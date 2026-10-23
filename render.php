@@ -15,6 +15,15 @@ function aok_fallback(string $tplFile): void {
     exit;
 }
 
+// a missing image / script / font: a plain 404, no page needed
+if (($_SERVER['REDIRECT_STATUS'] ?? '') === '404'
+    && preg_match('#\.(png|jpe?g|gif|webp|avif|svg|ico|css|js|mjs|map|woff2?|ttf|json|xml|pdf|zip)$#i', (string)parse_url($_SERVER['REQUEST_URI'] ?? '', PHP_URL_PATH))) {
+    http_response_code(404);
+    header('Content-Type: text/plain; charset=utf-8');
+    echo "Not found\n";
+    exit;
+}
+
 try {
     require_once __DIR__ . '/api/seo-lib.php';
     $tpl = file_get_contents($tplFile);

@@ -1,30 +1,55 @@
-ANALYSIS OF KARMA — Update (editable FAQs, meditation practices, mobile fixes)
-==============================================================================
+ANALYSIS OF KARMA — Update (SEO, local SEO, AI search & security)
+===================================================================
 
 WHAT'S NEW IN THIS UPDATE
-  • FAQs are now fully editable. Open Admin -> Visual Editor -> "Edit
-    About Us" (or "Edit Contact Us"), scroll to the FAQ section, and you
-    can:  + Add FAQ,  reorder with the up/down arrows, and remove any FAQ
-    with the X button. Click the question/answer text to edit it.
-  • Meditation -> "What we practise": you can now add, reorder and remove
-    the practice cards. Open Admin -> Visual Editor -> "Edit Meditation",
-    scroll to that section, and use  + Add practice  / the up-down arrows /
-    X Remove. Click a card's title or text to edit it.
-  • Cross-device compatibility checked and tightened on phones, tablets
-    (iPad portrait & landscape) and desktop. Fixed a small horizontal-
-    scroll issue on very narrow phones (360px) on the Contact page; all
-    pages now fit cleanly with no sideways scrolling.
+  • Google and AI assistants now see your real pages. Every page is built on
+    the server with its own title, description, structured data and content,
+    so ChatGPT, Claude, Perplexity and Google can read and cite it.
+  • Every service has its own page:  /services/kundli-birth-chart-reading  etc.
+    A new FAQ page lives at /faq. All your existing text is unchanged.
+  • "Surrey, BC" is added to page titles in Google (not to your page text).
+    You can switch this off in Admin -> Local & Business.
+  • New admin tabs:
+      Local & Business  - service area, hours, phone, Google Business links
+      Practitioner      - your bio, training and expertise
+      AI & GEO          - choose which AI assistants may read your site,
+                          llms.txt, IndexNow
+      Redirects         - review possible duplicate services / blog posts and
+                          merge them yourself (nothing is merged automatically;
+                          every merge can be undone), plus custom redirects
+      SEO Health        - one score with a to-do list
+  • Each service now has "Page address, SEO & redirect" settings; each blog
+    post has Canonical URL and 301 redirect fields.
+  • Faster: the logo is 13 KB instead of 2.4 MB, the website code is cached
+    by browsers, and the 3D scene loads after the page (and is skipped on
+    data-saver connections and low-memory phones).
+  • Security: the admin password is now checked on the server and stored
+    only as a secure hash. Your password and client leads are no longer
+    readable in the public site data.
 
-(Also includes the previous update: menu-bar editor, custom pages, and
- expanded social links — Facebook, Instagram, YouTube, Google Maps + add
- your own.)
+IMPORTANT: THIS UPDATE HAS MORE THAN ONE FILE
+  Full step-by-step instructions: see DEPLOY.md, section
+  "Upgrading the live site (SEO & security release)". In short:
 
-HOW TO APPLY (1 file, nothing else changes)
-  1. cPanel -> File Manager -> public_html (your web root).
-  2. Upload the included index.html and choose "Overwrite".
-     Only index.html changed. Do NOT touch api/, config.php, uploads/,
-     or anything else. Your database content is untouched.
-  3. Open your site and hard-refresh:  Ctrl+Shift+R  (Cmd+Shift+R on Mac).
-  4. Go to /#admin, log in, then Visual Editor to use the new options.
+  1. Back up: download your current .htaccess and api/config.php, and use
+     Admin -> Settings -> Backup -> Export content.
+  2. Upload everything EXCEPT api/config.php (keep your live one):
+       index.html, render.php, sitemap.xml, robots.txt,
+       the assets/ files, and the api/ files listed in DEPLOY.md.
+  3. Upload .htaccess LAST. If your old .htaccess had cPanel "php handler"
+     lines, paste them into the marked block at the top of the new one first.
+     (File Manager -> Settings -> "Show Hidden Files" to see .htaccess.)
+  4. Log in at  https://www.analysisofkarma.com/admin  with your CURRENT
+     password. It keeps working; the server secures it on that first login.
+  5. Change your password: Admin -> Settings -> Security.
+     (Recommended, because the old one was publicly readable before.)
+  6. Check the new tabs, add your phone number, click Save changes.
+  7. Open Admin -> SEO Health. "Crawl files" should be all green.
+  8. Hard-refresh: Ctrl+Shift+R (Cmd+Shift+R on Mac).
 
-All your existing content, photos and settings stay exactly as they are.
+IF SOMETHING GOES WRONG
+  Put your old .htaccess back (or rename the new one to .htaccess-off).
+  The site keeps working as before (admin at /#admin) while you check the
+  steps above.
+
+All your existing content, photos, leads and settings stay exactly as they are.
