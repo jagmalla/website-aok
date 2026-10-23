@@ -1,0 +1,30 @@
+ANALYSIS OF KARMA — Update (editable FAQs, meditation practices, mobile fixes)
+==============================================================================
+
+WHAT'S NEW IN THIS UPDATE
+  • FAQs are now fully editable. Open Admin -> Visual Editor -> "Edit
+    About Us" (or "Edit Contact Us"), scroll to the FAQ section, and you
+    can:  + Add FAQ,  reorder with the up/down arrows, and remove any FAQ
+    with the X button. Click the question/answer text to edit it.
+  • Meditation -> "What we practise": you can now add, reorder and remove
+    the practice cards. Open Admin -> Visual Editor -> "Edit Meditation",
+    scroll to that section, and use  + Add practice  / the up-down arrows /
+    X Remove. Click a card's title or text to edit it.
+  • Cross-device compatibility checked and tightened on phones, tablets
+    (iPad portrait & landscape) and desktop. Fixed a small horizontal-
+    scroll issue on very narrow phones (360px) on the Contact page; all
+    pages now fit cleanly with no sideways scrolling.
+
+(Also includes the previous update: menu-bar editor, custom pages, and
+ expanded social links — Facebook, Instagram, YouTube, Google Maps + add
+ your own.)
+
+HOW TO APPLY (1 file, nothing else changes)
+  1. cPanel -> File Manager -> public_html (your web root).
+  2. Upload the included index.html and choose "Overwrite".
+     Only index.html changed. Do NOT touch api/, config.php, uploads/,
+     or anything else. Your database content is untouched.
+  3. Open your site and hard-refresh:  Ctrl+Shift+R  (Cmd+Shift+R on Mac).
+  4. Go to /#admin, log in, then Visual Editor to use the new options.
+
+All your existing content, photos and settings stay exactly as they are.

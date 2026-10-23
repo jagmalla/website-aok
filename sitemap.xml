@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+  <url>
+    <loc>https://www.analysisofkarma.com/</loc>
+    <changefreq>monthly</changefreq>
+  </url>
+  <url>
+    <loc>https://www.analysisofkarma.com/about</loc>
+    <changefreq>monthly</changefreq>
+  </url>
+  <url>
+    <loc>https://www.analysisofkarma.com/services</loc>
+    <changefreq>monthly</changefreq>
+  </url>
+  <url>
+    <loc>https://www.analysisofkarma.com/meditation</loc>
+    <changefreq>monthly</changefreq>
+  </url>
+  <url>
+    <loc>https://www.analysisofkarma.com/blog</loc>
+    <changefreq>weekly</changefreq>
+  </url>
+  <url>
+    <loc>https://www.analysisofkarma.com/contact</loc>
+    <changefreq>monthly</changefreq>
+  </url>
+</urlset>

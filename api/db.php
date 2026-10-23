@@ -1,0 +1,59 @@
+<?php
+require_once __DIR__ . '/config.php';
+
+function db(): PDO {
+    static $pdo = null;
+    if ($pdo !== null) return $pdo;
+    $dsn = 'mysql:host=' . DB_HOST . ';dbname=' . DB_NAME . ';charset=utf8mb4';
+    $pdo = new PDO($dsn, DB_USER, DB_PASS, [
+        PDO::ATTR_ERRMODE            => PDO::ERRMODE_EXCEPTION,
+        PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
+        PDO::ATTR_EMULATE_PREPARES   => false,
+    ]);
+    return $pdo;
+}
+
+function cors(): void {
+    $origin = $_SERVER['HTTP_ORIGIN'] ?? '';
+    // Allow the configured domain, or any localhost for local dev
+    if ($origin === ALLOWED_ORIGIN || preg_match('#^https?://localhost(:\d+)?$#', $origin)) {
+        header('Access-Control-Allow-Origin: ' . $origin);
+    }
+    header('Access-Control-Allow-Methods: GET, POST, OPTIONS');
+    header('Access-Control-Allow-Headers: Content-Type, X-Requested-With');
+    header('Access-Control-Max-Age: 86400');
+    if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') { http_response_code(204); exit; }
+}
+
+function json_out(array $data, int $code = 200): void {
+    http_response_code($code);
+    header('Content-Type: application/json; charset=utf-8');
+    echo json_encode($data, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
+    exit;
+}
+
+function json_in(): array {
+    $raw = file_get_contents('php://input');
+    return json_decode($raw, true) ?? [];
+}
+
+// Load the saved site-data payload as an array (or null if none saved yet)
+function site_data(): ?array {
+    try {
+        $row = db()->query("SELECT payload FROM aok_site_data WHERE id = 1")->fetch();
+        if ($row && !empty($row['payload'])) {
+            $d = json_decode($row['payload'], true);
+            return is_array($d) ? $d : null;
+        }
+    } catch (Exception $e) {}
+    return null;
+}
+
+// Resolve the recipient + from address: admin-managed values win, config constants are the fallback
+function mail_settings(?array $site = null): array {
+    if ($site === null) $site = site_data();
+    $c = $site['contact'] ?? [];
+    $to   = (!empty($c['email'])    && filter_var($c['email'],    FILTER_VALIDATE_EMAIL)) ? $c['email']    : MAIL_TO;
+    $from = (!empty($c['mailFrom']) && filter_var($c['mailFrom'], FILTER_VALIDATE_EMAIL)) ? $c['mailFrom'] : MAIL_FROM;
+    return ['to' => $to, 'from' => $from];
+}
