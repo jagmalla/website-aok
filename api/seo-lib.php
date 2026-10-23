@@ -138,6 +138,14 @@ function aok_route_path(string $route): string {
     return $route === 'home' ? '/' : '/' . $route;
 }
 
+// True when a redirect target points back at the requested path (a redirect loop), so it is ignored.
+function aok_same_path(string $to, string $path): bool {
+    $t = (string)parse_url(trim($to), PHP_URL_PATH);
+    $host = parse_url(trim($to), PHP_URL_HOST);
+    if ($host && strcasecmp(preg_replace('/^www\./i', '', $host), preg_replace('/^www\./i', '', (string)($_SERVER['HTTP_HOST'] ?? ''))) !== 0) return false;
+    return strcasecmp('/' . trim(rawurldecode($t), '/'), $path) === 0;
+}
+
 // Resolve a request path to a route. Possible types:
 // home about services meditation blog contact faq service post page admin redirect 404
 function aok_resolve(string $uri, array $d): array {
@@ -147,7 +155,7 @@ function aok_resolve(string $uri, array $d): array {
     foreach ($d['redirects'] ?? [] as $r) {
         $from = '/' . trim((string)($r['from'] ?? ''), '/');
         $to = trim((string)($r['to'] ?? ''));
-        if ($from !== '/' && $to !== '' && strcasecmp($from, $path) === 0) return ['type' => 'redirect', 'to' => $to];
+        if ($from !== '/' && $to !== '' && strcasecmp($from, $path) === 0 && !aok_same_path($to, $path)) return ['type' => 'redirect', 'to' => $to];
     }
     $parts = array_values(array_filter(explode('/', $path), 'strlen'));
     if (!$parts) return ['type' => 'home', 'path' => '/'];
@@ -158,7 +166,7 @@ function aok_resolve(string $uri, array $d): array {
         $slugs = aok_service_slugs($d['services'] ?? []);
         foreach ($d['services'] ?? [] as $s) {
             if (($slugs[(string)($s['id'] ?? '')] ?? null) === strtolower($parts[1])) {
-                if (!empty($s['redirectTo'])) return ['type' => 'redirect', 'to' => $s['redirectTo']];
+                if (!empty($s['redirectTo']) && !aok_same_path($s['redirectTo'], $path)) return ['type' => 'redirect', 'to' => $s['redirectTo']];
                 return ['type' => 'service', 'item' => $s, 'slug' => $slugs[(string)$s['id']], 'path' => '/services/' . $slugs[(string)$s['id']]];
             }
         }
@@ -166,7 +174,7 @@ function aok_resolve(string $uri, array $d): array {
     if ($p0 === 'blog' && count($parts) === 2) {
         foreach ($d['blog'] ?? [] as $p) {
             if (($p['slug'] ?? '') === $parts[1] && !empty($p['published'])) {
-                if (!empty($p['redirectTo'])) return ['type' => 'redirect', 'to' => $p['redirectTo']];
+                if (!empty($p['redirectTo']) && !aok_same_path($p['redirectTo'], $path)) return ['type' => 'redirect', 'to' => $p['redirectTo']];
                 return ['type' => 'post', 'item' => $p, 'path' => '/blog/' . rawurlencode($p['slug'])];
             }
         }
@@ -194,7 +202,13 @@ function aok_with_location(string $title, array $d): string {
     $city = trim((string)aok_get($d, 'local.locality', 'Surrey'));
     if (stripos($title, $city) !== false) return $title;
     $pos = strpos($title, ' | ');
-    return $pos === false ? $title . ' · ' . $label : substr($title, 0, $pos) . ' · ' . $label . substr($title, $pos);
+    if ($pos === false) return $title . ' · ' . $label;
+    $t = substr($title, 0, $pos) . ' · ' . $label . substr($title, $pos);
+    // too long for Google (~65 chars)? drop a trailing "| brand" segment only (Google shows the site name
+    // above the result anyway); the owner's keyword text is never removed
+    $j = strrpos($t, ' | ');
+    if ((function_exists('mb_strlen') ? mb_strlen($t, 'UTF-8') : strlen($t)) > 65 && $j !== false && stripos(substr($t, $j + 3), aok_brand($d)) !== false) $t = substr($t, 0, $j);
+    return $t;
 }
 
 function aok_brand(array $d): string {
@@ -577,7 +591,7 @@ function aok_main_html(array $d, array $r): string {
         $o .= '<section><p>' . aok_e(aok_text($g('home.hero.kicker'))) . '</p><h1>' . aok_e(aok_text($g('home.hero.h1'))) . '</h1><p>' . aok_rich($g('home.hero.sub')) . '</p><p>'
             . aok_btn($d, 'home.hero.cta1', 'Book a Consultation', 'contact') . ' ' . aok_btn($d, 'home.hero.cta2', 'Explore Services', 'services') . '</p></section>';
         $o .= '<section><p>' . aok_e(aok_text($g('home.servicesIntro.kicker'))) . '</p><h2>' . aok_e(aok_text($g('home.servicesIntro.title'))) . '</h2><p>' . aok_rich($g('home.servicesIntro.sub')) . '</p>'
-            . aok_services_list($d, array_slice($d['services'] ?? [], 0, 6)) . '<p>' . aok_btn($d, 'home.servicesIntro.btn', 'See all services →', 'services') . '</p></section>';
+            . aok_services_list($d, array_slice(array_values(array_filter($d['services'] ?? [], function ($x) { return empty($x['redirectTo']); })), 0, 6)) . '<p>' . aok_btn($d, 'home.servicesIntro.btn', 'See all services →', 'services') . '</p></section>';
         $o .= '<section><p>' . aok_e(aok_text($g('home.about.kicker'))) . '</p><h2>' . aok_e(aok_text($g('home.about.title'))) . '</h2>' . aok_paras($g('home.about.body')) . '<ul>';
         foreach ((array)$g('home.about.credentials', []) as $c) $o .= '<li>' . aok_e(aok_text($c)) . '</li>';
         $o .= '</ul><p>' . aok_btn($d, 'home.about.btn', 'About Us', 'about') . '</p></section>' . aok_cta($d);

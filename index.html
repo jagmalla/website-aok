@@ -319,6 +319,8 @@ class Component extends DCLogic {
     return '/'+r; }
   // id -> URL slug for each service (custom slug, else from the title; duplicates get -2, -3 …) — same rules as aok_service_slugs()
   serviceSlugify(s){ return String(s||'').replace(/&/g,' and ').toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-+|-+$/g,''); }
+  // services merged into another one (Admin → Redirects) stay in the admin but leave the public lists
+  liveServices(){ return ((this.state.data&&this.state.data.services)||[]).filter(s=>!s.redirectTo); }
   serviceSlugs(services){ const out={},used={}; (services||[]).forEach(s=>{ let base=this.serviceSlugify((s.slug||'')!==''?s.slug:(s.title||'service'))||'service'; let slug=base,n=2; while(used[slug]) slug=base+'-'+(n++); used[slug]=1; out[s.id]=slug; }); return out; }
   serviceHref(s){ return '/services/'+(this.serviceSlugs(this.state.data.services||[])[s.id]||this.serviceSlugify(s.title)); }
   // a real link (crawlable, opens in a new tab with ctrl/cmd-click) that navigates inside the app on a normal click
@@ -361,7 +363,7 @@ class Component extends DCLogic {
     try{
       fetch('/api/data.php',{ method:'POST', headers:this.apiHeaders(), body })
         .then(r=>r.json().catch(()=>null))
-        .then(j=>{ if(j&&(j.error==='not_logged_in'||j.error==='bad_csrf')){ this.setState({authed:false,editMode:false,route:'admin'}); this.flash('\u26a0 Your admin session has ended \u2014 please log in again, then click Save.'); return; } if(j&&j.ok){ this.flash('\u2713 Saved \u2014 your changes are now live'); this._indexNowAuto(); } else { this.flash('\u26a0 Save failed: '+((j&&j.error)?j.error:'database error')+' \u2014 open /api/health.php to diagnose'); } })
+        .then(j=>{ if(j&&(j.error==='not_logged_in'||j.error==='bad_csrf')){ this.setState({authed:false,editMode:false,route:'admin'}); this.flash('\u26a0 Your admin session has ended \u2014 please log in again, then click Save.'); return; } if(j&&j.ok){ this.flash('\u2713 Saved \u2014 your changes are now live'); this._live={}; this.forceUpdate(); this._indexNowAuto(); } else { this.flash('\u26a0 Save failed: '+((j&&j.error)?j.error:'database error')+' \u2014 open /api/health.php to diagnose'); } })
         .catch(()=>{ this.flash('\u26a0 Couldn\u2019t reach the server. Check your connection and click Save again.'); });
     }catch(e){ this.flash('\u26a0 Could not save to the server.'); } }
   // IndexNow: tell Bing & co. (and the AI search built on them) that pages changed. Auto mode pings at most once an hour.
@@ -455,6 +457,7 @@ class Component extends DCLogic {
         llmsOverride:'', llmsFullOverride:'', indexNowKey:'', indexNowAuto:true },
       // admin-managed 301 redirects (used when merging duplicate services or posts): [{from:'/old', to:'/new'}]
       redirects:[],
+      dupIgnore:[],   // duplicate pairs the admin marked as “not duplicates”
       nav:{ items:[
         {id:this.uid(),label:'Home',type:'route',value:'home'},
         {id:this.uid(),label:'About Us',type:'route',value:'about'},
@@ -636,7 +639,9 @@ class Component extends DCLogic {
   cut(s,max){ s=String(s||'').replace(/\s+/g,' ').trim(); if(s.length<=max) return s; s=s.slice(0,max-1); const p=s.lastIndexOf(' '); return (p>max*.6?s.slice(0,p):s).replace(/[ ,;:\u2014-]+$/,'')+'\u2026'; }
   brandName(){ const d=this.state.data; return (d.local&&d.local.businessName)||d.brand.name; }
   // "· Surrey, BC" before the "| Brand" part, unless the title already names the city (same as aok_with_location)
-  withLocation(title){ const L=this.state.data.local||{}; if(L.locationInTitles===false||!L.locality||!title) return title; if(title.toLowerCase().indexOf(String(L.locality).toLowerCase())>-1) return title; const label=L.locality+(L.regionCode?', '+L.regionCode:''); const i=title.indexOf(' | '); return i<0?title+' \u00b7 '+label:title.slice(0,i)+' \u00b7 '+label+title.slice(i); }
+  withLocation(title){ const L=this.state.data.local||{}; if(L.locationInTitles===false||!L.locality||!title) return title; if(title.toLowerCase().indexOf(String(L.locality).toLowerCase())>-1) return title; const label=L.locality+(L.regionCode?', '+L.regionCode:''); const i=title.indexOf(' | '); if(i<0) return title+' \u00b7 '+label; const t=title.slice(0,i)+' \u00b7 '+label+title.slice(i);
+    // too long for Google (~65 chars)? drop a trailing "| brand" segment only (Google shows the site name anyway); keyword text is never removed
+    const j=t.lastIndexOf(' | '); return (t.length>65&&j>-1&&t.slice(j+3).toLowerCase().indexOf(this.brandName().toLowerCase())>-1)?t.slice(0,j):t; }
   headMeta(){ const d=this.state.data, r=this.state.route, brand=this.brandName(); const base=String(d.siteUrl||'https://www.analysisofkarma.com').replace(/\/$/,'').replace(/^http:/,'https:');
     const m={title:brand,description:(d.seo.home&&d.seo.home.metaDescription)||'',robots:'index, follow',canonical:base+this.routePath()};
     if(['home','about','services','meditation','blog','contact','faq'].indexOf(r)>-1&&!(r==='blog'&&this.state.postId)){ const sc=d.seo[r]||{}; m.title=sc.title||brand; if(r!=='blog') m.title=this.withLocation(m.title); if(sc.metaDescription) m.description=sc.metaDescription; m.robots=sc.robots||'index, follow'; if(r==='faq'&&!sc.title) m.title=this.txt(d.faqPage.hero.title)+' | '+brand; }
@@ -864,7 +869,7 @@ class Component extends DCLogic {
             h('div',{id:'aok-hero3d','aria-hidden':'true'}),
             h('div',{className:'aok-hero3d-fallback','aria-hidden':'true'}),
             (heroImg||em)? h('div',{className:'aok-locket'}, this.eimg('home.hero.image',{alt:d.seo.home.focusKeyword+' — Jag Mallah',placeholder:'astrologer\nportrait\n(replace in admin)',radius:'50%',style:{width:'100%',aspectRatio:'1/1'}})):null)),
-        h('div',{className:'aok-wrap aok-hero-bento'}, ...d.services.slice(0,3).map((s,i)=>this.heroChip(s,i)))),
+        h('div',{className:'aok-wrap aok-hero-bento'}, ...this.liveServices().slice(0,3).map((s,i)=>this.heroChip(s,i)))),
       this.gapBlocks('home::s1'),
       // services overview
       h('section',{style:{padding:'84px 0'}}, this.wrap(h('div',null,
@@ -872,7 +877,7 @@ class Component extends DCLogic {
           h('div',{style:{display:'flex',justifyContent:'center'}},this.kicker(this.etextInline('home.servicesIntro.kicker'))),
           this.etext('home.servicesIntro.title',{tag:'h2',style:{font:'800 clamp(30px,3.6vw,44px) '+this.HEAD,color:P.maroon,margin:'16px 0 12px',letterSpacing:'-.015em'}}),
           this.etext('home.servicesIntro.sub',{tag:'p',style:{font:'400 17px/1.65 Plus Jakarta Sans',color:P.muted}})),
-        h('div',{style:{display:'grid',gridTemplateColumns:'repeat(3,1fr)',gap:22}}, ...d.services.slice(0,6).map((s,i)=>this.serviceCard(s,i))),
+        h('div',{style:{display:'grid',gridTemplateColumns:'repeat(3,1fr)',gap:22}}, ...this.liveServices().slice(0,6).map((s,i)=>this.serviceCard(s,i))),
         h('div',{style:{textAlign:'center',marginTop:44}}, this.ebtn('home.servicesIntro.btn',{label:'See all services →',link:'services',variant:'outline',size:'md'}))))),
       this.gapBlocks('home::s2'),
       // about preview
@@ -999,7 +1004,7 @@ class Component extends DCLogic {
   // ---------- SERVICES ----------
   renderServices(){ const h=React.createElement,P=this.P,d=this.state.data;
     return h('main',{style:{animation:'aokfade .4s'}}, this.pageHero('servicesPage.hero','services'),
-      h('section',{style:{padding:'70px 0'}}, this.wrap(h('div',{style:{display:'grid',gridTemplateColumns:'repeat(2,1fr)',gap:24}}, ...d.services.map((s,i)=>h('div',{key:s.id,className:'aok-card aok-tilt aok-reveal',style:{display:'flex',gap:22,padding:30}},
+      h('section',{style:{padding:'70px 0'}}, this.wrap(h('div',{style:{display:'grid',gridTemplateColumns:'repeat(2,1fr)',gap:24}}, ...this.liveServices().map((s,i)=>h('div',{key:s.id,className:'aok-card aok-tilt aok-reveal',style:{display:'flex',gap:22,padding:30}},
         this.badge(s.icon,'lg'),
         h('div',{style:{minWidth:0}}, h('div',{style:{display:'flex',justifyContent:'space-between',alignItems:'baseline',gap:12,flexWrap:'wrap'}},
             h('h3',{style:{font:'700 21px '+this.HEAD,color:P.maroon,margin:'2px 0 0'}}, h('a',this.linkTo(this.serviceHref(s),()=>this.go('service',{serviceId:s.id}),{style:{color:'inherit'}}), s.title))),
@@ -1034,7 +1039,7 @@ class Component extends DCLogic {
       this.ctaBand('home.cta')); }
 
   // ---------- BLOG ----------
-  renderBlog(){ const h=React.createElement,P=this.P,d=this.state.data; const posts=d.blog.filter(p=>p.published||this.state.editMode);
+  renderBlog(){ const h=React.createElement,P=this.P,d=this.state.data; const posts=d.blog.filter(p=>(p.published&&!p.redirectTo)||this.state.editMode);
     const ph='linear-gradient(135deg,#FFFFFF 0%,#F4EEE3 55%,#E9DCC2 100%)';
     return h('main',{style:{animation:'aokfade .4s'}}, this.pageHero('blogPage.hero','blog'),
       h('section',{style:{padding:'70px 0'}}, this.wrap(posts.length? h('div',{style:{display:'grid',gridTemplateColumns:'repeat(3,1fr)',gap:24}}, ...posts.map(p=>h('article',{key:p.id,onClick:()=>this.setState({postId:p.id,menuOpen:false}),className:'aok-card aok-tilt aok-reveal',style:{overflow:'hidden',cursor:'pointer',display:'flex',flexDirection:'column'}},
@@ -1218,7 +1223,7 @@ class Component extends DCLogic {
     parts.push(br('b2'),[L.locality||'Surrey',L.region||'British Columbia',(L.country||'CA')==='CA'?'Canada':L.country].join(', '));
     if(c.phone) parts.push(br('b3'),'Phone: ',h('a',{key:'tel',href:'tel:'+String(c.phone).replace(/[^\d+]/g,''),className:'aok-footlink'},c.phone));
     if(c.email) parts.push(br('b4'),'Email: ',h('a',{key:'em',href:'mailto:'+c.email,className:'aok-footlink'},c.email));
-    const areas=(L.areasServed||[]).filter(Boolean); if(areas.length) parts.push(br('b5'),'Serving: '+areas.join(', ')+(L.onlineWorldwide!==false?' \u00b7 Worldwide online ('+(L.onlineChannels||['Zoom','WhatsApp']).join(' & ')+')':''));
+    const areas=(L.areasServed||[]).filter(Boolean); if(areas.length) parts.push(br('b5'),'Serving: '+areas.join(', ')+(L.onlineWorldwide!==false?' \u00b7 Worldwide online ('+(L.onlineChannels||['Zoom','WhatsApp']).filter(Boolean).join(' & ')+')':''));
     const days=[['Mo','Mon'],['Tu','Tue'],['We','Wed'],['Th','Thu'],['Fr','Fri'],['Sa','Sat'],['Su','Sun']].filter(x=>L.hours&&L.hours[x[0]]&&L.hours[x[0]].o&&L.hours[x[0]].c).map(x=>x[1]+' '+L.hours[x[0]].o+'\u2013'+L.hours[x[0]].c);
     if(days.length) parts.push(br('b6'),'Hours: '+days.join(' \u00b7 '));
     return h('address',{style:{fontStyle:'normal',font:'400 13.5px/1.75 Plus Jakarta Sans',color:P.ink,marginTop:18,maxWidth:360}},...parts); }
@@ -1756,7 +1761,7 @@ class Component extends DCLogic {
         h('div',{style:{textAlign:'center',marginTop:18}}, h('a',{onClick:()=>this.go('home'),style:{cursor:'pointer',font:'500 13px Plus Jakarta Sans',color:P.muted}},'\u2190 Back to website'))), this.renderToast());}
 
   renderAdminShell(){ const h=React.createElement,P=this.P;
-    const tabs=[['dashboard','\u25C8 Dashboard'],['pages','\u270e Visual Editor'],['services','\u2609 Services'],['blog','\u270d Blog'],['leads','\u2709 Leads'],['seo','\u2191 SEO'],['schema','{ } Schema'],['submit','\u2691 Search Engines'],['settings','\u2699 Settings']];
+    const tabs=[['dashboard','\u25C8 Dashboard'],['pages','\u270e Visual Editor'],['services','\u2609 Services'],['blog','\u270d Blog'],['leads','\u2709 Leads'],['seo','\u2191 SEO'],['schema','{ } Schema'],['submit','\u2691 Search Engines'],['local','\u2316 Local & Business'],['person','\u2726 Practitioner'],['ai','\u25ce AI & GEO'],['redirects','\u21aa Redirects'],['health','\u271a SEO Health'],['settings','\u2699 Settings']];
     const unread=(this.state.data.leads||[]).filter(l=>!l.read).length;
     return h('div',{style:{minHeight:'100vh',display:'grid',gridTemplateColumns:'260px 1fr',background:P.bg}},
       h('aside',{style:{background:P.maroonD,color:P.cream,padding:'24px 16px',position:'sticky',top:0,height:'100vh',overflowY:'auto'}},
@@ -1774,7 +1779,7 @@ class Component extends DCLogic {
     let ctrl; if(opts.options) ctrl=h('select',{...common},...opts.options.map(o=>h('option',{key:o.value??o,value:o.value??o},o.label??o))); else if(opts.multiline) ctrl=h('textarea',{...common,rows:opts.rows||4}); else ctrl=h('input',{...common,type:opts.type||'text'});
     return h('label',{key:path,style:{display:'block',marginBottom:opts.mb??16}}, opts.label?h('span',{style:{display:'block',font:'600 12.5px '+this.HEAD,color:P.maroon,marginBottom:6,letterSpacing:'.02em'}},opts.label, opts.hint?h('span',{style:{fontWeight:400,color:P.muted}},'  \u2014 '+opts.hint):null):null, ctrl); }
 
-  renderAdminTab(){ switch(this.state.adminTab){ case 'pages':return this.tabPages(); case 'services':return this.tabServices(); case 'blog':return this.tabBlog(); case 'leads':return this.tabLeads(); case 'seo':return this.tabSeo(); case 'schema':return this.tabSchema(); case 'submit':return this.tabSubmit(); case 'settings':return this.tabSettings(); default:return this.tabDashboard(); } }
+  renderAdminTab(){ switch(this.state.adminTab){ case 'pages':return this.tabPages(); case 'services':return this.tabServices(); case 'blog':return this.tabBlog(); case 'leads':return this.tabLeads(); case 'seo':return this.tabSeo(); case 'schema':return this.tabSchema(); case 'submit':return this.tabSubmit(); case 'local':return this.tabLocal(); case 'person':return this.tabPerson(); case 'ai':return this.tabAi(); case 'redirects':return this.tabRedirects(); case 'health':return this.tabHealth(); case 'settings':return this.tabSettings(); default:return this.tabDashboard(); } }
 
   // ----- dashboard -----
   tabDashboard(){ const h=React.createElement,P=this.P,d=this.state.data; const unread=(d.leads||[]).filter(l=>!l.read).length;
@@ -1789,7 +1794,10 @@ class Component extends DCLogic {
         action('\u270d Write a blog post','Publish SEO articles to rank on Google.','blog'),
         action('\u2191 Tune SEO','Focus keywords, meta tags & live analysis.','seo'),
         action('\u2691 Submit to search engines','Sitemap, robots & one-click submission links.','submit'),
-        action('\u2699 Site settings','Contact email, map, social links & password.','settings'))); }
+        action('\u2699 Site settings','Contact email, map, social links & password.','settings'),
+        action('\u271a SEO health check','One score for titles, schema, local details & crawl files.','health'),
+        action('\u2316 Local & Business profile','Service area, hours & Google Business Profile links.','local'),
+        action('\u25ce AI & GEO','Choose which AI assistants may read and cite you.','ai'))); }
 
   // ----- pages / visual editor -----
   tabPages(){ const h=React.createElement,P=this.P,d=this.state.data; const pages=[['home','Home','The hero, services overview, about preview & call-to-action.'],['about','About Us','Your story, values, the FAQ section and the closing quote.'],['services','Services','The services listing page \u2014 hero, the service cards, and any blocks you add.'],['meditation','Meditation','The intro, your \u201cprofessional meditation guide\u201d text and the offerings.'],['blog','Blog','The blog listing page. To design an individual post, open Admin \u2192 Blog \u2192 \u270e Design.'],['faq','FAQ','All your frequently asked questions \u2014 add, edit and reorder them here. They also power the FAQ structured data for Google and AI answers.'],['contact','Contact Us','Heading, note, the form intro and the FAQ section.']];
@@ -1863,7 +1871,22 @@ class Component extends DCLogic {
           h('div',null, h('div',{style:{font:'600 12.5px '+this.HEAD,color:P.maroon,marginBottom:6}},'Icon'), h('select',{value:s.icon,onChange:e=>upd(i,'icon',e.target.value),style:{width:'100%',padding:'11px',borderRadius:10,border:'1px solid '+P.line,background:P.white,fontSize:20,textAlign:'center'}},...icons.map(ic=>h('option',{key:ic,value:ic},ic)))),
           h('div',null, h('div',{style:{font:'600 12.5px '+this.HEAD,color:P.maroon,marginBottom:6}},'Title'), h('input',{value:s.title,onChange:e=>upd(i,'title',e.target.value),style:this.inpStyle()})),
           h('div',null, h('div',{style:{font:'600 12.5px '+this.HEAD,color:P.maroon,marginBottom:6}},'Price'), h('input',{value:s.price,onChange:e=>upd(i,'price',e.target.value),style:this.inpStyle()}))),
-        h('div',{style:{marginTop:12}}, h('div',{style:{font:'600 12.5px '+this.HEAD,color:P.maroon,marginBottom:6}},'Description'), h('textarea',{value:s.desc,onChange:e=>upd(i,'desc',e.target.value),rows:2,style:this.inpStyle()})), h('div',{style:{marginTop:12}}, h('div',{style:{font:'600 12.5px '+this.HEAD,color:P.maroon,marginBottom:6}},'Detailed description ',h('span',{style:{fontWeight:400,color:P.muted}},'\u2014 shown when a visitor clicks \u201cRead more\u201d')), h('textarea',{value:s.detail||'',onChange:e=>upd(i,'detail',e.target.value),rows:5,style:this.inpStyle()})))))) ); }
+        h('div',{style:{marginTop:12}}, h('div',{style:{font:'600 12.5px '+this.HEAD,color:P.maroon,marginBottom:6}},'Description'), h('textarea',{value:s.desc,onChange:e=>upd(i,'desc',e.target.value),rows:2,style:this.inpStyle()})), h('div',{style:{marginTop:12}}, h('div',{style:{font:'600 12.5px '+this.HEAD,color:P.maroon,marginBottom:6}},'Detailed description ',h('span',{style:{fontWeight:400,color:P.muted}},'\u2014 shown when a visitor clicks \u201cRead more\u201d')), h('textarea',{value:s.detail||'',onChange:e=>upd(i,'detail',e.target.value),rows:5,style:this.inpStyle()})), this.svcSeoPanel(s,i,upd))))) ); }
+  // per-service page address, SEO title/description, canonical, 301 redirect and noindex (collapsed by default)
+  svcSeoPanel(s,i,upd){ const h=React.createElement,P=this.P; const open=(this._svcSeo||{})[s.id]; const url='/services/'+this.serviceSlugs(this.state.data.services)[s.id];
+    const toggle=()=>{ this._svcSeo={...(this._svcSeo||{}),[s.id]:!open}; this.forceUpdate(); };
+    const flags=[s.redirectTo?'\u21aa merged \u2192 '+s.redirectTo:null,s.canonical?'canonical \u2192 '+s.canonical:null,s.noindex?'hidden from Google':null].filter(Boolean);
+    const f=(k,label,hint,ph,multi)=>h('label',{key:k,style:{display:'block'}}, h('span',{style:this.lbl()},label,hint?h('span',{style:{fontWeight:400,color:P.muted}},'  \u2014 '+hint):null), h(multi?'textarea':'input',{value:s[k]||'',placeholder:ph||'',rows:multi?2:undefined,onChange:e=>upd(i,k,e.target.value),onBlur:k==='slug'?(e=>{ const v=this.serviceSlugify(e.target.value); if(v!==(s.slug||'')) upd(i,'slug',v); }):undefined,style:this.inpStyle()}));
+    const autoTitle=this.withLocation(this.txt(s.title)+' | '+this.brandName());
+    return h('div',{style:{marginTop:14,borderTop:'1px solid '+P.line,paddingTop:12}},
+      h('div',{style:{display:'flex',alignItems:'center',gap:10,flexWrap:'wrap'}}, h('button',{onClick:toggle,style:{...this.iconBtn(),width:'auto',padding:'0 12px',font:'600 12.5px '+this.HEAD}},(open?'\u25be':'\u25b8')+' Page address, SEO & redirect'), h('a',{href:url,target:'_blank',style:{font:'500 12.5px ui-monospace,monospace',color:P.red}},url), ...flags.map(t=>h('span',{key:t,style:{padding:'2px 9px',borderRadius:999,background:'#fbf1dc',color:P.maroon,font:'600 11.5px '+this.HEAD}},t))),
+      open?h('div',{style:{display:'grid',gap:12,marginTop:12}},
+        f('slug','Page address (slug)','empty = made from the title',this.serviceSlugify(s.title||'')),
+        f('seoTitle','SEO title','empty = \u201c'+autoTitle+'\u201d'),
+        f('seoDescription','Meta description','empty = the short description',null,true),
+        f('canonical','Canonical URL','only if another page should rank instead of this one','/services/\u2026'),
+        f('redirectTo','301 redirect to','merges this service into another page: it leaves the site and its address forwards there','/services/\u2026'),
+        h('label',{style:{display:'flex',gap:10,alignItems:'center',font:'500 14px Plus Jakarta Sans',color:P.ink}}, h('input',{type:'checkbox',checked:!!s.noindex,onChange:e=>upd(i,'noindex',e.target.checked),style:{width:18,height:18}}),'Hide this page from Google (noindex)')):null); }
 
   iconBtn(danger){ const P=this.P; return {width:34,height:34,borderRadius:9,border:'1px solid '+P.line,background:danger?'#fbe9e3':P.white,color:danger?P.bad:P.maroon,cursor:'pointer',font:'600 15px '+this.HEAD}; }
   inpStyle(){ const P=this.P; return {width:'100%',padding:'11px 13px',borderRadius:10,border:'1px solid '+P.line,background:P.white,font:'400 14.5px Plus Jakarta Sans',color:P.ink,resize:'vertical'}; }
@@ -1880,6 +1903,9 @@ class Component extends DCLogic {
             h('label',null,h('span',{style:this.lbl()},'Date'),h('input',{type:'date',value:p.date||'',onChange:e=>upd('date',e.target.value),style:this.inpStyle()})),
             h('label',null,h('span',{style:this.lbl()},'Focus keyword'),h('input',{value:p.focusKeyword||'',onChange:e=>upd('focusKeyword',e.target.value),style:this.inpStyle()})),
             h('label',null,h('span',{style:this.lbl()},'Search engines'),h('select',{value:p.robots||'index, follow',onChange:e=>upd('robots',e.target.value),style:this.inpStyle()},h('option',null,'index, follow'),h('option',null,'noindex, follow'),h('option',null,'noindex, nofollow')))),
+          h('div',{style:{display:'grid',gridTemplateColumns:'1fr 1fr',gap:14}},
+            h('label',null,h('span',{style:this.lbl()},'Canonical URL ',h('span',{style:{fontWeight:400,color:P.muted}},'\u2014 only if another page should rank instead')),h('input',{value:p.canonical||'',placeholder:'/blog/\u2026',onChange:e=>upd('canonical',e.target.value),style:this.inpStyle()})),
+            h('label',null,h('span',{style:this.lbl()},'301 redirect to ',h('span',{style:{fontWeight:400,color:P.muted}},'\u2014 merges this post into another page')),h('input',{value:p.redirectTo||'',placeholder:'/blog/\u2026',onChange:e=>upd('redirectTo',e.target.value),style:this.inpStyle()}))),
           h('label',null,h('span',{style:this.lbl()},'Excerpt'),h('textarea',{value:p.excerpt||'',onChange:e=>upd('excerpt',e.target.value),rows:2,style:this.inpStyle()})),
           h('label',null,h('span',{style:this.lbl()},'Body'),h('textarea',{value:p.body||'',onChange:e=>upd('body',e.target.value),rows:12,style:this.inpStyle()})),
           h('label',{style:{display:'flex',gap:10,alignItems:'center',font:'500 15px Plus Jakarta Sans',color:P.ink}},h('input',{type:'checkbox',checked:!!p.published,onChange:e=>upd('published',e.target.checked),style:{width:18,height:18}}),'Published (visible on website)'))) ); }
@@ -1963,18 +1989,9 @@ class Component extends DCLogic {
 
   // ----- submit to search engines -----
   tabSubmit(){ const h=React.createElement,P=this.P,d=this.state.data; const base=(d.siteUrl||'').replace(/\/$/,'');
-    const mainPages=[['',''],['about','monthly'],['services','monthly'],['meditation','monthly'],['blog','weekly'],['contact','monthly']];
-    const pubPosts=(d.blog||[]).filter(p=>p.published&&p.slug);
-    const urlXml=(loc,cf,lm)=>'  <url>\n    <loc>'+loc+'</loc>\n'+(lm?'    <lastmod>'+lm+'</lastmod>\n':'')+'    <changefreq>'+cf+'</changefreq>\n  </url>';
-    const sitemap='<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n'
-      + mainPages.map(p=>urlXml(base+(p[0]?'/'+p[0]:'/'),p[1]||'monthly')).join('\n') + '\n'
-      + pubPosts.map(p=>urlXml(base+'/blog/'+encodeURIComponent(p.slug),'monthly',(p.date||'').slice(0,10))).join('\n')
-      + '\n</urlset>';
-    const totalUrls=mainPages.length+pubPosts.length;
+    const sm=this.live('/sitemap.xml'); const locs=sm.text?(sm.text.match(/<loc>[^<]*/g)||[]):[]; const totalUrls=sm.loading?'\u2026':locs.length; const postN=locs.filter(x=>x.indexOf('/blog/')>-1).length; const svcN=locs.filter(x=>x.indexOf('/services/')>-1).length;
     let lastAt=0; try{ lastAt=parseInt(localStorage.getItem('aok_sitemap_at')||'0',10); }catch(e){}
     const lastStr=lastAt?new Date(lastAt).toLocaleString():'never';
-    const robots='User-agent: *\nAllow: /\n\n# AI crawlers\nUser-agent: GPTBot\nAllow: /\nUser-agent: ClaudeBot\nAllow: /\nUser-agent: PerplexityBot\nAllow: /\nUser-agent: Google-Extended\nAllow: /\n\nSitemap: '+base+'/sitemap.xml';
-    const copy=(txt,what)=>{ try{ navigator.clipboard.writeText(txt); this.flash(what+' copied'); }catch(e){ this.flash('Copy failed'); } };
     const engines=[['Google Search Console','Verify your site & submit your sitemap to Google.','https://search.google.com/search-console'],['Bing Webmaster Tools','Submit to Bing & Yahoo (also feeds DuckDuckGo).','https://www.bing.com/webmasters'],['Yandex Webmaster','Reach Yandex search users.','https://webmaster.yandex.com'],['IndexNow','Instantly ping Bing, Yandex & Seznam on every update.','https://www.indexnow.org'],['Google Business Profile','Your local listing \u2014 vital for \u201cnear me\u201d searches.',d.contact.gmb||'https://business.google.com'],['Baidu / others','Submit manually for international reach.','https://ziyuan.baidu.com']];
     return h('div',null, this.adminHead('Submit to Search Engines & AI','Get listed everywhere. Your sitemap updates automatically and always lists every page plus all published blog posts.'),
       this.card(this.inp('siteUrl',{label:'Your live website URL',hint:'used to build the sitemap & schema',mb:0}),{marginBottom:18}),
@@ -1982,7 +1999,7 @@ class Component extends DCLogic {
         h('div',{style:{display:'flex',justifyContent:'space-between',alignItems:'flex-start',gap:16,flexWrap:'wrap'}},
           h('div',null,
             h('div',{style:{font:'700 16px '+this.HEAD,color:P.maroon,marginBottom:4}},'🗺 Sitemap'),
-            h('div',{style:{font:'400 13.5px/1.6 Plus Jakarta Sans',color:P.muted}}, 'Currently ', h('b',{style:{color:P.maroon}}, totalUrls+' URLs'), ' — '+mainPages.length+' pages + '+pubPosts.length+' blog posts. Lives at ', h('a',{href:base+'/sitemap.xml',target:'_blank',style:{color:P.red}}, base+'/sitemap.xml')),
+            h('div',{style:{font:'400 13.5px/1.6 Plus Jakarta Sans',color:P.muted}}, 'Currently ', h('b',{style:{color:P.maroon}}, totalUrls+' URLs'), ' — including '+svcN+' service pages and '+postN+' blog posts. Lives at ', h('a',{href:base+'/sitemap.xml',target:'_blank',style:{color:P.red}}, base+'/sitemap.xml')),
             h('div',{style:{font:'400 12.5px Plus Jakarta Sans',color:P.muted,marginTop:6}},'Last manual update: '+lastStr)),
           this.btn('↻ Update sitemap now',()=>this.updateSitemap(false),{variant:'solid',pad:'11px 20px',style:{fontSize:13.5,flex:'0 0 auto'}})),
         h('div',{style:{marginTop:16,paddingTop:16,borderTop:'1px solid '+P.line,display:'flex',alignItems:'center',gap:12,flexWrap:'wrap'}},
@@ -1995,9 +2012,197 @@ class Component extends DCLogic {
         h('div',{style:{display:'flex',justifyContent:'space-between',alignItems:'center',marginBottom:8}},h('span',{style:{font:'700 15px '+this.HEAD,color:P.maroon}},e[0]),h('span',{style:{color:P.gold,fontSize:18}},'\u2197')),
         h('div',{style:{font:'400 13px/1.5 Plus Jakarta Sans',color:P.muted}},e[1])))),
       h('div',{style:{display:'grid',gridTemplateColumns:'1fr 1fr',gap:18}},
-        this.card(h('div',null, h('div',{style:{display:'flex',justifyContent:'space-between',alignItems:'center',marginBottom:10}},h('div',{style:{font:'700 15px '+this.HEAD,color:P.maroon}},'sitemap.xml'),this.btn('Copy',()=>copy(sitemap,'Sitemap'),{variant:'outline',pad:'6px 14px',style:{fontSize:12.5}})), h('textarea',{readOnly:true,value:sitemap,rows:9,style:{width:'100%',padding:'12px',borderRadius:9,border:'1px solid '+P.line,background:P.bgAlt,font:'400 12px/1.5 ui-monospace,monospace',color:P.ink,resize:'vertical'}}))),
-        this.card(h('div',null, h('div',{style:{display:'flex',justifyContent:'space-between',alignItems:'center',marginBottom:10}},h('div',{style:{font:'700 15px '+this.HEAD,color:P.maroon}},'robots.txt'),this.btn('Copy',()=>copy(robots,'robots.txt'),{variant:'outline',pad:'6px 14px',style:{fontSize:12.5}})), h('textarea',{readOnly:true,value:robots,rows:9,style:{width:'100%',padding:'12px',borderRadius:9,border:'1px solid '+P.line,background:P.bgAlt,font:'400 12px/1.5 ui-monospace,monospace',color:P.ink,resize:'vertical'}})))),
-      this.card(h('div',null,h('div',{style:{font:'700 14px '+this.HEAD,color:P.maroon,marginBottom:6}},'\u2139 How to use'),h('ol',{style:{font:'400 13.5px/1.7 Plus Jakarta Sans',color:P.ink,margin:0,paddingLeft:20}},h('li',null,'Host your website and set the live URL above.'),h('li',null,'Save the sitemap.xml and robots.txt files at the root of your domain.'),h('li',null,'Open Google Search Console & Bing Webmaster Tools, verify ownership, and submit your sitemap URL.'),h('li',null,'The robots.txt above already allows AI crawlers (GPTBot, ClaudeBot, PerplexityBot) so your content can appear in AI answers.'))),{marginTop:16})); }
+        this.card(this.preview('/sitemap.xml',10)), this.card(this.preview('/robots.txt',10))),
+      this.card(h('div',null,h('div',{style:{font:'700 14px '+this.HEAD,color:P.maroon,marginBottom:6}},'\u2139 How to use'),h('ol',{style:{font:'400 13.5px/1.7 Plus Jakarta Sans',color:P.ink,margin:0,paddingLeft:20}},h('li',null,'Keep the live website URL above set to https://www.analysisofkarma.com.'),h('li',null,'sitemap.xml, robots.txt and llms.txt are generated live by your server from this admin \u2014 there are no files to upload.'),h('li',null,'Open Google Search Console & Bing Webmaster Tools, verify ownership, and submit your sitemap URL once.'),h('li',null,'Choose which AI assistants may read your site in AI & GEO.'))),{marginTop:16})); }
+
+  // ----- shared admin helpers for the Local / Practitioner / AI / Redirects / Health tabs -----
+  // one entry per line <-> an array; blank lines are kept while typing and dropped on blur
+  listInp(path,opts={}){ const h=React.createElement,P=this.P; const arr=this.getIn(this.state.data,path); const v=Array.isArray(arr)?arr.join('\n'):(arr||'');
+    return h('label',{key:path,style:{display:'block',marginBottom:opts.mb??16}}, opts.label?h('span',{style:{display:'block',font:'600 12.5px '+this.HEAD,color:P.maroon,marginBottom:6,letterSpacing:'.02em'}},opts.label, h('span',{style:{fontWeight:400,color:P.muted}},'  — '+(opts.hint||'one per line'))):null,
+      h('textarea',{value:v,rows:opts.rows||Math.min(8,Math.max(3,(Array.isArray(arr)?arr.length:1)+1)),placeholder:opts.placeholder,onChange:e=>this.commit(path,e.target.value.split('\n')),onBlur:e=>{ const clean=e.target.value.split('\n').map(x=>x.trim()).filter(Boolean); if(clean.join('\n')!==v) this.commit(path,clean); },style:this.inpStyle()})); }
+  chk(path,label,opts={}){ const h=React.createElement,P=this.P; const raw=this.getIn(this.state.data,path); const on=raw===undefined?!!opts.def:!!raw;
+    return h('label',{key:path,style:{display:'flex',gap:10,alignItems:'flex-start',marginBottom:opts.mb??14,font:'500 14px/1.45 Plus Jakarta Sans',color:this.P.ink,cursor:'pointer'}}, h('input',{type:'checkbox',checked:on,onChange:e=>this.commit(path,e.target.checked),style:{width:18,height:18,marginTop:1,flex:'0 0 auto'}}), h('span',null,label,opts.hint?h('span',{style:{display:'block',font:'400 12.5px/1.45 Plus Jakarta Sans',color:P.muted}},opts.hint):null)); }
+  cardTitle(t,sub){ const h=React.createElement,P=this.P; return h('div',{style:{marginBottom:14}}, h('div',{style:{font:'700 16px '+this.HEAD,color:P.maroon}},t), sub?h('p',{style:{font:'400 13px/1.55 Plus Jakarta Sans',color:P.muted,margin:'4px 0 0'}},sub):null); }
+  note(children,tone){ const P=this.P; const bg={ok:'#e4f3e8',warn:'#fbf1dc',bad:'#fbe9e3'}[tone]||P.bgAlt; return React.createElement('div',{style:{padding:'12px 14px',borderRadius:10,background:bg,font:'400 13px/1.6 Plus Jakarta Sans',color:P.ink,marginBottom:14}},children); }
+  // fetch a live file (/robots.txt, /llms.txt …) once and keep it for the previews; force=true refetches
+  live(path,force){ this._live=this._live||{}; if(force||!this._live[path]){ this._live[path]={loading:true,text:''};
+      fetch(path,{cache:'no-store',credentials:'same-origin',headers:path.indexOf('/api/')===0?this.apiHeaders():undefined}).then(r=>r.text().then(t=>({t,status:r.status,type:r.headers.get('content-type')||''}))).then(x=>{ this._live[path]={text:x.t,status:x.status,type:x.type,at:Date.now()}; this.forceUpdate(); }).catch(()=>{ this._live[path]={text:'',status:0,error:true}; this.forceUpdate(); }); }
+    return this._live[path]; }
+  preview(path,rows){ const h=React.createElement,P=this.P; const x=this.live(path);
+    return h('div',null, h('div',{style:{display:'flex',justifyContent:'space-between',alignItems:'center',gap:10,marginBottom:8}}, h('a',{href:path,target:'_blank',style:{font:'600 13px ui-monospace,monospace',color:P.red}},path+' ↗'), h('button',{onClick:()=>this.live(path,true),style:{...this.iconBtn(),width:'auto',height:30,padding:'0 12px',font:'600 12px '+this.HEAD}},'↻ Refresh')),
+      h('textarea',{readOnly:true,value:x.loading?'Loading…':x.error?'Could not load '+path+' (is the new .htaccess uploaded?)':x.text,rows:rows||12,spellCheck:false,style:{width:'100%',padding:'12px',borderRadius:9,border:'1px solid '+P.line,background:P.bgAlt,font:'400 12px/1.55 ui-monospace,monospace',color:P.ink,resize:'vertical'}}),
+      h('div',{style:{font:'400 12px Plus Jakarta Sans',color:P.muted,marginTop:6}},'Shows the saved, live version — click “Save changes”, then Refresh, to see your edits.')); }
+
+  // ----- Local & Business Profile -----
+  tabLocal(){ const h=React.createElement,P=this.P,d=this.state.data; const L=d.local||{}; const sab=L.serviceAreaBusiness!==false;
+    const days=[['Mo','Monday'],['Tu','Tuesday'],['We','Wednesday'],['Th','Thursday'],['Fr','Friday'],['Sa','Saturday'],['Su','Sunday']];
+    const hrs=L.hours||{}; const setH=(k,f,v)=>this.commit('local.hours.'+k+'.'+f,v);
+    const copyMon=()=>{ const m=hrs.Mo||{o:'',c:''}; const nh={}; days.forEach(x=>{ nh[x[0]]={o:m.o||'',c:m.c||''}; }); this.commit('local.hours',nh); this.flash('Monday’s hours copied to every day'); };
+    const cats=['Astrologer','Psychic','Spiritual consultant','Meditation instructor','Life coach'];
+    const primary=L.gbpPrimaryCategory||'Astrologer'; const catOpts=cats.indexOf(primary)<0?[primary].concat(cats):cats;
+    const loc=[L.locality,L.regionCode||L.region].filter(Boolean).join(', ');
+    const phone=(d.contact&&d.contact.phone)||'';
+    return h('div',null, this.adminHead('Local & Business Profile','How Google, Maps and AI assistants see your business. Keep these exactly as they appear on your Google Business Profile — the same name, area and phone everywhere is what local rankings reward.'),
+      h('div',{style:{display:'grid',gridTemplateColumns:'1fr 1fr',gap:20,alignItems:'start'}},
+        h('div',{style:{display:'grid',gap:20}},
+          this.card(h('div',null, this.cardTitle('Business identity','Used in your structured data, page titles and llms.txt.'),
+            this.inp('local.businessName',{label:'Business name',hint:'exactly as on Google Business Profile'}),
+            this.inp('local.legalName',{label:'Legal name (optional)'}),
+            this.inp('local.businessType',{label:'Business type (schema.org)',options:[{value:'ProfessionalService',label:'ProfessionalService (recommended)'},{value:'LocalBusiness',label:'LocalBusiness'},{value:'HealthAndBeautyBusiness',label:'HealthAndBeautyBusiness'}]}),
+            h('label',{style:{display:'block',marginBottom:16}}, h('span',{style:this.lbl()},'Google Business primary category'), h('select',{value:primary,onChange:e=>this.commit('local.gbpPrimaryCategory',e.target.value),style:this.inpStyle()},...catOpts.map(c=>h('option',{key:c,value:c},c)))),
+            this.listInp('local.gbpAdditionalCategories',{label:'Additional categories',mb:0}))),
+          this.card(h('div',null, this.cardTitle('Service area','Where you serve clients. As a service-area business your street address stays hidden everywhere.'),
+            this.chk('local.serviceAreaBusiness','Service-area business (hide my street address)',{def:true,hint:'Recommended: you consult online and do not receive walk-in clients.'}),
+            sab?null:h('div',null, this.inp('local.streetAddress',{label:'Street address',hint:'shown publicly'}), this.inp('local.postalCode',{label:'Postal code'})),
+            h('div',{style:{display:'grid',gridTemplateColumns:'1fr 1fr',gap:12}}, this.inp('local.locality',{label:'City'}), this.inp('local.region',{label:'Province / region'}), this.inp('local.regionCode',{label:'Region code',hint:'e.g. BC'}), this.inp('local.country',{label:'Country code',hint:'e.g. CA'}), this.inp('local.lat',{label:'Latitude',hint:'city centre is fine'}), this.inp('local.lng',{label:'Longitude'})),
+            this.listInp('local.areasServed',{label:'Areas served',hint:'one per line, most local first'}),
+            this.chk('local.onlineWorldwide','Also serve clients worldwide online',{def:true}),
+            this.listInp('local.onlineChannels',{label:'Online channels',rows:2}),
+            this.chk('local.locationInTitles','Add “· '+(loc||'your city')+'” to page titles in Google',{def:true,mb:0,hint:'Only the search-result titles change (blog posts are left as written); the text on your pages stays exactly the same.'}))),
+          this.card(h('div',null, this.cardTitle('Pricing & languages'),
+            h('div',{style:{display:'grid',gridTemplateColumns:'1.4fr .6fr',gap:12}}, this.inp('local.priceRange',{label:'Price range'}), this.inp('local.currency',{label:'Currency'})),
+            this.inp('local.paymentPolicy',{label:'Payment policy',multiline:true,rows:3}),
+            this.listInp('local.languages',{label:'Languages',rows:2,mb:0})))),
+        h('div',{style:{display:'grid',gap:20}},
+          this.card(h('div',null, this.cardTitle('Name, area & phone (NAP)','This is what appears in your site footer and in Google’s data. Phone, WhatsApp and email are the same fields as in Settings.'),
+            this.inp('contact.phone',{label:'Phone',hint:'use the number on your Google Business Profile',placeholder:'+1 604 …'}),
+            this.inp('contact.whatsapp',{label:'WhatsApp number'}),
+            this.inp('contact.email',{label:'Email',type:'email'}),
+            h('div',{style:{padding:'14px 16px',borderRadius:12,border:'1px dashed '+P.gold,background:P.white,font:'400 13.5px/1.6 Plus Jakarta Sans',color:P.ink}},
+              h('div',{style:{font:'600 11px '+this.HEAD,letterSpacing:'.1em',textTransform:'uppercase',color:P.gold,marginBottom:6}},'Footer preview'),
+              this.napBlock()),
+            phone?null:h('div',{style:{marginTop:12}},this.note(['⚠ ',h('b',null,'No phone number yet.'),' Google matches your website to your Business Profile by name, area and phone — add the number shown on your profile.'],'warn')))),
+          this.card(h('div',null, this.cardTitle('Opening hours','Leave a day empty for “by appointment / closed”. Use the same hours as your Business Profile.'),
+            h('div',{style:{display:'grid',gap:8}}, ...days.map(x=>{ const v=hrs[x[0]]||{}; return h('div',{key:x[0],style:{display:'grid',gridTemplateColumns:'100px 1fr 1fr 34px',gap:8,alignItems:'center'}},
+              h('span',{style:{font:'600 13px '+this.HEAD,color:P.maroon}},x[1]),
+              h('input',{type:'time',value:v.o||'',onChange:e=>setH(x[0],'o',e.target.value),style:{...this.inpStyle(),padding:'8px 10px'}}),
+              h('input',{type:'time',value:v.c||'',onChange:e=>setH(x[0],'c',e.target.value),style:{...this.inpStyle(),padding:'8px 10px'}}),
+              h('button',{title:'Closed',onClick:()=>this.commit('local.hours.'+x[0],{o:'',c:''}),style:{...this.iconBtn(),width:34,height:34}},'✕')); })),
+            h('div',{style:{marginTop:12}}, this.btn('Copy Monday to every day',copyMon,{variant:'outline',pad:'8px 16px',style:{fontSize:13}})))),
+          this.card(h('div',null, this.cardTitle('Google Business Profile & reviews','These links tie your website to your Maps listing (they are added to your structured data as “sameAs”).'),
+            this.inp('local.mapsCidUrl',{label:'Google Maps CID link',hint:'Maps → your listing → Share, or https://maps.google.com/?cid=…',placeholder:'https://maps.google.com/?cid=…'}),
+            this.inp('contact.gmb',{label:'Business Profile share link',hint:'same as Settings'}),
+            this.inp('local.reviewUrl',{label:'“Leave a review” link',hint:'optional',placeholder:'https://g.page/r/…/review'}),
+            this.listInp('local.directories',{label:'Other listings',hint:'Bing Places, Apple Business Connect, Yelp, Facebook page … one URL per line',mb:0})))))); }
+
+  // ----- Practitioner (E-E-A-T) -----
+  tabPerson(){ const h=React.createElement,P=this.P,d=this.state.data; const pr=d.person||{};
+    return h('div',null, this.adminHead('Practitioner (E-E-A-T)','Experience, expertise and trust: who gives the readings. Google and AI assistants use this to understand that a real, trained astrologer stands behind the site.'),
+      h('div',{style:{display:'grid',gridTemplateColumns:'1fr 1fr',gap:20,alignItems:'start'}},
+        h('div',{style:{display:'grid',gap:20}},
+          this.card(h('div',null, this.cardTitle('Profile'),
+            this.inp('person.name',{label:'Name'}),
+            this.inp('person.jobTitle',{label:'Professional title'}),
+            this.listInp('person.additionalRoles',{label:'Other roles',rows:2}),
+            this.inp('person.shortBio',{label:'Short bio',hint:'2–3 sentences, used by search engines and AI assistants',multiline:true,rows:6}),
+            this.inp('person.image',{label:'Photo URL (optional)',hint:'a public image link; your logo is used if empty',placeholder:'https://www.analysisofkarma.com/uploads/…',mb:0}))),
+          this.card(h('div',null, this.cardTitle('Profiles about you','Pages that are about you personally (e.g. a YouTube channel, interviews, LinkedIn). Your business social links from Settings are included automatically.'),
+            this.listInp('person.sameAs',{label:'Profile links',hint:'one URL per line',mb:0})))),
+        h('div',{style:{display:'grid',gap:20}},
+          this.card(h('div',null, this.cardTitle('Training & credentials'),
+            this.inp('person.mentor',{label:'Mentor / guru'}),
+            this.listInp('person.studies',{label:'Formal studies'}),
+            this.listInp('person.classicalTexts',{label:'Classical texts researched',mb:0}))),
+          this.card(h('div',null, this.cardTitle('Areas of expertise','Topics you are an authority on (schema.org “knowsAbout”).'),
+            this.listInp('person.knowsAbout',{label:'Topics',rows:10,mb:0})))))); }
+
+  // ----- AI & GEO control centre -----
+  aiBotInfo(){ return {'GPTBot':['OpenAI','Trains ChatGPT models','train'],'OAI-SearchBot':['OpenAI','ChatGPT search results','search'],'ChatGPT-User':['OpenAI','Opens your pages when a ChatGPT user asks','user'],
+    'ClaudeBot':['Anthropic','Trains Claude models','train'],'Claude-SearchBot':['Anthropic','Claude search results','search'],'Claude-User':['Anthropic','Opens your pages when a Claude user asks','user'],
+    'PerplexityBot':['Perplexity','Perplexity answers & citations','search'],'Perplexity-User':['Perplexity','Opens your pages when a Perplexity user asks','user'],
+    'Google-Extended':['Google','Gemini training & grounding (not Google Search)','train'],'Applebot-Extended':['Apple','Apple Intelligence training (not Siri / Spotlight search)','train'],
+    'Amazonbot':['Amazon','Alexa answers','search'],'meta-externalagent':['Meta','Meta AI training','train'],'CCBot':['Common Crawl','Open dataset used by many AI models','train'],'Bytespider':['ByteDance','TikTok / Doubao AI training','train']}; }
+  tabAi(){ const h=React.createElement,P=this.P,d=this.state.data; const ai=d.ai||{}; const bots=ai.bots||{}; const info=this.aiBotInfo(); const names=Object.keys(info).concat(Object.keys(bots).filter(k=>!info[k]));
+    const setAll=fn=>{ const nb={}; names.forEach(n=>{ nb[n]=fn(n); }); this.commit('ai.bots',nb); };
+    const kind={train:'Training',search:'Search & answers',user:'On request'};
+    const inx=this._indexNowInfo; const key=ai.indexNowKey||''; const base=(d.siteUrl||'').replace(/\/$/,'');
+    const sm=this.live('/sitemap.xml'); const smCount=sm.text?(sm.text.match(/<loc>/g)||[]).length:null;
+    return h('div',null, this.adminHead('AI & GEO Control Center','Decide which AI assistants may read your site, and what they learn about you. Search crawlers (Google, Bing) are never blocked here.'),
+      this.card(h('div',null, this.cardTitle('AI crawlers','Allowed bots can read every public page; blocked bots get “Disallow: /” in robots.txt. “Search & answers” and “On request” bots are what get you cited in ChatGPT, Claude and Perplexity answers.'),
+        h('div',{style:{display:'flex',gap:8,flexWrap:'wrap',marginBottom:14}}, this.btn('Allow all',()=>setAll(()=>true),{variant:'outline',pad:'7px 14px',style:{fontSize:12.5}}), this.btn('Allow answers, block training',()=>setAll(n=>!info[n]||info[n][2]!=='train'),{variant:'outline',pad:'7px 14px',style:{fontSize:12.5}})),
+        h('div',{style:{display:'grid',gridTemplateColumns:'repeat(2,1fr)',gap:8}}, ...names.map(n=>{ const on=bots[n]!==false; const i=info[n]||['','Custom bot','search'];
+          return h('label',{key:n,style:{display:'flex',gap:10,alignItems:'center',padding:'10px 12px',borderRadius:10,border:'1px solid '+(on?P.line:'#efc9bd'),background:on?P.white:'#fdf3ef',cursor:'pointer'}}, h('input',{type:'checkbox',checked:on,onChange:e=>this.commit('ai.bots.'+n,e.target.checked),style:{width:18,height:18}}),
+            h('span',{style:{flex:1,minWidth:0}}, h('span',{style:{display:'block',font:'700 13.5px ui-monospace,monospace',color:P.maroon}},n), h('span',{style:{display:'block',font:'400 12px/1.4 Plus Jakarta Sans',color:P.muted}},i[0]+' · '+i[1])),
+            h('span',{style:{font:'600 10.5px '+this.HEAD,letterSpacing:'.04em',textTransform:'uppercase',color:i[2]==='train'?P.gold:P.ok}},kind[i[2]]||'')); })),
+        h('div',{style:{marginTop:16}}, this.preview('/robots.txt',8))),{marginBottom:20}),
+      h('div',{style:{display:'grid',gridTemplateColumns:'1fr 1fr',gap:20,alignItems:'start'}},
+        this.card(h('div',null, this.cardTitle('llms.txt — your profile for AI assistants','Generated automatically from your About, Services, FAQ and blog. Leave the boxes empty to keep it automatic, or paste your own text to replace it.'),
+          this.preview('/llms.txt',12),
+          h('div',{style:{height:14}}),
+          this.inp('ai.llmsOverride',{label:'Replace /llms.txt with my own text',hint:'optional',multiline:true,rows:4}),
+          this.inp('ai.llmsFullOverride',{label:'Replace /llms-full.txt with my own text',hint:'optional',multiline:true,rows:4,mb:0}))),
+        h('div',{style:{display:'grid',gap:20}},
+          this.card(h('div',null, this.cardTitle('Sitemap','Live and always current: every page, service and published post.'),
+            this.note([h('b',null,smCount==null?'…':smCount+' URLs'),' in ',h('a',{href:'/sitemap.xml',target:'_blank',style:{color:P.red}},base+'/sitemap.xml'),'. Pages that are hidden, redirected or point to another canonical page are left out automatically.']),
+            h('div',{style:{display:'flex',gap:8,flexWrap:'wrap'}}, this.btn('↻ Save a static backup copy',()=>this.updateSitemap(false),{variant:'outline',pad:'8px 16px',style:{fontSize:13}}), this.btn('Re-count',()=>this.live('/sitemap.xml',true),{variant:'outline',pad:'8px 16px',style:{fontSize:13}})))),
+          this.card(h('div',null, this.cardTitle('IndexNow','Tells Bing, Yandex, Seznam and Naver (and the AI search built on Bing) about changes within minutes.'),
+            this.chk('ai.indexNowAuto','Notify automatically after I save (at most once an hour)',{def:true}),
+            h('div',{style:{font:'400 13px/1.6 Plus Jakarta Sans',color:P.ink,marginBottom:12}}, h('b',null,'Key: '), key?h('a',{href:'/'+key+'.txt',target:'_blank',style:{font:'500 12.5px ui-monospace,monospace',color:P.red}},key):h('span',{style:{color:P.muted}},'created on the first notification')),
+            inx?this.note(inx.skipped?'Last run: skipped — notifications are only sent from the live domain.':inx.ok?'✓ Last run: '+inx.count+' URLs accepted ('+new Date(inx.at).toLocaleString()+').':'⚠ Last run failed'+(inx.status?' (HTTP '+inx.status+')':'')+(inx.error?': '+inx.error:'')+'.',inx.ok||inx.skipped?'ok':'bad'):null,
+            this.btn('⚑ Notify search engines now',()=>this.indexNow(false),{variant:'solid',pad:'10px 18px',style:{fontSize:13.5}})))))); }
+
+  // ----- Redirects & duplicate review (nothing is ever merged or deleted automatically) -----
+  dupTokens(t){ const stop={the:1,and:1,for:1,your:1,with:1,what:1,how:1,its:1,does:1,doesn:1,really:1,means:1,each:1,best:1,you:1,are:1,why:1,from:1,into:1,service:1,services:1,report:1,reports:1,vedic:1,astrology:1,astrological:1,astrologer:1,based:1};
+    const out={}; this.txt(t).toLowerCase().replace(/&/g,' ').split(/[^a-z0-9]+/).forEach(w=>{ if(w.length>=3&&!stop[w]) out[w.slice(0,5)]=1; }); return Object.keys(out); }
+  // pairs of items whose titles overlap strongly ("Gemstone Recommendation" / "Gemstone Recommendation Services")
+  findDuplicates(items){ const ign={}; ((this.state.data.dupIgnore)||[]).forEach(k=>{ ign[k]=1; }); const live=items.filter(x=>!x.redirectTo); const toks=live.map(x=>this.dupTokens(x.title)); const out=[];
+    for(let i=0;i<live.length;i++) for(let j=i+1;j<live.length;j++){ const a=toks[i],b=toks[j]; if(!a.length||!b.length) continue; const shared=a.filter(x=>b.indexOf(x)>-1).length; const score=shared/Math.min(a.length,b.length);
+      if(shared>=Math.min(2,a.length,b.length)&&score>=0.6&&!ign[[live[i].id,live[j].id].sort().join('|')]) out.push([live[i],live[j],score]); }
+    return out.sort((x,y)=>y[2]-x[2]); }
+  tabRedirects(){ const h=React.createElement,P=this.P,d=this.state.data; const reds=d.redirects||[]; const slugs=this.serviceSlugs(d.services);
+    const svcUrl=s=>'/services/'+slugs[s.id]; const postUrl=p=>'/blog/'+p.slug;
+    const setItem=(kind,id,patch)=>this.commit(kind,(d[kind]||[]).map(x=>x.id===id?{...x,...patch}:x));
+    const ignore=(a,b)=>this.commit('dupIgnore',((d.dupIgnore)||[]).concat([[a.id,b.id].sort().join('|')]));
+    const norm=u=>'/'+String(u||'').trim().replace(/^https?:\/\/[^/]+/i,'').replace(/^\/+|\/+$/g,'');
+    const issues=r=>{ const f=norm(r.from); if(!r.from) return 'Enter the old address'; if(!/^\//.test(String(r.from).trim())) return 'The old address must start with /'; if(f==='/'||f==='/admin') return 'This address cannot be redirected'; if(!r.to) return 'Enter where it should go'; if(norm(r.to)===f) return 'Redirects to itself'; if(reds.some(o=>o!==r&&norm(o.from)===norm(r.to)&&norm(o.to)===f)) return 'Loop: these two redirect to each other'; return null; };
+    const pairBlock=(kind,pair,url)=>{ const [a,b]=pair; const label=x=>h('div',{style:{flex:1,minWidth:0}}, h('div',{style:{font:'700 14.5px '+this.HEAD,color:P.maroon}},this.txt(x.title)), h('a',{href:url(x),target:'_blank',style:{font:'400 12.5px ui-monospace,monospace',color:P.muted}},url(x)));
+      const act=(keep,drop,how)=>()=>{ const msg=how==='redirect'?'Merge “'+this.txt(drop.title)+'” into “'+this.txt(keep.title)+'”?\n\nIt stays in your admin (nothing is deleted) but leaves the website, and its address forwards to '+url(keep)+'. You can undo this at any time.':'Mark “'+this.txt(keep.title)+'” as the main page?\n\n“'+this.txt(drop.title)+'” stays visible on your site, but Google is told to rank '+url(keep)+' instead.';
+        if(!confirm(msg)) return; setItem(kind,drop.id,how==='redirect'?{redirectTo:url(keep)}:{canonical:url(keep)}); this.flash(how==='redirect'?'Merged — click Save to publish':'Canonical set — click Save to publish'); };
+      return this.card(h('div',null, h('div',{style:{display:'flex',gap:16,alignItems:'center',marginBottom:12}}, label(a), h('span',{style:{color:P.gold,font:'700 13px '+this.HEAD}},Math.round(pair[2]*100)+'% similar'), label(b)),
+        h('div',{style:{display:'flex',gap:8,flexWrap:'wrap'}},
+          this.btn('Keep left, merge right → left',act(a,b,'redirect'),{variant:'outline',pad:'7px 13px',style:{fontSize:12.5}}),
+          this.btn('Keep right, merge left → right',act(b,a,'redirect'),{variant:'outline',pad:'7px 13px',style:{fontSize:12.5}}),
+          this.btn('Keep both, left ranks (canonical)',act(a,b,'canonical'),{variant:'outline',pad:'7px 13px',style:{fontSize:12.5}}),
+          this.btn('Not duplicates',()=>ignore(a,b),{variant:'outline',pad:'7px 13px',style:{fontSize:12.5,color:P.muted}}))),{padding:18}); };
+    const merged=[].concat((d.services||[]).filter(s=>s.redirectTo||s.canonical).map(s=>['services',s,svcUrl(s)]),(d.blog||[]).filter(p=>p.redirectTo||p.canonical).map(p=>['blog',p,postUrl(p)]));
+    const dS=this.findDuplicates(d.services||[]), dP=this.findDuplicates(d.blog||[]);
+    return h('div',null, this.adminHead('Redirects & Duplicates','Review overlapping services and posts and decide what to merge. Nothing is merged or deleted automatically — every change here is one you choose, and each can be undone.'),
+      h('div',{style:{display:'grid',gap:14,marginBottom:26}},
+        h('h2',{style:{font:'700 18px '+this.HEAD,color:P.maroon,margin:0}},'Possible duplicate services ',h('span',{style:{fontWeight:400,color:P.muted,fontSize:14}},'('+dS.length+')')),
+        dS.length?null:this.note('No overlapping services found.','ok'), ...dS.map((pr,i)=>h('div',{key:'s'+i},pairBlock('services',pr,svcUrl))),
+        h('h2',{style:{font:'700 18px '+this.HEAD,color:P.maroon,margin:'10px 0 0'}},'Possible duplicate blog posts ',h('span',{style:{fontWeight:400,color:P.muted,fontSize:14}},'('+dP.length+')')),
+        dP.length?null:this.note('No overlapping posts found.','ok'), ...dP.map((pr,i)=>h('div',{key:'p'+i},pairBlock('blog',pr,postUrl)))),
+      merged.length?this.card(h('div',null, this.cardTitle('Merged & canonical items','These stay in your admin. Undo to put them back on the website exactly as they were.'),
+        ...merged.map(m=>{ const [kind,x,u]=m; return h('div',{key:x.id,style:{display:'flex',gap:12,alignItems:'center',padding:'10px 0',borderTop:'1px solid '+P.line}}, h('div',{style:{flex:1,minWidth:0}}, h('div',{style:{font:'600 14px '+this.HEAD,color:P.maroon}},this.txt(x.title)), h('div',{style:{font:'400 12.5px ui-monospace,monospace',color:P.muted}},u+(x.redirectTo?'  ↪ 301 → '+x.redirectTo:'  → canonical '+x.canonical))),
+          this.btn('Undo',()=>setItem(kind,x.id,{redirectTo:'',canonical:''}),{variant:'outline',pad:'6px 14px',style:{fontSize:12.5}})); })),{marginBottom:20}):null,
+      this.card(h('div',null, this.cardTitle('Custom 301 redirects','Forward an old address to a new one — e.g. a renamed page or an old URL from a previous website. Addresses start with /.'),
+        ...reds.map((r,i)=>{ const err=issues(r); return h('div',{key:i,style:{marginBottom:10}}, h('div',{style:{display:'grid',gridTemplateColumns:'1fr 24px 1fr 34px',gap:8,alignItems:'center'}},
+          h('input',{value:r.from||'',placeholder:'/old-address',onChange:e=>this.commit('redirects.'+i+'.from',e.target.value),style:this.inpStyle()}), h('span',{style:{color:P.gold,textAlign:'center'}},'→'),
+          h('input',{value:r.to||'',placeholder:'/new-address or https://…',onChange:e=>this.commit('redirects.'+i+'.to',e.target.value),style:this.inpStyle()}),
+          h('button',{onClick:()=>this.commit('redirects',reds.filter((_,j)=>j!==i)),style:this.iconBtn(true)},'✕')), err?h('div',{style:{font:'500 12.5px Plus Jakarta Sans',color:P.bad,marginTop:4}},'⚠ '+err):null); }),
+        this.btn('+ Add redirect',()=>this.commit('redirects',reds.concat([{from:'',to:''}])),{variant:'outline',pad:'8px 16px',style:{fontSize:13}})))); }
+
+  // ----- SEO health scorecard -----
+  tabHealth(){ const h=React.createElement,P=this.P; const x=this.live('/api/seo-health.php'); let j=null; try{ j=JSON.parse(x.text||'null'); }catch(e){}
+    // checks only the browser can do: are the live files really reachable?
+    const probes=[['/robots.txt','robots.txt is served live',t=>/User-agent/i.test(t)],['/sitemap.xml','sitemap.xml is served live',t=>/<urlset/.test(t)],['/llms.txt','llms.txt is served live',t=>/^# /.test(t)],['/services','Pages are rendered on the server (crawlers see real content)',t=>t.indexOf('aok-ssr')>-1],['/this-page-should-not-exist-404','Unknown addresses return a real 404',(t,s)=>s===404]];
+    const probeChecks=probes.map(p=>{ const r=this.live(p[0]); return {group:'Crawl files',status:r.loading?'info':(p[2](r.text||'',r.status)?'ok':'fail'),title:p[1],detail:r.loading?'Checking…':(p[2](r.text||'',r.status)?'':'Not working yet — upload the new .htaccess and render.php (see DEPLOY.md).')}; });
+    const checks=(j&&j.checks?j.checks:[]).concat(probeChecks);
+    const weight={ok:1,warn:.5,fail:0}; const scored=checks.filter(c=>c.status in weight); const score=scored.length?Math.round(scored.reduce((a,c)=>a+weight[c.status],0)/scored.length*100):0;
+    const groups=[]; checks.forEach(c=>{ if(groups.indexOf(c.group)<0) groups.push(c.group); });
+    const col={ok:P.ok,warn:P.gold,fail:P.bad,info:P.muted}; const ico={ok:'✓',warn:'!',fail:'✕',info:'i'};
+    const rerun=()=>{ Object.keys(this._live||{}).forEach(k=>{ delete this._live[k]; }); this.forceUpdate(); };
+    const counts={fail:checks.filter(c=>c.status==='fail').length,warn:checks.filter(c=>c.status==='warn').length,ok:checks.filter(c=>c.status==='ok').length};
+    return h('div',null, this.adminHead('SEO Health','A live check of everything search engines and AI assistants read: titles, descriptions, structured data, local details, crawl files and security.'),
+      this.card(h('div',{style:{display:'flex',alignItems:'center',gap:20,flexWrap:'wrap'}},
+        h('div',{style:{width:84,height:84,borderRadius:'50%',background:'conic-gradient('+(score>=80?P.ok:score>=55?P.gold:P.bad)+' '+(score*3.6)+'deg,'+P.bgAlt+' 0)',display:'flex',alignItems:'center',justifyContent:'center'}}, h('div',{style:{width:66,height:66,borderRadius:'50%',background:P.card,display:'flex',alignItems:'center',justifyContent:'center',font:'800 22px '+this.HEAD,color:P.maroon}},x.loading?'…':score)),
+        h('div',{style:{flex:1,minWidth:220}}, h('div',{style:{font:'700 17px '+this.HEAD,color:P.maroon}},'Health score'), h('div',{style:{font:'400 13.5px Plus Jakarta Sans',color:P.muted,marginTop:4}},counts.fail+' to fix · '+counts.warn+' to improve · '+counts.ok+' passing'), x.status&&x.status!==200&&!x.loading?h('div',{style:{font:'500 13px Plus Jakarta Sans',color:P.bad,marginTop:6}},'The server check could not run (HTTP '+x.status+'). Upload api/seo-health.php and log in again.'):null),
+        this.btn('↻ Run again',rerun,{variant:'solid',pad:'10px 18px',style:{fontSize:13.5}})),{marginBottom:20}),
+      ...groups.map(g=>this.card(h('div',null, h('div',{style:{font:'700 15px '+this.HEAD,color:P.maroon,marginBottom:10}},g),
+        ...checks.filter(c=>c.group===g).map((c,i)=>h('div',{key:i,style:{display:'flex',gap:12,alignItems:'flex-start',padding:'9px 0',borderTop:i?'1px solid '+P.line:'none'}},
+          h('span',{style:{width:22,height:22,borderRadius:'50%',flexShrink:0,background:col[c.status],color:'#fff',display:'flex',alignItems:'center',justifyContent:'center',font:'700 12px '+this.HEAD,marginTop:1}},ico[c.status]),
+          h('div',{style:{flex:1,minWidth:0}}, h('div',{style:{font:'600 14px/1.45 Plus Jakarta Sans',color:P.ink}},c.title), c.detail?h('div',{style:{font:'400 13px/1.55 Plus Jakarta Sans',color:P.muted,marginTop:2,whiteSpace:'pre-line'}},c.detail):null),
+          c.fix&&c.status!=='ok'?h('button',{onClick:()=>this.setState({adminTab:c.fix}),style:{...this.iconBtn(),width:'auto',height:30,padding:'0 12px',font:'600 12px '+this.HEAD,flex:'0 0 auto'}},'Fix →'):null))),{marginBottom:16}))); }
 
   // ----- settings -----
   tabSettings(){ const h=React.createElement,P=this.P,d=this.state.data;
