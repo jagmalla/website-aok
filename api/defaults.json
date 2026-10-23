@@ -45,6 +45,14 @@
    "British Columbia",
    "Canada"
   ],
+  "nearbyLabel": "Greater Vancouver & Fraser Valley",
+  "nearbyCities": [
+   "Burnaby",
+   "Richmond",
+   "Delta",
+   "Langley",
+   "Abbotsford"
+  ],
   "onlineWorldwide": true,
   "onlineChannels": [
    "Zoom",
@@ -100,6 +108,7 @@
   ],
   "shortBio": "Jag Mallah is an independent Vedic astrologer and professional meditation guide based in Surrey, British Columbia, consulting worldwide over Zoom and WhatsApp in English and Hindi. He completed formal studies in Advanced Astrology, Tajika (Varshaphala and Prashna Shastra), Muhurta and Medical Astrology under his mentor Sh. Sharawan Jha, and researches the classical texts Brihat Parashara Hora Shastra, Phaladeepika, Tajika Neelakanthi, Bhrigu Nandi Nadi, Jaimini Sutras and Swarodaya Shastra.",
   "mentor": "Sh. Sharawan Jha",
+  "traditions": "Parashari and Nadi astrology",
   "studies": [
    "Advanced Astrology",
    "Tajika (Varshaphala and Prashna Shastra)",
@@ -484,7 +493,7 @@
    },
    {
     "q": "What information do I need for a birth chart reading?",
-    "a": "To generate an accurate birth chart, I need your date of birth, the exact time of birth (down to the minute, if possible), and the city and country where you were born."
+    "a": "To generate an accurate birth chart, I need your date of birth, the exact time of birth (down to the minute, if possible), and the city and country where you were born. Please send these when you book, along with your questions, so your chart is ready before our Zoom or WhatsApp call."
    },
    {
     "q": "What if I don’t know my exact time of birth?",
@@ -492,7 +501,7 @@
    },
    {
     "q": "What is a “Rising Sign” or Ascendant?",
-    "a": "Your Rising sign is the zodiac constellation that was rising on the eastern horizon at the exact moment you were born. It represents your outward personality, your physical appearance, and how the world initially perceives you."
+    "a": "Your Rising sign (Lagna, or Ascendant) is the zodiac constellation that was rising on the eastern horizon at the exact moment you were born. It represents your outward personality, your physical appearance, and how the world initially perceives you. In Vedic astrology, the Lagna also sets the twelve houses, so an accurate birth time matters."
    },
    {
     "q": "Can astrology predict exactly what will happen in my future?",
@@ -500,7 +509,7 @@
    },
    {
     "q": "Are my personal data and consultation private?",
-    "a": "Absolutely. At Analysis of Karma, I follow strict privacy and confidentiality rules to protect your personal details. All consultations are 100% confidential and are never shared or discussed with anyone else."
+    "a": "Absolutely. At Analysis of Karma, I follow strict privacy and confidentiality rules to protect your personal details. All consultations are 100% confidential and are never shared or discussed with anyone else. Your birth details stay between us, and I never publish client stories or testimonials, however kind they may be."
    },
    {
     "q": "What is Mercury Retrograde?",
@@ -520,15 +529,15 @@
    },
    {
     "q": "Do you offer refunds if I am not satisfied with a live reading?",
-    "a": "I offer a satisfaction guarantee for new clients. If you are not satisfied with your reading or feel the service was not a good fit, you can speak with me directly to discuss a refund."
+    "a": "New clients pay only if satisfied, so there is nothing to refund. Consultations are $100 CAD per hour over Zoom or WhatsApp, and you pay after the reading. If you did not find value, you do not pay. If it helped you, you pay for it, so you do not carry a karma debt."
    },
    {
     "q": "How does astrology determine relationship compatibility?",
-    "a": "Astrologers use a technique called “Synastry,” which involves overlaying two people’s birth charts to see how their planets interact. This highlights areas of harmony, potential friction, communication styles, and the long-term viability of the partnership."
+    "a": "Astrologers use a technique called “Synastry,” which involves overlaying two people’s birth charts to see how their planets interact. This highlights areas of harmony, potential friction, communication styles, and the long-term viability of the partnership. In Vedic astrology, I also use Kundli Milan (Guna Milan) and check both charts for Mangal Dosha."
    },
    {
     "q": "What is a Moon sign and why does it matter?",
-    "a": "While your Sun sign represents your core identity and ego, your Moon sign dictates your emotional inner world. It governs your subconscious reactions, your instincts, and what you need to feel safe, nurtured, and secure."
+    "a": "While your Sun sign represents your core identity and ego, your Moon sign dictates your emotional inner world. It governs your subconscious reactions, your instincts, and what you need to feel safe, nurtured, and secure. In Vedic astrology, your Moon sign (Rashi) is central: your dasha periods are counted from the Moon’s birth nakshatra."
    },
    {
     "q": "How often should I get my birth chart read?",
@@ -536,7 +545,7 @@
    },
    {
     "q": "Can astrology predict health issues?",
-    "a": "Medical astrology can point out physical sensitivities or periods of low vitality based on planetary alignments. However, I am not a medical professional. Astrology should never replace professional medical diagnosis, advice, or treatment."
+    "a": "Medical astrology can point out physical sensitivities or periods of low vitality based on planetary alignments. However, I am not a medical professional. Astrology should never replace professional medical diagnosis, advice, or treatment. A reading can highlight areas to look after and times to take extra care, so you can discuss concerns with your doctor."
    }
   ]
  },

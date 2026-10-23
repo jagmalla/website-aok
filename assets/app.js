@@ -121,7 +121,7 @@ class Component extends DCLogic {
     try{
       fetch('/api/data.php',{ headers:{'Accept':'application/json'} })
         .then(r=>r.ok?r.json():null)
-        .then(srv=>{ if(!srv||srv.ok===false) return; const merged=this.fill(this.defaults(),srv); try{ localStorage.setItem('aok_site_v1', JSON.stringify(merged)); }catch(e){} const r=this._routeFromUrl(merged)||{}; const patch={data:merged}; if(r.route&&r.route!=='admin'){ patch.route=r.route; patch.postId=r.postId; patch.pageId=r.pageId; } this.setState(patch,()=>{ this.syncHead(); }); })
+        .then(srv=>{ if(!srv||srv.ok===false) return; const merged=this.fill(this.defaults(),srv); try{ localStorage.setItem('aok_site_v1', JSON.stringify(merged)); }catch(e){} const r=this._routeFromUrl(merged)||{}; const patch={data:merged}; if(r.route&&r.route!=='admin'){ patch.route=r.route; patch.postId=r.postId; patch.pageId=r.pageId; patch.serviceId=r.serviceId||null; } this.setState(patch,()=>{ this.syncHead(); }); })
         .catch(()=>{});
     }catch(e){}
   }
@@ -213,6 +213,7 @@ class Component extends DCLogic {
         gbpPrimaryCategory:'Astrologer', gbpAdditionalCategories:['Psychic','Spiritual consultant'],
         serviceAreaBusiness:true, streetAddress:'', locality:'Surrey', region:'British Columbia', regionCode:'BC', postalCode:'', country:'CA',
         lat:'49.1913', lng:'-122.8490', areasServed:['Surrey, BC','Greater Vancouver','British Columbia','Canada'],
+        nearbyLabel:'Greater Vancouver & Fraser Valley', nearbyCities:['Burnaby','Richmond','Delta','Langley','Abbotsford'],
         onlineWorldwide:true, onlineChannels:['Zoom','WhatsApp'],
         hours:{Mo:{o:'',c:''},Tu:{o:'',c:''},We:{o:'',c:''},Th:{o:'',c:''},Fr:{o:'',c:''},Sa:{o:'',c:''},Su:{o:'',c:''}},
         mapsCidUrl:'', reviewUrl:'', priceRange:'$100 CAD per hour', currency:'CAD', languages:['English','Hindi'],
@@ -221,7 +222,7 @@ class Component extends DCLogic {
       // Practitioner (E-E-A-T) — used in structured data and llms.txt
       person:{ name:'Jag Mallah', jobTitle:'Independent Vedic Astrologer', additionalRoles:['Meditation Guide'],
         shortBio:'Jag Mallah is an independent Vedic astrologer and professional meditation guide based in Surrey, British Columbia, consulting worldwide over Zoom and WhatsApp in English and Hindi. He completed formal studies in Advanced Astrology, Tajika (Varshaphala and Prashna Shastra), Muhurta and Medical Astrology under his mentor Sh. Sharawan Jha, and researches the classical texts Brihat Parashara Hora Shastra, Phaladeepika, Tajika Neelakanthi, Bhrigu Nandi Nadi, Jaimini Sutras and Swarodaya Shastra.',
-        mentor:'Sh. Sharawan Jha',
+        mentor:'Sh. Sharawan Jha', traditions:'Parashari and Nadi astrology',
         studies:['Advanced Astrology','Tajika (Varshaphala and Prashna Shastra)','Muhurta','Medical Astrology'],
         classicalTexts:['Brihat Parashara Hora Shastra','Phaladeepika','Tajika Neelakanthi','Bhrigu Nandi Nadi','Jaimini Sutras','Swarodaya Shastra'],
         knowsAbout:['Vedic astrology','Jyotish','Kundli (birth chart) reading','Kundli Milan (marriage matching)','Dasha and transit analysis','Mangal Dosha and other doshas','Muhurta (auspicious timing)','Tajika / Varshaphala (annual charts)','Prashna Shastra (horary astrology)','Medical astrology','Gemstone recommendation','Meditation','Pranayama (breathwork)','Mantra practice'],
@@ -325,20 +326,20 @@ class Component extends DCLogic {
         items:[
           {q:'What is the difference between Vedic and Western astrology?',a:'Western astrology is based on the solar calendar and the seasons (Tropical zodiac), focusing heavily on psychology and personality. Vedic astrology (Jyotish) is based on the exact positions of the constellations (Sidereal zodiac) and is generally more focused on predictive outcomes, karma, and major life events.'},
           {q:'How accurate are daily or monthly horoscopes?',a:'General daily horoscopes are typically based solely on your Moon sign, while monthly horoscopes are based on your Sun sign. Both offer broad themes for the collective. For highly accurate and specific predictions, you need a personalized reading based on your complete natal chart (which uses your exact time, date, and place of birth).'},
-          {q:'What information do I need for a birth chart reading?',a:'To generate an accurate birth chart, I need your date of birth, the exact time of birth (down to the minute, if possible), and the city and country where you were born.'},
+          {q:'What information do I need for a birth chart reading?',a:'To generate an accurate birth chart, I need your date of birth, the exact time of birth (down to the minute, if possible), and the city and country where you were born. Please send these when you book, along with your questions, so your chart is ready before our Zoom or WhatsApp call.'},
           {q:'What if I don\u2019t know my exact time of birth?',a:'If you only know a rough window of time, it is still possible to read your chart using your Moon sign. Alternatively, we can perform a \u201cChart Rectification.\u201d This is an advanced process where I ask you about the timing of major life events to calculate and narrow down your closest exact birth time.'},
-          {q:'What is a \u201cRising Sign\u201d or Ascendant?',a:'Your Rising sign is the zodiac constellation that was rising on the eastern horizon at the exact moment you were born. It represents your outward personality, your physical appearance, and how the world initially perceives you.'},
+          {q:'What is a \u201cRising Sign\u201d or Ascendant?',a:'Your Rising sign (Lagna, or Ascendant) is the zodiac constellation that was rising on the eastern horizon at the exact moment you were born. It represents your outward personality, your physical appearance, and how the world initially perceives you. In Vedic astrology, the Lagna also sets the twelve houses, so an accurate birth time matters.'},
           {q:'Can astrology predict exactly what will happen in my future?',a:'Astrology does not predict a fixed, unavoidable fate. Instead, it highlights the energies, opportunities, and challenges present in your life. Think of it as a weather forecast\u2014it can tell you it will rain, but whether you carry an umbrella is ultimately up to your free will.'},
-          {q:'Are my personal data and consultation private?',a:'Absolutely. At Analysis of Karma, I follow strict privacy and confidentiality rules to protect your personal details. All consultations are 100% confidential and are never shared or discussed with anyone else.'},
+          {q:'Are my personal data and consultation private?',a:'Absolutely. At Analysis of Karma, I follow strict privacy and confidentiality rules to protect your personal details. All consultations are 100% confidential and are never shared or discussed with anyone else. Your birth details stay between us, and I never publish client stories or testimonials, however kind they may be.'},
           {q:'What is Mercury Retrograde?',a:'It is an optical illusion where the planet Mercury appears to move backward in the sky from our vantage point on Earth. In astrology, it is associated with miscommunications, technology glitches, and travel delays. It is a time better suited for reviewing, reflecting, and completing old tasks rather than starting brand-new projects.'},
           {q:'What are astrological remedies? Do I have to do them?',a:'Remedies are suggested actions used to mitigate challenging planetary placements. They can include lifestyle changes (karma), wearing specific gemstones, chanting mantras, or performing acts of charity. They are entirely optional and act as spiritual tools to help balance your energy, not mandatory requirements.'},
           {q:'Can astrology help me choose a career path?',a:'Yes! By looking at the 10th House (career), the 5th House (creativity and education), the 6th House (daily work and overcoming obstacles), and the placements of planets like Saturn and Mercury, astrology can reveal your natural talents, ideal work environments, and potential paths to financial success.'},
           {q:'What is a Saturn Return?',a:'A Saturn Return occurs roughly every 27 to 29.5 years when the planet Saturn returns to the exact sign and degree it was in when you were born. It is a major astrological coming-of-age period associated with intense growth, maturity, and the restructuring of your life.'},
-          {q:'Do you offer refunds if I am not satisfied with a live reading?',a:'I offer a satisfaction guarantee for new clients. If you are not satisfied with your reading or feel the service was not a good fit, you can speak with me directly to discuss a refund.'},
-          {q:'How does astrology determine relationship compatibility?',a:'Astrologers use a technique called \u201cSynastry,\u201d which involves overlaying two people\u2019s birth charts to see how their planets interact. This highlights areas of harmony, potential friction, communication styles, and the long-term viability of the partnership.'},
-          {q:'What is a Moon sign and why does it matter?',a:'While your Sun sign represents your core identity and ego, your Moon sign dictates your emotional inner world. It governs your subconscious reactions, your instincts, and what you need to feel safe, nurtured, and secure.'},
+          {q:'Do you offer refunds if I am not satisfied with a live reading?',a:'New clients pay only if satisfied, so there is nothing to refund. Consultations are $100 CAD per hour over Zoom or WhatsApp, and you pay after the reading. If you did not find value, you do not pay. If it helped you, you pay for it, so you do not carry a karma debt.'},
+          {q:'How does astrology determine relationship compatibility?',a:'Astrologers use a technique called \u201cSynastry,\u201d which involves overlaying two people\u2019s birth charts to see how their planets interact. This highlights areas of harmony, potential friction, communication styles, and the long-term viability of the partnership. In Vedic astrology, I also use Kundli Milan (Guna Milan) and check both charts for Mangal Dosha.'},
+          {q:'What is a Moon sign and why does it matter?',a:'While your Sun sign represents your core identity and ego, your Moon sign dictates your emotional inner world. It governs your subconscious reactions, your instincts, and what you need to feel safe, nurtured, and secure. In Vedic astrology, your Moon sign (Rashi) is central: your dasha periods are counted from the Moon\u2019s birth nakshatra.'},
           {q:'How often should I get my birth chart read?',a:'A foundational, in-depth birth chart reading usually only needs to be done once. However, checking in for a \u201cTransit\u201d or \u201cYear Ahead\u201d reading is a highly popular service to book once a year, usually around your birthday or the New Year, to see what energies are currently affecting your chart.'},
-          {q:'Can astrology predict health issues?',a:'Medical astrology can point out physical sensitivities or periods of low vitality based on planetary alignments. However, I am not a medical professional. Astrology should never replace professional medical diagnosis, advice, or treatment.'}
+          {q:'Can astrology predict health issues?',a:'Medical astrology can point out physical sensitivities or periods of low vitality based on planetary alignments. However, I am not a medical professional. Astrology should never replace professional medical diagnosis, advice, or treatment. A reading can highlight areas to look after and times to take extra care, so you can discuss concerns with your doctor.'}
         ] },
       leads:[],
       blocks:{ home:[], about:[], services:[], meditation:[], blog:[], contact:[] },
@@ -601,6 +602,74 @@ class Component extends DCLogic {
     return h('main',{style:{animation:'aokfade .4s'}}, this.pageHero('faqPage.hero','faq'), this.faqSection({noTitle:true,bg:'transparent'}), this.ctaBand('home.cta')); }
 
   // ---------- one page per service (/services/{slug}) — the service's own words, unchanged ----------
+  // ----- topic clusters: blog posts <-> service pages (same rules as aok_cluster_* in api/seo-lib.php) -----
+  clusterWords(t){ const key=String(t||''); const c=this._cw||(this._cw=new Map()); if(c.has(key)) return c.get(key); if(c.size>400) c.clear();
+    const stop=this._cwStop||(this._cwStop=(()=>{ const o=Object.create(null); 'the and for your with what how its does doesn really means each best you are why from into this that can will when where which who not but all any our out more most just than them they their there here have has had was were been about also only very much many ultimate guide clear simple look step help helps know real truly without jargon vedic astrology astrological astrologer astrologers service services report reports'.split(' ').forEach(w=>{ o[w]=1; }); return o; })());
+    const out=[]; this.txt(key).toLowerCase().replace(/&/g,' ').split(/[^a-z0-9]+/).forEach(w=>{ if(w.length>=3&&!stop[w]){ const k=w.slice(0,5); if(out.indexOf(k)<0) out.push(k); } }); c.set(key,out); return out; }
+  clusterScore(post,svc){ const pw=Object.create(null), sw=Object.create(null);
+    this.clusterWords((post.title||'')+' '+(post.focusKeyword||'')).forEach(k=>{ pw[k]=4; }); this.clusterWords(post.excerpt).forEach(k=>{ if(!pw[k]) pw[k]=2; }); this.clusterWords(post.body).forEach(k=>{ if(!pw[k]) pw[k]=1; });
+    this.clusterWords(svc.title).forEach(k=>{ sw[k]=2; }); this.clusterWords(svc.desc).forEach(k=>{ if(!sw[k]) sw[k]=1; });
+    let s=0; for(const k in pw) if(sw[k]) s+=pw[k]*sw[k]; return s; }
+  // best matches (score >= 8) first, ties in list order; atLeast tops up with the next best, then the first items
+  clusterPick(items,score,n,atLeast){ const sc=items.map((x,i)=>[score(x),i,x]).sort((a,b)=>(b[0]-a[0])||(a[1]-b[1])); const out=[], have={};
+    sc.forEach(e=>{ if(e[0]>=8&&out.length<n){ out.push(e); have[e[1]]=1; } });
+    sc.forEach(e=>{ if(out.length<(atLeast||0)&&e[0]>0&&!have[e[1]]){ out.push(e); have[e[1]]=1; } });
+    items.forEach((x,i)=>{ if(out.length<(atLeast||0)&&!have[i]){ out.push([0,i,x]); have[i]=1; } });
+    return out.map(e=>e[2]); }
+  livePosts(){ return ((this.state.data&&this.state.data.blog)||[]).filter(p=>p.published&&p.slug&&!p.redirectTo); }
+  relatedServices(post){ return this.clusterPick(this.liveServices(),s=>this.clusterScore(post,s),3,2); }
+  relatedPosts(svc){ return this.clusterPick(this.livePosts(),p=>this.clusterScore(p,svc),3,0); }
+  joinList(a){ a=(a||[]).map(x=>String(x).trim()).filter(Boolean); return a.length<2?a.join(''):a.slice(0,-1).join(', ')+' and '+a[a.length-1]; }
+  linkBtn(label,href,fn,variant){ return React.createElement('a',this.linkTo(href,fn,{className:'aok-btn aok-fx-lift',style:{display:'inline-flex',alignItems:'center',gap:9,font:'600 14.5px '+this.HEAD,padding:'12px 22px',borderRadius:999,textDecoration:'none',whiteSpace:'nowrap',...this.btnVariants()[variant||'solid']}}),label); }
+  locLabel(){ const L=this.state.data.local||{}; return (L.locality||'Surrey')+(L.regionCode?', '+L.regionCode:''); }
+
+  // "Related consultations" under a blog post / "Articles on …" on a service page
+  relatedServicesBlock(post){ const h=React.createElement,P=this.P; const rel=this.relatedServices(post); if(!rel.length) return null;
+    return h('section',{'aria-labelledby':'related-services-h',style:{marginTop:44}},
+      h('h2',{id:'related-services-h',style:{font:'600 30px/1.15 '+this.SERIF,color:P.maroon,margin:'0 0 18px'}},'Related consultations'),
+      h('div',{style:{display:'grid',gridTemplateColumns:'repeat('+rel.length+',1fr)',gap:16}}, ...rel.map(s=>h('a',this.linkTo(this.serviceHref(s),()=>this.go('service',{serviceId:s.id}),{key:s.id,className:'aok-card aok-tilt',style:{display:'block',padding:'22px 22px 20px',textDecoration:'none'}}),
+        h('div',{style:{marginBottom:12}},this.badge(s.icon)), h('div',{style:{font:'600 20px/1.2 '+this.SERIF,color:P.maroon,marginBottom:8}},s.title),
+        h('div',{style:{font:'400 14px/1.6 Plus Jakarta Sans',color:P.ink,marginBottom:12}},this.cut(this.txt(s.desc),120)), h('span',{style:{font:'600 13px '+this.HEAD,color:'#8A6A2E'}},'Explore '+this.txt(s.title)+' →'))))); }
+  relatedPostsBlock(svc){ const h=React.createElement,P=this.P; const rel=this.relatedPosts(svc); if(!rel.length) return null;
+    return h('section',{'aria-labelledby':'related-posts-h',style:{padding:'0 0 64px'}}, this.wrap(h('div',null,
+      h('h2',{id:'related-posts-h',style:{font:'600 clamp(26px,3vw,34px)/1.15 '+this.SERIF,color:P.maroon,margin:'0 0 20px'}},'Articles on '+this.txt(svc.title)),
+      h('div',{style:{display:'grid',gridTemplateColumns:'repeat(3,1fr)',gap:18}}, ...rel.map(p=>h('a',this.linkTo('/blog/'+encodeURIComponent(p.slug),()=>this.setState({route:'blog',postId:p.id,serviceId:null,menuOpen:false}),{key:p.id,className:'aok-card aok-tilt',style:{display:'block',padding:'22px 24px',textDecoration:'none'}}),
+        h('div',{style:{font:'600 11.5px '+this.HEAD,letterSpacing:'.14em',textTransform:'uppercase',color:'#8A6A2E',marginBottom:10}},'Article'),
+        h('div',{style:{font:'600 21px/1.22 '+this.SERIF,color:P.maroon,marginBottom:10}},p.title), h('div',{style:{font:'400 14px/1.6 Plus Jakarta Sans',color:P.ink}},this.cut(this.txt(p.excerpt),140)))))))); }
+
+  // visible E-E-A-T card — the same facts as the Person in the structured data
+  authorCard(){ const h=React.createElement,P=this.P,d=this.state.data,pe=d.person||{},L=d.local||{}; const name=pe.name||d.brand.astrologer;
+    const studies=(pe.studies||[]).filter(Boolean), texts=(pe.classicalTexts||[]).filter(Boolean); const pr=(d.about&&d.about.pricing)||{};
+    const chip=t=>h('span',{key:t,style:{display:'inline-block',padding:'5px 12px',borderRadius:999,background:'rgba(255,255,255,.7)',border:'1px solid rgba(166,132,70,.35)',font:'600 12px '+this.HEAD,color:P.maroon,margin:'0 6px 6px 0'}},t);
+    return h('aside',{id:'about-the-astrologer','aria-labelledby':'about-the-astrologer-h',className:'aok-card',style:{marginTop:44,padding:'30px 32px',display:'grid',gridTemplateColumns:'86px 1fr',gap:24,alignItems:'start'}},
+      h('div',{style:{width:86,height:86,borderRadius:'50%',padding:6,background:'linear-gradient(135deg,#F3E6C6,#C5A869)',boxShadow:'0 10px 24px -12px rgba(110,84,38,.6)'}}, h('div',{style:{width:'100%',height:'100%',borderRadius:'50%',overflow:'hidden',background:'#FFFCF7',display:'flex',alignItems:'center',justifyContent:'center'}}, pe.image?h('img',{src:pe.image,alt:name,loading:'lazy',width:74,height:74,style:{width:'100%',height:'100%',objectFit:'cover'}}):this.mark(62))),
+      h('div',null,
+        h('div',{style:{font:'600 11.5px '+this.HEAD,letterSpacing:'.2em',textTransform:'uppercase',color:'#8A6A2E',marginBottom:8}},'About the astrologer'),
+        h('h2',{id:'about-the-astrologer-h',style:{font:'600 28px/1.15 '+this.SERIF,color:P.maroon,margin:'0 0 6px'}},'About the Astrologer — '+name),
+        h('div',{style:{font:'500 14px Plus Jakarta Sans',color:P.muted,marginBottom:14}},(pe.jobTitle||'Vedic Astrologer')+' · '+this.locLabel()+' · Online worldwide'),
+        studies.length?h('p',{style:{font:'400 15px/1.7 Plus Jakarta Sans',color:P.ink,margin:'0 0 10px'}},'Formal training in '+this.joinList(studies)+(pe.mentor?' under '+pe.mentor:'')+'.'):null,
+        studies.length?h('div',{style:{margin:'0 0 8px'}},...studies.map(chip)):null,
+        texts.length?h('p',{style:{font:'400 15px/1.7 Plus Jakarta Sans',color:P.ink,margin:'0 0 14px'}},'Classical research'+(pe.traditions?': '+pe.traditions+', through ':': ')+this.joinList(texts)+'.'):null,
+        h('div',{style:{font:'600 13.5px '+this.HEAD,color:'#8A6A2E',margin:'0 0 18px'}},((pr.fee||'$100 CAD')+' '+(pr.unit||'per hour')).trim()+' · '+((L.onlineChannels||['Zoom','WhatsApp']).filter(Boolean).join(' & '))+' · New clients pay only if satisfied'),
+        h('div',{style:{display:'flex',gap:10,flexWrap:'wrap'}}, this.linkBtn('Book a consultation →','/contact',()=>this.go('contact'),'solid'), this.linkBtn('More about '+name,'/about',()=>this.go('about'),'outline')))); }
+
+  // "Service Areas & Online Consultations" (contact + service pages); the footer carries the short version
+  areaItems(){ const d=this.state.data,L=d.local||{}; const out=[]; const near=(L.nearbyCities||[]).filter(Boolean), langs=(L.languages||[]).filter(Boolean);
+    if(L.locality!=='') out.push(['⌖',this.locLabel()+' (home base)']);
+    if(near.length) out.push(['◎',(L.nearbyLabel||'Greater Vancouver')+': '+this.joinList(near)]);
+    if(L.region) out.push(['✦',L.region+' and across '+((L.country||'CA')==='CA'?'Canada':L.country)]);
+    if(L.onlineWorldwide!==false) out.push(['☉','Worldwide online via '+(L.onlineChannels||['Zoom','WhatsApp']).filter(Boolean).join(' & ')+(langs.length?', in '+this.joinList(langs):'')]);
+    return out; }
+  areasIntro(){ const d=this.state.data,L=d.local||{},pe=d.person||{}; const near=(L.nearbyCities||[]).filter(Boolean);
+    return 'Based in '+(L.locality||'Surrey')+', '+(L.region||'British Columbia')+', '+(pe.name||d.brand.astrologer)+' offers Vedic astrology consultations over '+this.joinList((L.onlineChannels||['Zoom','WhatsApp']).filter(Boolean))+' to clients across '+(near.length?(L.nearbyLabel||'Greater Vancouver')+', ':'')+(L.region||'British Columbia')+', Canada'+(L.onlineWorldwide!==false?' and worldwide.':'.'); }
+  areasBlock(){ const h=React.createElement,P=this.P;
+    return h('section',{id:'service-areas','aria-labelledby':'service-areas-h',style:{padding:'0 0 64px'}}, this.wrap(h('div',{className:'aok-card',style:{padding:'30px 32px',display:'grid',gridTemplateColumns:'1fr 1.2fr',gap:28,alignItems:'center'}},
+      h('div',null, h('div',{style:{font:'600 11.5px '+this.HEAD,letterSpacing:'.2em',textTransform:'uppercase',color:'#8A6A2E',marginBottom:8}},'Where I consult'),
+        h('h2',{id:'service-areas-h',style:{font:'600 clamp(26px,3vw,34px)/1.15 '+this.SERIF,color:P.maroon,margin:'0 0 12px'}},'Service Areas & Online Consultations'),
+        h('p',{style:{font:'400 15px/1.7 Plus Jakarta Sans',color:P.ink,margin:'0 0 18px'}},this.areasIntro()),
+        this.linkBtn('Book an online consultation →','/contact',()=>this.go('contact'),'outline')),
+      h('ul',{style:{listStyle:'none',margin:0,padding:0,display:'grid',gap:10}}, ...this.areaItems().map((it,i)=>h('li',{key:i,style:{display:'flex',gap:12,alignItems:'center',padding:'12px 16px',borderRadius:14,background:'rgba(255,255,255,.6)',border:'1px solid rgba(166,132,70,.22)',font:'500 14.5px/1.5 Plus Jakarta Sans',color:P.ink}}, h('span',{'aria-hidden':'true',style:{color:'#A68446',fontSize:18,width:22,textAlign:'center',flexShrink:0}},it[0]), it[1])))))); }
+
   renderServiceDetail(){ const h=React.createElement,P=this.P,d=this.state.data; const s=(d.services||[]).find(x=>x.id===this.state.serviceId);
     if(!s) return this.renderNotFound();
     const others=(d.services||[]).filter(x=>x.id!==s.id&&!x.redirectTo).slice(0,3);
@@ -619,6 +688,9 @@ class Component extends DCLogic {
           h('div',{style:{font:'500 14px Plus Jakarta Sans',color:P.muted,margin:'8px 0 18px'}}, (d.about&&d.about.pricing&&d.about.pricing.unit)||'per hour'),
           h('div',{style:{marginBottom:20,padding:'9px 16px',borderRadius:999,background:'#FFFCF7',border:'1px solid #C5A869',font:'600 12.5px '+this.HEAD,color:P.maroon,display:'inline-block'}},'New clients: pay only if satisfied'),
           h('div',null, this.ebtn('servicesPage.cardBtn',{label:'Book this \u2192',link:'contact',variant:'outline',size:'sm'})))))),
+      this.relatedPostsBlock(s),
+      h('section',{style:{padding:'0 0 64px'}}, this.wrap(h('div',{style:{maxWidth:980,margin:'0 auto'}}, this.authorCard()))),
+      this.areasBlock(),
       others.length? h('section',{style:{background:P.bgAlt,padding:'70px 0'}}, this.wrap(h('div',null,
         h('div',{style:{textAlign:'center',marginBottom:36}}, this.etext('home.servicesIntro.title',{tag:'h2',style:{font:'800 clamp(28px,3.3vw,40px) '+this.HEAD,color:P.maroon,margin:0,letterSpacing:'-.015em'}})),
         h('div',{style:{display:'grid',gridTemplateColumns:'repeat(3,1fr)',gap:22}}, ...others.map((x,i)=>this.serviceCard(x,i))),
@@ -829,12 +901,12 @@ class Component extends DCLogic {
     return h('main',{style:{animation:'aokfade .4s'}},
       h('section',{className:'aok-pagehero'}, this.wrap(h('div',{style:{maxWidth:780,margin:'0 auto',padding:'44px 0 50px'}},
         h('a',this.linkTo('/blog',()=>this.setState({postId:null}),{style:{cursor:'pointer',font:'600 14px '+this.HEAD,color:'#8A6A2E'}}),'← '+this.t('blog')),
-        h('div',{style:{font:'600 12px '+this.HEAD,letterSpacing:'.14em',textTransform:'uppercase',color:'#8A6A2E',margin:'24px 0 14px'}}, this.fmtDate(p.date)),
+        h('div',{style:{font:'600 12px '+this.HEAD,letterSpacing:'.14em',textTransform:'uppercase',color:'#8A6A2E',margin:'24px 0 14px'}}, this.fmtDate(p.date),' \u00b7 By ',h('a',{href:'#about-the-astrologer',style:{color:'#8A6A2E'}},(d.person&&d.person.name)||d.brand.astrologer)),
         h('h1',{style:{font:'800 clamp(30px,3.9vw,48px)/1.1 '+this.HEAD,color:P.maroon,margin:0,letterSpacing:'-.015em'}}, p.title))), h('div',{className:'aok-hairline'})),
       h('section',{style:{padding:'52px 0 70px'}}, this.wrap(h('div',{style:{maxWidth:780,margin:'0 auto'}},
         h('div',{className:'aok-card',style:{padding:8,marginBottom:36}}, h('div',{style:{aspectRatio:'16/8',borderRadius:14,overflow:'hidden',background:p.image?'transparent':'linear-gradient(135deg,#FFFFFF 0%,#F4EEE3 55%,#E9DCC2 100%)'}}, p.image?h('img',{loading:'lazy',decoding:'async',src:p.image,alt:p.focusKeyword||p.title,style:{width:'100%',height:'100%',objectFit:'cover'}}):h('div',{style:{height:'100%',display:'flex',alignItems:'center',justifyContent:'center',color:'#A68446',fontFamily:'monospace',fontSize:12}},'featured image — alt: '+(p.focusKeyword||'')))),
         h('div',{style:{font:'400 18px/1.85 Plus Jakarta Sans',color:P.ink,whiteSpace:'pre-line'}}, p.body),
-        h('div',{style:{marginTop:38,paddingTop:28,borderTop:'1px solid '+P.line,display:'flex',gap:14,alignItems:'center'}}, this.mark(50), h('div',null,h('div',{style:{font:'600 22px/1.2 '+this.SERIF,color:P.maroon}},d.brand.astrologer),h('div',{style:{font:'400 14px Plus Jakarta Sans',color:P.muted}},'Vedic astrologer · Analysis of Karma')))))),
+        this.authorCard(), this.relatedServicesBlock(p)))),
       this.ctaBand('home.cta')); }
 
   fmtDate(s){ try{ return new Date(s).toLocaleDateString('en-IN',{day:'numeric',month:'long',year:'numeric'}); }catch(e){ return s; } }
@@ -865,7 +937,7 @@ class Component extends DCLogic {
               : h('p',{style:{font:'400 14.5px/1.65 Plus Jakarta Sans',color:P.muted,margin:0}},'Please use the form to reach Jag Mallah — he replies personally to every message.'),
             h('div',{style:{display:'flex',gap:10,marginTop:20,flexWrap:'wrap'}}, ...this.socialLinks().map((s,i)=>h('a',{key:i,href:s[1],target:'_blank',rel:'noopener',title:s[0],'aria-label':s[0],className:'aok-badge3d is-sm',style:{textTransform:'capitalize',font:'600 17px/1 Plus Jakarta Sans'}},h('span',null,s[2]))))),
           h('div',{className:'aok-card',style:{padding:8}}, h('div',{style:{position:'relative',borderRadius:14,overflow:'hidden',aspectRatio:'1/1',background:P.bgAlt}}, this.state.editMode? h('div',{onClick:()=>this.setState({mapEdit:true}),style:{position:'absolute',inset:0,zIndex:20,cursor:'pointer',background:'rgba(30,32,34,.08)',display:'flex',alignItems:'flex-start',justifyContent:'flex-end',padding:10}}, h('span',{style:{padding:'8px 14px',borderRadius:999,background:P.maroon,color:P.cream,font:'600 13px '+this.HEAD,boxShadow:'0 4px 14px rgba(0,0,0,.25)'}},'✎ Edit map')):null, mapEmbed? h('div',{className:'aok-mapembed',style:{width:'100%',height:'100%'},dangerouslySetInnerHTML:{__html:mapEmbed}}) : mapSrc? h('iframe',{src:mapSrc,style:{width:'100%',height:'100%',border:0},loading:'lazy',title:'Business location map'}) : (mapLink? h('a',{href:mapLink,target:'_blank',rel:'noopener',style:{height:'100%',display:'flex',flexDirection:'column',alignItems:'center',justifyContent:'center',textAlign:'center',padding:28,gap:14,cursor:'pointer',textDecoration:'none',background:pearl,position:'relative',overflow:'hidden'}}, h('div',{style:{position:'absolute',inset:0,background:'var(--starmap) center/420px 420px no-repeat',opacity:.9}}), h('div',{className:'aok-badge3d is-lg is-round',style:{position:'relative'}},h('span',null,'⚑')), h('div',{style:{font:'600 24px/1.2 '+this.SERIF,color:P.maroon,position:'relative'}},'Find us on Google Maps'), h('div',{style:{font:'400 14px/1.6 Plus Jakarta Sans',color:P.ink,maxWidth:260,position:'relative'}},'Serving Surrey & the Greater Vancouver area, and worldwide online. Tap to view our business profile and directions.'), h('div',{style:{marginTop:4,padding:'10px 20px',borderRadius:999,background:'#FFFCF7',border:'1px solid #C5A869',font:'600 13px '+this.HEAD,color:P.maroon,position:'relative'}},'Open in Google Maps →')) : h('div',{style:{height:'100%',display:'flex',flexDirection:'column',alignItems:'center',justifyContent:'center',color:P.muted,textAlign:'center',padding:24,gap:8,background:pearl}}, h('div',{style:{fontSize:34,color:P.gold}},'⚑'), h('div',{style:{font:'600 15px '+this.HEAD,color:P.maroon}},'Add your Google Map'), h('div',{style:{font:'400 13px Plus Jakarta Sans',maxWidth:240}},'Set your business address or map query in Admin → Settings to show a live Google Map here.'))))))))),
-      this.faqSection({hideAsk:true}), this.renderMapEditor()); }
+      this.areasBlock(), this.faqSection({hideAsk:true}), this.renderMapEditor()); }
 
   renderMapEditor(){ if(!this.state.mapEdit) return null; const h=React.createElement,P=this.P; const c=this.state.data.contact;
     const fieldLabel=(n,t)=>h('div',{style:{font:'700 13px '+this.HEAD,color:P.maroon,margin:'0 0 7px',display:'flex',alignItems:'center'}}, h('span',{style:{display:'inline-flex',width:22,height:22,borderRadius:6,background:P.gold,color:P.maroonD,alignItems:'center',justifyContent:'center',font:'700 12px '+this.HEAD,marginRight:9}},n), t);
@@ -997,7 +1069,7 @@ class Component extends DCLogic {
     parts.push(br('b2'),[L.locality||'Surrey',L.region||'British Columbia',(L.country||'CA')==='CA'?'Canada':L.country].join(', '));
     if(c.phone) parts.push(br('b3'),'Phone: ',h('a',{key:'tel',href:'tel:'+String(c.phone).replace(/[^\d+]/g,''),className:'aok-footlink'},c.phone));
     if(c.email) parts.push(br('b4'),'Email: ',h('a',{key:'em',href:'mailto:'+c.email,className:'aok-footlink'},c.email));
-    const areas=(L.areasServed||[]).filter(Boolean); if(areas.length) parts.push(br('b5'),'Serving: '+areas.join(', ')+(L.onlineWorldwide!==false?' \u00b7 Worldwide online ('+(L.onlineChannels||['Zoom','WhatsApp']).filter(Boolean).join(' & ')+')':''));
+    const areas=(L.areasServed||[]).filter(Boolean), near=(L.nearbyCities||[]).filter(Boolean); if(areas.length) parts.push(br('b5'),'Serving: '+areas.join(', ')+(near.length?' \u00b7 including '+this.joinList(near):'')+(L.onlineWorldwide!==false?' \u00b7 Worldwide online ('+(L.onlineChannels||['Zoom','WhatsApp']).filter(Boolean).join(' & ')+')':''));
     const days=[['Mo','Mon'],['Tu','Tue'],['We','Wed'],['Th','Thu'],['Fr','Fri'],['Sa','Sat'],['Su','Sun']].filter(x=>L.hours&&L.hours[x[0]]&&L.hours[x[0]].o&&L.hours[x[0]].c).map(x=>x[1]+' '+L.hours[x[0]].o+'\u2013'+L.hours[x[0]].c);
     if(days.length) parts.push(br('b6'),'Hours: '+days.join(' \u00b7 '));
     return h('address',{style:{fontStyle:'normal',font:'400 13.5px/1.75 Plus Jakarta Sans',color:P.ink,marginTop:18,maxWidth:360}},...parts); }
@@ -1099,6 +1171,21 @@ class Component extends DCLogic {
   socAdd(){ this.pushHist(); const arr=[...((this.state.data.socials)||[]),{net:'facebook',url:''}]; this.save(this.setIn(this.state.data,'socials',arr)); }
   socDel(i){ this.pushHist(); const arr=((this.state.data.socials)||[]).slice(); arr.splice(i,1); this.save(this.setIn(this.state.data,'socials',arr)); }
   // answer-engine hint: 40–60 word answers are the sweet spot for featured snippets and AI answers
+  // The 7 FAQ answers that were shorter than the 40–60 words AI answer engines prefer, as first shipped.
+  // Admin → SEO Health offers to swap each one for its expanded default — only if it is still word-for-word unchanged.
+  faqShortOriginals(){ return {
+    'What information do I need for a birth chart reading?':'To generate an accurate birth chart, I need your date of birth, the exact time of birth (down to the minute, if possible), and the city and country where you were born.',
+    'What is a \u201cRising Sign\u201d or Ascendant?':'Your Rising sign is the zodiac constellation that was rising on the eastern horizon at the exact moment you were born. It represents your outward personality, your physical appearance, and how the world initially perceives you.',
+    'Are my personal data and consultation private?':'Absolutely. At Analysis of Karma, I follow strict privacy and confidentiality rules to protect your personal details. All consultations are 100% confidential and are never shared or discussed with anyone else.',
+    'Do you offer refunds if I am not satisfied with a live reading?':'I offer a satisfaction guarantee for new clients. If you are not satisfied with your reading or feel the service was not a good fit, you can speak with me directly to discuss a refund.',
+    'How does astrology determine relationship compatibility?':'Astrologers use a technique called \u201cSynastry,\u201d which involves overlaying two people\u2019s birth charts to see how their planets interact. This highlights areas of harmony, potential friction, communication styles, and the long-term viability of the partnership.',
+    'What is a Moon sign and why does it matter?':'While your Sun sign represents your core identity and ego, your Moon sign dictates your emotional inner world. It governs your subconscious reactions, your instincts, and what you need to feel safe, nurtured, and secure.',
+    'Can astrology predict health issues?':'Medical astrology can point out physical sensitivities or periods of low vitality based on planetary alignments. However, I am not a medical professional. Astrology should never replace professional medical diagnosis, advice, or treatment.'
+  }; }
+  faqUpgradable(){ const orig=this.faqShortOriginals(), d=this.state.data, def={}; (this.defaults().faqPage.items||[]).forEach(it=>{ def[it.q]=it.a; });
+    return (((d.faqPage||{}).items)||[]).map((it,i)=>({i,q:it.q,a:def[it.q]})).filter(x=>orig[x.q]!==undefined&&this.txt(d.faqPage.items[x.i].a).trim()===this.txt(orig[x.q]).trim()&&x.a); }
+  upgradeFaq(){ const list=this.faqUpgradable(); if(!list.length) return; const items=this.state.data.faqPage.items.map((it,i)=>{ const u=list.find(x=>x.i===i); return u?{...it,a:u.a}:it; });
+    this.commit('faqPage.items',items); this.flash('\u2713 '+list.length+' FAQ answers expanded \u2014 click Save changes to publish'); }
   wordCount(html){ return this.txt(html).split(/\s+/).filter(Boolean).length; }
   answerHint(a){ const n=this.wordCount(a), ok=n>=40&&n<=60, near=n>=30&&n<=80; return React.createElement('div',{contentEditable:false,style:{display:'inline-block',margin:'0 0 8px',padding:'3px 10px',borderRadius:999,font:'600 11.5px '+this.HEAD,background:ok?'#e4f3e8':near?'#fbf1dc':'#fbe9e3',color:ok?this.P.ok:near?'#8A6A2E':this.P.bad}}, n+' words \u00b7 '+(ok?'ideal answer length':'aim for 40\u201360 words')); }
   faqAdd(){ this.pushHist(); const items=[...((this.state.data.faqPage&&this.state.data.faqPage.items)||[]),{q:'New question?',a:'Type the answer here.'}]; this.save(this.setIn(this.state.data,'faqPage.items',items)); if(this._faqOpen) this._faqOpen[items.length-1]=true; this.flash('FAQ added — edit the question and answer'); }
@@ -1830,6 +1917,8 @@ class Component extends DCLogic {
             sab?null:h('div',null, this.inp('local.streetAddress',{label:'Street address',hint:'shown publicly'}), this.inp('local.postalCode',{label:'Postal code'})),
             h('div',{style:{display:'grid',gridTemplateColumns:'1fr 1fr',gap:12}}, this.inp('local.locality',{label:'City'}), this.inp('local.region',{label:'Province / region'}), this.inp('local.regionCode',{label:'Region code',hint:'e.g. BC'}), this.inp('local.country',{label:'Country code',hint:'e.g. CA'}), this.inp('local.lat',{label:'Latitude',hint:'city centre is fine'}), this.inp('local.lng',{label:'Longitude'})),
             this.listInp('local.areasServed',{label:'Areas served',hint:'one per line, most local first'}),
+            this.inp('local.nearbyLabel',{label:'Nearby region name',hint:'heading for the cities below'}),
+            this.listInp('local.nearbyCities',{label:'Nearby cities you serve',hint:'shown in “Service Areas & Online Consultations” and the footer'}),
             this.chk('local.onlineWorldwide','Also serve clients worldwide online',{def:true}),
             this.listInp('local.onlineChannels',{label:'Online channels',rows:2}),
             this.chk('local.locationInTitles','Add “· '+(loc||'your city')+'” to page titles in Google',{def:true,mb:0,hint:'Only the search-result titles change (blog posts are left as written); the text on your pages stays exactly the same.'}))),
@@ -1875,6 +1964,7 @@ class Component extends DCLogic {
         h('div',{style:{display:'grid',gap:20}},
           this.card(h('div',null, this.cardTitle('Training & credentials'),
             this.inp('person.mentor',{label:'Mentor / guru'}),
+            this.inp('person.traditions',{label:'Classical traditions',hint:'shown on the credential card, e.g. Parashari and Nadi astrology'}),
             this.listInp('person.studies',{label:'Formal studies'}),
             this.listInp('person.classicalTexts',{label:'Classical texts researched',mb:0}))),
           this.card(h('div',null, this.cardTitle('Areas of expertise','Topics you are an authority on (schema.org “knowsAbout”).'),
@@ -1972,6 +2062,10 @@ class Component extends DCLogic {
         h('div',{style:{width:84,height:84,borderRadius:'50%',background:'conic-gradient('+(score>=80?P.ok:score>=55?P.gold:P.bad)+' '+(score*3.6)+'deg,'+P.bgAlt+' 0)',display:'flex',alignItems:'center',justifyContent:'center'}}, h('div',{style:{width:66,height:66,borderRadius:'50%',background:P.card,display:'flex',alignItems:'center',justifyContent:'center',font:'800 22px '+this.HEAD,color:P.maroon}},x.loading?'…':score)),
         h('div',{style:{flex:1,minWidth:220}}, h('div',{style:{font:'700 17px '+this.HEAD,color:P.maroon}},'Health score'), h('div',{style:{font:'400 13.5px Plus Jakarta Sans',color:P.muted,marginTop:4}},counts.fail+' to fix · '+counts.warn+' to improve · '+counts.ok+' passing'), x.status&&x.status!==200&&!x.loading?h('div',{style:{font:'500 13px Plus Jakarta Sans',color:P.bad,marginTop:6}},'The server check could not run (HTTP '+x.status+'). Upload api/seo-health.php and log in again.'):null),
         this.btn('↻ Run again',rerun,{variant:'solid',pad:'10px 18px',style:{fontSize:13.5}})),{marginBottom:20}),
+      (()=>{ const up=this.faqUpgradable(); if(!up.length) return null;
+        return this.card(h('div',null, this.cardTitle('✨ '+up.length+' FAQ answers can be expanded for AI answers','These answers are still exactly as first shipped and are shorter than the 40–60 words answer engines quote most. The expanded versions keep the same wording and policies, with one or two sentences added. Answers you have edited are never touched.'),
+          h('ul',{style:{margin:'0 0 14px',paddingLeft:20,font:'400 13.5px/1.7 Plus Jakarta Sans',color:P.ink}}, ...up.map(x=>h('li',{key:x.i},this.txt(x.q)+' → '+this.wordCount(x.a)+' words'))),
+          this.btn('Use the expanded answers',()=>this.upgradeFaq(),{variant:'solid',pad:'10px 18px',style:{fontSize:13.5}})),{marginBottom:20,borderColor:P.gold}); })(),
       ...groups.map(g=>this.card(h('div',null, h('div',{style:{font:'700 15px '+this.HEAD,color:P.maroon,marginBottom:10}},g),
         ...checks.filter(c=>c.group===g).map((c,i)=>h('div',{key:i,style:{display:'flex',gap:12,alignItems:'flex-start',padding:'9px 0',borderTop:i?'1px solid '+P.line:'none'}},
           h('span',{style:{width:22,height:22,borderRadius:'50%',flexShrink:0,background:col[c.status],color:'#fff',display:'flex',alignItems:'center',justifyContent:'center',font:'700 12px '+this.HEAD,marginTop:1}},ico[c.status]),
