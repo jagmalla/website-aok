@@ -293,22 +293,52 @@ class Component extends DCLogic {
   ]; }
   componentDidUpdate(){ this.syncHead(); this.syncUrl(); if(this.state.authed&&!this._smChecked) this._sitemapAutoCheck(); }
   updateSitemap(silent){ const finish=(j)=>{ try{ localStorage.setItem('aok_sitemap_at', String(Date.now())); }catch(e){} this._sitemapInfo=j||null; this.forceUpdate(); if(!silent) this.flash((j&&j.ok)?('✓ Sitemap updated — '+j.total+' URLs ('+j.posts+' blog posts)'):'⚠ Could not update sitemap'); };
-    try{ fetch('/api/sitemap.php?action=write',{method:'POST',headers:{'Content-Type':'application/json'}}).then(r=>r.json().catch(()=>null)).then(finish).catch(()=>{ if(!silent) this.flash('⚠ Could not reach the server to update the sitemap'); }); }catch(e){ if(!silent) this.flash('⚠ Could not update sitemap'); } }
+    try{ fetch('/api/sitemap.php?action=write',{method:'POST',headers:this.apiHeaders()}).then(r=>r.json().catch(()=>null)).then(finish).catch(()=>{ if(!silent) this.flash('⚠ Could not reach the server to update the sitemap'); }); }catch(e){ if(!silent) this.flash('⚠ Could not update sitemap'); } }
   _sitemapAutoCheck(){ this._smChecked=true; const freq=(this.state.data&&this.state.data.sitemapAuto)||'off'; if(freq==='off') return; let last=0; try{ last=parseInt(localStorage.getItem('aok_sitemap_at')||'0',10); }catch(e){} const ms={daily:864e5,weekly:6048e5,monthly:2592e6}[freq]; if(!ms) return; if(Date.now()-last>=ms) this.updateSitemap(true); }
   syncUrl(){ try{ const r=this.state.route; if(r==='admin'){ if((location.hash||'').toLowerCase()!=='#admin') history.replaceState(null,'','#admin'); return; }
-      let path='/'; if(r==='blog'&&this.state.postId){ const post=(this.state.data.blog||[]).find(x=>x.id===this.state.postId); path=(post&&post.slug)?('/blog/'+encodeURIComponent(post.slug)):'/blog'; }
-      else if(r==='page'&&this.state.pageId){ const pg=(this.state.data.pages||[]).find(x=>x.id===this.state.pageId); path=(pg&&pg.slug)?('/'+encodeURIComponent(pg.slug)):'/'; }
-      else if(r!=='home'){ path='/'+r; }
+      if(r==='notfound') return;   // keep the address the visitor typed
+      const path=this.routePath();
       if(location.pathname!==path || location.hash){ history.replaceState(null,'',path); } }catch(e){} }
   _routeFromUrl(data){ try{ const hash=(location.hash||'').toLowerCase(); if(hash==='#admin'||hash==='#/admin') return {route:'admin',postId:null,pageId:null};
       const parts=(location.pathname||'/').replace(/^\/+|\/+$/g,'').split('/').filter(Boolean);
       if(!parts.length) return {route:'home',postId:null,pageId:null};
       if(parts[0]==='admin') return {route:'admin',postId:null,pageId:null};
-      if(parts[0]==='blog'&&parts[1]){ const slug=decodeURIComponent(parts[1]); const post=((data&&data.blog)||[]).find(x=>x.slug===slug); return {route:'blog',postId:post?post.id:null,pageId:null}; }
-      const known=['about','services','meditation','blog','contact']; if(known.indexOf(parts[0])>-1) return {route:parts[0],postId:null,pageId:null};
-      const pg=((data&&data.pages)||[]).find(p=>p.slug===decodeURIComponent(parts[0])); if(pg) return {route:'page',pageId:pg.id,postId:null};
-      return {route:'home',postId:null,pageId:null}; }catch(e){ return null; } }
-  checkUrl(){ const r=this._routeFromUrl(this.state.data); if(!r) return; if(r.route!==this.state.route||r.postId!==this.state.postId||r.pageId!==this.state.pageId) this.setState(r); }
+      const none={route:'notfound',postId:null,pageId:null,serviceId:null};
+      if(parts[0]==='blog'&&parts[1]){ const slug=decodeURIComponent(parts[1]); const post=((data&&data.blog)||[]).find(x=>x.slug===slug&&(x.published||this.state.editMode)); return post?{route:'blog',postId:post.id,pageId:null,serviceId:null}:none; }
+      if(parts[0]==='services'&&parts[1]){ const sv=(data&&data.services)||[]; const slugs=this.serviceSlugs(sv); const s=sv.find(x=>slugs[x.id]===decodeURIComponent(parts[1]).toLowerCase()); return s?{route:'service',serviceId:s.id,postId:null,pageId:null}:none; }
+      const known=['about','services','meditation','blog','contact','faq']; if(parts.length===1&&known.indexOf(parts[0])>-1) return {route:parts[0],postId:null,pageId:null,serviceId:null};
+      const pg=((data&&data.pages)||[]).find(p=>p.slug===decodeURIComponent(parts[0])); if(pg&&parts.length===1) return {route:'page',pageId:pg.id,postId:null,serviceId:null};
+      return none; }catch(e){ return null; } }
+  // path of the current route (mirrors aok_resolve in api/seo-lib.php)
+  routePath(st){ st=st||this.state; const d=this.state.data||{}; const r=st.route;
+    if(r==='home') return '/';
+    if(r==='blog'&&st.postId){ const p=(d.blog||[]).find(x=>x.id===st.postId); return p&&p.slug?'/blog/'+encodeURIComponent(p.slug):'/blog'; }
+    if(r==='service'){ const slugs=this.serviceSlugs(d.services||[]); return slugs[st.serviceId]?'/services/'+slugs[st.serviceId]:'/services'; }
+    if(r==='page'){ const pg=(d.pages||[]).find(x=>x.id===st.pageId); return pg&&pg.slug?'/'+encodeURIComponent(pg.slug):'/'; }
+    if(r==='notfound') return location.pathname;
+    return '/'+r; }
+  // id -> URL slug for each service (custom slug, else from the title; duplicates get -2, -3 …) — same rules as aok_service_slugs()
+  serviceSlugify(s){ return String(s||'').replace(/&/g,' and ').toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-+|-+$/g,''); }
+  serviceSlugs(services){ const out={},used={}; (services||[]).forEach(s=>{ let base=this.serviceSlugify((s.slug||'')!==''?s.slug:(s.title||'service'))||'service'; let slug=base,n=2; while(used[slug]) slug=base+'-'+(n++); used[slug]=1; out[s.id]=slug; }); return out; }
+  serviceHref(s){ return '/services/'+(this.serviceSlugs(this.state.data.services||[])[s.id]||this.serviceSlugify(s.title)); }
+  // a real link (crawlable, opens in a new tab with ctrl/cmd-click) that navigates inside the app on a normal click
+  linkTo(href,fn,extra){ return {href,onClick:e=>{ if(e.metaKey||e.ctrlKey||e.shiftKey||e.altKey||e.button===1) return; e.preventDefault(); fn(); },...(extra||{})}; }
+  routeHref(route){ return route==='home'?'/':'/'+route; }
+  checkUrl(){ const r=this._routeFromUrl(this.state.data); if(!r) return; if(r.route==='admin') this.checkAuth(); if(r.route!==this.state.route||r.postId!==this.state.postId||r.pageId!==this.state.pageId||(r.serviceId||null)!==(this.state.serviceId||null)) this.setState(r); }
+
+  // ---------- admin session (server-side login, api/auth.php) ----------
+  apiHeaders(){ return {'Content-Type':'application/json','X-AOK-CSRF':this._csrf||''}; }
+  login(){ const pw=this.state.pass||''; if(!pw){ this.flash('Enter your password'); return; }
+    fetch('/api/auth.php',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({action:'login',password:pw})})
+      .then(r=>r.json().catch(()=>({ok:false,error:'server'})))
+      .then(j=>{ if(j&&j.ok){ this._csrf=j.csrf; this._defaultPw=!!j.defaultPassword; this.setState({authed:true,pass:''}); this._loadFromServer(); }
+        else this.flash(j&&j.error==='locked'?'Too many attempts \u2014 please wait '+(j.minutes||15)+' minutes and try again.':j&&j.error==='wrong_password'?'Incorrect password':'\u26a0 Could not reach the login service (api/auth.php).'); })
+      .catch(()=>this.flash('\u26a0 Could not reach the server. Check your connection and try again.')); }
+  checkAuth(){ if(this._authChecked) return; this._authChecked=true;
+    fetch('/api/auth.php?action=status',{headers:{'Accept':'application/json'}}).then(r=>r.json()).then(j=>{ if(j&&j.authed){ this._csrf=j.csrf; if(!this.state.authed){ this.setState({authed:true}); this._loadFromServer(); } } }).catch(()=>{}); }
+  logout(){ fetch('/api/auth.php',{method:'POST',headers:this.apiHeaders(),body:JSON.stringify({action:'logout'})}).catch(()=>{}); this._csrf=null; this._authChecked=false; this.setState({authed:false,editMode:false,route:'home'}); }
+  changePassword(){ const f=this._pw||{}; if((f.next||'').length<8){ this.flash('The new password needs at least 8 characters'); return; } if(f.next!==f.confirm){ this.flash('The two new passwords do not match'); return; }
+    fetch('/api/auth.php',{method:'POST',headers:this.apiHeaders(),body:JSON.stringify({action:'change',current:f.current||'',next:f.next})}).then(r=>r.json()).then(j=>{ if(j&&j.ok){ this._pw={}; this._defaultPw=false; this.flash('\u2713 Password changed'); this.forceUpdate(); } else this.flash(j&&j.error==='wrong_password'?'Your current password is incorrect':'\u26a0 Could not change the password'); }).catch(()=>this.flash('\u26a0 Could not reach the server')); }
 
   // ---------- persistence ----------
   _loadFromServer(){ // server is the authoritative store (cross-device); localStorage is a fast cache
@@ -324,22 +354,29 @@ class Component extends DCLogic {
   _serverSave(){ // only the logged-in admin may write site content to the server; visitors never do
     if(!this.state.authed && !this.state.editMode) return;
     clearTimeout(this._srvTimer);
-    this._srvTimer=setTimeout(()=>{ try{ fetch('/api/data.php',{ method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify(this.state.data) }).catch(()=>{}); }catch(e){} },800); }
+    this._srvTimer=setTimeout(()=>{ try{ fetch('/api/data.php',{ method:'POST', headers:this.apiHeaders(), body:JSON.stringify(this.state.data) }).catch(()=>{}); }catch(e){} },800); }
   saveNow(){ try{ localStorage.setItem('aok_site_v1', JSON.stringify(this.state.data)); }catch(e){}
     clearTimeout(this._srvTimer); // we are saving right now, so cancel any pending auto-save
     this.flash('Saving\u2026'); const body=JSON.stringify(this.state.data);
     try{
-      fetch('/api/data.php',{ method:'POST', headers:{'Content-Type':'application/json'}, body })
+      fetch('/api/data.php',{ method:'POST', headers:this.apiHeaders(), body })
         .then(r=>r.json().catch(()=>null))
-        .then(j=>{ if(j&&j.ok){ this.flash('\u2713 Saved \u2014 your changes are now live'); } else { this.flash('\u26a0 Save failed: '+((j&&j.error)?j.error:'database error')+' \u2014 open /api/health.php to diagnose'); } })
+        .then(j=>{ if(j&&(j.error==='not_logged_in'||j.error==='bad_csrf')){ this.setState({authed:false,editMode:false,route:'admin'}); this.flash('\u26a0 Your admin session has ended \u2014 please log in again, then click Save.'); return; } if(j&&j.ok){ this.flash('\u2713 Saved \u2014 your changes are now live'); this._indexNowAuto(); } else { this.flash('\u26a0 Save failed: '+((j&&j.error)?j.error:'database error')+' \u2014 open /api/health.php to diagnose'); } })
         .catch(()=>{ this.flash('\u26a0 Couldn\u2019t reach the server. Check your connection and click Save again.'); });
     }catch(e){ this.flash('\u26a0 Could not save to the server.'); } }
+  // IndexNow: tell Bing & co. (and the AI search built on them) that pages changed. Auto mode pings at most once an hour.
+  _indexNowAuto(){ const ai=(this.state.data&&this.state.data.ai)||{}; if(ai.indexNowAuto===false) return; let last=0; try{ last=parseInt(localStorage.getItem('aok_indexnow_at')||'0',10); }catch(e){} if(Date.now()-last<36e5) return; this.indexNow(true); }
+  indexNow(silent){ try{ localStorage.setItem('aok_indexnow_at', String(Date.now())); }catch(e){}
+    fetch('/api/indexnow.php',{ method:'POST', headers:this.apiHeaders(), body:'{}' }).then(r=>r.json().catch(()=>null)).then(j=>{ this._indexNowInfo=Object.assign({at:new Date().toISOString()},j||{ok:false});
+      if(j&&j.key&&this.getIn(this.state.data,'ai.indexNowKey')!==j.key) this.save(this.setIn(this.state.data,'ai.indexNowKey',j.key));
+      this.forceUpdate(); if(!silent) this.flash(j&&j.skipped?'\u2139 IndexNow is only sent from the live domain (key is ready)':(j&&j.ok)?('\u2713 IndexNow: '+j.count+' URLs submitted'):('\u26a0 IndexNow failed'+(j&&j.status?' (HTTP '+j.status+')':''))); })
+      .catch(()=>{ if(!silent) this.flash('\u26a0 Could not reach the server for IndexNow'); }); }
   sendTestEmail(){ if(this._emailTesting) return; const to=(this.getIn(this.state.data,'contact.email')||'').trim();
     if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(to)){ this._emailTestOk=false; this._emailTestMsg='Please enter a valid recipient email address first.'; this.forceUpdate(); return; }
     this._emailTesting=true; this._emailTestMsg=null; this.forceUpdate();
     const done=(ok,msg)=>{ this._emailTesting=false; this._emailTestOk=ok; this._emailTestMsg=msg; this.forceUpdate(); };
     try{
-      fetch('/api/test-email.php',{ method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({to}) })
+      fetch('/api/test-email.php',{ method:'POST', headers:this.apiHeaders(), body:JSON.stringify({to}) })
         .then(r=>r.json())
         .then(j=>{ if(j&&j.ok&&j.sent) done(true,'\u2713 Test email sent to '+j.to+'. Check your inbox (and spam folder) in a minute.'); else if(j&&j.ok&&!j.sent) done(false,'\u26a0 The server accepted the request but mail() failed to send. Your host may need email enabled, or try a From address on your own domain.'); else done(false,'\u26a0 Could not send test email'+(j&&j.error?' ('+j.error+')':'')+'.'); })
         .catch(()=>done(false,'\u26a0 Network error \u2014 test email only works on your live server, not in a local preview.'));
@@ -348,7 +385,7 @@ class Component extends DCLogic {
   scaleImage(file,cb,max,fmt){ max=max||1280; const rd=new FileReader(); rd.onload=()=>{ const img=new Image(); img.onload=()=>{ let w=img.width,hh=img.height; if(w>max||hh>max){ if(w>=hh){ hh=Math.round(hh*max/w); w=max; } else { w=Math.round(w*max/hh); hh=max; } } try{ const c=document.createElement('canvas'); c.width=w; c.height=hh; const cx=c.getContext('2d'); if(fmt!=='image/png'){ cx.fillStyle='#fff'; cx.fillRect(0,0,w,hh); } cx.drawImage(img,0,0,w,hh); this.uploadImage(c.toDataURL(fmt||'image/jpeg',0.82),cb); }catch(e){ cb(rd.result); } }; img.onerror=()=>cb(rd.result); img.src=rd.result; }; rd.readAsDataURL(file); }
   uploadImage(dataUrl,cb){ // POST scaled image to server, fall back to inline data URL on failure
     try{
-      fetch('/api/upload.php',{ method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({data:dataUrl}) })
+      fetch('/api/upload.php',{ method:'POST', headers:this.apiHeaders(), body:JSON.stringify({data:dataUrl}) })
         .then(r=>r.json())
         .then(j=>{ if(j&&j.ok&&j.url) cb(j.url); else cb(dataUrl); })
         .catch(()=>cb(dataUrl));
@@ -383,7 +420,7 @@ class Component extends DCLogic {
   flash(msg){ this.setState({toast:msg}); clearTimeout(this._tt); this._tt=setTimeout(()=>this.setState({toast:null}),2200); }
   uid(){ return 'x'+Math.random().toString(36).slice(2,9); }
 
-  go(route, extra){ this.setState({route, menuOpen:false, postId:null, ...(extra||{})}); window.scrollTo&&window.scrollTo(0,0); }
+  go(route, extra){ this.setState({route, menuOpen:false, postId:null, serviceId:null, ...(extra||{})}); window.scrollTo&&window.scrollTo(0,0); }
 
   // ---------- defaults ----------
   defaults(){
@@ -395,7 +432,29 @@ class Component extends DCLogic {
         gmb:'https://share.google/r37d5nGpSJCeEXhvt', facebook:'' },
       siteUrl:'https://www.analysisofkarma.com',
       sitemapAuto:'off',
-      adminPass:'admin123',
+      // Local SEO / Google Business Profile — a service-area business (no street address shown)
+      local:{ businessName:'Analysis of Karma', legalName:'', businessType:'ProfessionalService',
+        gbpPrimaryCategory:'Astrologer', gbpAdditionalCategories:['Psychic','Spiritual consultant'],
+        serviceAreaBusiness:true, streetAddress:'', locality:'Surrey', region:'British Columbia', regionCode:'BC', postalCode:'', country:'CA',
+        lat:'49.1913', lng:'-122.8490', areasServed:['Surrey, BC','Greater Vancouver','British Columbia','Canada'],
+        onlineWorldwide:true, onlineChannels:['Zoom','WhatsApp'],
+        hours:{Mo:{o:'',c:''},Tu:{o:'',c:''},We:{o:'',c:''},Th:{o:'',c:''},Fr:{o:'',c:''},Sa:{o:'',c:''},Su:{o:'',c:''}},
+        mapsCidUrl:'', reviewUrl:'', priceRange:'$100 CAD per hour', currency:'CAD', languages:['English','Hindi'],
+        paymentPolicy:'Satisfaction-based payment: new clients do not pay if they are not satisfied with their consultation.',
+        directories:[], locationInTitles:true },
+      // Practitioner (E-E-A-T) — used in structured data and llms.txt
+      person:{ name:'Jag Mallah', jobTitle:'Independent Vedic Astrologer', additionalRoles:['Meditation Guide'],
+        shortBio:'Jag Mallah is an independent Vedic astrologer and professional meditation guide based in Surrey, British Columbia, consulting worldwide over Zoom and WhatsApp in English and Hindi. He completed formal studies in Advanced Astrology, Tajika (Varshaphala and Prashna Shastra), Muhurta and Medical Astrology under his mentor Sh. Sharawan Jha, and researches the classical texts Brihat Parashara Hora Shastra, Phaladeepika, Tajika Neelakanthi, Bhrigu Nandi Nadi, Jaimini Sutras and Swarodaya Shastra.',
+        mentor:'Sh. Sharawan Jha',
+        studies:['Advanced Astrology','Tajika (Varshaphala and Prashna Shastra)','Muhurta','Medical Astrology'],
+        classicalTexts:['Brihat Parashara Hora Shastra','Phaladeepika','Tajika Neelakanthi','Bhrigu Nandi Nadi','Jaimini Sutras','Swarodaya Shastra'],
+        knowsAbout:['Vedic astrology','Jyotish','Kundli (birth chart) reading','Kundli Milan (marriage matching)','Dasha and transit analysis','Mangal Dosha and other doshas','Muhurta (auspicious timing)','Tajika / Varshaphala (annual charts)','Prashna Shastra (horary astrology)','Medical astrology','Gemstone recommendation','Meditation','Pranayama (breathwork)','Mantra practice'],
+        sameAs:[], image:'' },
+      // AI & GEO control centre
+      ai:{ bots:{'GPTBot':true,'OAI-SearchBot':true,'ChatGPT-User':true,'ClaudeBot':true,'Claude-SearchBot':true,'Claude-User':true,'PerplexityBot':true,'Perplexity-User':true,'Google-Extended':true,'Applebot-Extended':true,'Amazonbot':true,'meta-externalagent':true,'CCBot':true,'Bytespider':true},
+        llmsOverride:'', llmsFullOverride:'', indexNowKey:'', indexNowAuto:true },
+      // admin-managed 301 redirects (used when merging duplicate services or posts): [{from:'/old', to:'/new'}]
+      redirects:[],
       nav:{ items:[
         {id:this.uid(),label:'Home',type:'route',value:'home'},
         {id:this.uid(),label:'About Us',type:'route',value:'about'},
@@ -571,10 +630,30 @@ class Component extends DCLogic {
   ]; }
 
   // ---------- head sync ----------
-  setMeta(name, content){ let m=document.head.querySelector('meta[name="'+name+'"][data-aok]'); if(!m){ m=document.createElement('meta'); m.setAttribute('name',name); m.setAttribute('data-aok','1'); document.head.appendChild(m);} m.setAttribute('content',content||''); }
-  syncHead(){ const d=this.state.data; if(!d) return; const r=this.state.route; let seo=(d.seo&&d.seo[r])||{};
-    if(r==='blog'&&this.state.postId){ const post=(d.blog||[]).find(x=>x.id===this.state.postId); if(post){ const strip=x=>String(x||'').replace(/<[^>]+>/g,''); seo={ title:(post.title?strip(post.title)+' | '+d.brand.name:seo.title), metaDescription:strip(post.excerpt||seo.metaDescription||''), robots:post.robots||'index, follow' }; } }
-    try{ document.title=seo.title||d.brand.name; this.setMeta('description',seo.metaDescription||''); this.setMeta('robots',seo.robots||'index, follow'); let s=document.getElementById('aok-schema'); if(!s){ s=document.createElement('script'); s.type='application/ld+json'; s.id='aok-schema'; document.head.appendChild(s);} s.textContent=d.schema||''; let fq=document.getElementById('aok-faq-schema'); if((r==='about'||r==='contact')&&d.faqPage&&d.faqPage.items){ if(!fq){ fq=document.createElement('script'); fq.type='application/ld+json'; fq.id='aok-faq-schema'; document.head.appendChild(fq);} const strip=x=>String(x||'').replace(/<[^>]+>/g,''); fq.textContent=JSON.stringify({"@context":"https://schema.org","@type":"FAQPage",mainEntity:d.faqPage.items.map(it=>({"@type":"Question",name:strip(it.q),acceptedAnswer:{"@type":"Answer",text:strip(it.a)}}))}); } else if(fq){ fq.remove(); } }catch(e){} }
+  setMeta(name, content, attr){ attr=attr||'name'; let m=document.head.querySelector('meta['+attr+'="'+name+'"]'); if(!m){ m=document.createElement('meta'); m.setAttribute(attr,name); document.head.appendChild(m);} m.setAttribute('data-aok','1'); m.setAttribute('content',content||''); }
+  setCanonical(href){ let l=document.head.querySelector('link[rel="canonical"]'); if(!href){ if(l) l.remove(); return; } if(!l){ l=document.createElement('link'); l.setAttribute('rel','canonical'); document.head.appendChild(l); } l.setAttribute('href',href); }
+  txt(s){ const e=document.createElement('div'); e.innerHTML=String(s||''); return (e.textContent||'').replace(/\s+/g,' ').trim(); }
+  cut(s,max){ s=String(s||'').replace(/\s+/g,' ').trim(); if(s.length<=max) return s; s=s.slice(0,max-1); const p=s.lastIndexOf(' '); return (p>max*.6?s.slice(0,p):s).replace(/[ ,;:\u2014-]+$/,'')+'\u2026'; }
+  brandName(){ const d=this.state.data; return (d.local&&d.local.businessName)||d.brand.name; }
+  // "· Surrey, BC" before the "| Brand" part, unless the title already names the city (same as aok_with_location)
+  withLocation(title){ const L=this.state.data.local||{}; if(L.locationInTitles===false||!L.locality||!title) return title; if(title.toLowerCase().indexOf(String(L.locality).toLowerCase())>-1) return title; const label=L.locality+(L.regionCode?', '+L.regionCode:''); const i=title.indexOf(' | '); return i<0?title+' \u00b7 '+label:title.slice(0,i)+' \u00b7 '+label+title.slice(i); }
+  headMeta(){ const d=this.state.data, r=this.state.route, brand=this.brandName(); const base=String(d.siteUrl||'https://www.analysisofkarma.com').replace(/\/$/,'').replace(/^http:/,'https:');
+    const m={title:brand,description:(d.seo.home&&d.seo.home.metaDescription)||'',robots:'index, follow',canonical:base+this.routePath()};
+    if(['home','about','services','meditation','blog','contact','faq'].indexOf(r)>-1&&!(r==='blog'&&this.state.postId)){ const sc=d.seo[r]||{}; m.title=sc.title||brand; if(r!=='blog') m.title=this.withLocation(m.title); if(sc.metaDescription) m.description=sc.metaDescription; m.robots=sc.robots||'index, follow'; if(r==='faq'&&!sc.title) m.title=this.txt(d.faqPage.hero.title)+' | '+brand; }
+    else if(r==='service'){ const s=(d.services||[]).find(x=>x.id===this.state.serviceId)||{}; m.title=(s.seoTitle||'').trim()||this.withLocation(this.txt(s.title)+' | '+brand); m.description=(s.seoDescription||'').trim()||this.cut(this.txt(s.desc),158); if(s.canonical) m.canonical=/^https?:/.test(s.canonical)?s.canonical:base+'/'+String(s.canonical).replace(/^\//,''); if(s.noindex) m.robots='noindex, follow'; }
+    else if(r==='blog'&&this.state.postId){ const p=(d.blog||[]).find(x=>x.id===this.state.postId)||{}; m.title=this.txt(p.title)+' | '+brand; m.description=this.cut(this.txt(p.excerpt),158); m.robots=p.robots||'index, follow'; if(p.canonical) m.canonical=/^https?:/.test(p.canonical)?p.canonical:base+'/'+String(p.canonical).replace(/^\//,''); }
+    else if(r==='page'){ const pg=(d.pages||[]).find(x=>x.id===this.state.pageId)||{}; m.title=this.txt(pg.title)+' | '+brand; }
+    else if(r==='admin'){ m.title='Admin | '+brand; m.robots='noindex, nofollow'; m.canonical=''; }
+    else if(r==='notfound'){ m.title='Page not found | '+brand; m.robots='noindex, follow'; m.canonical=''; }
+    return m; }
+  syncHead(){ const d=this.state.data; if(!d) return; const m=this.headMeta();
+    try{ document.title=m.title; this.setMeta('description',m.description); this.setMeta('robots',m.robots); this.setCanonical(m.canonical);
+      this.setMeta('og:title',m.title,'property'); this.setMeta('og:description',m.description,'property'); if(m.canonical) this.setMeta('og:url',m.canonical,'property'); this.setMeta('twitter:title',m.title); this.setMeta('twitter:description',m.description);
+      // the server (render.php) supplies the full structured-data graph; without it, fall back to the basic markup
+      if(document.getElementById('aok-graph')) return;
+      let s=document.getElementById('aok-schema'); if(!s){ s=document.createElement('script'); s.type='application/ld+json'; s.id='aok-schema'; document.head.appendChild(s);} s.textContent=d.schema||'';
+      let fq=document.getElementById('aok-faq-schema'); const r=this.state.route;
+      if(r==='faq'&&d.faqPage&&d.faqPage.items){ if(!fq){ fq=document.createElement('script'); fq.type='application/ld+json'; fq.id='aok-faq-schema'; document.head.appendChild(fq);} fq.textContent=JSON.stringify({"@context":"https://schema.org","@type":"FAQPage",mainEntity:d.faqPage.items.map(it=>({"@type":"Question",name:this.txt(it.q),acceptedAnswer:{"@type":"Answer",text:this.txt(it.a)}}))}); } else if(fq){ fq.remove(); } }catch(e){} }
 
   // ---------- editable components ----------
   makeComp(){
@@ -664,7 +743,7 @@ class Component extends DCLogic {
       ghost:{background:'rgba(255,255,255,.35)',color:P.maroon,border:'1px solid #C5A869'},
       dark:{background:P.maroon,color:P.cream,boxShadow:'0 10px 24px -10px rgba(20,21,23,.5)'} }; }
   // editable button (text / size / colour / link / target) used for the hero CTAs
-  btnGo(c){ const link=(c&&c.link)||'contact'; if(/^https?:\/\//i.test(link)||/^mailto:|^tel:/i.test(link)){ if(c.newTab) window.open(link,'_blank','noopener'); else window.location.href=link; return; } const routes=['home','about','services','meditation','blog','contact']; this.go(routes.indexOf(link)>-1?link:'contact'); }
+  btnGo(c){ const link=(c&&c.link)||'contact'; if(/^https?:\/\//i.test(link)||/^mailto:|^tel:/i.test(link)){ if(c.newTab) window.open(link,'_blank','noopener'); else window.location.href=link; return; } const routes=['home','about','services','meditation','blog','contact','faq']; this.go(routes.indexOf(link)>-1?link:'contact'); }
   ebtn(path,def,xtra){ const h=React.createElement,P=this.P; const c={...(def||{}),...(this.getIn(this.state.data,path)||{})}; const label=c.label||'Button'; const variant=c.variant||'solid'; const size=c.size||'md';
     const vs=this.btnVariants();
     const pad=size==='lg'?'16px 32px':(size==='sm'?'10px 18px':'14px 26px'); const fs=size==='lg'?'17px':(size==='sm'?'13.5px':'15px'); const em=this.state.editMode;
@@ -672,7 +751,7 @@ class Component extends DCLogic {
       label, em? h('span',{contentEditable:false,title:'Edit this button',style:{position:'absolute',top:-9,right:-9,width:22,height:22,borderRadius:'50%',background:P.maroonD,color:P.goldL,font:'11px '+this.HEAD,display:'flex',alignItems:'center',justifyContent:'center',border:'1px solid '+P.gold,zIndex:5}},'✎'):null); }
   renderBtnEditor(){ if(!this.state.btnEdit||!this.state.editMode) return null; const h=React.createElement,P=this.P; const be=this.state.btnEdit; const path=be.path; const def=be.def||{}; const c={...def,...(this.getIn(this.state.data,path)||{})};
     const set=(k,v)=>this.commit(path,{...c,[k]:v});
-    const routes=[['home','Home'],['about','About Us'],['services','Services'],['meditation','Meditation'],['blog','Blog'],['contact','Contact']];
+    const routes=[['home','Home'],['about','About Us'],['services','Services'],['meditation','Meditation'],['blog','Blog'],['faq','FAQ'],['contact','Contact']];
     const isUrl=/^https?:\/\//i.test(c.link||'')||(c.link!==undefined&&routes.findIndex(r=>r[0]===c.link)<0&&c.link!=='');
     const lbl=t=>h('div',{style:{font:'700 12px '+this.HEAD,color:P.maroon,letterSpacing:'.04em',textTransform:'uppercase',margin:'16px 0 7px'}},t);
     const seg=(opts,cur,fn)=>h('div',{style:{display:'flex',border:'1px solid '+P.line,borderRadius:9,overflow:'hidden'}}, ...opts.map(o=>h('button',{key:o[0],onClick:()=>fn(o[0]),style:{flex:1,padding:'9px 6px',border:'none',cursor:'pointer',background:cur===o[0]?P.maroon:P.white,color:cur===o[0]?P.cream:P.ink,font:'600 13px '+this.HEAD}},o[1])));
@@ -692,7 +771,7 @@ class Component extends DCLogic {
   renderVals(){ if(!this._ci){ this._ci=true; this.makeComp(); } const data=this.state.data||this.defaults(); if(!this.state.data){ this._needSave=true; } this._d=data; try{ return { app: this.renderApp() }; }catch(e){ return { app: React.createElement('pre',{style:{padding:24,color:'#b4452f',font:'13px monospace',whiteSpace:'pre-wrap'}}, 'RENDER ERROR: '+(e&&e.message)+'\n\n'+(e&&e.stack)) }; } }
 
   // the "scope" a block set belongs to: a page route, or an individual blog post
-  scopeKey(){ if(this.state.route==='blog'&&this.state.postId) return 'post:'+this.state.postId; if(this.state.route==='page'&&this.state.pageId) return 'page:'+this.state.pageId; return this.state.route; }
+  scopeKey(){ if(this.state.route==='blog'&&this.state.postId) return 'post:'+this.state.postId; if(this.state.route==='service'&&this.state.serviceId) return 'service:'+this.state.serviceId; if(this.state.route==='page'&&this.state.pageId) return 'page:'+this.state.pageId; return this.state.route; }
   renderApp(){ const h=React.createElement,P=this.P;
     if(this.state.route==='admin') return this.renderAdmin();
     const em=this.state.editMode;
@@ -707,30 +786,66 @@ class Component extends DCLogic {
 
   // ---------- nav ----------
   navActive(it){ if(it.type==='page') return this.state.route==='page'&&this.state.pageId===it.value; if(it.type==='route') return this.state.route===it.value&&!this.state.postId; return false; }
+  navLink(it){ const v=it.value||''; if(it.type==='url') return {href:v,target:it.newTab?'_blank':undefined,rel:it.newTab?'noopener':undefined};
+    const href=it.type==='page'?(()=>{ const pg=(this.state.data.pages||[]).find(p=>p.id===v); return pg&&pg.slug?'/'+encodeURIComponent(pg.slug):'/'; })():this.routeHref(v||'home');
+    return this.linkTo(href,()=>this.navTo(it)); }
   navTo(it){ this.setState({menuOpen:false}); if(it.type==='url'){ const u=it.value||''; if(/^https?:|^mailto:|^tel:/i.test(u)){ window.open(u, it.newTab?'_blank':'_self'); } return; } if(it.type==='page'){ this.go('page',{pageId:it.value}); return; } this.go(it.value||'home'); }
   renderNav(){ const h=React.createElement,d=this.state.data; const top=(this.state.editMode?52:0)+14;
     const items=((d.nav&&d.nav.items)||[]);
-    const linkEl=(it)=>{ const act=this.navActive(it); return h('a',{key:it.id,onClick:()=>this.navTo(it),className:'aok-navlink'+(act?' is-active':''),'aria-current':act?'page':undefined}, it.label||'Link'); };
+    const linkEl=(it)=>{ const act=this.navActive(it); return h('a',{key:it.id,...this.navLink(it),className:'aok-navlink'+(act?' is-active':''),'aria-current':act?'page':undefined}, it.label||'Link'); };
     const langTog=()=>h('div',{className:'aok-lang'}, ['en','hi'].map(lg=>h('button',{key:lg,onClick:()=>this.setLang(lg),className:this.state.lang===lg?'is-on':''}, lg==='en'?'EN':'हि')));
     const mob=this.state.menuOpen;
     return h('header',{className:'notranslate aok-header',translate:'no',style:{top:top}},
       h('div',{className:'aok-pill'},
-        h('a',{onClick:()=>this.go('home'),className:'aok-brand'}, h('span',{className:'aok-brand-mark'},this.mark(46)),
+        h('a',{...this.linkTo('/',()=>this.go('home')),className:'aok-brand','aria-label':d.brand.name+' home'}, h('span',{className:'aok-brand-mark'},this.mark(46)),
           h('div',{style:{minWidth:0}}, h('div',{className:'aok-brand-name aok-goldtext'}, d.brand.name), h('div',{className:'aok-brand-sub'}, 'Vedic Astrology'))),
         h('nav',{className:'aok-desknav aok-navlinks','aria-label':'Main'}, ...items.map(linkEl)),
         h('div',{className:'aok-desknav aok-navright'}, langTog(), this.ebtn('nav.cta',{label:this.t('book'),link:'contact',variant:'solid',size:'sm'})),
         h('button',{className:'aok-burger','aria-label':'Menu','aria-expanded':mob?'true':'false',onClick:()=>this.setState({menuOpen:!mob})}, mob?'✕':'☰')),
       h('div',{className:'aok-mobnav'+(mob?' open':'')},
-        h('div',{style:{display:'flex',flexDirection:'column'}}, ...items.map(it=>h('a',{key:it.id,onClick:()=>this.navTo(it),className:'aok-moblink'+(this.navActive(it)?' is-active':'')}, it.label||'Link'))),
+        h('div',{style:{display:'flex',flexDirection:'column'}}, ...items.map(it=>h('a',{key:it.id,...this.navLink(it),className:'aok-moblink'+(this.navActive(it)?' is-active':'')}, it.label||'Link'))),
         h('div',{style:{display:'flex',alignItems:'center',gap:14,marginTop:16}}, langTog(), this.ebtn('nav.cta',{label:this.t('book'),link:'contact',variant:'solid',size:'sm'},{flex:1,justifyContent:'center'}))));
   }
 
   // ---------- page switch ----------
-  renderPage(){ switch(this.state.route){ case 'about':return this.renderAbout(); case 'services':return this.renderServices(); case 'blog':return this.state.postId?this.renderPost():this.renderBlog(); case 'meditation':return this.renderMeditation(); case 'contact':return this.renderContact(); case 'page':return this.renderCustomPage(); default:return this.renderHome(); } }
+  renderPage(){ switch(this.state.route){ case 'about':return this.renderAbout(); case 'services':return this.renderServices(); case 'blog':return this.state.postId?this.renderPost():this.renderBlog(); case 'meditation':return this.renderMeditation(); case 'contact':return this.renderContact(); case 'page':return this.renderCustomPage(); case 'faq':return this.renderFaq(); case 'service':return this.renderServiceDetail(); case 'notfound':return this.renderNotFound(); default:return this.renderHome(); } }
   renderCustomPage(){ const h=React.createElement,P=this.P,d=this.state.data; const pg=(d.pages||[]).find(p=>p.id===this.state.pageId);
-    if(!pg) return h('main',{style:{padding:'90px 24px',textAlign:'center'}}, h('h1',{style:{font:'800 28px '+this.HEAD,color:P.maroon}},'Page not found'), h('p',{style:{color:P.muted,marginTop:10}}, h('a',{onClick:()=>this.go('home'),style:{color:P.red,cursor:'pointer'}},'← Back home')));
+    if(!pg) return this.renderNotFound();
     const showHero=pg.showTitle!==false;
     return h('main',{style:{animation:'aokfade .4s',minHeight:'46vh'}}, showHero? h('section',{className:'aok-pagehero'}, this.wrap(h('div',{style:{padding:'44px 0 48px',textAlign:'center'}}, this.etext('pages.'+(d.pages.indexOf(pg))+'.title',{tag:'h1',style:{font:'800 clamp(30px,4.2vw,52px) '+this.HEAD,margin:0,color:P.maroon,letterSpacing:'-.015em'}}))), h('div',{className:'aok-hairline'})):null); }
+
+  renderNotFound(){ const h=React.createElement,P=this.P;
+    return h('main',{style:{padding:'90px 24px',textAlign:'center'}}, h('h1',{style:{font:'800 28px '+this.HEAD,color:P.maroon}},'Page not found'), h('p',{style:{color:P.muted,marginTop:10}}, h('a',this.linkTo('/',()=>this.go('home'),{style:{color:P.red,cursor:'pointer'}}),'← Back home'))); }
+
+  // ---------- FAQ page: the single home of the FAQ (and of the FAQPage structured data) ----------
+  renderFaq(){ const h=React.createElement;
+    return h('main',{style:{animation:'aokfade .4s'}}, this.pageHero('faqPage.hero','faq'), this.faqSection({noTitle:true,bg:'transparent'}), this.ctaBand('home.cta')); }
+
+  // ---------- one page per service (/services/{slug}) — the service's own words, unchanged ----------
+  renderServiceDetail(){ const h=React.createElement,P=this.P,d=this.state.data; const s=(d.services||[]).find(x=>x.id===this.state.serviceId);
+    if(!s) return this.renderNotFound();
+    const others=(d.services||[]).filter(x=>x.id!==s.id&&!x.redirectTo).slice(0,3);
+    const crumb=(label,href,fn)=>h('a',this.linkTo(href,fn,{style:{color:'#8A6A2E',cursor:'pointer'}}),label);
+    return h('main',{style:{animation:'aokfade .4s'}},
+      h('section',{className:'aok-pagehero'}, this.wrap(h('div',{style:{textAlign:'center',padding:'40px 0 50px',maxWidth:840,margin:'0 auto'}},
+        h('nav',{'aria-label':'Breadcrumb',style:{font:'500 13px '+this.HEAD,color:P.muted,marginBottom:22}}, crumb('Home','/',()=>this.go('home')),' \u203a ',crumb('Services','/services',()=>this.go('services')),' \u203a ',h('span',null,s.title)),
+        h('div',{style:{display:'flex',justifyContent:'center',marginBottom:20}}, this.badge(s.icon,'lg')),
+        h('h1',{style:{font:'800 clamp(34px,4.6vw,56px) '+this.HEAD,margin:'0 0 18px',letterSpacing:'-.015em',color:P.maroon,lineHeight:1.06}}, this.twoToneText(s.title)),
+        h('p',{style:{font:'400 18px/1.7 Plus Jakarta Sans',color:P.ink,maxWidth:680,margin:'0 auto'}}, s.desc))), h('div',{className:'aok-hairline'})),
+      h('section',{style:{padding:'64px 0'}}, this.wrap(h('div',{style:{display:'grid',gridTemplateColumns:'1.3fr .7fr',gap:32,alignItems:'start'}},
+        h('div',{className:'aok-card',style:{padding:'34px 36px'}}, s.detail? h('div',{style:{font:'400 16.5px/1.8 Plus Jakarta Sans',color:P.ink,whiteSpace:'pre-line'}}, s.detail) : h('p',{style:{font:'400 16.5px/1.8 Plus Jakarta Sans',color:P.ink,margin:0}}, s.desc)),
+        h('div',{className:'aok-card',style:{padding:'30px 28px',textAlign:'center'}},
+          h('div',{style:{font:'600 12px '+this.HEAD,letterSpacing:'.2em',textTransform:'uppercase',color:'#8A6A2E',marginBottom:12}},'Consultation fee'),
+          h('div',{className:'aok-goldtext',style:{font:'600 44px/1 '+this.SERIF}}, s.price||((d.about&&d.about.pricing&&d.about.pricing.fee)||'$100 CAD')),
+          h('div',{style:{font:'500 14px Plus Jakarta Sans',color:P.muted,margin:'8px 0 18px'}}, (d.about&&d.about.pricing&&d.about.pricing.unit)||'per hour'),
+          h('div',{style:{marginBottom:20,padding:'9px 16px',borderRadius:999,background:'#FFFCF7',border:'1px solid #C5A869',font:'600 12.5px '+this.HEAD,color:P.maroon,display:'inline-block'}},'New clients: pay only if satisfied'),
+          h('div',null, this.ebtn('servicesPage.cardBtn',{label:'Book this \u2192',link:'contact',variant:'outline',size:'sm'})))))),
+      others.length? h('section',{style:{background:P.bgAlt,padding:'70px 0'}}, this.wrap(h('div',null,
+        h('div',{style:{textAlign:'center',marginBottom:36}}, this.etext('home.servicesIntro.title',{tag:'h2',style:{font:'800 clamp(28px,3.3vw,40px) '+this.HEAD,color:P.maroon,margin:0,letterSpacing:'-.015em'}})),
+        h('div',{style:{display:'grid',gridTemplateColumns:'repeat(3,1fr)',gap:22}}, ...others.map((x,i)=>this.serviceCard(x,i))),
+        h('div',{style:{textAlign:'center',marginTop:36}}, h('a',this.linkTo('/services',()=>this.go('services'),{className:'aok-btn',style:{display:'inline-flex',font:'600 15px '+this.HEAD,padding:'14px 26px',borderRadius:999,...this.btnVariants().outline}}),'See all services \u2192'))))):null,
+      this.ctaBand('home.cta')); }
+  twoToneText(t){ const h=React.createElement; const m=String(t||'').match(/^(.+?(?::| \u2014))\s+(\S.*)$/); return m? [h('span',{key:'a',className:'aok-tt-a'},m[1]),' ',h('span',{key:'b',className:'aok-tt-b'},m[2])] : t; }
 
   wrap(children,style){ return React.createElement('div',{style:{maxWidth:1200,margin:'0 auto',padding:'0 24px',...style}}, children); }
 
@@ -785,12 +900,12 @@ class Component extends DCLogic {
     const m=txt.match(/^(.+?(?::| —))\s+(\S.*)$/); if(!m) return this.etext(path,o);
     return h(o.tag||'div',{key:path,className:o.className,style:o.style}, h('span',{className:'aok-tt-a'+(o.block?' is-block':'')}, m[1]), ' ', h('span',{className:'aok-tt-b'+(o.block?' is-block':'')}, m[2])); }
   badge(icon,size,round){ return React.createElement('span',{className:'aok-badge3d'+(size?' is-'+size:'')+(round?' is-round':''),'aria-hidden':'true'}, React.createElement('span',null, icon||'☉')); }
-  heroChip(s,i){ const h=React.createElement; const go=()=>this.go('services');
-    return h('div',{key:s.id,className:'aok-card aok-tilt aok-chip',role:'link',tabIndex:0,onClick:go,onKeyDown:e=>{ if(e.key==='Enter') go(); }}, this.badge(s.icon,'lg'), h('span',{className:'aok-chip-t'}, s.title)); }
+  heroChip(s,i){ const h=React.createElement; const go=()=>this.go('service',{serviceId:s.id});
+    return h('a',{key:s.id,className:'aok-card aok-tilt aok-chip',...this.linkTo(this.serviceHref(s),go)}, this.badge(s.icon,'lg'), h('span',{className:'aok-chip-t'}, s.title)); }
   serviceCard(s,i){ const h=React.createElement,P=this.P;
-    return h('div',{key:s.id,className:'aok-card aok-tilt aok-reveal',onClick:()=>this.go('services'),style:{padding:'30px 28px',cursor:'pointer'}},
+    return h('div',{key:s.id,className:'aok-card aok-tilt aok-reveal',onClick:()=>this.go('service',{serviceId:s.id}),style:{padding:'30px 28px',cursor:'pointer'}},
       this.badge(s.icon),
-      h('h3',{style:{font:'700 21px '+this.HEAD,color:P.maroon,margin:'20px 0 8px'}}, s.title),
+      h('h3',{style:{font:'700 21px '+this.HEAD,color:P.maroon,margin:'20px 0 8px'}}, h('a',this.linkTo(this.serviceHref(s),()=>this.go('service',{serviceId:s.id}),{style:{color:'inherit'}}), s.title)),
       h('p',{style:{font:'400 14.5px/1.65 Plus Jakarta Sans',color:P.muted,margin:0}}, s.desc)); }
 
   ctaBand(path){ const h=React.createElement,P=this.P;
@@ -887,7 +1002,7 @@ class Component extends DCLogic {
       h('section',{style:{padding:'70px 0'}}, this.wrap(h('div',{style:{display:'grid',gridTemplateColumns:'repeat(2,1fr)',gap:24}}, ...d.services.map((s,i)=>h('div',{key:s.id,className:'aok-card aok-tilt aok-reveal',style:{display:'flex',gap:22,padding:30}},
         this.badge(s.icon,'lg'),
         h('div',{style:{minWidth:0}}, h('div',{style:{display:'flex',justifyContent:'space-between',alignItems:'baseline',gap:12,flexWrap:'wrap'}},
-            h('h3',{style:{font:'700 21px '+this.HEAD,color:P.maroon,margin:'2px 0 0'}}, s.title)),
+            h('h3',{style:{font:'700 21px '+this.HEAD,color:P.maroon,margin:'2px 0 0'}}, h('a',this.linkTo(this.serviceHref(s),()=>this.go('service',{serviceId:s.id}),{style:{color:'inherit'}}), s.title))),
           h('p',{style:{font:'400 15px/1.7 Plus Jakarta Sans',color:P.muted,margin:'10px 0 14px'}}, s.desc),
           (s.detail&&(this._svcOpen||{})[s.id])? h('p',{style:{font:'400 14.5px/1.75 Plus Jakarta Sans',color:P.ink,margin:'0 0 14px',whiteSpace:'pre-line'}}, s.detail):null,
           s.detail? h('button',{onClick:()=>{ const o=this._svcOpen||(this._svcOpen={}); o[s.id]=!o[s.id]; this.forceUpdate(); },style:{display:'block',background:'none',border:'none',color:'#8A6A2E',font:'700 14px '+this.HEAD,cursor:'pointer',padding:'0 0 14px'}}, ((this._svcOpen||{})[s.id])?'Read less ↑':'Read more ↓'):null,
@@ -926,7 +1041,7 @@ class Component extends DCLogic {
         h('div',{style:{aspectRatio:'16/10',margin:8,borderRadius:14,overflow:'hidden',background:p.image?'transparent':ph}}, p.image?h('img',{src:p.image,alt:p.focusKeyword||p.title,style:{width:'100%',height:'100%',objectFit:'cover',display:'block'}}):h('div',{style:{height:'100%',display:'flex',alignItems:'center',justifyContent:'center',color:'#A68446',fontFamily:'monospace',fontSize:12}},'blog image')),
         h('div',{style:{padding:'14px 24px 26px',flex:1,display:'flex',flexDirection:'column'}},
           h('div',{style:{font:'600 12px '+this.HEAD,letterSpacing:'.12em',textTransform:'uppercase',color:'#8A6A2E',marginBottom:10}}, this.fmtDate(p.date)+(p.published?'':' · DRAFT')),
-          h('h3',{style:{font:'700 19px/1.3 '+this.HEAD,color:P.maroon,margin:'0 0 10px'}}, p.title),
+          h('h3',{style:{font:'700 19px/1.3 '+this.HEAD,color:P.maroon,margin:'0 0 10px'}}, h('a',this.linkTo('/blog/'+encodeURIComponent(p.slug||''),()=>this.setState({postId:p.id,menuOpen:false}),{style:{color:'inherit'}}), p.title)),
           h('p',{style:{font:'400 14.5px/1.65 Plus Jakarta Sans',color:P.muted,margin:'0 0 16px',flex:1}}, p.excerpt),
           h('span',{style:{font:'700 14px '+this.HEAD,color:'#8A6A2E'}}, this.t('readmore')+' →')))))
         : h('div',{style:{textAlign:'center',padding:'40px',color:P.muted,font:'400 16px Plus Jakarta Sans'}},'No posts yet. Add one from the admin panel → Blog.')))); }
@@ -934,7 +1049,7 @@ class Component extends DCLogic {
   renderPost(){ const h=React.createElement,P=this.P,d=this.state.data; const p=d.blog.find(x=>x.id===this.state.postId); if(!p) return this.renderBlog();
     return h('main',{style:{animation:'aokfade .4s'}},
       h('section',{className:'aok-pagehero'}, this.wrap(h('div',{style:{maxWidth:780,margin:'0 auto',padding:'44px 0 50px'}},
-        h('a',{onClick:()=>this.setState({postId:null}),style:{cursor:'pointer',font:'600 14px '+this.HEAD,color:'#8A6A2E'}},'← '+this.t('blog')),
+        h('a',this.linkTo('/blog',()=>this.setState({postId:null}),{style:{cursor:'pointer',font:'600 14px '+this.HEAD,color:'#8A6A2E'}}),'← '+this.t('blog')),
         h('div',{style:{font:'600 12px '+this.HEAD,letterSpacing:'.14em',textTransform:'uppercase',color:'#8A6A2E',margin:'24px 0 14px'}}, this.fmtDate(p.date)),
         h('h1',{style:{font:'800 clamp(30px,3.9vw,48px)/1.1 '+this.HEAD,color:P.maroon,margin:0,letterSpacing:'-.015em'}}, p.title))), h('div',{className:'aok-hairline'})),
       h('section',{style:{padding:'52px 0 70px'}}, this.wrap(h('div',{style:{maxWidth:780,margin:'0 auto'}},
@@ -1073,7 +1188,7 @@ class Component extends DCLogic {
   // ---------- FAQ (shared section) ----------
   faqSection(opts){ const h=React.createElement,P=this.P,d=this.state.data; const fp=d.faqPage; if(!fp||!((fp.items)||[]).length) return null; const open=this._faqOpen||(this._faqOpen={}); const em=this.state.editMode; const showAsk=!(opts&&opts.hideAsk);
     return h('section',{style:{padding:'72px 0',background:(opts&&opts.bg)||P.bgAlt}}, this.wrap(h('div',{style:{maxWidth:820,margin:'0 auto'}},
-      h('div',{style:{textAlign:'center',marginBottom:34}},
+      (opts&&opts.noTitle)? null : h('div',{style:{textAlign:'center',marginBottom:34}},
         h('div',{style:{display:'flex',justifyContent:'center',marginBottom:14}},this.kicker('FAQ')),
         this.etext('faqPage.hero.title',{tag:'h2',style:{font:'800 clamp(26px,3.2vw,38px) '+this.HEAD,color:P.maroon,margin:0,letterSpacing:'-.02em'}})),
       h('div',{style:{display:'grid',gap:14}},
@@ -1086,7 +1201,7 @@ class Component extends DCLogic {
                     h('button',{title:'Move down',onClick:e=>{e.stopPropagation();this.faqMove(i,1);},style:{...this.iconBtn(),width:30,height:30,fontSize:13}},'\u2193'),
                     h('button',{title:'Remove this FAQ',onClick:e=>{e.stopPropagation();this.faqDel(i);},style:{...this.iconBtn(true),width:30,height:30,fontSize:13}},'\u2715'))
                 : h('span',{style:{flexShrink:0,width:28,height:28,borderRadius:'50%',background:isOpen?P.red:P.bgAlt,color:isOpen?P.cream:P.maroon,display:'flex',alignItems:'center',justifyContent:'center',font:'700 18px '+this.HEAD,lineHeight:1}}, isOpen?'\u2212':'+')),
-            isOpen? h('div',{style:{padding:'0 22px 22px'}}, em? this.etext('faqPage.items.'+i+'.a',{tag:'p',className:'aok-link',style:{font:'400 15.5px/1.7 Plus Jakarta Sans',color:P.ink,margin:0}}) : h('p',{className:'aok-link',style:{font:'400 15.5px/1.7 Plus Jakarta Sans',color:P.ink,margin:0}}, it.a)) : null);
+            isOpen? h('div',{style:{padding:'0 22px 22px'}}, em? this.answerHint(it.a):null, em? this.etext('faqPage.items.'+i+'.a',{tag:'p',className:'aok-link',style:{font:'400 15.5px/1.7 Plus Jakarta Sans',color:P.ink,margin:0}}) : h('p',{className:'aok-link',style:{font:'400 15.5px/1.7 Plus Jakarta Sans',color:P.ink,margin:0}}, it.a)) : null);
         })),
       em? h('div',{style:{textAlign:'center',marginTop:18}}, this.btn('\uff0b Add FAQ',()=>this.faqAdd(),{variant:'gold',pad:'11px 20px',style:{fontSize:14}})):null,
       showAsk? h('div',{style:{textAlign:'center',marginTop:24}}, this.ebtn('faqPage.askBtn',{label:'Ask your own question \u2192',link:'contact',variant:'outline',size:'md'})):null))); }
@@ -1096,18 +1211,29 @@ class Component extends DCLogic {
     const base=[['Facebook',c.facebook,'f'],['Instagram',c.instagram,'◉'],['YouTube',c.youtube,'▶'],['Google',c.gmb,'⚑']];
     const extra=((this.state.data.socials)||[]).map(s=>[(s.net||'link'),s.url,map[s.net]||'☍']);
     return base.concat(extra).filter(s=>s[1]); }
+  // Name / area / phone, identical to the server-rendered copy and the structured data (local SEO consistency)
+  napBlock(){ const h=React.createElement,P=this.P,d=this.state.data,L=d.local||{},pe=d.person||{},c=d.contact||{};
+    const br=k=>h('br',{key:k}); const parts=[h('strong',{key:'n',style:{color:P.maroon,fontWeight:600}},this.brandName()),br('b0'),(pe.jobTitle||'Vedic Astrologer')+' '+(pe.name||d.brand.astrologer)];
+    if(!L.serviceAreaBusiness&&L.streetAddress) parts.push(br('b1'),L.streetAddress);
+    parts.push(br('b2'),[L.locality||'Surrey',L.region||'British Columbia',(L.country||'CA')==='CA'?'Canada':L.country].join(', '));
+    if(c.phone) parts.push(br('b3'),'Phone: ',h('a',{key:'tel',href:'tel:'+String(c.phone).replace(/[^\d+]/g,''),className:'aok-footlink'},c.phone));
+    if(c.email) parts.push(br('b4'),'Email: ',h('a',{key:'em',href:'mailto:'+c.email,className:'aok-footlink'},c.email));
+    const areas=(L.areasServed||[]).filter(Boolean); if(areas.length) parts.push(br('b5'),'Serving: '+areas.join(', ')+(L.onlineWorldwide!==false?' \u00b7 Worldwide online ('+(L.onlineChannels||['Zoom','WhatsApp']).join(' & ')+')':''));
+    const days=[['Mo','Mon'],['Tu','Tue'],['We','Wed'],['Th','Thu'],['Fr','Fri'],['Sa','Sat'],['Su','Sun']].filter(x=>L.hours&&L.hours[x[0]]&&L.hours[x[0]].o&&L.hours[x[0]].c).map(x=>x[1]+' '+L.hours[x[0]].o+'\u2013'+L.hours[x[0]].c);
+    if(days.length) parts.push(br('b6'),'Hours: '+days.join(' \u00b7 '));
+    return h('address',{style:{fontStyle:'normal',font:'400 13.5px/1.75 Plus Jakarta Sans',color:P.ink,marginTop:18,maxWidth:360}},...parts); }
   renderFooter(){ const h=React.createElement,P=this.P,d=this.state.data;
-    const links=[['home',this.t('home')],['about',this.t('about')],['services',this.t('services')],['meditation',this.t('meditation')],['blog',this.t('blog')],['contact',this.t('contact')]];
+    const links=[['home',this.t('home')],['about',this.t('about')],['services',this.t('services')],['meditation',this.t('meditation')],['blog',this.t('blog')],['faq',this.t('faq')],['contact',this.t('contact')]];
     const head=t=>h('div',{style:{font:'600 12px '+this.HEAD,letterSpacing:'.2em',textTransform:'uppercase',color:'#8A6A2E',marginBottom:16}}, t);
     return h('footer',{className:'aok-footer'}, h('div',{className:'aok-hairline'}), this.wrap(h('div',{style:{position:'relative'}},
       h('div',{style:{display:'grid',gridTemplateColumns:'1.4fr 1fr 1.2fr',gap:40,padding:'60px 0 38px'}},
         h('div',null, h('div',{style:{display:'flex',alignItems:'center',gap:12,marginBottom:16}}, h('span',{className:'aok-brand-mark'},this.mark(46)), h('div',{className:'aok-goldtext',style:{font:'600 26px/1 '+this.SERIF}}, d.brand.name)),
-          h('p',{style:{font:'400 14.5px/1.75 Plus Jakarta Sans',maxWidth:330,margin:0,color:P.ink}}, d.brand.tagline)),
+          h('p',{style:{font:'400 14.5px/1.75 Plus Jakarta Sans',maxWidth:330,margin:0,color:P.ink}}, d.brand.tagline), this.napBlock()),
         h('div',null, head(this.t('quicklinks')),
-          h('div',{style:{display:'grid',gap:10}}, ...links.map(l=>h('a',{key:l[0],onClick:()=>this.go(l[0]),className:'aok-footlink'},l[1])))),
+          h('div',{style:{display:'grid',gap:10}}, ...links.map(l=>h('a',{key:l[0],...this.linkTo(this.routeHref(l[0]),()=>this.go(l[0])),className:'aok-footlink'},l[1])))),
         h('div',null, head(this.t('follow')),
           h('div',{style:{display:'flex',gap:10,marginBottom:18,flexWrap:'wrap'}}, ...this.socialLinks().map((s,i)=>h('a',{key:i,href:s[1],target:'_blank',rel:'noopener',title:s[0],'aria-label':s[0],className:'aok-badge3d is-sm',style:{font:'600 16px/1 Plus Jakarta Sans'}},h('span',null,s[2])))),
-          h('a',{onClick:()=>this.go('contact'),className:'aok-footlink'}, 'Contact form →'))),
+          h('a',{...this.linkTo('/contact',()=>this.go('contact')),className:'aok-footlink'}, 'Contact form →'))),
       h('div',{style:{borderTop:'1px solid '+P.line,padding:'22px 0 2px',font:'400 12.5px/1.7 Plus Jakarta Sans',color:P.muted,maxWidth:800}}, h('strong',{style:{color:P.ink,fontWeight:600}},'Disclaimer: '), d.disclaimer),
       h('div',{style:{borderTop:'1px solid '+P.line,padding:'20px 0',display:'flex',justifyContent:'space-between',alignItems:'center',flexWrap:'wrap',gap:12,font:'400 13px Plus Jakarta Sans',color:P.muted}},
         h('span',null,'© '+new Date().getFullYear()+' '+d.brand.name+'. All rights reserved.'))))); }
@@ -1193,6 +1319,9 @@ class Component extends DCLogic {
   navSetType(i,type){ const def=type==='page'?((this.state.data.pages||[])[0]||{}).id||'':type==='url'?'https://':'home'; this.pushHist(); const items=((this.state.data.nav.items)||[]).slice(); items[i]={...items[i],type,value:def}; this.save(this.setIn(this.state.data,'nav.items',items)); }
   socAdd(){ this.pushHist(); const arr=[...((this.state.data.socials)||[]),{net:'facebook',url:''}]; this.save(this.setIn(this.state.data,'socials',arr)); }
   socDel(i){ this.pushHist(); const arr=((this.state.data.socials)||[]).slice(); arr.splice(i,1); this.save(this.setIn(this.state.data,'socials',arr)); }
+  // answer-engine hint: 40–60 word answers are the sweet spot for featured snippets and AI answers
+  wordCount(html){ return this.txt(html).split(/\s+/).filter(Boolean).length; }
+  answerHint(a){ const n=this.wordCount(a), ok=n>=40&&n<=60, near=n>=30&&n<=80; return React.createElement('div',{contentEditable:false,style:{display:'inline-block',margin:'0 0 8px',padding:'3px 10px',borderRadius:999,font:'600 11.5px '+this.HEAD,background:ok?'#e4f3e8':near?'#fbf1dc':'#fbe9e3',color:ok?this.P.ok:near?'#8A6A2E':this.P.bad}}, n+' words \u00b7 '+(ok?'ideal answer length':'aim for 40\u201360 words')); }
   faqAdd(){ this.pushHist(); const items=[...((this.state.data.faqPage&&this.state.data.faqPage.items)||[]),{q:'New question?',a:'Type the answer here.'}]; this.save(this.setIn(this.state.data,'faqPage.items',items)); if(this._faqOpen) this._faqOpen[items.length-1]=true; this.flash('FAQ added — edit the question and answer'); }
   faqDel(i){ if(!confirm('Remove this FAQ?'))return; this.pushHist(); const items=((this.state.data.faqPage.items)||[]).slice(); items.splice(i,1); this.save(this.setIn(this.state.data,'faqPage.items',items)); this.flash('FAQ removed'); }
   faqMove(i,dir){ const items=((this.state.data.faqPage.items)||[]).slice(); const j=i+dir; if(j<0||j>=items.length)return; this.pushHist(); [items[i],items[j]]=[items[j],items[i]]; this.save(this.setIn(this.state.data,'faqPage.items',items)); }
@@ -1584,7 +1713,7 @@ class Component extends DCLogic {
       ...rows); }
 
   // ---------- EDIT BAR ----------
-  renderEditBar(){ const h=React.createElement,P=this.P; const pages=[['home','Home'],['about','About'],['services','Services'],['meditation','Meditation'],['blog','Blog'],['contact','Contact']];
+  renderEditBar(){ const h=React.createElement,P=this.P; const pages=[['home','Home'],['about','About'],['services','Services'],['meditation','Meditation'],['blog','Blog'],['faq','FAQ'],['contact','Contact']];
     const T=(label,fn,title,active)=>h('button',{title,onMouseDown:e=>e.preventDefault(),onClick:e=>{e.preventDefault();fn();},style:{minWidth:30,height:30,padding:'0 8px',borderRadius:7,border:'1px solid rgba(247,239,224,.22)',background:active?P.goldL:'transparent',color:active?P.maroonD:P.cream,cursor:'pointer',font:'600 13px '+this.HEAD,flex:'0 0 auto'}},label);
     const cmd=(label,c,arg,title)=>T(label,()=>this.exec(c,arg),title);
     const sep=()=>h('div',{style:{width:1,height:22,background:'rgba(247,239,224,.18)',flex:'0 0 auto'}});
@@ -1618,14 +1747,13 @@ class Component extends DCLogic {
 
   renderLogin(){ const h=React.createElement,P=this.P;
     return h('div',{style:{minHeight:'100vh',background:'linear-gradient(160deg,'+P.maroon+','+P.maroonD+')',display:'flex',alignItems:'center',justifyContent:'center',padding:24}},
-      h('form',{onSubmit:e=>{e.preventDefault(); if(this.state.pass===this.state.data.adminPass){ this.setState({authed:true,pass:''}); } else { this.flash('Incorrect password'); }},style:{background:P.card,borderRadius:22,padding:'44px 40px',width:'100%',maxWidth:400,boxShadow:'0 30px 70px rgba(0,0,0,.4)'}},
+      h('form',{onSubmit:e=>{e.preventDefault(); this.login();},style:{background:P.card,borderRadius:22,padding:'44px 40px',width:'100%',maxWidth:400,boxShadow:'0 30px 70px rgba(0,0,0,.4)'}},
         h('div',{style:{display:'flex',justifyContent:'center',marginBottom:20}},this.mark(58)),
         h('h1',{style:{font:'800 24px '+this.HEAD,color:P.maroon,textAlign:'center',margin:'0 0 4px'}},'Admin Login'),
         h('p',{style:{font:'400 14px Plus Jakarta Sans',color:P.muted,textAlign:'center',margin:'0 0 24px'}},'Analysis of Karma \u00b7 Website Builder'),
         h('input',{type:'password',value:this.state.pass,onChange:e=>this.setState({pass:e.target.value}),placeholder:'Password',autoFocus:true,style:{width:'100%',padding:'13px 15px',borderRadius:11,border:'1px solid '+P.line,background:P.white,font:'400 15px Plus Jakarta Sans',marginBottom:14}}),
         this.btn('Enter dashboard',null,{variant:'solid',style:{width:'100%',justifyContent:'center'}}),
-        h('div',{style:{textAlign:'center',marginTop:18}}, h('a',{onClick:()=>this.go('home'),style:{cursor:'pointer',font:'500 13px Plus Jakarta Sans',color:P.muted}},'\u2190 Back to website')),
-        h('div',{style:{marginTop:16,padding:'10px 12px',borderRadius:9,background:P.bgAlt,font:'400 12px Plus Jakarta Sans',color:P.muted,textAlign:'center'}},'Demo password: ',h('b',null,'admin123'),' \u2014 change it in Settings')));}
+        h('div',{style:{textAlign:'center',marginTop:18}}, h('a',{onClick:()=>this.go('home'),style:{cursor:'pointer',font:'500 13px Plus Jakarta Sans',color:P.muted}},'\u2190 Back to website'))), this.renderToast());}
 
   renderAdminShell(){ const h=React.createElement,P=this.P;
     const tabs=[['dashboard','\u25C8 Dashboard'],['pages','\u270e Visual Editor'],['services','\u2609 Services'],['blog','\u270d Blog'],['leads','\u2709 Leads'],['seo','\u2191 SEO'],['schema','{ } Schema'],['submit','\u2691 Search Engines'],['settings','\u2699 Settings']];
@@ -1636,7 +1764,7 @@ class Component extends DCLogic {
         h('nav',{style:{display:'grid',gap:4}}, ...tabs.map(tb=>h('button',{key:tb[0],onClick:()=>this.setState({adminTab:tb[0]}),style:{display:'flex',justifyContent:'space-between',alignItems:'center',textAlign:'left',padding:'11px 14px',borderRadius:10,border:'none',cursor:'pointer',font:'600 14px '+this.HEAD,background:this.state.adminTab===tb[0]?P.red:'transparent',color:this.state.adminTab===tb[0]?P.cream:'rgba(247,239,224,.75)'}}, h('span',null,tb[1]), tb[0]==='leads'&&unread?h('span',{style:{background:P.goldL,color:P.maroonD,borderRadius:999,padding:'1px 8px',font:'700 11px '+this.HEAD}},unread):null))),
         h('div',{style:{marginTop:22,paddingTop:18,borderTop:'1px solid rgba(247,239,224,.12)',display:'grid',gap:8}},
           h('button',{onClick:()=>this.go('home'),style:{padding:'10px 14px',borderRadius:10,border:'1px solid rgba(247,239,224,.25)',background:'transparent',color:P.cream,cursor:'pointer',font:'600 13px '+this.HEAD}},'\u2197 View website'),
-          h('button',{onClick:()=>this.setState({authed:false,route:'home'}),style:{padding:'10px 14px',borderRadius:10,border:'none',background:'transparent',color:'rgba(247,239,224,.6)',cursor:'pointer',font:'600 13px '+this.HEAD,textAlign:'left'}},'\u23fb Log out'))),
+          h('button',{onClick:()=>this.logout(),style:{padding:'10px 14px',borderRadius:10,border:'none',background:'transparent',color:'rgba(247,239,224,.6)',cursor:'pointer',font:'600 13px '+this.HEAD,textAlign:'left'}},'\u23fb Log out'))),
       h('main',{className:'aok-scroll',style:{padding:'34px 38px',overflowY:'auto',height:'100vh'}}, this.renderAdminTab()),
       this.renderToast()); }
 
@@ -1664,8 +1792,8 @@ class Component extends DCLogic {
         action('\u2699 Site settings','Contact email, map, social links & password.','settings'))); }
 
   // ----- pages / visual editor -----
-  tabPages(){ const h=React.createElement,P=this.P,d=this.state.data; const pages=[['home','Home','The hero, services overview, about preview & call-to-action.'],['about','About Us','Your story, values, the FAQ section and the closing quote.'],['services','Services','The services listing page \u2014 hero, the service cards, and any blocks you add.'],['meditation','Meditation','The intro, your \u201cprofessional meditation guide\u201d text and the offerings.'],['blog','Blog','The blog listing page. To design an individual post, open Admin \u2192 Blog \u2192 \u270e Design.'],['contact','Contact Us','Heading, note, the form intro and the FAQ section.']];
-    const builtins=[['home','Home'],['about','About Us'],['services','Services'],['meditation','Meditation'],['blog','Blog'],['contact','Contact Us']];
+  tabPages(){ const h=React.createElement,P=this.P,d=this.state.data; const pages=[['home','Home','The hero, services overview, about preview & call-to-action.'],['about','About Us','Your story, values, the FAQ section and the closing quote.'],['services','Services','The services listing page \u2014 hero, the service cards, and any blocks you add.'],['meditation','Meditation','The intro, your \u201cprofessional meditation guide\u201d text and the offerings.'],['blog','Blog','The blog listing page. To design an individual post, open Admin \u2192 Blog \u2192 \u270e Design.'],['faq','FAQ','All your frequently asked questions \u2014 add, edit and reorder them here. They also power the FAQ structured data for Google and AI answers.'],['contact','Contact Us','Heading, note, the form intro and the FAQ section.']];
+    const builtins=[['home','Home'],['about','About Us'],['services','Services'],['meditation','Meditation'],['blog','Blog'],['faq','FAQ'],['contact','Contact Us']];
     const custom=d.pages||[];
     const navItems=(d.nav&&d.nav.items)||[];
     const fldLbl=t=>h('span',{style:{display:'block',font:'600 11.5px '+this.HEAD,color:P.maroon,marginBottom:5,letterSpacing:'.02em'}},t);
@@ -1805,7 +1933,7 @@ class Component extends DCLogic {
       ['Page contains image and/or video',true]
     ]; }
 
-  tabSeo(){ const h=React.createElement,P=this.P,d=this.state.data; const pages=[['home','Home'],['about','About Us'],['services','Services'],['meditation','Meditation'],['blog','Blog'],['contact','Contact Us']]; const active=this._seoPage||'home';
+  tabSeo(){ const h=React.createElement,P=this.P,d=this.state.data; const pages=[['home','Home'],['about','About Us'],['services','Services'],['meditation','Meditation'],['blog','Blog'],['faq','FAQ'],['contact','Contact Us']]; const active=this._seoPage||'home';
     const checks=this.seoChecks(active); const passed=checks.filter(c=>c[1]).length; const score=Math.round(passed/checks.length*100); const sc=d.seo[active];
     return h('div',null, this.adminHead('SEO Settings','Optimise each page to rank on Google. Set a focus keyword, SEO title and meta description \u2014 the live checklist shows what\u2019s done.'),
       h('div',{style:{display:'flex',gap:8,flexWrap:'wrap',marginBottom:22}}, ...pages.map(p=>h('button',{key:p[0],onClick:()=>{this._seoPage=p[0];this.forceUpdate();},style:{padding:'9px 16px',borderRadius:999,border:'1px solid '+(active===p[0]?P.red:P.line),background:active===p[0]?P.red:P.card,color:active===p[0]?P.cream:P.ink,cursor:'pointer',font:'600 14px '+this.HEAD}},p[1]))),
@@ -1909,7 +2037,13 @@ class Component extends DCLogic {
               h('button',{onClick:()=>this.socDel(i),style:{...this.iconBtn(true),width:34,height:34,flex:'0 0 auto'}},'✕'))),
             this.btn('＋ Add social link',()=>this.socAdd(),{variant:'outline',pad:'9px 16px',style:{fontSize:13}}))),
           this.card(h('div',null, h('div',{style:{font:'700 16px '+this.HEAD,color:P.maroon,marginBottom:16}},'Security'),
-            this.inp('adminPass',{label:'Admin password',hint:'used to log in',mb:0}))),
+            (()=>{ const f=this._pw||(this._pw={}); const set=(k,v)=>{ this._pw={...this._pw,[k]:v}; this.forceUpdate(); };
+              const box=(k,label)=>h('label',{key:k,style:{display:'block',marginBottom:12}}, h('span',{style:this.lbl()},label), h('input',{type:'password',autoComplete:k==='current'?'current-password':'new-password',value:f[k]||'',onChange:e=>set(k,e.target.value),style:this.inpStyle()}));
+              return h('div',null,
+                this._defaultPw? h('p',{style:{font:'600 13px/1.5 Plus Jakarta Sans',color:P.bad,margin:'0 0 12px'}},'\u26a0 You are using the default password. Please change it now.'):null,
+                h('p',{style:{font:'400 13px/1.55 Plus Jakarta Sans',color:P.muted,margin:'0 0 14px'}},'Your password is stored securely on the server (hashed) and is never part of the website data.'),
+                box('current','Current password'), box('next','New password (8+ characters)'), box('confirm','Repeat new password'),
+                this.btn('Change password',()=>this.changePassword(),{variant:'solid',pad:'10px 20px',style:{fontSize:13.5}})); })())),
           this.card(h('div',null, h('div',{style:{font:'700 16px '+this.HEAD,color:P.maroon,marginBottom:6}},'Backup'),
             h('p',{style:{font:'400 13px Plus Jakarta Sans',color:P.muted,margin:'0 0 14px'}},'Export all your content as a file, or restore from one.'),
             h('div',{style:{display:'flex',gap:10,flexWrap:'wrap'}}, this.btn('\u2193 Export content',exportData,{variant:'outline',pad:'10px 18px',style:{fontSize:13.5}}), this.btn('\u2191 Import',importData,{variant:'outline',pad:'10px 18px',style:{fontSize:13.5}}), this.btn('Reset site',()=>{ if(confirm('Reset ALL content to defaults? This cannot be undone.')) this.save(this.defaults()); },{variant:'outline',pad:'10px 18px',style:{fontSize:13.5,color:P.bad,borderColor:P.bad}})))))) ); }

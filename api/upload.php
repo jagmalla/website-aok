@@ -1,6 +1,7 @@
 <?php
 require_once __DIR__ . '/db.php';
 cors();
+require_admin();   // admin only
 
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
     json_out(['ok' => false, 'error' => 'method_not_allowed'], 405);

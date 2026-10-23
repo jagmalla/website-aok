@@ -1,0 +1,101 @@
+# =====================================================================================
+#  Analysis of Karma — Apache rules (A2 Hosting / cPanel)
+# =====================================================================================
+#
+#  >>> PASTE YOUR CPANEL / PHP HANDLER LINES HERE (if you have any) <<<
+#  If your current .htaccess on the server has lines such as
+#      # php -- BEGIN cPanel-generated handler, do not edit
+#      AddHandler application/x-httpd-ea-php82 .php .php8 .phtml
+#      # php -- END cPanel-generated handler, do not edit
+#  copy them here, unchanged, before uploading this file. (cPanel's "MultiPHP Manager"
+#  may also re-add them automatically.)
+#
+#  What this file does:
+#    1. Sends everyone to https://www.analysisofkarma.com (one canonical address)
+#    2. Blocks private files (configuration, tools, docs, PHP inside /uploads)
+#    3. Gives every page exactly one URL (no /index.html, no trailing slashes)
+#    4. Serves robots.txt, sitemap.xml, llms.txt and llms-full.txt live from your admin settings
+#    5. Sends every page URL to render.php, which builds the page on the server so search
+#       engines and AI assistants see your real content (and real 404s for unknown URLs)
+#    6. Compression, browser caching and basic security headers
+# =====================================================================================
+
+Options -Indexes
+DirectoryIndex render.php index.html
+ErrorDocument 404 /render.php
+
+<IfModule mod_rewrite.c>
+RewriteEngine On
+RewriteBase /
+
+# ---- 1. One canonical address: https + www (production domain only, so test copies keep working)
+RewriteCond %{HTTP_HOST} ^(www\.)?analysisofkarma\.com$ [NC]
+RewriteCond %{HTTPS} !=on
+RewriteCond %{HTTP:X-Forwarded-Proto} !=https
+RewriteRule ^ https://www.analysisofkarma.com%{REQUEST_URI} [R=301,L,NE]
+RewriteCond %{HTTP_HOST} ^analysisofkarma\.com$ [NC]
+RewriteRule ^ https://www.analysisofkarma.com%{REQUEST_URI} [R=301,L,NE]
+
+# ---- 2. Private files and folders
+RewriteRule ^(\.git|tools)(/|$) - [F,L]
+RewriteRule ^api/(config|db|seo-lib)\.php$ - [F,L]
+RewriteRule ^api/defaults\.json$ - [F,L]
+RewriteRule ^(DEPLOY\.md|HOW-TO-UPDATE\.txt)$ - [F,L]
+RewriteRule ^uploads/.*\.(php\d?|phtml|phar|cgi|pl)$ - [F,L,NC]
+
+# ---- 3. One URL per page
+RewriteCond %{THE_REQUEST} \s/+(index\.html|render\.php)[\s?] [NC]
+RewriteRule ^ / [R=301,L]
+RewriteCond %{REQUEST_FILENAME} !-d
+RewriteRule ^(.+)/$ /$1 [R=301,L]
+
+# ---- 4. SEO & AI files, generated live from the admin settings
+RewriteRule ^robots\.txt$ api/robots.php [L]
+RewriteRule ^sitemap\.xml$ api/sitemap.php [L]
+RewriteRule ^llms\.txt$ api/llms.php [L]
+RewriteRule ^llms-full\.txt$ api/llms.php?full=1 [L,QSA]
+RewriteRule ^([a-f0-9]{32})\.txt$ api/indexnow.php?key=$1 [L]
+
+# ---- 5. Real files and folders are served as they are
+RewriteCond %{REQUEST_FILENAME} -f [OR]
+RewriteCond %{REQUEST_FILENAME} -d
+RewriteRule ^ - [L]
+
+# Missing images/scripts/fonts get a plain 404 (no page rendering needed)
+RewriteRule \.(png|jpe?g|gif|webp|avif|svg|ico|css|js|mjs|map|woff2?|ttf|json|xml|pdf|zip)$ - [R=404,L,NC]
+
+# ---- 6. Every page URL is rendered on the server
+RewriteRule ^ render.php [L,QSA]
+</IfModule>
+
+# ---- Compression
+<IfModule mod_deflate.c>
+  AddOutputFilterByType DEFLATE text/html text/plain text/css text/xml text/markdown application/javascript text/javascript application/json application/ld+json application/xml image/svg+xml
+</IfModule>
+
+# ---- Caching (pages are always revalidated; files carry their own lifetimes)
+<IfModule mod_headers.c>
+  <FilesMatch "\.(png|jpe?g|gif|webp|avif|svg|ico)$">
+    Header set Cache-Control "public, max-age=2592000"
+  </FilesMatch>
+  <FilesMatch "\.(woff2?|ttf)$">
+    Header set Cache-Control "public, max-age=31536000, immutable"
+  </FilesMatch>
+  <FilesMatch "\.(css|js|mjs)$">
+    Header set Cache-Control "public, max-age=604800"
+  </FilesMatch>
+
+  # ---- Security headers
+  Header always set X-Content-Type-Options "nosniff"
+  Header always set Referrer-Policy "strict-origin-when-cross-origin"
+  Header always set X-Frame-Options "SAMEORIGIN"
+  Header always set Permissions-Policy "camera=(), microphone=(), geolocation=(), payment=()"
+  # Turn on once https://www.analysisofkarma.com works everywhere (tells browsers to always use HTTPS):
+  # Header always set Strict-Transport-Security "max-age=31536000"
+</IfModule>
+
+<IfModule mod_mime.c>
+  AddType text/markdown .md
+  AddType image/webp .webp
+  AddType image/avif .avif
+</IfModule>

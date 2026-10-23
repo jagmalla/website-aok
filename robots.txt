@@ -1,14 +1,155 @@
+# robots.txt for Analysis of Karma — generated from Admin > AI & GEO
+
 User-agent: *
 Allow: /
+Disallow: /admin
+Disallow: /api/auth.php
+Disallow: /api/upload.php
+Disallow: /api/test-email.php
+Disallow: /api/health.php
+Disallow: /api/seo-health.php
+Disallow: /api/contact.php
 
-# AI crawlers
+# AI search & assistant crawlers
 User-agent: GPTBot
 Allow: /
+Disallow: /admin
+Disallow: /api/auth.php
+Disallow: /api/upload.php
+Disallow: /api/test-email.php
+Disallow: /api/health.php
+Disallow: /api/seo-health.php
+Disallow: /api/contact.php
+
+User-agent: OAI-SearchBot
+Allow: /
+Disallow: /admin
+Disallow: /api/auth.php
+Disallow: /api/upload.php
+Disallow: /api/test-email.php
+Disallow: /api/health.php
+Disallow: /api/seo-health.php
+Disallow: /api/contact.php
+
+User-agent: ChatGPT-User
+Allow: /
+Disallow: /admin
+Disallow: /api/auth.php
+Disallow: /api/upload.php
+Disallow: /api/test-email.php
+Disallow: /api/health.php
+Disallow: /api/seo-health.php
+Disallow: /api/contact.php
+
 User-agent: ClaudeBot
 Allow: /
+Disallow: /admin
+Disallow: /api/auth.php
+Disallow: /api/upload.php
+Disallow: /api/test-email.php
+Disallow: /api/health.php
+Disallow: /api/seo-health.php
+Disallow: /api/contact.php
+
+User-agent: Claude-SearchBot
+Allow: /
+Disallow: /admin
+Disallow: /api/auth.php
+Disallow: /api/upload.php
+Disallow: /api/test-email.php
+Disallow: /api/health.php
+Disallow: /api/seo-health.php
+Disallow: /api/contact.php
+
+User-agent: Claude-User
+Allow: /
+Disallow: /admin
+Disallow: /api/auth.php
+Disallow: /api/upload.php
+Disallow: /api/test-email.php
+Disallow: /api/health.php
+Disallow: /api/seo-health.php
+Disallow: /api/contact.php
+
 User-agent: PerplexityBot
 Allow: /
+Disallow: /admin
+Disallow: /api/auth.php
+Disallow: /api/upload.php
+Disallow: /api/test-email.php
+Disallow: /api/health.php
+Disallow: /api/seo-health.php
+Disallow: /api/contact.php
+
+User-agent: Perplexity-User
+Allow: /
+Disallow: /admin
+Disallow: /api/auth.php
+Disallow: /api/upload.php
+Disallow: /api/test-email.php
+Disallow: /api/health.php
+Disallow: /api/seo-health.php
+Disallow: /api/contact.php
+
 User-agent: Google-Extended
 Allow: /
+Disallow: /admin
+Disallow: /api/auth.php
+Disallow: /api/upload.php
+Disallow: /api/test-email.php
+Disallow: /api/health.php
+Disallow: /api/seo-health.php
+Disallow: /api/contact.php
 
+User-agent: Applebot-Extended
+Allow: /
+Disallow: /admin
+Disallow: /api/auth.php
+Disallow: /api/upload.php
+Disallow: /api/test-email.php
+Disallow: /api/health.php
+Disallow: /api/seo-health.php
+Disallow: /api/contact.php
+
+User-agent: Amazonbot
+Allow: /
+Disallow: /admin
+Disallow: /api/auth.php
+Disallow: /api/upload.php
+Disallow: /api/test-email.php
+Disallow: /api/health.php
+Disallow: /api/seo-health.php
+Disallow: /api/contact.php
+
+User-agent: meta-externalagent
+Allow: /
+Disallow: /admin
+Disallow: /api/auth.php
+Disallow: /api/upload.php
+Disallow: /api/test-email.php
+Disallow: /api/health.php
+Disallow: /api/seo-health.php
+Disallow: /api/contact.php
+
+User-agent: CCBot
+Allow: /
+Disallow: /admin
+Disallow: /api/auth.php
+Disallow: /api/upload.php
+Disallow: /api/test-email.php
+Disallow: /api/health.php
+Disallow: /api/seo-health.php
+Disallow: /api/contact.php
+
+User-agent: Bytespider
+Allow: /
+Disallow: /admin
+Disallow: /api/auth.php
+Disallow: /api/upload.php
+Disallow: /api/test-email.php
+Disallow: /api/health.php
+Disallow: /api/seo-health.php
+Disallow: /api/contact.php
+
+# Plain-language summary of this business for AI assistants: https://www.analysisofkarma.com/llms.txt
 Sitemap: https://www.analysisofkarma.com/sitemap.xml

@@ -49,6 +49,46 @@ function site_data(): ?array {
     return null;
 }
 
+// ---------- Admin session (server-side login; see api/auth.php) ----------
+// Sessions are only started when the admin cookie is present, so ordinary visitors never get one.
+function aok_https(): bool {
+    return (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off')
+        || strtolower($_SERVER['HTTP_X_FORWARDED_PROTO'] ?? '') === 'https';
+}
+
+function aok_session_start(): void {
+    if (session_status() === PHP_SESSION_ACTIVE) return;
+    session_name('aok_admin');
+    session_set_cookie_params(['lifetime' => 0, 'path' => '/', 'secure' => aok_https(), 'httponly' => true, 'samesite' => 'Lax']);
+    session_start();
+}
+
+function is_admin(): bool {
+    if (session_status() !== PHP_SESSION_ACTIVE) {
+        if (empty($_COOKIE['aok_admin'])) return false;
+        aok_session_start();
+    }
+    return !empty($_SESSION['aok_admin']);
+}
+
+// Stops the request with 401/403 unless the caller is the logged-in admin.
+// Any non-GET request must also carry the session's CSRF token in the X-AOK-CSRF header.
+function require_admin(): void {
+    if (!is_admin()) json_out(['ok' => false, 'error' => 'not_logged_in'], 401);
+    if ($_SERVER['REQUEST_METHOD'] !== 'GET') {
+        $sent = $_SERVER['HTTP_X_AOK_CSRF'] ?? '';
+        if ($sent === '' || !hash_equals((string)($_SESSION['aok_csrf'] ?? ''), $sent)) {
+            json_out(['ok' => false, 'error' => 'bad_csrf'], 403);
+        }
+    }
+}
+
+// What the public (and search engines) may see of the site data: never credentials or client leads.
+function public_payload(array $d): array {
+    unset($d['adminPass'], $d['leads']);
+    return $d;
+}
+
 // Resolve the recipient + from address: admin-managed values win, config constants are the fallback
 function mail_settings(?array $site = null): array {
     if ($site === null) $site = site_data();

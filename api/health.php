@@ -1,8 +1,9 @@
 <?php
 // One-time diagnostic. Visit https://yourdomain.com/api/health.php in your browser.
 // It tells you exactly why saving might be failing. DELETE this file when done.
-require_once __DIR__ . '/config.php';
+require_once __DIR__ . '/db.php';
 header('Content-Type: text/plain; charset=utf-8');
+if (!is_admin()) { http_response_code(403); exit("Log in to the admin first, then open this page.\n"); }
 
 echo "Analysis of Karma — health check\n";
 echo "================================\n\n";
