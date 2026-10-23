@@ -24,5 +24,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' || (($_GET['action'] ?? '') === 'write
 }
 
 header('Content-Type: application/xml; charset=utf-8');
+header('X-AOK-Generated: sitemap');
 header('X-Robots-Tag: noindex');
 echo $xml;

@@ -268,6 +268,26 @@ function aok_with_location(string $title, array $d): string {
     return $t;
 }
 
+// "Title | Brand", unless that is too long for Google (~65 chars): then the title alone
+// (Google shows the site name above each result anyway). Mirrors fitBrand() in assets/app.js.
+function aok_fit_brand(string $title, string $brand): string {
+    $t = $title . ' | ' . $brand;
+    return mb_strlen($t, 'UTF-8') > 65 && $title !== '' ? $title : $t;
+}
+
+// A custom page's description: its own, else its text blocks, else the site description
+function aok_page_description(array $d, array $pg): string {
+    $own = trim((string)($pg['metaDescription'] ?? ''));
+    if ($own !== '') return $own;
+    $parts = [];
+    foreach ((array)aok_get($d, 'blocks', []) as $k => $blocks) {
+        if ($k !== 'page:' . ($pg['id'] ?? '')) continue;
+        foreach ((array)$blocks as $b) foreach (['text', 'caption'] as $f) if (!empty($b[$f]) && is_string($b[$f])) $parts[] = aok_text($b[$f]);
+    }
+    $t = trim(implode(' ', $parts));
+    return $t !== '' ? aok_cut($t, 158) : (string)aok_get($d, 'seo.home.metaDescription', '');
+}
+
 function aok_brand(array $d): string {
     return (string)(aok_get($d, 'local.businessName') ?: aok_get($d, 'brand.name', 'Analysis of Karma'));
 }
@@ -294,15 +314,15 @@ function aok_meta(array $d, array $r): array {
         if (!empty($s['noindex'])) $m['robots'] = 'noindex, follow';
     } elseif ($t === 'post') {
         $p = $r['item'];
-        $m['title'] = aok_text($p['title'] ?? '') . ' | ' . $brand;
+        $m['title'] = aok_fit_brand(aok_text($p['title'] ?? ''), $brand);
         $m['description'] = aok_cut(aok_text($p['excerpt'] ?? ''), 158);
         $m['robots'] = (string)($p['robots'] ?? '') ?: 'index, follow';
         $m['ogType'] = 'article';
         if (!empty($p['image'])) $m['image'] = aok_abs($base, $p['image']);
         if (!empty($p['canonical'])) $m['canonical'] = aok_abs($base, $p['canonical']);
     } elseif ($t === 'page') {
-        $m['title'] = aok_text($r['item']['title'] ?? '') . ' | ' . $brand;
-        $m['description'] = (string)aok_get($d, 'seo.home.metaDescription', '');
+        $m['title'] = aok_fit_brand(aok_text($r['item']['title'] ?? ''), $brand);
+        $m['description'] = aok_page_description($d, $r['item']);
     } elseif ($t === 'admin') {
         $m['title'] = 'Admin | ' . $brand; $m['robots'] = 'noindex, nofollow'; $m['canonical'] = '';
     } else {

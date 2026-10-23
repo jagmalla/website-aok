@@ -1,0 +1,2 @@
+# Live database settings stay on the server only (template: api/config.sample.php)
+api/config.php

@@ -1,6 +1,6 @@
 <?php
-// One-time diagnostic. Visit https://yourdomain.com/api/health.php in your browser.
-// It tells you exactly why saving might be failing. DELETE this file when done.
+// Database diagnostic for the admin: visit https://yourdomain.com/api/health.php while logged in.
+// It tells you exactly why saving might be failing. (Admin -> SEO Health covers everything else.)
 require_once __DIR__ . '/db.php';
 header('Content-Type: text/plain; charset=utf-8');
 if (!is_admin()) { http_response_code(403); exit("Log in to the admin first, then open this page.\n"); }
@@ -21,8 +21,8 @@ try {
 
     $hasData  = count($pdo->query("SHOW TABLES LIKE 'aok_site_data'")->fetchAll()) > 0;
     $hasLeads = count($pdo->query("SHOW TABLES LIKE 'aok_leads'")->fetchAll()) > 0;
-    echo ($hasData  ? "[OK]   Table 'aok_site_data' exists.\n" : "[FAIL] Table 'aok_site_data' is MISSING.\n         -> Run install.php once (see below).\n");
-    echo ($hasLeads ? "[OK]   Table 'aok_leads' exists.\n"     : "[FAIL] Table 'aok_leads' is MISSING.\n         -> Run install.php once (see below).\n");
+    echo ($hasData  ? "[OK]   Table 'aok_site_data' exists.\n" : "[FAIL] Table 'aok_site_data' is MISSING.\n         -> Log in at /admin once: the tables are created automatically.\n");
+    echo ($hasLeads ? "[OK]   Table 'aok_leads' exists.\n"     : "[FAIL] Table 'aok_leads' is MISSING.\n         -> Log in at /admin once: the tables are created automatically.\n");
 
     try {
         $pdo->exec("CREATE TABLE IF NOT EXISTS aok_health_test (id INT PRIMARY KEY)");
@@ -35,15 +35,10 @@ try {
         echo "            add your user to the database and tick ALL PRIVILEGES.\n";
     }
 
-    if (!$hasData || !$hasLeads) {
-        $key = 'setup_' . substr(md5(DB_PASS), 0, 8);
-        echo "\nTo create the missing tables, open:\n";
-        echo "   https://" . ($_SERVER['HTTP_HOST'] ?? 'yourdomain.com') . "/install.php?key=" . $key . "\n";
-    }
 } catch (Exception $e) {
     echo "[FAIL] Cannot connect to the database:\n       " . $e->getMessage() . "\n\n";
     echo "       Fix the values in api/config.php (use the FULL cPanel-prefixed names,\n";
     echo "       e.g. cpaneluser_dbname / cpaneluser_dbuser), then reload this page.\n";
 }
 
-echo "\n(Delete this file, api/health.php, once everything shows [OK].)\n";
+echo "\nEverything else (rewrites, files, SEO): Admin -> SEO Health.\n";

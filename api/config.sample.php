@@ -1,5 +1,8 @@
 <?php
-// Database credentials — fill in your A2 Hosting values
+// TEMPLATE. On a new server, copy this file to api/config.php and fill in your A2 Hosting values.
+// (The real api/config.php is never part of an update, so uploading new files can't overwrite it.)
+
+// Database credentials
 define('DB_HOST', 'localhost');
 define('DB_NAME', '');
 define('DB_USER', '');

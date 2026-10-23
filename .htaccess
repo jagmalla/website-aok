@@ -38,7 +38,7 @@ RewriteRule ^ https://www.analysisofkarma.com%{REQUEST_URI} [R=301,L,NE]
 
 # ---- 2. Private files and folders
 RewriteRule ^(\.git|tools)(/|$) - [F,L]
-RewriteRule ^api/(config|db|seo-lib)\.php$ - [F,L]
+RewriteRule ^api/(config|config\.sample|db|seo-lib)\.php$ - [F,L]
 RewriteRule ^api/defaults\.json$ - [F,L]
 RewriteRule ^(DEPLOY\.md|HOW-TO-UPDATE\.txt)$ - [F,L]
 RewriteRule ^uploads/.*\.(php\d?|phtml|phar|cgi|pl)$ - [F,L,NC]

@@ -16,6 +16,7 @@ const AOK_MAX_FAILS = 8;          // failed attempts allowed per IP ...
 const AOK_LOCK_MINUTES = 15;      // ... within this window
 
 function auth_tables(): void {
+    aok_ensure_tables();
     db()->exec("CREATE TABLE IF NOT EXISTS aok_auth (id INT PRIMARY KEY, pass_hash VARCHAR(255) NOT NULL, updated_at DATETIME)");
     db()->exec("CREATE TABLE IF NOT EXISTS aok_login_attempts (ip VARCHAR(64) PRIMARY KEY, fails INT NOT NULL DEFAULT 0, last_at DATETIME)");
 }

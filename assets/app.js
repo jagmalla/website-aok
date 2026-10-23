@@ -417,12 +417,17 @@ class Component extends DCLogic {
   withLocation(title){ const L=this.state.data.local||{}; if(L.locationInTitles===false||!L.locality||!title) return title; if(title.toLowerCase().indexOf(String(L.locality).toLowerCase())>-1) return title; const label=L.locality+(L.regionCode?', '+L.regionCode:''); const i=title.indexOf(' | '); if(i<0) return title+' \u00b7 '+label; const t=title.slice(0,i)+' \u00b7 '+label+title.slice(i);
     // too long for Google (~65 chars)? drop a trailing "| brand" segment only (Google shows the site name anyway); keyword text is never removed
     const j=t.lastIndexOf(' | '); return (t.length>65&&j>-1&&t.slice(j+3).toLowerCase().indexOf(this.brandName().toLowerCase())>-1)?t.slice(0,j):t; }
+  // "Title | Brand" unless too long for Google (~65 chars) — mirrors aok_fit_brand in api/seo-lib.php
+  fitBrand(title,brand){ const t=title+' | '+brand; return t.length>65&&title?title:t; }
+  pageDescription(pg){ if((pg.metaDescription||'').trim()) return pg.metaDescription.trim(); const blocks=((this.state.data.blocks||{})['page:'+pg.id])||[]; const parts=[];
+    blocks.forEach(b=>{ ['text','caption'].forEach(f=>{ if(b&&typeof b[f]==='string'&&b[f]) parts.push(this.txt(b[f])); }); }); const t=parts.join(' ').trim();
+    return t?this.cut(t,158):((this.state.data.seo&&this.state.data.seo.home&&this.state.data.seo.home.metaDescription)||''); }
   headMeta(){ const d=this.state.data, r=this.state.route, brand=this.brandName(); const base=String(d.siteUrl||'https://www.analysisofkarma.com').replace(/\/$/,'').replace(/^http:/,'https:');
     const m={title:brand,description:(d.seo.home&&d.seo.home.metaDescription)||'',robots:'index, follow',canonical:base+this.routePath()};
     if(['home','about','services','meditation','blog','contact','faq'].indexOf(r)>-1&&!(r==='blog'&&this.state.postId)){ const sc=d.seo[r]||{}; m.title=sc.title||brand; if(r!=='blog') m.title=this.withLocation(m.title); if(sc.metaDescription) m.description=sc.metaDescription; m.robots=sc.robots||'index, follow'; if(r==='faq'&&!sc.title) m.title=this.txt(d.faqPage.hero.title)+' | '+brand; }
     else if(r==='service'){ const s=(d.services||[]).find(x=>x.id===this.state.serviceId)||{}; m.title=(s.seoTitle||'').trim()||this.withLocation(this.txt(s.title)+' | '+brand); m.description=(s.seoDescription||'').trim()||this.cut(this.txt(s.desc),158); if(s.canonical) m.canonical=/^https?:/.test(s.canonical)?s.canonical:base+'/'+String(s.canonical).replace(/^\//,''); if(s.noindex) m.robots='noindex, follow'; }
-    else if(r==='blog'&&this.state.postId){ const p=(d.blog||[]).find(x=>x.id===this.state.postId)||{}; m.title=this.txt(p.title)+' | '+brand; m.description=this.cut(this.txt(p.excerpt),158); m.robots=p.robots||'index, follow'; if(p.canonical) m.canonical=/^https?:/.test(p.canonical)?p.canonical:base+'/'+String(p.canonical).replace(/^\//,''); }
-    else if(r==='page'){ const pg=(d.pages||[]).find(x=>x.id===this.state.pageId)||{}; m.title=this.txt(pg.title)+' | '+brand; }
+    else if(r==='blog'&&this.state.postId){ const p=(d.blog||[]).find(x=>x.id===this.state.postId)||{}; m.title=this.fitBrand(this.txt(p.title),brand); m.description=this.cut(this.txt(p.excerpt),158); m.robots=p.robots||'index, follow'; if(p.canonical) m.canonical=/^https?:/.test(p.canonical)?p.canonical:base+'/'+String(p.canonical).replace(/^\//,''); }
+    else if(r==='page'){ const pg=(d.pages||[]).find(x=>x.id===this.state.pageId)||{}; m.title=this.fitBrand(this.txt(pg.title),brand); m.description=this.pageDescription(pg); }
     else if(r==='admin'){ m.title='Admin | '+brand; m.robots='noindex, nofollow'; m.canonical=''; }
     else if(r==='notfound'){ m.title='Page not found | '+brand; m.robots='noindex, follow'; m.canonical=''; }
     return m; }
@@ -2050,7 +2055,8 @@ class Component extends DCLogic {
   tabHealth(){ const h=React.createElement,P=this.P; const x=this.live('/api/seo-health.php'); let j=null; try{ j=JSON.parse(x.text||'null'); }catch(e){}
     // checks only the browser can do: are the live files really reachable?
     const probes=[['/robots.txt','robots.txt is served live',t=>/User-agent/i.test(t)],['/sitemap.xml','sitemap.xml is served live',t=>/<urlset/.test(t)],['/llms.txt','llms.txt is served live',t=>/^# /.test(t)],['/services','Pages are rendered on the server (crawlers see real content)',t=>t.indexOf('aok-ssr')>-1],['/this-page-should-not-exist-404','Unknown addresses return a real 404',(t,s)=>s===404]];
-    const probeChecks=probes.map(p=>{ const r=this.live(p[0]); return {group:'Crawl files',status:r.loading?'info':(p[2](r.text||'',r.status)?'ok':'fail'),title:p[1],detail:r.loading?'Checking…':(p[2](r.text||'',r.status)?'':'Not working yet — upload the new .htaccess and render.php (see DEPLOY.md).')}; });
+    // the server checks the same things itself (Server setup group); the browser probes are the fallback
+    const probeChecks=(j&&j.selfCheck)?[]:(x.loading?[]:probes).map(p=>{ const r=this.live(p[0]); return {group:'Crawl files',status:r.loading?'info':(p[2](r.text||'',r.status)?'ok':'fail'),title:p[1],detail:r.loading?'Checking…':(p[2](r.text||'',r.status)?'':'Not working yet — upload the new .htaccess and render.php (see DEPLOY.md).')}; });
     const checks=(j&&j.checks?j.checks:[]).concat(probeChecks);
     const weight={ok:1,warn:.5,fail:0}; const scored=checks.filter(c=>c.status in weight); const score=scored.length?Math.round(scored.reduce((a,c)=>a+weight[c.status],0)/scored.length*100):0;
     const groups=[]; checks.forEach(c=>{ if(groups.indexOf(c.group)<0) groups.push(c.group); });

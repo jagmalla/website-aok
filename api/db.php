@@ -1,4 +1,8 @@
 <?php
+if (!is_file(__DIR__ . '/config.php')) {
+    // render.php catches this and serves the plain page; API calls answer with a clear error
+    throw new RuntimeException('api/config.php is missing: copy api/config.sample.php to api/config.php and fill in the database details.');
+}
 require_once __DIR__ . '/config.php';
 
 function db(): PDO {
@@ -35,6 +39,13 @@ function json_out(array $data, int $code = 200): void {
 function json_in(): array {
     $raw = file_get_contents('php://input');
     return json_decode($raw, true) ?? [];
+}
+
+// Creates the database tables if they don't exist yet (called on admin login, so a fresh install
+// needs no separate setup script).
+function aok_ensure_tables(): void {
+    db()->exec("CREATE TABLE IF NOT EXISTS aok_site_data (id INT PRIMARY KEY, payload LONGTEXT, updated_at DATETIME) DEFAULT CHARSET=utf8mb4");
+    db()->exec("CREATE TABLE IF NOT EXISTS aok_leads (id INT AUTO_INCREMENT PRIMARY KEY, payload LONGTEXT, created_at DATETIME) DEFAULT CHARSET=utf8mb4");
 }
 
 // Load the saved site-data payload as an array (or null if none saved yet)

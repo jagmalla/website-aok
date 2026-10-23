@@ -20,4 +20,5 @@ $t .= "# Plain-language summary of this business for AI assistants: $base/llms.t
 $t .= "Sitemap: $base/sitemap.xml\n";
 
 header('Content-Type: text/plain; charset=utf-8');
+header('X-AOK-Generated: robots');   // lets Admin -> SEO Health tell the live file from the static backup
 echo $t;

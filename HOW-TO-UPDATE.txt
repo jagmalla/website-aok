@@ -20,6 +20,13 @@ WHAT'S NEW IN THIS UPDATE
       SEO Health        - one score with a to-do list
   • Each service now has "Page address, SEO & redirect" settings; each blog
     post has Canonical URL and 301 redirect fields.
+  • Every blog post links to its most relevant service pages (and back),
+    every service page and post ends with an "About the Astrologer" card
+    showing your training, and service and contact pages show "Service
+    Areas & Online Consultations" (Surrey, Burnaby, Richmond, Delta,
+    Langley, Abbotsford, BC, Canada and worldwide via Zoom & WhatsApp).
+  • Seven short FAQ answers are expanded to 50-55 words, the length AI
+    answer engines quote.
   • Faster: the logo is 13 KB instead of 2.4 MB, the website code is cached
     by browsers, and the 3D scene loads after the page (and is skipped on
     data-saver connections and low-memory phones).
@@ -28,14 +35,15 @@ WHAT'S NEW IN THIS UPDATE
     readable in the public site data.
 
 IMPORTANT: THIS UPDATE HAS MORE THAN ONE FILE
-  Full step-by-step instructions: see DEPLOY.md, section
-  "Upgrading the live site (SEO & security release)". In short:
+  Full step-by-step checklist: DEPLOY.md, "Part A - Upgrade the live site"
+  and "Part C - Verify the upload". In short:
 
   1. Back up: download your current .htaccess and api/config.php, and use
      Admin -> Settings -> Backup -> Export content.
-  2. Upload everything EXCEPT api/config.php (keep your live one):
-       index.html, render.php, sitemap.xml, robots.txt,
-       the assets/ files, and the api/ files listed in DEPLOY.md.
+  2. Upload the files listed in DEPLOY.md (Part A2) into public_html/,
+     public_html/assets/ and public_html/api/, with "Overwrite" ticked.
+     This update contains no api/config.php, so your live database
+     settings cannot be overwritten. Delete install.php if you still have it.
   3. Upload .htaccess LAST. If your old .htaccess had cPanel "php handler"
      lines, paste them into the marked block at the top of the new one first.
      (File Manager -> Settings -> "Show Hidden Files" to see .htaccess.)
@@ -44,7 +52,10 @@ IMPORTANT: THIS UPDATE HAS MORE THAN ONE FILE
   5. Change your password: Admin -> Settings -> Security.
      (Recommended, because the old one was publicly readable before.)
   6. Check the new tabs, add your phone number, click Save changes.
-  7. Open Admin -> SEO Health. "Crawl files" should be all green.
+  7. Open Admin -> SEO Health. The first group, "Server setup (after
+     upload)", should be all green; each red item says how to fix it.
+     If a card offers "Use the expanded answers" for the FAQ, click it
+     and Save.
   8. Hard-refresh: Ctrl+Shift+R (Cmd+Shift+R on Mac).
 
 IF SOMETHING GOES WRONG

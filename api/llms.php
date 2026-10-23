@@ -7,6 +7,7 @@ require_once __DIR__ . '/seo-lib.php';
 $d = aok_site();
 $full = !empty($_GET['full']);
 header('Content-Type: text/plain; charset=utf-8');
+header('X-AOK-Generated: llms');
 
 $override = trim((string)aok_get($d, $full ? 'ai.llmsFullOverride' : 'ai.llmsOverride', ''));
 if ($override !== '') { echo $override . "\n"; exit; }
