@@ -184,7 +184,7 @@ $root = realpath(__DIR__ . '/..');
 $add($G, version_compare(PHP_VERSION, '7.4', '>=') ? 'ok' : 'fail', 'PHP ' . PHP_VERSION . (version_compare(PHP_VERSION, '7.4', '>=') ? '' : ' — needs 7.4 or newer (cPanel → MultiPHP Manager)'));
 $ht = is_file($root . '/.htaccess') ? (string)file_get_contents($root . '/.htaccess') : '';
 $add($G, $ht === '' ? 'fail' : (strpos($ht, 'render.php') !== false ? 'ok' : 'warn'), $ht === '' ? '.htaccess is missing from the web root' : (strpos($ht, 'render.php') !== false ? '.htaccess is the new version' : '.htaccess is an old version'), $ht === '' || strpos($ht, 'render.php') === false ? 'Upload the new .htaccess (File Manager → Settings → Show Hidden Files).' : '');
-$missing = array_values(array_filter(['render.php', 'index.html', 'assets/app.js', 'assets/hero3d.js', 'api/seo-lib.php', 'api/defaults.json', 'api/robots.php', 'api/sitemap.php', 'api/llms.php', 'api/indexnow.php'], function ($f) use ($root) { return !is_file($root . '/' . $f); }));
+$missing = array_values(array_filter(['render.php', 'index.html', 'assets/app.js', 'assets/hero3d.js', 'api/seo-lib.php', 'api/upgrades.php', 'api/defaults.json', 'api/robots.php', 'api/sitemap.php', 'api/llms.php', 'api/indexnow.php'], function ($f) use ($root) { return !is_file($root . '/' . $f); }));
 $add($G, $missing ? 'fail' : 'ok', $missing ? 'Files missing on the server: ' . implode(', ', $missing) : 'All site files are in place');
 if (is_file($root . '/install.php')) $add($G, 'fail', 'install.php is still on the server', 'It is not needed any more — delete it in File Manager.');
 

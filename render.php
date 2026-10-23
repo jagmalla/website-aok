@@ -38,7 +38,8 @@ try {
 
     if ($r['type'] === 'redirect') {
         $to = $r['to'];
-        if (!preg_match('#^https?://#i', $to)) $to = '/' . ltrim($to, '/');
+        // absolute Location on the requested host (https + www on the live site, via .htaccess)
+        if (!preg_match('#^https?://#i', $to)) $to = (aok_https() ? 'https' : 'http') . '://' . preg_replace('/[^a-z0-9.:\-\[\]]/i', '', (string)($_SERVER['HTTP_HOST'] ?? 'www.analysisofkarma.com')) . '/' . ltrim($to, '/');
         header('Location: ' . $to, true, 301);
         exit;
     }

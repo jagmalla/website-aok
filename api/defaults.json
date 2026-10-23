@@ -165,6 +165,7 @@
   "indexNowAuto": true
  },
  "redirects": [],
+ "contentVersion": 2,
  "dupIgnore": [],
  "nav": {
   "items": [
@@ -401,6 +402,7 @@
    "title": "Career & Finance Consultation",
    "price": "$100 CAD",
    "desc": "Timing for job changes, business, and money decisions based on your dasha, transits and the houses of wealth and profession.",
+   "detail": "Your career consultation focuses on the houses and planets of work and wealth — the 10th house of profession, the 2nd and 11th of income and gains, the 6th of daily work, and key planets such as Saturn, Mercury and the Sun. We read your natural talents and ideal fields, and use your dashas and transits to time job changes, business decisions and investments.\n\nYou receive practical, prioritised guidance: where your strengths lie, which periods favour bold moves, and the remedies that support steady financial growth.",
    "image": null
   },
   {
@@ -409,6 +411,7 @@
    "title": "Dosha Analysis & Remedies",
    "price": "$100 CAD",
    "desc": "In-depth study of Mangal, Kaal Sarp, Pitra and other doshas — what they really mean for you, and the remedies that help.",
+   "detail": "Doshas cause a lot of needless worry. We examine your chart for Mangal (Manglik), Kaal Sarp, Pitra and other doshas, and tell you the truth: whether a dosha is genuinely present and strong, or mild and already cancelled by other placements.\n\nWhere a real dosha exists, we prescribe classical, practical remedies — specific mantras, charity, fasts, gemstones and rituals — matched to your chart. The goal is never fear; it is to balance the energy and move forward with confidence, especially around marriage and major decisions.",
    "image": null
   },
   {
@@ -417,6 +420,7 @@
    "title": "Gemstone Recommendation",
    "price": "$100 CAD",
    "desc": "Which gemstone genuinely suits your chart (and which to avoid), with the right finger, metal, weight and energising ritual.",
+   "detail": "Gemstones strengthen a beneficial planet, but the wrong stone can do harm — so this service begins with a careful study of your chart. We identify which planets need support and which stone (and which to avoid) is right for you, from ruby and pearl to yellow and blue sapphire, emerald, coral and diamond.\n\nYou receive clear guidance on the correct carat weight, metal and finger, and the day and mantra for energising and wearing it, so the gemstone works with your chart rather than against it.",
    "image": null
   },
   {
@@ -438,6 +442,7 @@
   {
    "id": "d13",
    "slug": "understanding-your-kundli",
+   "redirectTo": "/blog/ultimate-guide-birth-chart",
    "title": "Understanding your Kundli: a beginner’s guide to the Vedic birth chart",
    "date": "2026-05-22",
    "published": true,
@@ -450,6 +455,7 @@
   {
    "id": "d14",
    "slug": "mangal-dosha-truth",
+   "redirectTo": "/blog/mangal-dosha-myths-facts-remedies",
    "title": "Mangal Dosha: what it really means for marriage (and what it doesn’t)",
    "date": "2026-04-09",
    "published": true,
@@ -573,7 +579,7 @@
   },
   "services": {
    "focusKeyword": "Vedic astrology services",
-   "title": "Vedic Astrology Services | Kundli, Matching & Remedies — Jag Mallah",
+   "title": "Vedic Astrology Services | Kundli, Matching & Remedies",
    "metaDescription": "Vedic astrology services by Jag Mallah: birth chart readings, Kundli Milan marriage matching, dosha analysis, gemstone & meditation guidance. Book online.",
    "robots": "index, follow"
   },
@@ -591,14 +597,14 @@
   },
   "faq": {
    "focusKeyword": "Vedic astrology FAQ",
-   "title": "Vedic Astrology FAQ | Common Questions Answered — Jag Mallah",
+   "title": "Vedic Astrology FAQ | Common Questions Answered",
    "metaDescription": "Answers to common Vedic astrology questions — birth charts, Moon signs, remedies, Saturn return, compatibility and more, explained by astrologer Jag Mallah.",
    "robots": "index, follow"
   },
   "meditation": {
    "focusKeyword": "professional meditation guide",
    "title": "Professional Meditation Guide Jag Mallah | Analysis of Karma",
-   "metaDescription": "Jag Mallah is a professional meditation guide offering guided meditation, breathwork and mantra practice to calm the mind, steady the breath and deepen your spiritual path. Learn more.",
+   "metaDescription": "Professional meditation guide Jag Mallah offers guided meditation, breathwork and mantra practice to calm the mind and deepen your spiritual path.",
    "robots": "index, follow"
   }
  },
@@ -672,7 +678,8 @@
    "price": "$100 CAD",
    "desc": "Discover which gemstone genuinely suits your chart — with the right weight, metal, finger and energising ritual.",
    "detail": "Gemstones strengthen a beneficial planet, but the wrong stone can do harm — so this service begins with a careful study of your chart. We identify which planets need support and which stone (and which to avoid) is right for you, from ruby and pearl to yellow and blue sapphire, emerald, coral and diamond.\n\nYou receive clear guidance on the correct carat weight, metal and finger, and the day and mantra for energising and wearing it, so the gemstone works with your chart rather than against it.",
-   "image": null
+   "image": null,
+   "redirectTo": "/services/gemstone-recommendation"
   },
   {
    "id": "d23",
@@ -692,7 +699,8 @@
    "price": "$100 CAD",
    "desc": "Targeted guidance on your profession, business prospects, money timing and the right moves for growth.",
    "detail": "Your career report focuses on the houses and planets of work and wealth — the 10th house of profession, the 2nd and 11th of income and gains, the 6th of daily work, and key planets such as Saturn, Mercury and the Sun. We read your natural talents and ideal fields, and use your dashas and transits to time job changes, business decisions and investments.\n\nYou receive practical, prioritised guidance: where your strengths lie, which periods favour bold moves, and the remedies that support steady financial growth.",
-   "image": null
+   "image": null,
+   "redirectTo": "/services/career-and-finance-consultation"
   },
   {
    "id": "d25",
@@ -712,7 +720,8 @@
    "price": "$100 CAD",
    "desc": "Honest analysis of Mangal, Kaal Sarp, Pitra and other doshas — what they really mean and the remedies that help.",
    "detail": "Doshas cause a lot of needless worry. We examine your chart for Mangal (Manglik), Kaal Sarp, Pitra and other doshas, and tell you the truth: whether a dosha is genuinely present and strong, or mild and already cancelled by other placements.\n\nWhere a real dosha exists, we prescribe classical, practical remedies — specific mantras, charity, fasts, gemstones and rituals — matched to your chart. The goal is never fear; it is to balance the energy and move forward with confidence, especially around marriage and major decisions.",
-   "image": null
+   "image": null,
+   "redirectTo": "/services/dosha-analysis-and-remedies"
   },
   {
    "id": "d27",
@@ -746,7 +755,7 @@
    "focusKeyword": "birth chart",
    "robots": "index, follow",
    "excerpt": "Your birth chart is the map of who you are. Here is how to read its signs, planets and houses — step by step, without the jargon.",
-   "body": "Your birth chart — also called the natal chart or Kundli — is a snapshot of the sky at the precise moment you were born. Every planet was sitting in a particular sign and house, and that exact arrangement never repeats. It is the single most important tool in astrology.\n\nThree ingredients build the chart. The signs (Aries through Pisces) describe how energy expresses itself. The planets describe what kind of energy is at play — the Sun is identity, the Moon is emotion, Mercury is the mind, and so on. The houses, twelve slices of the chart, describe where in life that energy lands: money, marriage, career, health.\n\nThe Ascendant, or Rising sign, is your starting point — the sign on the eastern horizon at your birth. It frames the whole house system and is why two people born on the same day can feel so different. Once you know your Ascendant and the sign and house of each planet, the chart begins to read like a sentence.\n\nReading well takes practice, but you can start today: find your Sun, Moon and Rising, notice which houses hold the most planets, and look at where Saturn sits to understand your biggest lessons. From there, a personal consultation can connect the dots into one clear, practical story."
+   "body": "Your birth chart — also called the natal chart or Kundli — is a snapshot of the sky at the precise moment you were born. Every planet was sitting in a particular sign and house, and that exact arrangement never repeats. It is the single most important tool in astrology, and in classical Jyotish it is the foundation of every reading.\n\nThree ingredients build the chart. The signs (Aries through Pisces) describe how energy expresses itself. The planets describe what kind of energy is at play — the Sun is identity, the Moon is emotion, Mercury is the mind, and so on. The houses, twelve slices of the chart, describe where in life that energy lands: money, marriage, career, health.\n\nIn the Vedic chart, each of the twelve houses governs an area of life — self, wealth, courage, home, creativity, health, partnership, transformation, fortune, career, gains and liberation. The nine planets move through these houses and through the twenty-seven nakshatras, colouring each area with their nature.\n\nThe Ascendant, or Rising sign, is your starting point — the sign on the eastern horizon at your birth. It frames the whole house system and is why two people born on the same day can feel so different. Once you know your Ascendant and the sign and house of each planet, the chart begins to read like a sentence.\n\nReading a Vedic birth chart is less about prediction and more about understanding pattern and timing. The dasha system tells us which planet is shaping your current chapter. Remedies — mantra, gemstone, meditation — help you work with that energy rather than against it.\n\nReading well takes practice, but you can start today: find your Sun, Moon and Rising, notice which houses hold the most planets, and look at where Saturn sits to understand your biggest lessons. Know your ascendant and the planet ruling your present dasha, and the chart slowly begins to speak. From there, a personal consultation can connect the dots into one clear, practical story."
   },
   {
    "id": "d30",
@@ -842,7 +851,7 @@
    "focusKeyword": "Mangal Dosha",
    "robots": "index, follow",
    "excerpt": "Mangal Dosha causes more fear than it deserves. Here is a calm, classical look at what being Manglik really means — and the remedies that genuinely help.",
-   "body": "Few astrological terms cause as much panic as Mangal Dosha, also known as Kuja Dosha or being “Manglik.” It occurs when Mars sits in certain houses — the 1st, 4th, 7th, 8th or 12th — of the birth chart, and it is most often discussed around marriage.\n\nThe myths run wild: that a Manglik person brings misfortune, or that such a marriage is doomed. The facts are far gentler. Mangal Dosha is just one factor among many, and it is frequently cancelled or reduced by other placements in the chart. An experienced astrologer weighs the whole picture, not a single label. In many cases the so-called dosha is mild, or already neutralised.\n\nWhere a genuine, strong dosha exists, classical remedies are well established: specific Mars mantras, charitable acts, fasting on Tuesdays, and in some traditions matching with another Manglik chart so the effect is balanced. The goal is never fear — it is a steady, well-suited marriage. A proper Kundli Milan will tell you far more than the word “Manglik” ever could."
+   "body": "Few astrological terms cause as much panic as Mangal Dosha, also known as Kuja Dosha or being “Manglik.” It occurs when Mars sits in certain houses — the 1st, 4th, 7th, 8th or 12th — of the birth chart, and it is most often discussed around marriage. When a chart is called Manglik, families often worry.\n\nThe myths run wild: that a Manglik person brings misfortune, or that such a marriage is doomed. The facts are far gentler. Mangal Dosha is just one factor among many in marriage matching, and it is frequently cancelled or reduced by other placements in the chart. An experienced Vedic astrologer weighs the whole picture, not a single label. In many cases the so-called dosha is mild, or already neutralised.\n\nWhere a genuine, strong dosha exists, classical remedies are well established: specific Mars mantras, charitable acts, fasting on Tuesdays, and in some traditions matching with another Manglik chart so the effect is balanced. The goal is never fear — it is a steady, well-suited marriage. If Mangal Dosha is worrying you, a proper Kundli Milan will tell you far more than the word “Manglik” ever could."
   },
   {
    "id": "d38",

@@ -2,154 +2,107 @@
 
 User-agent: *
 Allow: /
+Allow: /api/data.php
+Disallow: /api/
 Disallow: /admin
-Disallow: /api/auth.php
-Disallow: /api/upload.php
-Disallow: /api/test-email.php
-Disallow: /api/health.php
-Disallow: /api/seo-health.php
-Disallow: /api/contact.php
 
-# AI search & assistant crawlers
+# Search engines
+User-agent: Googlebot
+Allow: /
+Allow: /api/data.php
+Disallow: /api/
+Disallow: /admin
+
+User-agent: Bingbot
+Allow: /
+Allow: /api/data.php
+Disallow: /api/
+Disallow: /admin
+
+# AI search & assistant crawlers (Admin > AI & GEO)
 User-agent: GPTBot
 Allow: /
+Allow: /api/data.php
+Disallow: /api/
 Disallow: /admin
-Disallow: /api/auth.php
-Disallow: /api/upload.php
-Disallow: /api/test-email.php
-Disallow: /api/health.php
-Disallow: /api/seo-health.php
-Disallow: /api/contact.php
 
 User-agent: OAI-SearchBot
 Allow: /
+Allow: /api/data.php
+Disallow: /api/
 Disallow: /admin
-Disallow: /api/auth.php
-Disallow: /api/upload.php
-Disallow: /api/test-email.php
-Disallow: /api/health.php
-Disallow: /api/seo-health.php
-Disallow: /api/contact.php
 
 User-agent: ChatGPT-User
 Allow: /
+Allow: /api/data.php
+Disallow: /api/
 Disallow: /admin
-Disallow: /api/auth.php
-Disallow: /api/upload.php
-Disallow: /api/test-email.php
-Disallow: /api/health.php
-Disallow: /api/seo-health.php
-Disallow: /api/contact.php
 
 User-agent: ClaudeBot
 Allow: /
+Allow: /api/data.php
+Disallow: /api/
 Disallow: /admin
-Disallow: /api/auth.php
-Disallow: /api/upload.php
-Disallow: /api/test-email.php
-Disallow: /api/health.php
-Disallow: /api/seo-health.php
-Disallow: /api/contact.php
 
 User-agent: Claude-SearchBot
 Allow: /
+Allow: /api/data.php
+Disallow: /api/
 Disallow: /admin
-Disallow: /api/auth.php
-Disallow: /api/upload.php
-Disallow: /api/test-email.php
-Disallow: /api/health.php
-Disallow: /api/seo-health.php
-Disallow: /api/contact.php
 
 User-agent: Claude-User
 Allow: /
+Allow: /api/data.php
+Disallow: /api/
 Disallow: /admin
-Disallow: /api/auth.php
-Disallow: /api/upload.php
-Disallow: /api/test-email.php
-Disallow: /api/health.php
-Disallow: /api/seo-health.php
-Disallow: /api/contact.php
 
 User-agent: PerplexityBot
 Allow: /
+Allow: /api/data.php
+Disallow: /api/
 Disallow: /admin
-Disallow: /api/auth.php
-Disallow: /api/upload.php
-Disallow: /api/test-email.php
-Disallow: /api/health.php
-Disallow: /api/seo-health.php
-Disallow: /api/contact.php
 
 User-agent: Perplexity-User
 Allow: /
+Allow: /api/data.php
+Disallow: /api/
 Disallow: /admin
-Disallow: /api/auth.php
-Disallow: /api/upload.php
-Disallow: /api/test-email.php
-Disallow: /api/health.php
-Disallow: /api/seo-health.php
-Disallow: /api/contact.php
 
 User-agent: Google-Extended
 Allow: /
+Allow: /api/data.php
+Disallow: /api/
 Disallow: /admin
-Disallow: /api/auth.php
-Disallow: /api/upload.php
-Disallow: /api/test-email.php
-Disallow: /api/health.php
-Disallow: /api/seo-health.php
-Disallow: /api/contact.php
 
 User-agent: Applebot-Extended
 Allow: /
+Allow: /api/data.php
+Disallow: /api/
 Disallow: /admin
-Disallow: /api/auth.php
-Disallow: /api/upload.php
-Disallow: /api/test-email.php
-Disallow: /api/health.php
-Disallow: /api/seo-health.php
-Disallow: /api/contact.php
 
 User-agent: Amazonbot
 Allow: /
+Allow: /api/data.php
+Disallow: /api/
 Disallow: /admin
-Disallow: /api/auth.php
-Disallow: /api/upload.php
-Disallow: /api/test-email.php
-Disallow: /api/health.php
-Disallow: /api/seo-health.php
-Disallow: /api/contact.php
 
 User-agent: meta-externalagent
 Allow: /
+Allow: /api/data.php
+Disallow: /api/
 Disallow: /admin
-Disallow: /api/auth.php
-Disallow: /api/upload.php
-Disallow: /api/test-email.php
-Disallow: /api/health.php
-Disallow: /api/seo-health.php
-Disallow: /api/contact.php
 
 User-agent: CCBot
 Allow: /
+Allow: /api/data.php
+Disallow: /api/
 Disallow: /admin
-Disallow: /api/auth.php
-Disallow: /api/upload.php
-Disallow: /api/test-email.php
-Disallow: /api/health.php
-Disallow: /api/seo-health.php
-Disallow: /api/contact.php
 
 User-agent: Bytespider
 Allow: /
+Allow: /api/data.php
+Disallow: /api/
 Disallow: /admin
-Disallow: /api/auth.php
-Disallow: /api/upload.php
-Disallow: /api/test-email.php
-Disallow: /api/health.php
-Disallow: /api/seo-health.php
-Disallow: /api/contact.php
 
 # Plain-language summary of this business for AI assistants: https://www.analysisofkarma.com/llms.txt
 Sitemap: https://www.analysisofkarma.com/sitemap.xml

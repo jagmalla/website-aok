@@ -14,9 +14,9 @@ WHAT'S NEW IN THIS UPDATE
       Practitioner      - your bio, training and expertise
       AI & GEO          - choose which AI assistants may read your site,
                           llms.txt, IndexNow
-      Redirects         - review possible duplicate services / blog posts and
-                          merge them yourself (nothing is merged automatically;
-                          every merge can be undone), plus custom redirects
+      Redirects         - the 3 duplicate services and 2 duplicate blog posts
+                          are merged into their main page (301 redirect, text
+                          kept); Undo restores any of them; custom redirects
       SEO Health        - one score with a to-do list
   • Each service now has "Page address, SEO & redirect" settings; each blog
     post has Canonical URL and 301 redirect fields.
@@ -26,7 +26,9 @@ WHAT'S NEW IN THIS UPDATE
     Areas & Online Consultations" (Surrey, Burnaby, Richmond, Delta,
     Langley, Abbotsford, BC, Canada and worldwide via Zoom & WhatsApp).
   • Seven short FAQ answers are expanded to 50-55 words, the length AI
-    answer engines quote.
+    answer engines quote, and three SEO titles/descriptions are shortened.
+    This happens by itself on the first page view after upload (answers
+    you edited yourself are left alone).
   • Faster: the logo is 13 KB instead of 2.4 MB, the website code is cached
     by browsers, and the 3D scene loads after the page (and is skipped on
     data-saver connections and low-memory phones).
@@ -54,8 +56,8 @@ IMPORTANT: THIS UPDATE HAS MORE THAN ONE FILE
   6. Check the new tabs, add your phone number, click Save changes.
   7. Open Admin -> SEO Health. The first group, "Server setup (after
      upload)", should be all green; each red item says how to fix it.
-     If a card offers "Use the expanded answers" for the FAQ, click it
-     and Save.
+     The score should be 99-100; adding your phone number (step 6)
+     takes it to 100.
   8. Hard-refresh: Ctrl+Shift+R (Cmd+Shift+R on Mac).
 
 IF SOMETHING GOES WRONG

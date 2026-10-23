@@ -1,13 +1,19 @@
 <?php
-if (!is_file(__DIR__ . '/config.php')) {
+require_once __DIR__ . '/upgrades.php';
+// AOK_OFFLINE (tools/build-static.php): no database; everything falls back to api/defaults.json
+if (defined('AOK_OFFLINE')) {
+    // no config needed
+} elseif (!is_file(__DIR__ . '/config.php')) {
     // render.php catches this and serves the plain page; API calls answer with a clear error
     throw new RuntimeException('api/config.php is missing: copy api/config.sample.php to api/config.php and fill in the database details.');
+} else {
+    require_once __DIR__ . '/config.php';
 }
-require_once __DIR__ . '/config.php';
 
 function db(): PDO {
     static $pdo = null;
     if ($pdo !== null) return $pdo;
+    if (defined('AOK_OFFLINE')) throw new RuntimeException('offline');
     $dsn = 'mysql:host=' . DB_HOST . ';dbname=' . DB_NAME . ';charset=utf8mb4';
     $pdo = new PDO($dsn, DB_USER, DB_PASS, [
         PDO::ATTR_ERRMODE            => PDO::ERRMODE_EXCEPTION,
@@ -54,9 +60,18 @@ function site_data(): ?array {
         $row = db()->query("SELECT payload FROM aok_site_data WHERE id = 1")->fetch();
         if ($row && !empty($row['payload'])) {
             $d = json_decode($row['payload'], true);
-            return is_array($d) ? $d : null;
+            if (!is_array($d)) return null;
+            // one-time content upgrades (api/upgrades.php), saved back so they run only once
+            if ((int)($d['contentVersion'] ?? 0) < AOK_CONTENT_VERSION) {
+                $d = aok_upgrade_payload($d);
+                if ((int)($d['contentVersion'] ?? 0) >= AOK_CONTENT_VERSION) {
+                    db()->prepare("UPDATE aok_site_data SET payload = :p, updated_at = NOW() WHERE id = 1")
+                        ->execute([':p' => json_encode($d, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES)]);
+                }
+            }
+            return $d;
         }
-    } catch (Exception $e) {}
+    } catch (Throwable $e) {}
     return null;
 }
 

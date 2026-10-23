@@ -6,24 +6,10 @@ cors();
 // POST /api/data.php  → save site JSON (admin session + CSRF required), return {ok:true}
 
 if ($_SERVER['REQUEST_METHOD'] === 'GET') {
-    try {
-        $row = db()->query("SELECT payload FROM aok_site_data WHERE id = 1")->fetch();
-        if ($row) {
-            header('Cache-Control: no-store');
-            if (is_admin()) {
-                header('Content-Type: application/json; charset=utf-8');
-                echo $row['payload'];   // full data (incl. leads) for the logged-in admin only
-            } else {
-                $d = json_decode($row['payload'], true);
-                json_out(is_array($d) ? public_payload($d) : ['ok' => false, 'error' => 'corrupt_data']);
-            }
-        } else {
-            json_out(['ok' => false, 'error' => 'no_data']);
-        }
-    } catch (Exception $e) {
-        json_out(['ok' => false, 'error' => $e->getMessage()], 500);
-    }
-    exit;
+    $d = site_data();   // includes the one-time content upgrades (api/upgrades.php)
+    header('Cache-Control: no-store');
+    if ($d === null) json_out(['ok' => false, 'error' => 'no_data']);
+    json_out(is_admin() ? $d : public_payload($d));   // full data (incl. leads) for the logged-in admin only
 }
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
@@ -34,6 +20,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         json_out(['ok' => false, 'error' => 'invalid_json'], 400);
     }
     unset($test['adminPass']);   // passwords live hashed in aok_auth, never in the site data
+    $test = aok_upgrade_payload($test);   // an editor opened before this release still gets the content upgrades
     // keep the IndexNow key the server created, if this save came from an editor opened before it existed
     $old = site_data();
     if (empty($test['ai']['indexNowKey']) && !empty($old['ai']['indexNowKey']) && isset($test['ai']) && is_array($test['ai'])) {
