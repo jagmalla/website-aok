@@ -76,6 +76,34 @@ input,textarea,select{max-width:100%}
 img{height:auto}
 *{-webkit-tap-highlight-color:rgba(199,154,62,.25)}
 
+/* ===== 3D cosmic layer ===== */
+#aok-cosmos{position:absolute;inset:0;z-index:0;pointer-events:none;overflow:hidden}
+#aok-cosmos canvas{display:block;width:100%!important;height:100%!important}
+/* CSS starfield fallback — shown if WebGL/Three.js is unavailable */
+.aok-cosmos-fallback{position:absolute;inset:0;z-index:0;
+  background:radial-gradient(1px 1px at 20% 30%,rgba(255,255,255,.7),transparent),
+             radial-gradient(1px 1px at 70% 60%,rgba(224,184,90,.7),transparent),
+             radial-gradient(1px 1px at 40% 80%,rgba(255,255,255,.5),transparent),
+             radial-gradient(1.5px 1.5px at 85% 20%,rgba(224,184,90,.6),transparent),
+             radial-gradient(1px 1px at 55% 15%,rgba(255,255,255,.6),transparent);
+  background-size:260px 260px,320px 320px,300px 300px,380px 380px,240px 240px;
+  opacity:.5;animation:aoktwinkle 6s ease-in-out infinite}
+@keyframes aoktwinkle{0%,100%{opacity:.35}50%{opacity:.6}}
+/* Glassmorphic surface — translucent, blurred, gold-edged */
+.aok-glass{background:rgba(18,22,48,.42);
+  -webkit-backdrop-filter:blur(14px) saturate(1.25);backdrop-filter:blur(14px) saturate(1.25);
+  border:1px solid rgba(224,184,90,.28);
+  box-shadow:0 12px 44px rgba(0,0,0,.4),inset 0 1px 0 rgba(255,255,255,.08)}
+/* Subtle 3D depth + smooth hover tilt for content cards */
+.aok-tilt{transition:transform .25s cubic-bezier(.22,.61,.36,1),box-shadow .25s ease;
+  transform-style:preserve-3d;will-change:transform}
+.aok-depth{box-shadow:0 10px 30px rgba(58,14,8,.10),0 2px 8px rgba(58,14,8,.06)}
+.aok-depth:hover{box-shadow:0 26px 60px rgba(58,14,8,.20),0 6px 16px rgba(58,14,8,.10)}
+@media (prefers-reduced-motion:reduce){
+  .aok-cosmos-fallback{animation:none}
+  .aok-tilt{transition:none!important}
+}
+
 </style>
 <!-- React 18.3.1 (production) from CDN, pinned with Subresource Integrity -->
 <script src="https://unpkg.com/react@18.3.1/umd/react.production.min.js"
@@ -84,6 +112,10 @@ img{height:auto}
 <script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.production.min.js"
   integrity="sha384-gTGxhz21lVGYNMcdJOyq01Edg0jhn/c22nsx0kyqP0TxaV5WVdsSH1fSDUf5YJj1"
   crossorigin="anonymous"></script>
+<!-- Three.js r160 (ES module) via CDN import map — no build step, pure browser import -->
+<script type="importmap">
+{ "imports": { "three": "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.min.js" } }
+</script>
 </head>
 <body>
 <div id="root"></div>
@@ -594,9 +626,10 @@ class Component extends DCLogic {
   renderHome(){ const h=React.createElement,P=this.P,d=this.state.data; const hero=d.home.hero;
     return h('main',{style:{animation:'aokfade .4s'}},
       // hero
-      h('section',{style:{background:'radial-gradient(circle at 18% 22%,rgba(199,154,62,.18),transparent 42%),radial-gradient(circle at 85% 12%,rgba(199,154,62,.12),transparent 38%),linear-gradient(160deg,'+P.maroon+','+P.maroonD+')',color:P.cream,position:'relative',overflow:'hidden'}},
-        h('div',{style:{position:'absolute',inset:0,backgroundImage:'radial-gradient(rgba(255,255,255,.45) 1px,transparent 1px)',backgroundSize:'34px 34px',opacity:.18}}),
-        this.wrap(h('div',{style:{display:'grid',gridTemplateColumns:'1.15fr .85fr',gap:48,alignItems:'center',padding:'76px 0 84px',position:'relative'}},
+      h('section',{style:{background:'radial-gradient(circle at 18% 20%,rgba(199,154,62,.20),transparent 46%),radial-gradient(circle at 82% 14%,rgba(125,31,18,.28),transparent 42%),radial-gradient(circle at 60% 90%,rgba(199,154,62,.10),transparent 50%),linear-gradient(165deg,#0b1030 0%,#0a0c24 45%,#05060f 100%)',color:P.cream,position:'relative',overflow:'hidden'}},
+        h('div',{className:'aok-cosmos-fallback','aria-hidden':'true'}),
+        h('div',{id:'aok-cosmos','aria-hidden':'true'}),
+        this.wrap(h('div',{style:{display:'grid',gridTemplateColumns:'1.15fr .85fr',gap:48,alignItems:'center',padding:'76px 0 84px',position:'relative',zIndex:2}},
           h('div',null,
             this.kicker(this.etextInline('home.hero.kicker'),P.goldL),
             this.etext('home.hero.h1',{tag:'h1',style:{font:'800 clamp(34px,4.4vw,56px) '+this.HEAD,lineHeight:1.06,letterSpacing:'-.02em',margin:'20px 0 0',color:P.white}}),
@@ -605,7 +638,7 @@ class Component extends DCLogic {
           h('div',{style:{position:'relative'}},
             h('div',{style:{position:'absolute',inset:-14,borderRadius:'50% 50% 48% 52%/52% 48% 52% 48%',border:'1px solid rgba(199,154,62,.4)',animation:'aokspin 50s linear infinite'}}),
             this.eimg('home.hero.image',{alt:d.seo.home.focusKeyword+' \u2014 Jag Mallah',placeholder:'astrologer\nportrait\n(replace in admin)',radius:'50% 50% 48% 52%/52% 48% 52% 48%',style:{aspectRatio:'4/5',boxShadow:'0 30px 60px rgba(0,0,0,.35)'}})))),
-        h('div',{style:{height:8,background:'linear-gradient(90deg,'+P.gold+','+P.red+','+P.gold+')'}})),
+        h('div',{style:{height:8,background:'linear-gradient(90deg,'+P.gold+','+P.red+','+P.gold+')',position:'relative',zIndex:2}})),
       this.gapBlocks('home::s1'),
       // services overview
       h('section',{style:{padding:'78px 0'}}, this.wrap(h('div',null,
@@ -633,7 +666,7 @@ class Component extends DCLogic {
     return React.createElement(this.EditableText,{key:path,html:this.getIn(this.state.data,path),tag:'span',editable:this.state.editMode,onCommit:h=>this.commit(path,h)}); }
 
   serviceCard(s,i){ const h=React.createElement,P=this.P;
-    return h('div',{key:s.id,onClick:()=>this.go('services'),style:{background:P.card,border:'1px solid '+P.line,borderRadius:16,padding:'26px 24px',cursor:'pointer',transition:'transform .18s, box-shadow .18s',animation:'aokfade .4s'},onMouseEnter:e=>{e.currentTarget.style.transform='translateY(-4px)';e.currentTarget.style.boxShadow='0 18px 40px rgba(58,14,8,.12)';},onMouseLeave:e=>{e.currentTarget.style.transform='none';e.currentTarget.style.boxShadow='none';}},
+    return h('div',{key:s.id,className:'aok-tilt aok-depth',onClick:()=>this.go('services'),style:{background:P.card,border:'1px solid '+P.line,borderRadius:16,padding:'26px 24px',cursor:'pointer',animation:'aokfade .4s'}},
       h('div',{style:{width:52,height:52,borderRadius:14,background:'linear-gradient(180deg,'+P.maroon+','+P.redD+')',color:P.goldL,display:'flex',alignItems:'center',justifyContent:'center',font:'400 26px '+this.HEAD,marginBottom:16}}, s.icon||'\u2609'),
       h('h3',{style:{font:'700 19px '+this.HEAD,color:P.maroon,margin:'0 0 8px'}}, s.title),
       h('p',{style:{font:'400 14.5px/1.6 DM Sans',color:P.muted,margin:0}}, s.desc)); }
@@ -1761,6 +1794,187 @@ class Component extends DCLogic {
 /* ---- mount ---- */
 const __root = ReactDOM.createRoot(document.getElementById('root'));
 __root.render(React.createElement(Component));
+</script>
+<!-- ===== Cosmic 3D hero engine (Three.js) + card tilt — pure browser ES module, no build ===== -->
+<script type="module">
+import * as THREE from 'three';
+
+/* Soft round sprite so star points render as glows, not squares */
+function starSprite(){
+  const c=document.createElement('canvas'); c.width=c.height=64;
+  const x=c.getContext('2d'); const g=x.createRadialGradient(32,32,0,32,32,32);
+  g.addColorStop(0,'rgba(255,255,255,1)'); g.addColorStop(.25,'rgba(255,248,230,.9)');
+  g.addColorStop(.55,'rgba(224,184,90,.35)'); g.addColorStop(1,'rgba(224,184,90,0)');
+  x.fillStyle=g; x.fillRect(0,0,64,64);
+  const t=new THREE.CanvasTexture(c); t.colorSpace=THREE.SRGBColorSpace; return t;
+}
+
+/* Build and run one cosmos instance bound to a container element.
+   Returns { el, dispose } so it can be torn down on SPA route changes. */
+function createCosmos(el){
+  let renderer;
+  const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const mobile = matchMedia('(max-width:760px),(pointer:coarse)').matches;
+  try{
+    renderer = new THREE.WebGLRenderer({ alpha:true, antialias:!mobile, powerPreference:'high-performance' });
+  }catch(e){ return null; } // WebGL unavailable -> CSS fallback stays visible
+  if(!renderer.getContext()){ return null; }
+
+  renderer.setPixelRatio(Math.min(devicePixelRatio||1, mobile?1.5:2));
+  renderer.domElement.style.pointerEvents='none';
+  el.appendChild(renderer.domElement);
+
+  const scene=new THREE.Scene();
+  const camera=new THREE.PerspectiveCamera(50,1,0.1,100);
+  camera.position.set(0,0,5.4);
+
+  const GOLD=0xc79a3e, GOLDL=0xe0b85a, WHITE=0xfff6e0, EMBER=0x7d1f12;
+
+  /* ---- Ambient starfield (two depth layers for parallax) ---- */
+  const sprite=starSprite();
+  function makeStars(count,spread,size,colorA,colorB,op){
+    const geo=new THREE.BufferGeometry();
+    const pos=new Float32Array(count*3), col=new Float32Array(count*3);
+    const a=new THREE.Color(colorA), b=new THREE.Color(colorB), tmp=new THREE.Color();
+    for(let i=0;i<count;i++){
+      pos[i*3]  =(Math.random()-.5)*spread;
+      pos[i*3+1]=(Math.random()-.5)*spread*0.62;
+      pos[i*3+2]=(Math.random()-.5)*spread*0.6 - 2;
+      tmp.copy(a).lerp(b,Math.random()); col[i*3]=tmp.r; col[i*3+1]=tmp.g; col[i*3+2]=tmp.b;
+    }
+    geo.setAttribute('position',new THREE.BufferAttribute(pos,3));
+    geo.setAttribute('color',new THREE.BufferAttribute(col,3));
+    const mat=new THREE.PointsMaterial({ size, map:sprite, vertexColors:true, transparent:true,
+      opacity:op, depthWrite:false, blending:THREE.AdditiveBlending, sizeAttenuation:true });
+    return new THREE.Points(geo,mat);
+  }
+  const starsFar  = makeStars(mobile?420:900, 26, 0.09, WHITE, GOLD, 0.9);
+  const starsNear = makeStars(mobile?140:300, 18, 0.16, GOLDL, WHITE, 0.95);
+  scene.add(starsFar, starsNear);
+
+  /* ---- Interactive celestial sphere + zodiac ring ---- */
+  const celestial=new THREE.Group();
+  celestial.position.set(mobile?0:1.25, mobile?0.2:0.35, 0);
+  scene.add(celestial);
+
+  const sphere=new THREE.LineSegments(
+    new THREE.EdgesGeometry(new THREE.IcosahedronGeometry(1.15,2)),
+    new THREE.LineBasicMaterial({ color:GOLD, transparent:true, opacity:0.34 }));
+  celestial.add(sphere);
+
+  const ring=new THREE.Group();
+  ring.rotation.x=1.15; ring.rotation.z=0.25;
+  celestial.add(ring);
+  ring.add(new THREE.Mesh(new THREE.TorusGeometry(1.72,0.012,8,140),
+    new THREE.MeshBasicMaterial({ color:GOLDL, transparent:true, opacity:0.75 })));
+  ring.add(new THREE.Mesh(new THREE.TorusGeometry(1.95,0.006,8,140),
+    new THREE.MeshBasicMaterial({ color:GOLD, transparent:true, opacity:0.35 })));
+  // 12 zodiac division markers around the ring
+  const markGeo=new THREE.OctahedronGeometry(0.052,0);
+  const markMat=new THREE.MeshBasicMaterial({ color:GOLDL, transparent:true, opacity:0.95 });
+  for(let i=0;i<12;i++){
+    const m=new THREE.Mesh(markGeo,markMat), ang=(i/12)*Math.PI*2;
+    m.position.set(Math.cos(ang)*1.72, Math.sin(ang)*1.72, 0); ring.add(m);
+  }
+  // Glowing core "sun"
+  const core=new THREE.Sprite(new THREE.SpriteMaterial({ map:sprite, color:GOLDL,
+    transparent:true, opacity:0.9, blending:THREE.AdditiveBlending, depthWrite:false }));
+  core.scale.set(1.5,1.5,1.5); celestial.add(core);
+  const halo=new THREE.Sprite(new THREE.SpriteMaterial({ map:sprite, color:EMBER,
+    transparent:true, opacity:0.5, blending:THREE.AdditiveBlending, depthWrite:false }));
+  halo.scale.set(3.6,3.6,3.6); celestial.add(halo);
+
+  /* ---- Mouse parallax ---- */
+  const target={x:0,y:0}, cur={x:0,y:0};
+  function onMove(e){
+    const p = e.touches? e.touches[0] : e;
+    target.x=(p.clientX/innerWidth-0.5); target.y=(p.clientY/innerHeight-0.5);
+  }
+  if(!reduce){ addEventListener('pointermove',onMove,{passive:true}); }
+
+  /* ---- Sizing: track the container, not just the window ---- */
+  function resize(){
+    const w=el.clientWidth||innerWidth, hgt=el.clientHeight||1;
+    renderer.setSize(w,hgt,false);
+    camera.aspect=w/Math.max(hgt,1); camera.updateProjectionMatrix();
+  }
+  /* ---- Render loop with FPS cap + pause when hidden/offscreen ---- */
+  const fps = reduce?0 : (mobile?30:60);
+  const interval = fps?1000/fps:Infinity;
+  let last=-Infinity, raf=0, inView=true, disposed=false;
+  const io=new IntersectionObserver(es=>{ inView=es.some(x=>x.isIntersecting); },{threshold:0});
+  io.observe(el);
+  const running=()=>inView && !document.hidden && el.isConnected;
+
+  function frame(now){
+    cur.x += (target.x-cur.x)*0.05; cur.y += (target.y-cur.y)*0.05;
+    starsFar.rotation.y  = now*0.000012 + cur.x*0.12;
+    starsFar.rotation.x  = cur.y*0.06;
+    starsNear.rotation.y = now*0.00003 + cur.x*0.28;
+    starsNear.rotation.x = cur.y*0.14;
+    celestial.rotation.y = now*0.00015 + cur.x*0.5;
+    celestial.rotation.x = -cur.y*0.35;
+    ring.rotation.y = now*0.00022;
+    camera.position.x = cur.x*0.6; camera.position.y = -cur.y*0.4;
+    camera.lookAt(scene.position);
+    const tw=0.85+Math.sin(now*0.0016)*0.15; core.material.opacity=0.9*tw;
+    renderer.render(scene,camera);
+  }
+  function loop(now){
+    if(disposed) return;
+    raf=requestAnimationFrame(loop);
+    if(!running()) return;
+    if(now-last<interval) return;
+    last=now;
+    frame(now);
+  }
+  // Keep canvas sized to the container (hero height changes with content/viewport);
+  // in reduced-motion mode a resize re-renders a single static frame.
+  const ro=new ResizeObserver(()=>{ resize(); if(reduce) frame(performance.now()); });
+  ro.observe(el); resize();
+
+  if(reduce){ frame(performance.now()); }
+  else { raf=requestAnimationFrame(loop); }
+
+  return { el, dispose(){
+    disposed=true; cancelAnimationFrame(raf);
+    try{ io.disconnect(); ro.disconnect(); removeEventListener('pointermove',onMove); }catch(e){}
+    scene.traverse(o=>{ if(o.geometry)o.geometry.dispose(); if(o.material){ (Array.isArray(o.material)?o.material:[o.material]).forEach(m=>{ if(m.map)m.map.dispose(); m.dispose(); }); } });
+    sprite.dispose(); renderer.dispose();
+    if(renderer.domElement.parentNode) renderer.domElement.parentNode.removeChild(renderer.domElement);
+  }};
+}
+
+/* Keep one cosmos alive for the current #aok-cosmos node, surviving SPA
+   route changes: mount when it appears, dispose when React removes it. */
+let instance=null;
+function sync(){
+  const el=document.getElementById('aok-cosmos');
+  if(instance && (instance.el!==el || !instance.el.isConnected)){ instance.dispose(); instance=null; }
+  if(el && !instance){ instance=createCosmos(el); }
+}
+const mo=new MutationObserver(()=>{ requestAnimationFrame(sync); });
+mo.observe(document.getElementById('root')||document.body,{childList:true,subtree:true});
+sync();
+
+/* ===== Subtle 3D hover tilt for .aok-tilt cards (pointer-driven) ===== */
+(function(){
+  if(matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+  if(matchMedia('(pointer:coarse)').matches) return; // skip on touch devices
+  const MAX=7;
+  function move(e){
+    const card=e.target.closest && e.target.closest('.aok-tilt'); if(!card) return;
+    const r=card.getBoundingClientRect();
+    const px=(e.clientX-r.left)/r.width-0.5, py=(e.clientY-r.top)/r.height-0.5;
+    card.style.transform='perspective(900px) rotateX('+(-py*MAX).toFixed(2)+'deg) rotateY('+(px*MAX).toFixed(2)+'deg) translateY(-4px)';
+  }
+  function leave(e){
+    const card=e.target.closest && e.target.closest('.aok-tilt'); if(!card) return;
+    card.style.transform='';
+  }
+  document.addEventListener('pointermove',move,{passive:true});
+  document.addEventListener('pointerout',leave,{passive:true});
+})();
 </script>
 </body>
 </html>
