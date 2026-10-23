@@ -69,9 +69,11 @@ try {
     $html = preg_replace('#<title>.*?</title>\s*#s', '', $tpl, 1);
     $html = preg_replace('#<meta name="description"[^>]*>\s*#', '', $html, 1);
     $html = str_replace('</head>', $head . '</head>', $html);
-    // cache-busting version for the app script (Step 8): /assets/app.js?v=<last change>
-    $app = __DIR__ . '/assets/app.js';
-    if (is_file($app)) $html = preg_replace('#(/assets/app\.js)\?v=[^"\']*#', '$1?v=' . filemtime($app), $html);
+    // cache-busting versions for the scripts: /assets/app.js?v=<last change>, /assets/hero3d.js?v=…
+    $html = preg_replace_callback('#/assets/([a-z0-9_-]+\.js)\?v=[^"\']*#i', function ($m) {
+        $f = __DIR__ . '/assets/' . $m[1];
+        return '/assets/' . $m[1] . '?v=' . (is_file($f) ? filemtime($f) : '1');
+    }, $html);
     $ssr = '<div class="aok-ssr">' . aok_html_header($d) . aok_main_html($d, $r) . aok_html_footer($d) . '</div>';
     $html = str_replace('<div id="root"></div>', '<div id="root">' . $ssr . '</div>', $html);
 
