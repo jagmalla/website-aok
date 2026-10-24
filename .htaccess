@@ -1,34 +1,24 @@
 # =====================================================================================
-#  Analysis of Karma — Apache rules (A2 Hosting / cPanel)
-# =====================================================================================
+#  Analysis of Karma — .htaccess (public_html) — FINAL VERSION
+#  SEO · AI search (GEO) · security · speed.  Replace the whole old file with this one.
 #
-#  >>> PASTE YOUR CPANEL / PHP HANDLER LINES HERE (if you have any) <<<
-#  If your current .htaccess on the server has lines such as
-#      # php -- BEGIN cPanel-generated handler, do not edit
-#      AddHandler application/x-httpd-ea-php82 .php .php8 .phtml
-#      # php -- END cPanel-generated handler, do not edit
-#  copy them here, unchanged, before uploading this file. (cPanel's "MultiPHP Manager"
-#  may also re-add them automatically.)
-#
-#  What this file does:
-#    1. Sends everyone to https://www.analysisofkarma.com (one canonical address)
-#    2. Blocks private files (configuration, tools, docs, PHP inside /uploads)
-#    3. Gives every page exactly one URL (no /index.html, no trailing slashes)
-#    4. Serves robots.txt, sitemap.xml, llms.txt and llms-full.txt live from your admin settings
-#    5. Sends every page URL to render.php, which builds the page on the server so search
-#       engines and AI assistants see your real content (and real 404s for unknown URLs)
-#    6. Compression, browser caching and basic security headers
+#  If cPanel ever adds lines between "# php -- BEGIN cPanel-generated handler" and
+#  "# php -- END cPanel-generated handler", leave them where cPanel puts them.
 # =====================================================================================
 
-Options -Indexes
+# ---- 0. Basics
+# no folder listings (e.g. /api/ or /uploads/ never show their files); no guessed file names
+Options -Indexes -MultiViews
+# the home page "/" is built by render.php, like every other page (real content for Google & AI)
 DirectoryIndex render.php index.html
 ErrorDocument 404 /render.php
+AddDefaultCharset UTF-8
 
 <IfModule mod_rewrite.c>
 RewriteEngine On
 RewriteBase /
 
-# ---- 1. One canonical address: https + www (production domain only, so test copies keep working)
+# ---- 1. One address for the whole site: https://www.analysisofkarma.com
 RewriteCond %{HTTP_HOST} ^(www\.)?analysisofkarma\.com$ [NC]
 RewriteCond %{HTTPS} !=on
 RewriteCond %{HTTP:X-Forwarded-Proto} !=https
@@ -36,8 +26,8 @@ RewriteRule ^ https://www.analysisofkarma.com%{REQUEST_URI} [R=301,L,NE]
 RewriteCond %{HTTP_HOST} ^analysisofkarma\.com$ [NC]
 RewriteRule ^ https://www.analysisofkarma.com%{REQUEST_URI} [R=301,L,NE]
 
-# ---- 2. Private files and folders
-# hidden files and folders (.git, .env, .user.ini, .gitignore …), except /.well-known/ for SSL certificates
+# ---- 2. Private files: never readable from the web
+# hidden files and folders (.git, .env, .user.ini …), except /.well-known/ (SSL certificates)
 RewriteRule (^|/)\.(?!well-known(/|$)) - [F,L]
 RewriteRule ^tools(/|$) - [F,L]
 # the PHP libraries and settings (also as /api/db.php/anything)
@@ -50,37 +40,67 @@ RewriteRule \.(bak|old|orig|save|swp|sql|log|tar|gz|tgz|7z|rar|zip)$ - [F,L,NC]
 # nothing in /uploads may run as a program (pictures only)
 RewriteRule ^uploads/.*\.(php\d?|phtml|phar|pht|phps|cgi|pl|py|sh|shtml|inc)(/|$) - [F,L,NC]
 
-# ---- 3. One URL per page
+# ---- 3. Attack probes: this site has no WordPress, phpMyAdmin or install scripts, so robots
+#         scanning for them are refused straight away (no PHP runs, the server stays fast)
+RewriteCond %{REQUEST_METHOD} ^(TRACE|TRACK)$
+RewriteRule ^ - [F,L]
+RewriteRule ^(wp-admin|wp-includes|wp-content|wp-json|phpmyadmin|pma|myadmin|adminer|cgi-bin|vendor|node_modules)(/|$) - [F,L,NC]
+RewriteRule ^(wp-login|xmlrpc|wp-config|wp-cron|wlwmanifest|setup-config|install|shell|eval-stdin)\.php$ - [F,L,NC]
+
+# ---- 4. One URL per page (no duplicate addresses in Google)
 RewriteCond %{THE_REQUEST} \s/+(index\.html|render\.php)[\s?] [NC]
 RewriteRule ^ / [R=301,L]
 RewriteCond %{REQUEST_FILENAME} !-d
 RewriteRule ^(.+)/$ /$1 [R=301,L]
 
-# ---- 4. SEO & AI files, generated live from the admin settings
+# ---- 5. SEO & AI-search files, generated live from your admin settings
+#         (AI crawlers such as GPTBot, ClaudeBot and PerplexityBot are NOT blocked here:
+#          who may read the site is decided in Admin -> AI & GEO, which writes robots.txt)
 RewriteRule ^robots\.txt$ api/robots.php [L]
 RewriteRule ^sitemap\.xml$ api/sitemap.php [L]
 RewriteRule ^llms\.txt$ api/llms.php [L]
 RewriteRule ^llms-full\.txt$ api/llms.php?full=1 [L,QSA]
 RewriteRule ^([a-f0-9]{32})\.txt$ api/indexnow.php?key=$1 [L]
 
-# ---- 5. Real files and folders are served as they are
+# ---- 6. Real files and folders are served as they are
 RewriteCond %{REQUEST_FILENAME} -f [OR]
 RewriteCond %{REQUEST_FILENAME} -d
 RewriteRule ^ - [L]
 
-# Missing images/scripts/fonts get a plain 404 (no page rendering needed)
+# missing images / scripts / fonts: a plain 404, no page needed
 RewriteRule \.(png|jpe?g|gif|webp|avif|svg|ico|css|js|mjs|map|woff2?|ttf|json|xml|pdf|zip)$ - [R=404,L,NC]
 
-# ---- 6. Every page URL is rendered on the server
+# ---- 7. Every page URL is built on the server (titles, structured data, real text, real 404s)
 RewriteRule ^ render.php [L,QSA]
 </IfModule>
 
-# ---- Compression
-<IfModule mod_deflate.c>
-  AddOutputFilterByType DEFLATE text/html text/plain text/css text/xml text/markdown application/javascript text/javascript application/json application/ld+json application/xml image/svg+xml
+# ---- 8. Second lock on the private files (works even without the rewrite rules above)
+<FilesMatch "^(config|config\.sample|db|seo-lib|upgrades|sync|discovery-lib)\.php$|^(defaults\.json|error_log|php_errorlog|php\.ini)$">
+  <IfModule mod_authz_core.c>
+    Require all denied
+  </IfModule>
+  <IfModule !mod_authz_core.c>
+    Order allow,deny
+    Deny from all
+  </IfModule>
+</FilesMatch>
+
+# ---- 9. Correct file types (fonts, modules, Markdown, modern images)
+<IfModule mod_mime.c>
+  AddType text/javascript .mjs
+  AddType font/woff2 .woff2
+  AddType text/markdown .md
+  AddType image/webp .webp
+  AddType image/avif .avif
 </IfModule>
 
-# ---- Caching (pages are always revalidated; files carry their own lifetimes)
+# ---- 10. Compression (faster pages = better Core Web Vitals)
+<IfModule mod_deflate.c>
+  AddOutputFilterByType DEFLATE text/html text/plain text/css text/xml text/markdown text/javascript application/javascript application/json application/ld+json application/xml image/svg+xml image/x-icon font/ttf
+</IfModule>
+
+# ---- 11. Browser caching (pages are always re-checked: render.php sends "no-cache";
+#           scripts carry a version in their address, so updates show at once)
 <IfModule mod_headers.c>
   <FilesMatch "\.(png|jpe?g|gif|webp|avif|svg|ico)$">
     Header set Cache-Control "public, max-age=2592000"
@@ -91,18 +111,17 @@ RewriteRule ^ render.php [L,QSA]
   <FilesMatch "\.(css|js|mjs)$">
     Header set Cache-Control "public, max-age=604800"
   </FilesMatch>
+  <FilesMatch "\.html$">
+    Header set Cache-Control "no-cache"
+  </FilesMatch>
 
-  # ---- Security headers (the PHP pages send these too, plus the Content-Security-Policy and, on the live
-  #      https domain, Strict-Transport-Security; "set" replaces theirs instead of sending them twice)
+# ---- 12. Security headers. The PHP pages send these too, plus the Content-Security-Policy and,
+#           on https://www.analysisofkarma.com, Strict-Transport-Security (HTTPS only).
+#           "set" replaces PHP's copy, so nothing is sent twice.
   Header set X-Content-Type-Options "nosniff"
   Header set Referrer-Policy "strict-origin-when-cross-origin"
   Header set X-Frame-Options "SAMEORIGIN"
   Header set Permissions-Policy "camera=(), microphone=(), geolocation=(), payment=(), usb=(), interest-cohort=()"
   Header unset X-Powered-By
-</IfModule>
-
-<IfModule mod_mime.c>
-  AddType text/markdown .md
-  AddType image/webp .webp
-  AddType image/avif .avif
+  Header always unset X-Powered-By
 </IfModule>

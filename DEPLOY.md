@@ -97,13 +97,18 @@ In File Manager, open each folder below, click **Upload**, tick
 - If `public_html/install.php` exists from an earlier setup, **delete it**. It is no
   longer used.
 
-### A3 — Upload `.htaccess` last
+### A3 — Replace `.htaccess` last
 
-- [ ] Open the new `.htaccess` in a text editor. If your **old** one had lines between
-      `# php -- BEGIN cPanel-generated handler` and
-      `# php -- END cPanel-generated handler`, paste those lines into the marked block
-      at the top of the new file and save it.
-- [ ] Upload it to `public_html/` (Overwrite).
+- [ ] cPanel → File Manager → `public_html` → **Settings → Show Hidden (dot) Files**.
+- [ ] Right-click `.htaccess` → **Edit**. Select everything (Ctrl+A), delete it, paste the
+      whole new `.htaccess` from this update, **Save Changes**. (Keep a copy of the old text
+      first, just in case.)
+- [ ] Only if your old file had lines between `# php -- BEGIN cPanel-generated handler`
+      and `# php -- END cPanel-generated handler`: paste those lines back at the very top.
+- [ ] Check: `https://www.analysisofkarma.com/` opens normally, and
+      `https://www.analysisofkarma.com/api/db.php` shows **403 Forbidden**. If every page
+      shows "500 Internal Server Error", delete the line `Options -Indexes -MultiViews`
+      and save again.
 
 ### A4 — Log in and secure the admin
 
