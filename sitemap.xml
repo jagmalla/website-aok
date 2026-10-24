@@ -2,26 +2,197 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <url>
     <loc>https://www.analysisofkarma.com/</loc>
-    <changefreq>monthly</changefreq>
+    <lastmod>2026-10-24</lastmod>
+    <changefreq>weekly</changefreq>
   </url>
   <url>
     <loc>https://www.analysisofkarma.com/about</loc>
+    <lastmod>2026-10-24</lastmod>
     <changefreq>monthly</changefreq>
   </url>
   <url>
     <loc>https://www.analysisofkarma.com/services</loc>
-    <changefreq>monthly</changefreq>
+    <lastmod>2026-10-24</lastmod>
+    <changefreq>weekly</changefreq>
   </url>
   <url>
     <loc>https://www.analysisofkarma.com/meditation</loc>
+    <lastmod>2026-10-24</lastmod>
     <changefreq>monthly</changefreq>
   </url>
   <url>
     <loc>https://www.analysisofkarma.com/blog</loc>
+    <lastmod>2026-10-24</lastmod>
     <changefreq>weekly</changefreq>
   </url>
   <url>
+    <loc>https://www.analysisofkarma.com/faq</loc>
+    <lastmod>2026-10-24</lastmod>
+    <changefreq>monthly</changefreq>
+  </url>
+  <url>
     <loc>https://www.analysisofkarma.com/contact</loc>
+    <lastmod>2026-10-24</lastmod>
+    <changefreq>monthly</changefreq>
+  </url>
+  <url>
+    <loc>https://www.analysisofkarma.com/services/kundli-birth-chart-reading</loc>
+    <lastmod>2026-10-24</lastmod>
+    <changefreq>monthly</changefreq>
+  </url>
+  <url>
+    <loc>https://www.analysisofkarma.com/services/kundli-milan-marriage-matching</loc>
+    <lastmod>2026-10-24</lastmod>
+    <changefreq>monthly</changefreq>
+  </url>
+  <url>
+    <loc>https://www.analysisofkarma.com/services/career-finance-consultation</loc>
+    <lastmod>2026-10-24</lastmod>
+    <changefreq>monthly</changefreq>
+  </url>
+  <url>
+    <loc>https://www.analysisofkarma.com/services/dosha-analysis-remedies</loc>
+    <lastmod>2026-10-24</lastmod>
+    <changefreq>monthly</changefreq>
+  </url>
+  <url>
+    <loc>https://www.analysisofkarma.com/services/gemstone-recommendation</loc>
+    <lastmod>2026-10-24</lastmod>
+    <changefreq>monthly</changefreq>
+  </url>
+  <url>
+    <loc>https://www.analysisofkarma.com/services/vedic-meditation-guidance</loc>
+    <lastmod>2026-10-24</lastmod>
+    <changefreq>monthly</changefreq>
+  </url>
+  <url>
+    <loc>https://www.analysisofkarma.com/services/horoscopes-daily-weekly-monthly</loc>
+    <lastmod>2026-10-24</lastmod>
+    <changefreq>monthly</changefreq>
+  </url>
+  <url>
+    <loc>https://www.analysisofkarma.com/services/birth-chart-generation</loc>
+    <lastmod>2026-10-24</lastmod>
+    <changefreq>monthly</changefreq>
+  </url>
+  <url>
+    <loc>https://www.analysisofkarma.com/services/love-or-arranged-marriage-astrology</loc>
+    <lastmod>2026-10-24</lastmod>
+    <changefreq>monthly</changefreq>
+  </url>
+  <url>
+    <loc>https://www.analysisofkarma.com/services/live-astrologer-consultation</loc>
+    <lastmod>2026-10-24</lastmod>
+    <changefreq>monthly</changefreq>
+  </url>
+  <url>
+    <loc>https://www.analysisofkarma.com/services/personalized-year-ahead-forecast</loc>
+    <lastmod>2026-10-24</lastmod>
+    <changefreq>monthly</changefreq>
+  </url>
+  <url>
+    <loc>https://www.analysisofkarma.com/services/muhurat-auspicious-timing</loc>
+    <lastmod>2026-10-24</lastmod>
+    <changefreq>monthly</changefreq>
+  </url>
+  <url>
+    <loc>https://www.analysisofkarma.com/services/vedic-astrology-jyotish-deep-dives</loc>
+    <lastmod>2026-10-24</lastmod>
+    <changefreq>monthly</changefreq>
+  </url>
+  <url>
+    <loc>https://www.analysisofkarma.com/services/karmic-past-life-astrology</loc>
+    <lastmod>2026-10-24</lastmod>
+    <changefreq>monthly</changefreq>
+  </url>
+  <url>
+    <loc>https://www.analysisofkarma.com/services/child-naming-astrology-report</loc>
+    <lastmod>2026-10-24</lastmod>
+    <changefreq>monthly</changefreq>
+  </url>
+  <url>
+    <loc>https://www.analysisofkarma.com/services/medical-astrology-holistic</loc>
+    <lastmod>2026-10-24</lastmod>
+    <changefreq>monthly</changefreq>
+  </url>
+  <url>
+    <loc>https://www.analysisofkarma.com/blog/ultimate-guide-birth-chart</loc>
+    <lastmod>2026-06-15</lastmod>
+    <changefreq>monthly</changefreq>
+  </url>
+  <url>
+    <loc>https://www.analysisofkarma.com/blog/sun-moon-rising-signs</loc>
+    <lastmod>2026-06-08</lastmod>
+    <changefreq>monthly</changefreq>
+  </url>
+  <url>
+    <loc>https://www.analysisofkarma.com/blog/zodiac-compatibility-best-worst-matches</loc>
+    <lastmod>2026-06-01</lastmod>
+    <changefreq>monthly</changefreq>
+  </url>
+  <url>
+    <loc>https://www.analysisofkarma.com/blog/mercury-retrograde-survival-guide</loc>
+    <lastmod>2026-05-20</lastmod>
+    <changefreq>monthly</changefreq>
+  </url>
+  <url>
+    <loc>https://www.analysisofkarma.com/blog/vedic-vs-western-astrology</loc>
+    <lastmod>2026-05-10</lastmod>
+    <changefreq>monthly</changefreq>
+  </url>
+  <url>
+    <loc>https://www.analysisofkarma.com/blog/saturn-return-explained</loc>
+    <lastmod>2026-04-28</lastmod>
+    <changefreq>monthly</changefreq>
+  </url>
+  <url>
+    <loc>https://www.analysisofkarma.com/blog/12-astrological-houses-explained</loc>
+    <lastmod>2026-04-15</lastmod>
+    <changefreq>monthly</changefreq>
+  </url>
+  <url>
+    <loc>https://www.analysisofkarma.com/blog/best-gemstones-zodiac-sign</loc>
+    <lastmod>2026-04-02</lastmod>
+    <changefreq>monthly</changefreq>
+  </url>
+  <url>
+    <loc>https://www.analysisofkarma.com/blog/mangal-dosha-myths-facts-remedies</loc>
+    <lastmod>2026-03-20</lastmod>
+    <changefreq>monthly</changefreq>
+  </url>
+  <url>
+    <loc>https://www.analysisofkarma.com/blog/full-moon-new-moon-vedic-astrology</loc>
+    <lastmod>2026-03-08</lastmod>
+    <changefreq>monthly</changefreq>
+  </url>
+  <url>
+    <loc>https://www.analysisofkarma.com/blog/career-astrology-midheaven</loc>
+    <lastmod>2026-02-22</lastmod>
+    <changefreq>monthly</changefreq>
+  </url>
+  <url>
+    <loc>https://www.analysisofkarma.com/blog/north-and-south-nodes-karmic-path</loc>
+    <lastmod>2026-02-10</lastmod>
+    <changefreq>monthly</changefreq>
+  </url>
+  <url>
+    <loc>https://www.analysisofkarma.com/blog/auspicious-dates-marriage-business</loc>
+    <lastmod>2026-01-28</lastmod>
+    <changefreq>monthly</changefreq>
+  </url>
+  <url>
+    <loc>https://www.analysisofkarma.com/blog/solar-return-charts</loc>
+    <lastmod>2026-01-15</lastmod>
+    <changefreq>monthly</changefreq>
+  </url>
+  <url>
+    <loc>https://www.analysisofkarma.com/blog/medical-astrology-body</loc>
+    <lastmod>2026-01-05</lastmod>
+    <changefreq>monthly</changefreq>
+  </url>
+  <url>
+    <loc>https://www.analysisofkarma.com/blog/meditation-and-remedies</loc>
+    <lastmod>2026-03-01</lastmod>
     <changefreq>monthly</changefreq>
   </url>
 </urlset>
