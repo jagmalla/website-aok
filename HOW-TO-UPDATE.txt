@@ -1,7 +1,21 @@
 ANALYSIS OF KARMA — Update (SEO, local SEO, AI search & security)
 ===================================================================
 
-NEW IN THIS VERSION (content version 3)
+NEW IN THIS VERSION (content version 5)
+  • Every service now opens its own full page, for example
+    /services/kundli-birth-chart-reading, with a 3D Pearl & Gold banner,
+    your original description, a direct-answer box, the classical
+    methodology, the chart factors, the 4 consultation steps, FAQs, the
+    About the Astrologer card and a booking form for that service, plus
+    WhatsApp and call buttons. The text comes from your Services document.
+  • 11 services have new page addresses from that document; the old
+    addresses forward to the new ones automatically (301 redirects).
+  • Clicking a service card, "Read more" or "Book this" opens the page
+    ("Book this" jumps straight to its booking form).
+  • Bookings from a service page arrive marked with the service name.
+  • Edit any service page in Admin -> Services -> Detailed description.
+
+EARLIER: CONTENT VERSION 3
   • Your phone & WhatsApp +1 (236) 660-2000 is in the header, footer,
     contact page and Google's structured data, with WhatsApp and Call
     buttons (a small floating bar on every page) and Google Maps and

@@ -39,8 +39,10 @@ class Component extends DCLogic {
   ensureSeedServices(){ const d=this.state.data; if(!d) return; const have={}; (d.services||[]).forEach(s=>{ if(s&&s.seedKey) have[s.seedKey]=1; }); const add=this.seedServices().filter(s=>!have[s.seedKey]); if(add.length){ this.save(this.setIn(d,'services',[...(d.services||[]),...add])); } }
   // The 5 duplicate pairs merged in content version 2 (duplicate → primary). The duplicates stay in the admin with a
   // 301 redirect (Admin → Redirects → Undo restores them); api/upgrades.php applies the same merge to saved sites.
-  contentMerges(){ return { services:{'career-finance-reports': '/services/career-and-finance-consultation', 'gemstone-services': '/services/gemstone-recommendation', 'dosha-remedies': '/services/dosha-analysis-and-remedies'}, posts:{'understanding-your-kundli': '/blog/ultimate-guide-birth-chart', 'mangal-dosha-truth': '/blog/mangal-dosha-myths-facts-remedies'} }; }
-  seedServices(){ const S=(seedKey,icon,title,price,desc,detail)=>({id:this.uid(),seedKey,icon,title,price,desc,detail,image:null}); return [
+  // Page address of each of the 16 services (content version 5); the old automatic addresses 301 here (api/upgrades.php)
+  serviceRoute(title){ return ({'Kundli / Birth Chart Reading':'kundli-birth-chart-reading','Kundli Milan \u2014 Marriage Matching':'kundli-milan-marriage-matching','Career & Finance Consultation':'career-finance-consultation','Dosha Analysis & Remedies':'dosha-analysis-remedies','Gemstone Recommendation':'gemstone-recommendation','Vedic Meditation Guidance':'vedic-meditation-guidance','Daily / Weekly / Monthly Horoscopes':'horoscopes-daily-weekly-monthly','Birth Chart (Natal Chart) Generation':'birth-chart-generation','Love or Arrange Marriage Possibilities':'love-or-arranged-marriage-astrology','Live Astrologer Consultations (Chat / Call / Video)':'live-astrologer-consultation','Personalized Year-Ahead Forecasts (Solar Return)':'personalized-year-ahead-forecast','Muhurat / Auspicious Timing Selection':'muhurat-auspicious-timing','Vedic Astrology (Jyotish) Deep Dives':'vedic-astrology-jyotish-deep-dives','Karmic & Past Life Astrology':'karmic-past-life-astrology','Newborn / Child Naming & Astrology Reports':'child-naming-astrology-report','Medical Astrology (Holistic / Overview)':'medical-astrology-holistic'})[title]||''; }
+  contentMerges(){ return { services:{'career-finance-reports': '/services/career-finance-consultation', 'gemstone-services': '/services/gemstone-recommendation', 'dosha-remedies': '/services/dosha-analysis-remedies'}, posts:{'understanding-your-kundli': '/blog/ultimate-guide-birth-chart', 'mangal-dosha-truth': '/blog/mangal-dosha-myths-facts-remedies'} }; }
+  seedServices(){ const S=(seedKey,icon,title,price,desc,detail)=>({id:this.uid(),seedKey,icon,title,...(this.serviceRoute(title)?{slug:this.serviceRoute(title)}:{}),price,desc,detail,image:null}); return [
     S('horoscopes','\u263d','Daily / Weekly / Monthly Horoscopes','$100 CAD','Clear daily, weekly and monthly horoscope guidance based on your Moon sign and current transits \u2014 practical, not generic.',
       'Our horoscopes go beyond one-size-fits-all sun-sign columns. Daily readings track the Moon\u2019s fast movement and the key transits so you know the mood of each day; weekly and monthly outlooks map the bigger themes shaping your work, relationships and wellbeing.\n\nFor the sharpest accuracy we read against your own Moon sign and birth chart rather than just your Sun sign, so the guidance actually fits your life. Use it to plan important conversations, pick good days for effort, and stay steady when the planets get busy.'),
     S('birth-chart-generation','\u2609','Birth Chart (Natal Chart) Generation','$100 CAD','A precise, accurate Vedic birth chart (Kundli) prepared from your exact birth details, ready for reading.',
@@ -76,13 +78,17 @@ class Component extends DCLogic {
       if(r==='notfound') return;   // keep the address the visitor typed
       const path=this.routePath();
       if(location.pathname!==path || location.hash){ history.replaceState(null,'',path); } }catch(e){} }
-  _routeFromUrl(data){ try{ const hash=(location.hash||'').toLowerCase(); if(hash==='#admin'||hash==='#/admin') return {route:'admin',postId:null,pageId:null};
+  _routeFromUrl(data,hops){ try{ const hash=(location.hash||'').toLowerCase(); if(hash==='#admin'||hash==='#/admin') return {route:'admin',postId:null,pageId:null};
       const parts=(location.pathname||'/').replace(/^\/+|\/+$/g,'').split('/').filter(Boolean);
+      // 301s in the browser too (old service addresses, merged pages), for servers still on an older .htaccess
+      const follow=to=>{ if((hops||0)>3||!/^\/[^/]/.test(to||'')) return null; history.replaceState(null,'',to+(location.hash||'')); return this._routeFromUrl(data,(hops||0)+1); };
+      const here='/'+parts.join('/').toLowerCase(); const red=((data&&data.redirects)||[]).find(r=>r&&r.from&&('/'+String(r.from).replace(/^\/+|\/+$/g,'')).toLowerCase()===here&&r.to);
+      if(red&&here!=='/'){ const r2=follow(String(red.to).trim()); if(r2) return r2; }
       if(!parts.length) return {route:'home',postId:null,pageId:null};
       if(parts[0]==='admin') return {route:'admin',postId:null,pageId:null};
       const none={route:'notfound',postId:null,pageId:null,serviceId:null};
       if(parts[0]==='blog'&&parts[1]){ const slug=decodeURIComponent(parts[1]); const post=((data&&data.blog)||[]).find(x=>x.slug===slug&&(x.published||this.state.editMode)); return post?{route:'blog',postId:post.id,pageId:null,serviceId:null}:none; }
-      if(parts[0]==='services'&&parts[1]){ const sv=(data&&data.services)||[]; const slugs=this.serviceSlugs(sv); const s=sv.find(x=>slugs[x.id]===decodeURIComponent(parts[1]).toLowerCase()); return s?{route:'service',serviceId:s.id,postId:null,pageId:null}:none; }
+      if(parts[0]==='services'&&parts[1]){ const sv=(data&&data.services)||[]; const slugs=this.serviceSlugs(sv); const s=sv.find(x=>slugs[x.id]===decodeURIComponent(parts[1]).toLowerCase()); if(s&&s.redirectTo){ const r2=follow(s.redirectTo); if(r2) return r2; } return s?{route:'service',serviceId:s.id,postId:null,pageId:null}:none; }
       const known=['about','services','meditation','blog','contact','faq']; if(parts.length===1&&known.indexOf(parts[0])>-1) return {route:parts[0],postId:null,pageId:null,serviceId:null};
       const pg=((data&&data.pages)||[]).find(p=>p.slug===decodeURIComponent(parts[0])); if(pg&&parts.length===1) return {route:'page',pageId:pg.id,postId:null,serviceId:null};
       return none; }catch(e){ return null; } }
@@ -203,7 +209,7 @@ class Component extends DCLogic {
 
   // ---------- defaults ----------
   defaults(){
-    const svc=(icon,title,price,desc,detail)=>({id:this.uid(),icon,title,price,desc,...(detail?{detail}:{}),image:null});
+    const svc=(icon,title,price,desc,detail)=>({id:this.uid(),icon,title,...(this.serviceRoute(title)?{slug:this.serviceRoute(title)}:{}),price,desc,...(detail?{detail}:{}),image:null});
     return {
       brand:{ name:'Analysis of Karma', astrologer:'Jag Mallah', tagline:'Vedic astrology guidance for love, career, health & life\u2019s bigger questions.', logo:null },
       contact:{ email:'', mailFrom:'', /* the enquiry inbox is set on the server (api/db.php) and never shown on the site */ phone:'+1 (236) 660-2000', whatsapp:'+1 (236) 660-2000',
@@ -546,10 +552,10 @@ class Component extends DCLogic {
       dark:{background:P.maroon,color:P.cream,boxShadow:'0 10px 24px -10px rgba(20,21,23,.5)'} }; }
   // editable button (text / size / colour / link / target) used for the hero CTAs
   btnGo(c){ const link=(c&&c.link)||'contact'; if(/^https?:\/\//i.test(link)||/^mailto:|^tel:/i.test(link)){ if(c.newTab) window.open(link,'_blank','noopener'); else window.location.href=link; return; } const routes=['home','about','services','meditation','blog','contact','faq']; this.go(routes.indexOf(link)>-1?link:'contact'); }
-  ebtn(path,def,xtra){ const h=React.createElement,P=this.P; const c={...(def||{}),...(this.getIn(this.state.data,path)||{})}; const label=c.label||'Button'; const variant=c.variant||'solid'; const size=c.size||'md';
+  ebtn(path,def,xtra,go){ const h=React.createElement,P=this.P; const c={...(def||{}),...(this.getIn(this.state.data,path)||{})}; const label=c.label||'Button'; const variant=c.variant||'solid'; const size=c.size||'md';
     const vs=this.btnVariants();
     const pad=size==='lg'?'16px 32px':(size==='sm'?'10px 18px':'14px 26px'); const fs=size==='lg'?'17px':(size==='sm'?'13.5px':'15px'); const em=this.state.editMode;
-    return h('button',{onClick:e=>{ e.stopPropagation(); if(em) this.setState({btnEdit:{path,def:def||{}}}); else this.btnGo(c); },className:'aok-btn aok-fx-lift',style:{position:'relative',font:'600 '+fs+' '+this.HEAD,padding:pad,borderRadius:999,cursor:'pointer',border:'1px solid transparent',display:'inline-flex',alignItems:'center',gap:9,whiteSpace:'nowrap',...vs[variant],...(xtra||{})}},
+    return h('button',{onClick:e=>{ e.stopPropagation(); if(em) this.setState({btnEdit:{path,def:def||{}}}); else if(go&&(c.link||'contact')==='contact') go(); else this.btnGo(c); },className:'aok-btn aok-fx-lift',style:{position:'relative',font:'600 '+fs+' '+this.HEAD,padding:pad,borderRadius:999,cursor:'pointer',border:'1px solid transparent',display:'inline-flex',alignItems:'center',gap:9,whiteSpace:'nowrap',...vs[variant],...(xtra||{})}},
       label, em? h('span',{contentEditable:false,title:'Edit this button',style:{position:'absolute',top:-9,right:-9,width:22,height:22,borderRadius:'50%',background:P.maroonD,color:P.goldL,font:'11px '+this.HEAD,display:'flex',alignItems:'center',justifyContent:'center',border:'1px solid '+P.gold,zIndex:5}},'✎'):null); }
   renderBtnEditor(){ if(!this.state.btnEdit||!this.state.editMode) return null; const h=React.createElement,P=this.P; const be=this.state.btnEdit; const path=be.path; const def=be.def||{}; const c={...def,...(this.getIn(this.state.data,path)||{})};
     const set=(k,v)=>this.commit(path,{...c,[k]:v});
@@ -643,7 +649,7 @@ class Component extends DCLogic {
   relatedServices(post){ return this.clusterPick(this.liveServices(),s=>this.clusterScore(post,s),3,2); }
   relatedPosts(svc){ return this.clusterPick(this.livePosts(),p=>this.clusterScore(p,svc),3,0); }
   // contact helpers — mirror aok_whatsapp_url / aok_e164 in api/seo-lib.php
-  waUrl(){ const c=(this.state.data&&this.state.data.contact)||{}; let n=String(c.whatsapp||c.phone||'').replace(/\D/g,''); if(!n) return ''; if(n.length===10) n='1'+n; const t=(c.whatsappText||'').trim(); return 'https://wa.me/'+n+(t?'?text='+encodeURIComponent(t):''); }
+  waUrl(text){ const c=(this.state.data&&this.state.data.contact)||{}; let n=String(c.whatsapp||c.phone||'').replace(/\D/g,''); if(!n) return ''; if(n.length===10) n='1'+n; const t=(typeof text==='string'?text:(c.whatsappText||'')).trim(); return 'https://wa.me/'+n+(t?'?text='+encodeURIComponent(t):''); }
   telHref(){ const p=String(((this.state.data&&this.state.data.contact)||{}).phone||''); const dg=p.replace(/\D/g,''); if(!dg) return ''; return 'tel:'+(p.trim().charAt(0)==='+'?'+'+dg:(dg.length===10?'+1'+dg:'+'+dg)); }
   reviewLinks(){ const d=this.state.data,L=d.local||{},c=d.contact||{}; return [[ 'Review us on Google Maps',L.reviewUrl||L.mapsCidUrl||c.gmb],['Review us on Trustpilot',c.trustpilot]].filter(x=>x[1]); }
   // floating WhatsApp / Call buttons (public pages only)
@@ -716,35 +722,83 @@ class Component extends DCLogic {
       else if(all(/^\d+[.)]\s+/)) out.push(['ol',lines.map(l=>l.trim().replace(/^\d+[.)]\s+/,''))]);
       else out.push(['p',b]); }); return out; }
   mdInline(s,key){ const h=React.createElement; const parts=[]; String(s||'').split(/(\*\*[^*]+?\*\*|\n)/).forEach((x,i)=>{ if(!x) return; if(x==='\n') parts.push(h('br',{key:key+'b'+i})); else if(/^\*\*[^*]+\*\*$/.test(x)) parts.push(h('strong',{key:key+'s'+i,style:{fontWeight:700,color:this.P.maroon}},x.slice(2,-2))); else parts.push(x); }); return parts; }
-  mdRender(text,fontSize){ const h=React.createElement,P=this.P; const fs=fontSize||17;
-    return this.mdBlocks(text).map((bk,i)=>{ const t=bk[0],v=bk[1],k='md'+i;
+  mdRender(text,fontSize){ return this.mdRenderBlocks(this.mdBlocks(text),fontSize); }
+  mdRenderBlocks(blocks,fontSize,kp){ const h=React.createElement,P=this.P; const fs=fontSize||17;
+    return blocks.map((bk,i)=>{ const t=bk[0],v=bk[1],k=(kp||'md')+i;
       if(t==='h2') return h('h2',{key:k,style:{font:'600 clamp(26px,3vw,32px)/1.18 '+this.SERIF,color:P.maroon,margin:'40px 0 14px',letterSpacing:'-.005em'}},this.mdInline(v,k));
       if(t==='h3') return h('h3',{key:k,style:{font:'600 21px/1.3 '+this.SERIF,color:P.maroon,margin:'26px 0 8px'}},this.mdInline(v,k));
       if(t==='answer') return h('aside',{key:k,className:'aok-answer'},h('p',{style:{margin:0}},this.mdInline(v,k)));
       if(t==='ul'||t==='ol') return h(t,{key:k,className:'aok-mdlist',style:{font:'400 '+fs+'px/1.75 Plus Jakarta Sans',color:P.ink,margin:'0 0 18px',paddingLeft:24}},...v.map((li,j)=>h('li',{key:k+'l'+j,style:{marginBottom:6}},this.mdInline(li,k+'l'+j))));
       return h('p',{key:k,style:{font:'400 '+fs+'px/1.8 Plus Jakarta Sans',color:P.ink,margin:'0 0 18px'}},this.mdInline(v,k)); }); }
 
+  // ---------- SERVICE PAGE (/services/{slug}) ----------
+  // Hero with the service's 3D banner -> the original description -> the page text (answer box, sections as cards,
+  // the 4 consultation steps, the FAQ as an accordion) -> related articles -> the astrologer -> the booking form.
+  // The page text is the service's "Detailed description" (light Markdown), so every part stays editable.
+  serviceImg(s,ratio){ if(s&&s.image) return s.image; const slug=s&&this.serviceSlugs((this.state.data&&this.state.data.services)||[])[s.id]; return slug?'/assets/img/services/'+slug+'-'+(ratio||'16x9')+'.webp':''; }
+  scrollToBook(){ const el=document.getElementById('book'); if(el&&el.scrollIntoView) el.scrollIntoView({behavior:'smooth',block:'start'}); }
+  goServiceBook(s){ this.go('service',{serviceId:s.id}); setTimeout(()=>this.scrollToBook(),450); }
+  mdLabel(li){ const m=String(li||'').match(/^\*\*([^*]+?):\*\*\s*(.+)$/); return m?[m[1],m[2]]:null; }
+  serviceSections(md){ const intro=[],secs=[]; this.mdBlocks(md).forEach(b=>{ if(b[0]==='h2') secs.push({title:b[1],blocks:[]}); else (secs.length?secs[secs.length-1].blocks:intro).push(b); }); return {intro,secs}; }
+  svcSection(sec,i){ const h=React.createElement,P=this.P,k='ss'+i,t=sec.title,bl=sec.blocks;
+    const head=h('h2',{id:'section-'+(i+1),className:'aok-svc-h2'},this.mdInline(t,k));
+    const one=type=>bl.length===1&&bl[0][0]===type; let body;
+    if(/frequently asked/i.test(t)&&bl.some(b=>b[0]==='h3')){ const qa=[]; bl.forEach(b=>{ if(b[0]==='h3') qa.push({q:b[1],a:[]}); else if(qa.length) qa[qa.length-1].a.push(b); });
+      body=h('div',{className:'aok-sfaqs'}, ...qa.map((x,j)=>h('details',{key:k+j,className:'aok-sfaq',open:j===0}, h('summary',null,h('span',null,this.mdInline(x.q,k+'q'+j)),h('span',{className:'aok-sfaq-ic','aria-hidden':'true'})), h('div',{className:'aok-sfaq-a'}, this.mdRenderBlocks(x.a,16,k+'a'+j))))); }
+    else if(one('ol')){ const it=bl[0][1]; body=h('ol',{className:'aok-steps',style:{gridTemplateColumns:'repeat('+Math.min(it.length,4)+',1fr)'}}, ...it.map((li,j)=>{ const m=this.mdLabel(li); return h('li',{key:k+j,className:'aok-step'}, h('span',{className:'aok-step-n','aria-hidden':'true'},String(j+1)), m?h('h3',null,m[0]):null, h('p',null,this.mdInline(m?m[1]:li,k+'s'+j))); })); }
+    else if(one('ul')&&bl[0][1].every(li=>this.mdLabel(li))){ body=h('div',{className:'aok-feats',style:{gridTemplateColumns:'repeat(2,1fr)'}}, ...bl[0][1].map((li,j)=>{ const m=this.mdLabel(li); return h('div',{key:k+j,className:'aok-feat'}, h('h3',null,this.mdInline(m[0],k+'t'+j)), h('p',null,this.mdInline(m[1],k+'f'+j))); })); }
+    else body=h('div',{className:'aok-md'}, this.mdRenderBlocks(bl,16.5,k));
+    return h('section',{key:k,className:'aok-svc-sec','aria-labelledby':'section-'+(i+1)}, head, body); }
   renderServiceDetail(){ const h=React.createElement,P=this.P,d=this.state.data; const s=(d.services||[]).find(x=>x.id===this.state.serviceId);
     if(!s) return this.renderNotFound();
     const others=(d.services||[]).filter(x=>x.id!==s.id&&!x.redirectTo).slice(0,3);
     const crumb=(label,href,fn)=>h('a',this.linkTo(href,fn,{style:{color:'#8A6A2E',cursor:'pointer'}}),label);
+    const pr=(d.about&&d.about.pricing)||{}, L=d.local||{}, c=d.contact||{};
+    const fee=s.price||pr.fee||'$100 CAD', img=this.serviceImg(s), {intro,secs}=this.serviceSections(s.detail||'');
+    const book=e=>{ if(e) e.preventDefault(); this.scrollToBook(); };
+    const wa=this.waUrl('Hello Jag Mallah, I would like to book a '+s.title+' consultation.');
+    const waBtn=(label,variant)=>wa?h('a',{href:wa,target:'_blank',rel:'noopener',className:'aok-btn aok-fx-lift',style:{display:'inline-flex',alignItems:'center',gap:8,font:'600 15px '+this.HEAD,padding:'14px 24px',borderRadius:999,textDecoration:'none',...this.btnVariants()[variant||'outline']}},'✆ '+(label||'WhatsApp')):null;
+    const facts=[['◷','60-minute live session'],['✦',fee+' · '+(pr.unit||'per hour')],['✓','New clients pay after, only if satisfied'],['☎','Zoom · WhatsApp · Phone'],['अ',((L.languages||['English','Hindi','Punjabi']).join(', '))]];
     return h('main',{style:{animation:'aokfade .4s'}},
-      h('section',{className:'aok-pagehero'}, this.wrap(h('div',{style:{textAlign:'center',padding:'40px 0 50px',maxWidth:840,margin:'0 auto'}},
-        h('nav',{'aria-label':'Breadcrumb',style:{font:'500 13px '+this.HEAD,color:P.muted,marginBottom:22}}, crumb('Home','/',()=>this.go('home')),' \u203a ',crumb('Services','/services',()=>this.go('services')),' \u203a ',h('span',null,s.title)),
-        h('div',{style:{display:'flex',justifyContent:'center',marginBottom:20}}, this.badge(s.icon,'lg')),
-        h('h1',{style:{font:'800 clamp(34px,4.6vw,56px) '+this.HEAD,margin:'0 0 18px',letterSpacing:'-.015em',color:P.maroon,lineHeight:1.06}}, this.twoToneText(s.title)),
-        h('p',{style:{font:'400 18px/1.7 Plus Jakarta Sans',color:P.ink,maxWidth:680,margin:'0 auto'}}, s.desc))), h('div',{className:'aok-hairline'})),
-      h('section',{style:{padding:'64px 0'}}, this.wrap(h('div',{style:{display:'grid',gridTemplateColumns:'1.3fr .7fr',gap:32,alignItems:'start'}},
-        h('div',{className:'aok-card',style:{padding:'34px 36px'}}, s.detail? h('div',{className:'aok-md'}, this.mdRender(s.detail,16.5)) : h('p',{style:{font:'400 16.5px/1.8 Plus Jakarta Sans',color:P.ink,margin:0}}, s.desc)),
-        h('div',{className:'aok-card',style:{padding:'30px 28px',textAlign:'center'}},
-          h('div',{style:{font:'600 12px '+this.HEAD,letterSpacing:'.2em',textTransform:'uppercase',color:'#8A6A2E',marginBottom:12}},'Consultation fee'),
-          h('div',{className:'aok-goldtext',style:{font:'600 44px/1 '+this.SERIF}}, s.price||((d.about&&d.about.pricing&&d.about.pricing.fee)||'$100 CAD')),
-          h('div',{style:{font:'500 14px Plus Jakarta Sans',color:P.muted,margin:'8px 0 18px'}}, (d.about&&d.about.pricing&&d.about.pricing.unit)||'per hour'),
-          h('div',{style:{marginBottom:20,padding:'9px 16px',borderRadius:999,background:'#FFFCF7',border:'1px solid #C5A869',font:'600 12.5px '+this.HEAD,color:P.maroon,display:'inline-block'}},'New clients: pay only if satisfied'),
-          h('div',null, this.ebtn('servicesPage.cardBtn',{label:'Book this \u2192',link:'contact',variant:'outline',size:'sm'})),
-          this.waUrl()?h('a',{href:this.waUrl(),target:'_blank',rel:'noopener',className:'aok-btn aok-fx-lift',style:{display:'inline-flex',marginTop:12,font:'600 13.5px '+this.HEAD,padding:'10px 18px',borderRadius:999,textDecoration:'none',...this.btnVariants().solid}},'\u2706 WhatsApp Jag Mallah'):null)))),
+      h('section',{className:'aok-pagehero aok-svc-hero'}, this.wrap(h('div',{className:'aok-svc-hero-grid',style:{display:'grid',gridTemplateColumns:'1.04fr .96fr',gap:48,alignItems:'center',padding:'30px 0 54px'}},
+        h('div',null,
+          h('nav',{'aria-label':'Breadcrumb',style:{font:'500 13px '+this.HEAD,color:P.muted,marginBottom:22}}, crumb('Home','/',()=>this.go('home')),' › ',crumb('Services','/services',()=>this.go('services')),' › ',h('span',null,s.title)),
+          h('div',{style:{display:'flex',alignItems:'center',gap:16,marginBottom:18,flexWrap:'wrap'}}, this.badge(s.icon,'lg'), this.kicker('Vedic astrology service')),
+          h('h1',{style:{font:'800 clamp(34px,4.4vw,54px) '+this.HEAD,margin:'0 0 18px',letterSpacing:'-.015em',color:P.maroon,lineHeight:1.07}}, this.twoToneText(s.title)),
+          h('p',{className:'aok-svc-lead',style:{font:'400 18.5px/1.7 Plus Jakarta Sans',color:P.ink,margin:'0 0 26px',maxWidth:620}}, s.desc),
+          h('div',{style:{display:'flex',gap:12,flexWrap:'wrap',alignItems:'center'}},
+            h('a',{href:'#book',onClick:book,className:'aok-btn aok-fx-lift',style:{display:'inline-flex',alignItems:'center',gap:8,font:'600 15px '+this.HEAD,padding:'14px 26px',borderRadius:999,textDecoration:'none',...this.btnVariants().solid}},'Book Consultation →'),
+            waBtn('WhatsApp Jag Mallah')),
+          h('div',{style:{display:'flex',gap:8,flexWrap:'wrap',marginTop:22}}, ...facts.slice(0,3).map((f,i)=>h('span',{key:i,className:'aok-svc-chip'},h('b',{'aria-hidden':'true'},f[0]),f[1])))),
+        h('div',{className:'aok-svc-art'+(img?'':' is-empty')}, h('div',{className:'aok-svc-art-glow','aria-hidden':'true'}),
+          img?h('img',{src:img,alt:s.title+' — Vedic astrology consultation with Jag Mallah',width:1200,height:675,decoding:'async',fetchpriority:'high',onError:e=>{ e.currentTarget.style.display='none'; e.currentTarget.parentNode.classList.add('is-empty'); }}):null,
+          h('div',{className:'aok-svc-art-badge'},this.badge(s.icon,'lg'))))),
+        h('div',{className:'aok-hairline'})),
+      h('section',{style:{padding:'56px 0 30px'}}, this.wrap(h('div',{style:{display:'grid',gridTemplateColumns:'minmax(0,1fr) 300px',gap:40,alignItems:'start'}},
+        h('article',{className:'aok-svc-body'},
+          intro.length? h('div',{className:'aok-md',style:{marginBottom:10}}, this.mdRenderBlocks(intro,17,'si')) : null,
+          ...secs.map((sec,i)=>this.svcSection(sec,i)),
+          !intro.length&&!secs.length? h('p',{style:{font:'400 17px/1.8 Plus Jakarta Sans',color:P.ink}}, s.desc):null),
+        h('aside',{className:'aok-svc-side'},
+          h('div',{className:'aok-card',style:{padding:'28px 26px',textAlign:'center'}},
+            h('div',{style:{font:'600 12px '+this.HEAD,letterSpacing:'.2em',textTransform:'uppercase',color:'#8A6A2E',marginBottom:12}},'Consultation fee'),
+            h('div',{className:'aok-goldtext',style:{font:'600 42px/1 '+this.SERIF}}, fee),
+            h('div',{style:{font:'500 14px Plus Jakarta Sans',color:P.muted,margin:'8px 0 16px'}}, pr.unit||'per hour'),
+            h('ul',{className:'aok-svc-facts'}, ...facts.map((f,i)=>h('li',{key:i},h('b',{'aria-hidden':'true'},f[0]),f[1]))),
+            h('a',{href:'#book',onClick:book,className:'aok-btn aok-fx-lift',style:{display:'flex',justifyContent:'center',font:'600 14.5px '+this.HEAD,padding:'13px 20px',borderRadius:999,textDecoration:'none',marginTop:18,...this.btnVariants().solid}},'Book Consultation'),
+            wa?h('a',{href:wa,target:'_blank',rel:'noopener',className:'aok-btn aok-fx-lift',style:{display:'flex',justifyContent:'center',font:'600 14px '+this.HEAD,padding:'12px 18px',borderRadius:999,textDecoration:'none',marginTop:10,...this.btnVariants().outline}},'✆ WhatsApp '+(c.whatsapp||c.phone||'')):null),
+          secs.length>1? h('nav',{className:'aok-card aok-svc-toc','aria-label':'On this page'}, h('div',{className:'aok-svc-toc-t'},'On this page'), ...secs.map((sec,i)=>h('a',{key:i,href:'#section-'+(i+1),onClick:e=>{ e.preventDefault(); const el=document.getElementById('section-'+(i+1)); if(el) el.scrollIntoView({behavior:'smooth',block:'start'}); }},sec.title.replace(/\*\*/g,'')))):null)))),
       this.relatedPostsBlock(s),
-      h('section',{style:{padding:'0 0 64px'}}, this.wrap(h('div',{style:{maxWidth:980,margin:'0 auto'}}, this.authorCard()))),
+      h('section',{style:{padding:'10px 0 40px'}}, this.wrap(h('div',{style:{maxWidth:1000,margin:'0 auto'}}, this.authorCard()))),
+      h('section',{id:'book',className:'aok-svc-book',style:{padding:'30px 0 76px',scrollMarginTop:96}}, this.wrap(h('div',{style:{display:'grid',gridTemplateColumns:'.86fr 1.14fr',gap:30,alignItems:'start'}},
+        h('div',{className:'aok-card',style:{padding:'34px 32px'}},
+          this.kicker('Book your consultation'),
+          h('h2',{style:{font:'600 clamp(28px,3vw,36px)/1.15 '+this.SERIF,color:P.maroon,margin:'14px 0 12px'}}, 'Book: '+s.title),
+          h('p',{style:{font:'400 15.5px/1.7 Plus Jakarta Sans',color:P.ink,margin:'0 0 18px'}}, 'Send your birth details and your question, and Jag Mallah will reply '+(c.replyTime||'within 12–24 hours')+' to confirm a time that suits you.'),
+          h('ul',{className:'aok-svc-facts'}, ...facts.map((f,i)=>h('li',{key:i},h('b',{'aria-hidden':'true'},f[0]),f[1]))),
+          h('div',{style:{display:'flex',gap:10,flexWrap:'wrap',marginTop:22}}, waBtn('WhatsApp','solid'),
+            this.telHref()?h('a',{href:this.telHref(),className:'aok-btn aok-fx-lift',style:{display:'inline-flex',alignItems:'center',gap:8,font:'600 15px '+this.HEAD,padding:'14px 24px',borderRadius:999,textDecoration:'none',...this.btnVariants().outline}},'☎ Call '+(c.phone||'')):null)),
+        this.renderLeadForm({service:s.title})))),
       this.areasBlock(),
       others.length? h('section',{style:{background:P.bgAlt,padding:'70px 0'}}, this.wrap(h('div',null,
         h('div',{style:{textAlign:'center',marginBottom:36}}, this.etext('home.servicesIntro.title',{tag:'h2',style:{font:'800 clamp(28px,3.3vw,40px) '+this.HEAD,color:P.maroon,margin:0,letterSpacing:'-.015em'}})),
@@ -812,7 +866,8 @@ class Component extends DCLogic {
     return h('div',{key:s.id,className:'aok-card aok-tilt aok-reveal',onClick:()=>this.go('service',{serviceId:s.id}),style:{padding:'30px 28px',cursor:'pointer'}},
       this.badge(s.icon),
       h('h3',{style:{font:'700 21px '+this.HEAD,color:P.maroon,margin:'20px 0 8px'}}, h('a',this.linkTo(this.serviceHref(s),()=>this.go('service',{serviceId:s.id}),{style:{color:'inherit'}}), s.title)),
-      h('p',{style:{font:'400 14.5px/1.65 Plus Jakarta Sans',color:P.muted,margin:0}}, s.desc)); }
+      h('p',{style:{font:'400 14.5px/1.65 Plus Jakarta Sans',color:P.muted,margin:0}}, s.desc),
+      h('a',this.linkTo(this.serviceHref(s),()=>this.go('service',{serviceId:s.id}),{style:{display:'inline-block',marginTop:14,color:'#8A6A2E',font:'700 14px '+this.HEAD}}),'Read more \u2192')); }
 
   ctaBand(path){ const h=React.createElement,P=this.P;
     return h('section',{className:'aok-ctaband'},
@@ -905,14 +960,18 @@ class Component extends DCLogic {
   // ---------- SERVICES ----------
   renderServices(){ const h=React.createElement,P=this.P,d=this.state.data;
     return h('main',{style:{animation:'aokfade .4s'}}, this.pageHero('servicesPage.hero','services'),
-      h('section',{style:{padding:'70px 0'}}, this.wrap(h('div',{style:{display:'grid',gridTemplateColumns:'repeat(2,1fr)',gap:24}}, ...this.liveServices().map((s,i)=>h('div',{key:s.id,className:'aok-card aok-tilt aok-reveal',style:{display:'flex',gap:22,padding:30}},
+      h('section',{style:{padding:'70px 0'}}, this.wrap(h('div',{style:{display:'grid',gridTemplateColumns:'repeat(2,1fr)',gap:24}}, ...this.liveServices().map((s,i)=>{ const open=()=>this.go('service',{serviceId:s.id}); const img=this.serviceImg(s);
+        // the whole card opens the service page (real links for crawlers, instant for visitors)
+        return h('div',{key:s.id,className:'aok-card aok-tilt aok-reveal aok-svc-card',onClick:e=>{ if(e.target.closest&&e.target.closest('a,button')) return; open(); },style:{padding:0,cursor:'pointer',overflow:'hidden',display:'flex',flexDirection:'column'}},
+        img?h('a',{...this.linkTo(this.serviceHref(s),open),tabIndex:-1,'aria-hidden':'true',className:'aok-svc-card-img'}, h('img',{src:img,alt:'',loading:'lazy',decoding:'async',width:1200,height:675,onError:e=>{ e.currentTarget.parentNode.style.display='none'; }})):null,
+        h('div',{style:{display:'flex',gap:20,padding:'26px 28px 28px'}},
         this.badge(s.icon,'lg'),
         h('div',{style:{minWidth:0}}, h('div',{style:{display:'flex',justifyContent:'space-between',alignItems:'baseline',gap:12,flexWrap:'wrap'}},
-            h('h3',{style:{font:'700 21px '+this.HEAD,color:P.maroon,margin:'2px 0 0'}}, h('a',this.linkTo(this.serviceHref(s),()=>this.go('service',{serviceId:s.id}),{style:{color:'inherit'}}), s.title))),
+            h('h3',{style:{font:'700 21px '+this.HEAD,color:P.maroon,margin:'2px 0 0'}}, h('a',this.linkTo(this.serviceHref(s),open,{style:{color:'inherit'}}), s.title))),
           h('p',{style:{font:'400 15px/1.7 Plus Jakarta Sans',color:P.muted,margin:'10px 0 14px'}}, s.desc),
-          (s.detail&&(this._svcOpen||{})[s.id])? h('p',{style:{font:'400 14.5px/1.75 Plus Jakarta Sans',color:P.ink,margin:'0 0 14px',whiteSpace:'pre-line'}}, s.detail):null,
-          s.detail? h('button',{onClick:()=>{ const o=this._svcOpen||(this._svcOpen={}); o[s.id]=!o[s.id]; this.forceUpdate(); },style:{display:'block',background:'none',border:'none',color:'#8A6A2E',font:'700 14px '+this.HEAD,cursor:'pointer',padding:'0 0 14px'}}, ((this._svcOpen||{})[s.id])?'Read less ↑':'Read more ↓'):null,
-          this.ebtn('servicesPage.cardBtn',{label:'Book this →',link:'contact',variant:'outline',size:'sm'}))))))),
+          h('div',{style:{display:'flex',alignItems:'center',gap:18,flexWrap:'wrap'}},
+            h('a',this.linkTo(this.serviceHref(s),open,{style:{color:'#8A6A2E',font:'700 14px '+this.HEAD}}),'Read more \u2192'),
+            this.ebtn('servicesPage.cardBtn',{label:'Book this \u2192',link:'contact',variant:'outline',size:'sm'},null,()=>this.goServiceBook(s)))))); })))),
       this.ctaBand('home.cta')); }
 
   // ---------- MEDITATION ----------
@@ -1012,7 +1071,8 @@ class Component extends DCLogic {
         h('p',{style:{font:'400 12px/1.5 Plus Jakarta Sans',color:P.muted,margin:'0 0 22px'}},'In Google Maps: Share \u2192 Embed a map \u2192 Copy HTML, then paste the whole <iframe\u2026></iframe> here.'),
         h('div',{style:{display:'flex',justifyContent:'space-between',gap:12}}, h('button',{onClick:()=>{ this.commit('contact.mapUrl',''); this.commit('contact.mapEmbed',''); },style:{padding:'10px 18px',borderRadius:999,border:'1px solid '+P.line,background:'transparent',color:P.muted,cursor:'pointer',font:'600 13px '+this.HEAD}},'Clear map'), this.btn('Done',()=>this.setState({mapEdit:false}),{variant:'solid',pad:'10px 22px',style:{fontSize:14}})))); }
 
-  renderLeadForm(){ const h=React.createElement,P=this.P; const f=this._form||{}; if(!this._cap)this.newCaptcha();
+  renderLeadForm(opts){ const h=React.createElement,P=this.P; const f=this._form||{}; if(!this._cap)this.newCaptcha();
+    const svc=(opts&&opts.service)||''; this._leadService=svc;   // the service page's form books that service
     const set=(k,v)=>{ this._form={...this._form,[k]:v}; this.forceUpdate(); };
     const inpStyle={width:'100%',padding:'12px 14px',borderRadius:10,border:'1px solid '+P.line,background:P.white,font:'400 15px Plus Jakarta Sans',color:P.ink,resize:'vertical',boxSizing:'border-box'};
     const lbl=(label,opt,extra)=>h('span',{style:{display:'block',font:'600 13px '+this.HEAD,color:P.maroon,marginBottom:6}}, label, opt?h('span',{style:{color:P.muted,fontWeight:400}},' (optional)'):h('span',{style:{color:P.red}},' *'), extra||null);
@@ -1022,7 +1082,8 @@ class Component extends DCLogic {
     const conv=this.convertAppt(f.country,f.apptDate,f.apptTime);
     const dial=this.findCountry(f.country);
     return h('form',{onSubmit:e=>{e.preventDefault();this.submitLead();},className:'aok-card',style:{padding:32}},
-      h('h2',{style:{font:'700 22px '+this.HEAD,color:P.maroon,margin:'0 0 4px'}},'Send your details'),
+      h('h2',{style:{font:'700 22px '+this.HEAD,color:P.maroon,margin:'0 0 4px'}},svc?'Request your consultation':'Send your details'),
+      svc?h('div',{style:{display:'inline-flex',alignItems:'center',gap:8,margin:'8px 0 6px',padding:'7px 14px',borderRadius:999,background:'#FFFCF7',border:'1px solid #C5A869',font:'600 13px '+this.HEAD,color:P.maroon}},h('span',{style:{color:P.gold}},'\u2726'),'Consultation: '+svc):null,
       this.etext('contactPage.note',{tag:'p',style:{font:'400 14px Plus Jakarta Sans',color:P.muted,margin:'0 0 20px'}}),
       h('div',{style:{display:'grid',gap:16}},
         field('name','Name',false,'Your full name'),
@@ -1085,8 +1146,9 @@ class Component extends DCLogic {
     const dc=this.findCountry(f.country); const phoneFull=f.phone?((dc?'+'+dc[2]+' ':'')+f.phone):''; const conv=this.convertAppt(f.country,f.apptDate,f.apptTime);
     const apptStr=(f.apptDate||f.apptTime)?((f.apptDate||'')+(f.apptTime?' '+f.apptTime:'')+(dc?' ('+dc[1]+' local)':'')):'';
     const vanStr=conv?conv.van:'';
-    const lead={ id:this.uid(), name:f.name, email:f.email, country:dc?dc[1]:'', phone:phoneFull, appt:apptStr, apptVan:vanStr, dob:f.dob, tob:f.tob, pob:f.pob, reason:f.reason, at:new Date().toISOString(), read:false };
-    const payload={ Name:f.name||'', Email:f.email||'', 'WhatsApp / Phone':phoneFull||'-', Country:dc?dc[1]:'-', 'Preferred appointment (client local)':apptStr||'-', 'Appointment in Vancouver (PST)':vanStr||'-', 'Date of Birth':f.dob||'-', 'Time of Birth':f.tob||'-', 'Place of Birth':f.pob||'-', 'Reason / Question':f.reason||'', _subject:'New enquiry from '+(f.name||'')+' \u2014 Analysis of Karma', _replyto:f.email||'', _template:'table', _captcha:'false' };
+    const svc=this._leadService||'';
+    const lead={ id:this.uid(), service:svc, name:f.name, email:f.email, country:dc?dc[1]:'', phone:phoneFull, appt:apptStr, apptVan:vanStr, dob:f.dob, tob:f.tob, pob:f.pob, reason:f.reason, at:new Date().toISOString(), read:false };
+    const payload={ ...(svc?{Service:svc}:{}), Name:f.name||'', Email:f.email||'', 'WhatsApp / Phone':phoneFull||'-', Country:dc?dc[1]:'-', 'Preferred appointment (client local)':apptStr||'-', 'Appointment in Vancouver (PST)':vanStr||'-', 'Date of Birth':f.dob||'-', 'Time of Birth':f.tob||'-', 'Place of Birth':f.pob||'-', 'Reason / Question':f.reason||'', _subject:(svc?'Booking request: '+svc+' \u2014 '+(f.name||''):'New enquiry from '+(f.name||''))+' \u2014 Analysis of Karma', _replyto:f.email||'', _template:'table', _captcha:'false' };
     const finish=(ok)=>{ this._sending=false; try{ localStorage.setItem('aok_last_submit',String(Date.now())); }catch(e){} this.save(this.setIn(this.state.data,'leads',[lead,...(this.state.data.leads||[])])); this._form={}; this.newCaptcha(); this.flash(ok?'Thank you! Your message has been sent.':'Saved \u2014 your message was recorded and will reach the astrologer.'); this.forceUpdate(); };
     this._sending=true; this.forceUpdate();
     try{
@@ -1871,7 +1933,7 @@ class Component extends DCLogic {
         h('div',{style:{display:'flex',justifyContent:'space-between',alignItems:'flex-start',gap:12,marginBottom:10}},
           h('div',null, h('div',{style:{font:'700 17px '+this.HEAD,color:P.maroon}},l.name||'(no name)', l.read?null:h('span',{style:{marginLeft:10,background:P.goldL,color:P.maroonD,borderRadius:999,padding:'2px 9px',font:'700 10px '+this.HEAD,verticalAlign:'middle'}},'NEW')), h('div',{style:{font:'400 12.5px Plus Jakarta Sans',color:P.muted,marginTop:2}}, this.fmtDate(l.at)+' '+new Date(l.at).toLocaleTimeString('en-IN',{hour:'2-digit',minute:'2-digit'}))),
           h('div',{style:{display:'flex',gap:6}}, l.read?null:h('button',{onClick:()=>this.commit('leads',leads.map(x=>x.id===l.id?{...x,read:true}:x)),style:{...this.iconBtn(),width:'auto',padding:'0 12px'}},'Mark read'), h('button',{onClick:()=>{if(confirm('Delete this lead?'))this.commit('leads',leads.filter(x=>x.id!==l.id));},style:this.iconBtn(true)},'\u2715'))),
-        h('div',{style:{display:'flex',gap:18,flexWrap:'wrap',font:'400 13px Plus Jakarta Sans',color:P.ink,marginBottom:10}}, l.email?h('span',null,h('b',null,'Email: '),l.email):null, l.phone?h('span',null,h('b',null,'Phone: '),l.phone):null, l.country?h('span',null,h('b',null,'Country: '),l.country):null, l.appt?h('span',null,h('b',null,'Appt: '),l.appt):null, l.apptVan?h('span',null,h('b',null,'Vancouver: '),l.apptVan):null, l.dob?h('span',null,h('b',null,'DOB: '),l.dob):null, l.tob?h('span',null,h('b',null,'Time: '),l.tob):null, l.pob?h('span',null,h('b',null,'Place: '),l.pob):null),
+        h('div',{style:{display:'flex',gap:18,flexWrap:'wrap',font:'400 13px Plus Jakarta Sans',color:P.ink,marginBottom:10}}, l.service?h('span',null,h('b',null,'Service: '),l.service):null, l.email?h('span',null,h('b',null,'Email: '),l.email):null, l.phone?h('span',null,h('b',null,'Phone: '),l.phone):null, l.country?h('span',null,h('b',null,'Country: '),l.country):null, l.appt?h('span',null,h('b',null,'Appt: '),l.appt):null, l.apptVan?h('span',null,h('b',null,'Vancouver: '),l.apptVan):null, l.dob?h('span',null,h('b',null,'DOB: '),l.dob):null, l.tob?h('span',null,h('b',null,'Time: '),l.tob):null, l.pob?h('span',null,h('b',null,'Place: '),l.pob):null),
         h('div',{style:{font:'400 14.5px/1.6 Plus Jakarta Sans',color:P.ink,background:P.bgAlt,borderRadius:10,padding:'12px 14px'}},l.reason),
         h('a',{href:'mailto:'+(l.email||d.contact.email)+'?subject='+encodeURIComponent('Re: your enquiry')+'',style:{display:'inline-block',marginTop:10,font:'600 13px '+this.HEAD,color:P.red}},'Reply by email \u2192')))))
       : this.card(h('div',{style:{textAlign:'center',padding:'30px',color:P.muted}}, h('div',{style:{fontSize:34,color:P.gold,marginBottom:10}},'\u2709'), h('div',{style:{font:'600 16px '+this.HEAD,color:P.maroon,marginBottom:4}},'No leads yet'), h('div',{style:{font:'400 14px Plus Jakarta Sans'}},'Submissions from your Contact page will appear here.')))); }

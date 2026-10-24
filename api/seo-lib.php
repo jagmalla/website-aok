@@ -949,10 +949,18 @@ function aok_main_html(array $d, array $r): string {
     } elseif ($t === 'service') {
         $s = $r['item'];
         $o .= aok_crumbs([['Home', '/'], ['Services', '/services'], [aok_text($s['title'] ?? ''), '']]);
-        $o .= '<article><h1>' . aok_e(aok_text($s['title'] ?? '')) . '</h1><p>' . aok_rich($s['desc'] ?? '') . '</p>' . aok_paras($s['detail'] ?? '');
-        if (!empty($s['price'])) $o .= '<p>Consultation fee: <strong>' . aok_e(aok_text($s['price'])) . '</strong></p>';
-        $o .= '<p>' . aok_btn($d, 'servicesPage.cardBtn', 'Book this →', 'contact') . '</p>' . aok_contact_links_html($d) . '</article>';
-        $o .= aok_related_posts_html($d, $s) . aok_author_card_html($d) . aok_areas_html($d);
+        $title = aok_text($s['title'] ?? '');
+        $img = (!empty($s['image']) && !preg_match('#^data:#i', (string)$s['image'])) ? aok_abs(aok_base($d), $s['image']) : (aok_service_images($d, $s)[0] ?? '');
+        $o .= '<article><header><p>Vedic astrology service</p><h1>' . aok_e($title) . '</h1><p>' . aok_rich($s['desc'] ?? '') . '</p>'
+            . '<p><a href="#book">Book Consultation →</a></p>'
+            . ($img !== '' ? '<p><img src="' . aok_e($img) . '" width="1200" height="675" alt="' . aok_e($title . ' — Vedic astrology consultation with Jag Mallah') . '" style="max-width:100%;height:auto"></p>' : '')
+            . '</header>' . aok_paras($s['detail'] ?? '');
+        if (!empty($s['price'])) $o .= '<p>Consultation fee: <strong>' . aok_e(aok_text($s['price'])) . '</strong> per 60-minute session. New clients pay after the consultation, only if satisfied.</p>';
+        $o .= '</article>';
+        $o .= aok_related_posts_html($d, $s) . aok_author_card_html($d);
+        $o .= '<section id="book"><h2>Book: ' . aok_e($title) . '</h2><p>Send your birth details and your question through the booking form, and Jag Mallah will reply '
+            . aok_e(aok_text(aok_get($d, 'contact.replyTime', 'within 12–24 hours'))) . '.</p><p>' . aok_btn($d, 'servicesPage.cardBtn', 'Book this →', 'contact') . '</p>' . aok_contact_links_html($d) . '</section>';
+        $o .= aok_areas_html($d);
         $others = array_values(array_filter($d['services'] ?? [], function ($x) use ($s) { return ($x['id'] ?? '') !== ($s['id'] ?? '') && empty($x['redirectTo']); }));
         $o .= '<section><h2>' . aok_e(aok_text($g('home.servicesIntro.title', 'Vedic astrology services'))) . '</h2>' . aok_services_list($d, array_slice($others, 0, 6), false) . '<p><a href="/services">See all services</a></p></section>' . aok_cta($d);
     } elseif ($t === 'meditation') {

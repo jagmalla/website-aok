@@ -126,6 +126,51 @@ img{height:auto}
 .aok-answer{margin:6px 0 26px;padding:18px 22px;border-radius:16px;background:linear-gradient(135deg,rgba(255,255,255,.92),rgba(247,239,224,.88));border:1px solid rgba(166,132,70,.4);border-left:4px solid #A68446;box-shadow:0 14px 30px -18px rgba(110,84,38,.45);font:500 16.5px/1.7 'Plus Jakarta Sans',sans-serif;color:#1E2022}
 .aok-mdlist li::marker{color:#A68446}
 .aok-md>:first-child{margin-top:0}
+/* ---- service pages (/services/{slug}) ---- */
+.aok-svc-chip{display:inline-flex;align-items:center;gap:7px;padding:7px 13px;border-radius:999px;background:rgba(255,255,255,.78);border:1px solid rgba(166,132,70,.32);font:600 12.5px 'Plus Jakarta Sans',sans-serif;color:#4A3A1C}
+.aok-svc-chip b,.aok-svc-facts b{color:#A68446;font-weight:600;width:16px;text-align:center;flex-shrink:0}
+.aok-svc-art{position:relative;border-radius:28px;padding:10px;background:linear-gradient(145deg,rgba(255,255,255,.96),rgba(239,230,212,.72));border:1px solid rgba(166,132,70,.38);box-shadow:0 1px 0 #fff inset,0 34px 70px -24px rgba(110,84,38,.32);animation:aokfloat 8s ease-in-out infinite}
+.aok-svc-art img{display:block;width:100%;height:auto;aspect-ratio:16/9;object-fit:cover;border-radius:20px}
+.aok-svc-art-glow{position:absolute;inset:-14% -10%;z-index:-1;background:radial-gradient(closest-side,rgba(223,194,134,.42),rgba(223,194,134,0) 72%);pointer-events:none}
+.aok-svc-art-badge{display:none}.aok-svc-art.is-empty{aspect-ratio:16/9;display:flex;align-items:center;justify-content:center}.aok-svc-art.is-empty .aok-svc-art-badge{display:block}
+@keyframes aokfloat{0%,100%{transform:translateY(0)}50%{transform:translateY(-9px)}}
+.aok-svc-sec{margin:0 0 56px}
+.aok-svc-h2{font:600 clamp(27px,3vw,35px)/1.16 'Cormorant Garamond',Georgia,serif;color:#1E2022;margin:0 0 22px;scroll-margin-top:100px;letter-spacing:-.005em}
+.aok-svc-h2::after{content:'';display:block;width:64px;height:2px;margin-top:14px;background:linear-gradient(90deg,#A68446,#DFC286)}
+.aok-feats{display:grid;gap:16px}
+.aok-feat,.aok-step,.aok-sfaq{position:relative;background:rgba(255,252,247,.82);border:1px solid rgba(166,132,70,.24);border-radius:18px;box-shadow:0 1px 0 #fff inset,0 14px 30px -18px rgba(120,96,50,.28)}
+.aok-feat{padding:20px 22px 18px;transition:transform .25s,box-shadow .25s}
+.aok-feat:hover{transform:translateY(-3px);box-shadow:0 1px 0 #fff inset,0 22px 40px -20px rgba(120,96,50,.38)}
+.aok-feat h3{font:700 16px/1.35 'Plus Jakarta Sans',sans-serif;color:#1E2022;margin:0 0 8px;padding-left:16px;position:relative}
+.aok-feat h3::before{content:'';position:absolute;left:0;top:.42em;width:7px;height:7px;border-radius:50%;background:radial-gradient(circle at 35% 35%,#F3DFA8,#A68446)}
+.aok-feat p{font:400 15px/1.7 'Plus Jakarta Sans',sans-serif;color:#3A3D42;margin:0}
+.aok-steps{display:grid;gap:16px;list-style:none;margin:0;padding:0;counter-reset:none}
+.aok-step{padding:26px 20px 20px}
+.aok-step-n{display:flex;align-items:center;justify-content:center;width:42px;height:42px;border-radius:50%;margin-bottom:14px;font:600 20px/1 'Cormorant Garamond',Georgia,serif;color:#fff;background:radial-gradient(circle at 32% 30%,#F1DCA3,#B8904A 62%,#8C6D33);box-shadow:0 8px 18px -6px rgba(140,109,51,.55),0 0 0 4px rgba(223,194,134,.25)}
+.aok-step h3{font:700 15.5px/1.35 'Plus Jakarta Sans',sans-serif;color:#1E2022;margin:0 0 8px}
+.aok-step p{font:400 14.5px/1.65 'Plus Jakarta Sans',sans-serif;color:#3A3D42;margin:0}
+.aok-sfaqs{display:grid;gap:12px}
+.aok-sfaq summary{list-style:none;cursor:pointer;display:flex;align-items:center;justify-content:space-between;gap:16px;padding:18px 22px;font:700 16px/1.45 'Plus Jakarta Sans',sans-serif;color:#1E2022}
+.aok-sfaq summary::-webkit-details-marker{display:none}
+.aok-sfaq-ic{flex-shrink:0;width:28px;height:28px;border-radius:50%;border:1px solid rgba(166,132,70,.5);position:relative;transition:transform .25s}
+.aok-sfaq-ic::before,.aok-sfaq-ic::after{content:'';position:absolute;left:50%;top:50%;width:11px;height:1.6px;background:#A68446;transform:translate(-50%,-50%)}
+.aok-sfaq-ic::after{transform:translate(-50%,-50%) rotate(90deg)}
+.aok-sfaq[open] .aok-sfaq-ic{transform:rotate(45deg)}
+.aok-sfaq-a{padding:0 22px 6px}.aok-sfaq-a p{margin:0 0 16px!important}
+.aok-svc-side{position:sticky;top:100px;display:grid;gap:16px}
+.aok-svc-facts{list-style:none;margin:0;padding:0;display:grid;gap:9px;text-align:left}
+.aok-svc-facts li{display:flex;gap:10px;align-items:flex-start;font:500 14px/1.5 'Plus Jakarta Sans',sans-serif;color:#3A3D42}
+.aok-svc-toc{padding:20px 22px;display:grid;gap:8px}
+.aok-svc-toc-t{font:600 12px 'Plus Jakarta Sans',sans-serif;letter-spacing:.18em;text-transform:uppercase;color:#8A6A2E;margin-bottom:4px}
+.aok-svc-toc a{font:500 14px/1.45 'Plus Jakarta Sans',sans-serif;color:#3A3D42;text-decoration:none;padding:4px 0 4px 12px;border-left:2px solid rgba(166,132,70,.3)}
+.aok-svc-toc a:hover{color:#8C6D33;border-left-color:#A68446}
+.aok-svc-card-img{display:block;margin:8px 8px 0;border-radius:14px;overflow:hidden;aspect-ratio:16/9}
+.aok-svc-card-img img{display:block;width:100%;height:100%;object-fit:cover;transition:transform .6s}
+.aok-svc-card:hover .aok-svc-card-img img{transform:scale(1.04)}
+@media (max-width:1024px){.aok-steps{grid-template-columns:repeat(2,1fr)!important}}
+@media (max-width:900px){.aok-svc-side{position:static}}
+@media (prefers-reduced-motion:reduce){.aok-svc-art{animation:none}.aok-feat,.aok-svc-card-img img{transition:none}}
+@media print{.aok-svc-art,.aok-svc-side,.aok-svc-book{display:none}}
 /* floating WhatsApp / Call buttons */
 .aok-fab{position:fixed;right:18px;bottom:18px;z-index:900;display:flex;flex-direction:column;align-items:flex-end;gap:10px}
 .aok-fab-btn{display:inline-flex;align-items:center;gap:8px;padding:11px 17px;border-radius:999px;background:rgba(255,252,247,.92);-webkit-backdrop-filter:blur(10px);backdrop-filter:blur(10px);border:1px solid rgba(166,132,70,.45);box-shadow:0 12px 28px -12px rgba(110,84,38,.6);color:#1E2022;font:600 13.5px 'Plus Jakarta Sans',sans-serif;text-decoration:none;transition:transform .15s}
@@ -238,7 +283,7 @@ img{height:auto}
 </head>
 <body>
 <div id="root"></div>
-<script src="/assets/app.js?v=57e70d666e" defer></script>
+<script src="/assets/app.js?v=b23c19a97e" defer></script>
 <!-- Hero 3D scene (assets/hero3d.js, Three.js via the import map): started once the page is idle, and skipped on
      data-saver / 2G connections and low-memory phones (they keep the static pearl background) -->
 <script type="module">

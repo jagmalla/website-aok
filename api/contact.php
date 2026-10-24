@@ -46,6 +46,7 @@ $sent = mail($ms['to'], $subject, $body, $headers);
 // Build a lead record in the same shape the admin Leads tab expects
 $lead = [
     'id'      => 'srv' . bin2hex(random_bytes(4)),
+    'service' => mb_substr(trim((string)($data['Service'] ?? '')), 0, 120),   // booked from a service page
     'name'    => $name,
     'email'   => $email,
     'country' => $data['Country'] ?? '',

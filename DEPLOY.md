@@ -24,14 +24,14 @@ Either way, finish with **[Part C — Verify the upload](#part-c--verify-the-upl
 | `assets/app.js` | The website application (all pages, the visual editor and the admin). |
 | `assets/hero3d.js` | The 3D hero scene (loads after the page; skipped on data-saver connections). |
 | `assets/*.webp, *.png, *.jpg` | Logo, favicons and the social-sharing image. |
-| `assets/img/` | Branded Pearl & Gold images for every service and blog post (16:9, 4:3 and 1:1). Used in Google's structured data, social previews and the blog cards when you haven't uploaded an image for that page. |
+| `assets/img/` | `services/`: the 3D Pearl & Gold banner of each of the 16 service pages; `posts/`: the branded image of each blog post (16:9, 4:3 and 1:1). Used on the pages, in Google's structured data and in social previews when you haven't uploaded an image for that page. |
 | `uploads/` | Photos you upload in the admin. Must be writable. |
 | `api/config.sample.php` | Template for **`api/config.php`** (your database and email settings). Only used on a fresh install. |
 | `api/db.php` | Database connection and shared helpers (admin session, CSRF, table setup). |
 | `api/auth.php` | Admin login: hashed password, lockout after repeated failures. Creates the database tables on first login. |
 | `api/data.php` | Loads and saves your site content. |
 | `api/upgrades.php` | One-time content upgrade of the saved site (expanded FAQ answers, shorter SEO texts, the 5 duplicate merges; your business details and the in-depth content for all 32 pages). Runs by itself on the first page view after upload. |
-| `api/content/` | The in-depth classical sections for the 16 services (`services/`) and 16 blog posts (`posts/`). Added to your pages by the upgrade; not reachable from the web. |
+| `api/content/` | The page text of the 16 services (`services/<page address>.md`, from the Services specification) and the classical sections of the 16 blog posts (`posts/`). Applied to your pages by the upgrade; `v3/` only lets the upgrade recognise the earlier sections. Not reachable from the web. |
 | `api/upgrade-content.php` | The **Apply Full 32-Page Classical Content Upgrade** button in Admin → SEO Health. |
 | `api/seo-lib.php`, `api/defaults.json` | The SEO engine and the default content it falls back to. |
 | `api/robots.php`, `api/sitemap.php`, `api/llms.php`, `api/indexnow.php` | Live `/robots.txt`, `/sitemap.xml`, `/llms.txt`, `/llms-full.txt` and IndexNow. |
@@ -78,8 +78,8 @@ In File Manager, open each folder below, click **Upload**, tick
 | `public_html/` | `index.html` · `render.php` · `robots.txt` · `sitemap.xml` · `llms.txt` · `llms-full.txt` — **not `.htaccess` yet** |
 | `public_html/assets/` | `app.js` · `hero3d.js` · `og-image.jpg` · `logo-192.webp` · `logo-512.webp` · `logo-512.png` · `favicon-32.png` · `favicon-48.png` · `apple-touch-icon.png` |
 | `public_html/api/` | `auth.php` · `data.php` · `db.php` · `defaults.json` · `health.php` · `indexnow.php` · `llms.php` · `robots.php` · `seo-health.php` · `seo-lib.php` · `sitemap.php` · `test-email.php` · `upload.php` · `upgrades.php` · `upgrade-content.php` · `reset-password.php` · `contact.php` · `config.sample.php` |
-| `public_html/api/content/` | the folders `services/` and `posts/` with all their `.md` files (32 files) |
-| `public_html/assets/img/` | the folders `services/` and `posts/` with all their images (128 files) |
+| `public_html/api/content/` | the folders `services/`, `posts/` and `v3/` with all their `.md` files (48 files) |
+| `public_html/assets/img/` | the folders `services/` and `posts/` with all their images (160 files). Delete the old `assets/img/services/` folder first: the service images have new names. |
 
 > **Tip for the two folders:** zip `api/content` and `assets/img` on your computer,
 > upload each zip into its parent folder (`public_html/api/`, `public_html/assets/`),
@@ -266,8 +266,9 @@ are never touched.
   `**bold**`). `python3 tools/content-stats.py` checks word counts, the 45–55-word answer
   boxes and the 40–55-word FAQ answers. New sections reach saved sites through
   `api/upgrades.php` (raise `AOK_CONTENT_VERSION`) or the SEO Health button.
-- `node tools/build-images.js [slug …]` renders the branded images into `assets/img/`
-  (needs Playwright and Python Pillow). Run it for a new service or post.
+- `node tools/build-images.js [slug …]` renders the branded blog-post images into `assets/img/posts/`, and
+  `node tools/build-service-banners.js [address …]` the 3D service banners into `assets/img/services/`
+  (both need Playwright and Python Pillow). Service page addresses are set in `serviceRoute()` in `assets/app.js`.
 - Rules that exist on both sides (slugs, titles, topic-cluster links, service areas)
   are mirrored in `api/seo-lib.php` and `assets/app.js`. Change them together.
 - `render.php` adds `?v=<file time>` to `/assets/*.js` automatically, so browsers

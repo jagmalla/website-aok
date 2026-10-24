@@ -8,7 +8,7 @@ w = lambda s: len(re.sub(r'<[^>]+>|\*\*|^#+\s|^>\s?|^[-*]\s|^\d+\.\s', ' ', s or
 slug = lambda t: re.sub(r'[^a-z0-9]+', '-', t.lower().replace('&', ' and ')).strip('-')
 items = []
 for s in d['services'] + d['_seedServices']:
-    if not s.get('redirectTo'): items.append(('services', slug(s['title']), s['title'], w(s.get('desc')) + w(s.get('detail'))))
+    if not s.get('redirectTo'): items.append(('services', s.get('slug') or slug(s['title']), s['title'], w(s.get('desc'))))
 for p in d['_seedPosts'] + d['blog']:
     if p.get('published') and not p.get('redirectTo'): items.append(('posts', p['slug'], p['title'], w(p.get('body'))))
 bad = 0

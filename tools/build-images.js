@@ -1,6 +1,6 @@
 #!/usr/bin/env node
-// Branded Pearl & Gold images for every service and blog post, in the three shapes Google asks for
-// (16:9, 4:3 and 1:1, 1200px wide), written to assets/img/{services,posts}/<slug>-16x9.jpg|webp,
+// Branded Pearl & Gold images for every blog post, in the three shapes Google asks for
+// (16:9, 4:3 and 1:1, 1200px wide), written to assets/img/posts/<slug>-16x9.jpg|webp,
 // -4x3.jpg and -1x1.jpg. The site uses them in the structured data, as the social-media image and on
 // the blog cards whenever no image has been uploaded for that page.
 //
@@ -15,7 +15,7 @@ const slug = t => t.toLowerCase().replace(/&/g, ' and ').replace(/[^a-z0-9]+/g, 
 const text = s => String(s || '').replace(/<[^>]+>/g, ' ').replace(/&amp;/g, '&').replace(/\s+/g, ' ').trim();
 const only = process.argv.slice(2);
 const items = [];
-for (const s of [...d.services, ...d._seedServices]) if (!s.redirectTo) items.push({ kind: 'services', key: slug(s.title), title: text(s.title), kicker: 'Vedic Astrology Service' });
+// (services have their own 3D banners: tools/build-service-banners.js)
 for (const p of [...d._seedPosts, ...d.blog]) if (p.published && !p.redirectTo) items.push({ kind: 'posts', key: p.slug, title: text(p.title), kicker: 'Jyotish Journal' });
 const todo = only.length ? items.filter(x => only.includes(x.key)) : items;
 
@@ -80,7 +80,7 @@ h1{font:600 64px/1.04 'Cormorant Garamond',serif;color:#1E2022;margin:20px 0 0;l
     jobs.push([png, path.join(root, 'assets/img', it.kind, `${it.key}-${ratio}`), ratio === '16x9' ? 1 : 0]);
   }
   await b.close();
-  for (const k of ['services', 'posts']) fs.mkdirSync(path.join(root, 'assets/img', k), { recursive: true });
+  for (const k of ['posts']) fs.mkdirSync(path.join(root, 'assets/img', k), { recursive: true });
   fs.writeFileSync(path.join(tmp, 'jobs.json'), JSON.stringify(jobs));
   execFileSync('python3', ['-c', `import json,sys
 from PIL import Image

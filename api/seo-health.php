@@ -148,22 +148,23 @@ $linked = count(array_filter($liveSvcs, function ($s) use ($d) { return count(ao
 $add($G, $thin ? 'warn' : 'ok', $thin ? count($thin) . ' posts link to fewer than 2 services' : 'Topic clusters: every post links to 2–3 related services; ' . $linked . ' of ' . count($liveSvcs) . ' service pages link back to matching articles', $thin ? $list($thin) : 'Links are chosen automatically from shared keywords in titles, excerpts and descriptions.', 'blog');
 // long-form depth: the classical sections from api/content/ and the word counts AI answers favour
 $noMd = []; $short = []; $deep = 0; $all = 0;
+$defs = aok_defaults();
 foreach ($liveSvcs as $sv) {
-    $md = aok_content_md('services', aok_slugify((string)($sv['title'] ?? '')));
+    $md = aok_content_md('services', aok_service_content_key($sv, $defs));
     $all++; $w = $words(($sv['desc'] ?? '') . ' ' . preg_replace('/^[#>\-*]+\s*|\*\*/m', ' ', (string)($sv['detail'] ?? '')));
-    if ($md !== '' && !aok_has_content((string)($sv['detail'] ?? ''), $md)) $noMd[] = aok_cut(aok_text($sv['title'] ?? ''), 60);
-    elseif ($w < 600) $short[] = aok_cut(aok_text($sv['title'] ?? ''), 60) . " ($w words)";
+    if ($md !== '' && !aok_has_service_content((string)($sv['detail'] ?? ''), $md)) $noMd[] = aok_cut(aok_text($sv['title'] ?? ''), 60);
+    elseif ($w < 300) $short[] = aok_cut(aok_text($sv['title'] ?? ''), 60) . " ($w words)";
     else $deep++;
 }
 foreach ($livePosts as $po) {
     $md = aok_content_md('posts', (string)($po['slug'] ?? ''));
     $all++; $w = $words(preg_replace('/^[#>\-*]+\s*|\*\*/m', ' ', (string)($po['body'] ?? '')));
     if ($md !== '' && !aok_has_content((string)($po['body'] ?? ''), $md)) $noMd[] = aok_cut(aok_text($po['title'] ?? ''), 60);
-    elseif ($w < 600) $short[] = aok_cut(aok_text($po['title'] ?? ''), 60) . " ($w words)";
+    elseif ($w < 300) $short[] = aok_cut(aok_text($po['title'] ?? ''), 60) . " ($w words)";
     else $deep++;
 }
 $add($G, $noMd ? 'warn' : 'ok', $noMd ? count($noMd) . ' pages don’t have the classical content sections yet' : 'All ' . count($liveSvcs) . ' services and ' . count($livePosts) . ' posts have the classical content sections (direct answer, methodology, chart factors' . ', remedies)', $noMd ? "These pages were edited, so the automatic upgrade left them alone. The “Apply Full 32-Page Classical Content Upgrade” button above adds the sections after your text.\n" . $list($noMd, 5) : '');
-$add($G, $short ? 'warn' : 'ok', $short ? count($short) . ' pages have fewer than 600 words' : "$deep of $all service and blog pages have 600+ words of in-depth content", $short ? "Longer, well-structured pages are the ones search engines and AI assistants trust as sources.\n" . $list($short, 5) : '', 'pages');
+$add($G, $short ? 'warn' : 'ok', $short ? count($short) . ' pages have fewer than 300 words' : "$deep of $all service and blog pages have 300+ words of in-depth content", $short ? "Longer, well-structured pages are the ones search engines and AI assistants trust as sources.\n" . $list($short, 5) : '', 'pages');
 $cities = array_filter((array)aok_get($d, 'local.nearbyCities', []));
 $add($G, $cities ? 'ok' : 'warn', $cities ? 'Service-area block names ' . count($cities) . ' nearby cities (' . aok_join_list($cities) . ')' : 'No nearby cities listed for the service-area block', 'Shown on the contact page, every service page and in the footer, and listed in the structured data.', 'local');
 

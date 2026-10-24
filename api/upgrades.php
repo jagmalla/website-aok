@@ -21,9 +21,15 @@
 // Version 4:
 //   Contact-form enquiries go to the owner's inbox (AOK_CONTACT_EMAIL in api/db.php). Email addresses are
 //   never shown on the website any more (see public_payload in api/db.php).
+// Version 5:
+//   The 16 services get their own page addresses (/services/career-finance-consultation …); the old
+//   addresses 301 to them. Their page text becomes the owner's Services specification
+//   (api/content/services/<address>.md), replacing the version 3 sections (kept in api/content/v3/ only
+//   to recognise them). Pages whose text the owner edited keep it; the SEO Health button adds the new
+//   sections after it.
 // Only text that is still exactly as first shipped is replaced. Text you have edited is kept. Nothing is deleted.
 
-const AOK_CONTENT_VERSION = 4;
+const AOK_CONTENT_VERSION = 5;
 
 // fingerprints (md5 of the normalised text) of the originally shipped FAQ answers, by question
 const AOK_OLD_FAQ = [
@@ -102,7 +108,8 @@ function aok_upgrade_payload(array $d): array {
     if (!is_array($def)) return $d;   // can't upgrade without the defaults; tried again on the next request
     if ($v < 2) $d = aok_upgrade_v2($d, $def);
     if ($v < 3) $d = aok_upgrade_v3($d, $def);
-    $d = aok_upgrade_v4($d);
+    if ($v < 4) $d = aok_upgrade_v4($d);
+    $d = aok_upgrade_v5($d, $def);
     $d['contentVersion'] = AOK_CONTENT_VERSION;
     return $d;
 }
@@ -232,7 +239,7 @@ function aok_upgrade_v3(array $d, array $def): array {
     foreach ($d['blog'] as $p) if (!empty($p['slug'])) $have[$p['slug']] = 1;
     foreach ($def['_seedPosts'] ?? [] as $p) if (empty($have[$p['slug'] ?? ''])) $add[] = $p;
     $d['blog'] = array_merge($add, $d['blog']);
-    aok_apply_content($d, $def, false);
+    aok_apply_content($d, $def, false, ['posts']);   // services: version 5
     return $d;
 }
 
@@ -252,23 +259,11 @@ function aok_has_content(string $text, string $md): bool {
 
 // Adds the api/content sections after the existing text. $force = false: only where the text is still as
 // shipped; $force = true (the admin button): also where it was edited. Returns what changed and what was skipped.
-function aok_apply_content(array &$d, array $def, bool $force): array {
+function aok_apply_content(array &$d, array $def, bool $force, array $kinds = ['services', 'posts']): array {
     require_once __DIR__ . '/seo-lib.php';
     $out = ['services' => [], 'posts' => [], 'skipped' => []];
-    $defS = [];
-    foreach (array_merge($def['services'] ?? [], $def['_seedServices'] ?? []) as $s) if (!empty($s['id'])) $defS[$s['id']] = $s;
-    foreach ($d['services'] ?? [] as $i => $s) {
-        if (!is_array($s) || !empty($s['redirectTo'])) continue;
-        $orig = $defS[$s['id'] ?? ''] ?? null;
-        $key = aok_slugify((string)($orig['title'] ?? $s['title'] ?? ''));
-        $md = aok_content_md('services', $key);
-        if ($md === '') continue;
-        $detail = (string)($s['detail'] ?? '');
-        if (aok_has_content($detail, $md)) continue;
-        if (!$force && ($orig === null || aok_norm($detail) !== aok_norm($orig['detail'] ?? ''))) { $out['skipped'][] = (string)($s['title'] ?? $key); continue; }
-        $d['services'][$i]['detail'] = trim(rtrim($detail) . "\n\n" . $md);
-        $out['services'][] = (string)($s['title'] ?? $key);
-    }
+    if (in_array('services', $kinds, true)) { $r = aok_apply_service_content($d, $def, $force); $out['services'] = $r['services']; $out['skipped'] = $r['skipped']; }
+    if (!in_array('posts', $kinds, true)) return $out;
     $defP = [];
     foreach (array_merge($def['blog'] ?? [], $def['_seedPosts'] ?? []) as $p) if (!empty($p['slug'])) $defP[$p['slug']] = $p;
     foreach ($d['blog'] ?? [] as $i => $p) {
@@ -288,5 +283,88 @@ function aok_apply_content(array &$d, array $def, bool $force): array {
 function aok_upgrade_v4(array $d): array {
     if (!isset($d['contact']) || !is_array($d['contact'])) $d['contact'] = [];
     $d['contact']['email'] = AOK_CONTACT_EMAIL;   // the owner's enquiry inbox (private; stripped from public data)
+    return $d;
+}
+
+// The shipped default a saved service started from. Saved ids are random (made in the browser), so match by
+// seed key, then by title, then by id.
+function aok_default_service(array $s, array $def): ?array {
+    static $by = null;
+    if ($by === null) {
+        $by = ['seed' => [], 'title' => [], 'id' => []];
+        foreach (array_merge($def['services'] ?? [], $def['_seedServices'] ?? []) as $x) {
+            if (!empty($x['seedKey'])) $by['seed'][$x['seedKey']] = $x;
+            $by['title'][mb_strtolower(aok_norm($x['title'] ?? ''), 'UTF-8')] = $x;
+            if (!empty($x['id'])) $by['id'][$x['id']] = $x;
+        }
+    }
+    if (!empty($s['seedKey']) && isset($by['seed'][$s['seedKey']])) return $by['seed'][$s['seedKey']];
+    $t = mb_strtolower(aok_norm($s['title'] ?? ''), 'UTF-8');
+    if ($t !== '' && isset($by['title'][$t])) return $by['title'][$t];
+    return $by['id'][$s['id'] ?? ''] ?? null;
+}
+
+// The api/content/services file of a service: its shipped page address, else its own address.
+function aok_service_content_key(array $s, array $def): string {
+    $o = aok_default_service($s, $def);
+    if ($o && !empty($o['slug'])) return (string)$o['slug'];
+    return aok_slugify((string)(($s['slug'] ?? '') !== '' ? $s['slug'] : ($s['title'] ?? '')));
+}
+
+// true when $detail already has these sections (their direct-answer line)
+function aok_has_service_content(string $detail, string $md): bool {
+    $first = trim(strtok($md, "\n"));
+    return $first !== '' && strpos(aok_norm($detail), aok_norm($first)) !== false;
+}
+
+// Puts the specification's sections on every service page. $force = false: only where the text is still as
+// shipped (the version 3 sections are recognised and replaced); $force = true (the SEO Health button): also
+// where the owner edited it, keeping their text first.
+function aok_apply_service_content(array &$d, array $def, bool $force): array {
+    require_once __DIR__ . '/seo-lib.php';
+    $out = ['services' => [], 'skipped' => []];
+    foreach ($d['services'] ?? [] as $i => $s) {
+        if (!is_array($s) || !empty($s['redirectTo'])) continue;
+        $md = aok_content_md('services', aok_service_content_key($s, $def));
+        if ($md === '') continue;
+        $detail = (string)($s['detail'] ?? '');
+        if (aok_has_service_content($detail, $md)) continue;
+        $o = aok_default_service($s, $def);
+        $old = aok_content_md('v3/services', aok_slugify((string)($o['title'] ?? $s['title'] ?? '')));
+        $rest = ($old !== '' && strpos($detail, $old) !== false) ? trim(str_replace($old, '', $detail)) : trim($detail);
+        $asShipped = aok_norm($rest) === '' || ($o !== null && aok_norm($rest) === aok_norm($o['detail'] ?? ''));
+        if (!$asShipped && !$force) { $out['skipped'][] = (string)($s['title'] ?? ''); continue; }
+        $d['services'][$i]['detail'] = $asShipped ? $md : $rest . "\n\n" . $md;
+        $out['services'][] = (string)($s['title'] ?? '');
+    }
+    return $out;
+}
+
+function aok_upgrade_v5(array $d, array $def): array {
+    if (!isset($d['services']) || !is_array($d['services'])) return $d;
+    require_once __DIR__ . '/seo-lib.php';
+    // 1. page addresses from the specification (an address the owner set themselves is kept)
+    $before = aok_service_slugs($d['services']);
+    foreach ($d['services'] as $i => $s) {
+        $o = aok_default_service((array)$s, $def);
+        if ($o && !empty($o['slug']) && trim((string)($s['slug'] ?? '')) === '') $d['services'][$i]['slug'] = $o['slug'];
+    }
+    $after = aok_service_slugs($d['services']);
+    // 2. the old addresses forward to the new ones, and anything pointing at an old address follows
+    $map = [];
+    foreach ($before as $id => $old) if (isset($after[$id]) && $after[$id] !== $old) $map['/services/' . $old] = '/services/' . $after[$id];
+    if ($map) {
+        $reds = (isset($d['redirects']) && is_array($d['redirects'])) ? $d['redirects'] : [];
+        foreach ($reds as $k => $r) if (isset($map['/' . trim((string)($r['to'] ?? ''), '/')])) $reds[$k]['to'] = $map['/' . trim((string)$r['to'], '/')];
+        $have = [];
+        foreach ($reds as $r) $have[strtolower('/' . trim((string)($r['from'] ?? ''), '/'))] = 1;
+        foreach ($map as $from => $to) if (empty($have[strtolower($from)])) $reds[] = ['from' => $from, 'to' => $to];
+        $d['redirects'] = array_values($reds);
+        foreach (['services', 'blog'] as $kind) foreach ($d[$kind] ?? [] as $i => $x) {
+            foreach (['redirectTo', 'canonical'] as $f) if (!empty($x[$f]) && isset($map['/' . trim((string)$x[$f], '/')])) $d[$kind][$i][$f] = $map['/' . trim((string)$x[$f], '/')];
+        }
+    }
+    // 3. the specification's page text
+    aok_apply_service_content($d, $def, false);
     return $d;
 }
