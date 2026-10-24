@@ -55,7 +55,7 @@ img,iframe{max-width:100%}
 .aok-burger{display:none}
 .aok-mobnav{display:none}
 @container site (max-width:1024px){[style*="repeat(3"]{grid-template-columns:repeat(2,1fr)!important}[style*="repeat(4"]{grid-template-columns:repeat(2,1fr)!important}}
-@container site (max-width:860px){
+@container site (max-width:1140px){   /* the full menu needs ~1140px (logo 240px + 6 links + buttons); below that, the burger menu */
 .aok-desknav{display:none!important}
 .aok-burger{display:inline-flex!important}
 .aok-mobnav.open{display:block!important}
@@ -66,7 +66,7 @@ img,iframe{max-width:100%}
 }
 /* Viewport-based fallbacks — work on every browser, incl. older iOS/Android with no container-query support */
 @media (max-width:1024px){[style*="repeat(3"]{grid-template-columns:repeat(2,1fr)!important}[style*="repeat(4"]{grid-template-columns:repeat(2,1fr)!important}}
-@media (max-width:860px){
+@media (max-width:1140px){   /* the full menu needs ~1140px (logo 240px + 6 links + buttons); below that, the burger menu */
 .aok-desknav{display:none!important}
 .aok-burger{display:inline-flex!important}
 .aok-mobnav.open{display:block!important}
@@ -135,40 +135,162 @@ img{height:auto}
 .aok-svc-art-badge{display:none}.aok-svc-art.is-empty{aspect-ratio:16/9;display:flex;align-items:center;justify-content:center}.aok-svc-art.is-empty .aok-svc-art-badge{display:block}
 @keyframes aokfloat{0%,100%{transform:translateY(0)}50%{transform:translateY(-9px)}}
 .aok-svc-sec{margin:0 0 56px}
+/* ---- service pages: layout system ----
+   top    .aok-svc-top   1200px grid: editorial sections | 340px sticky booking card
+   below  .aok-svc-wide  one centred 1100px column (steps, FAQ, articles, author, booking, areas)
+   ≤1024px the booking card moves under the hero as a compact strip; ≤767px one column, 16px gutters */
+:root{--aok-line:rgba(212,175,55,.24);--aok-gold-label:#8A6508;interpolate-size:allow-keywords}
+.aok-svc-hero{overflow-x:clip}   /* the banner's soft glow may reach past the screen edge: never sideways scrolling */
+.aok-svc-upper{padding:56px 0 8px}
+.aok-svc-top{display:grid;grid-template-columns:minmax(0,1fr) 340px;gap:40px;align-items:start;max-width:1200px;margin:0 auto;padding:0 24px;box-sizing:border-box}
+.aok-svc-body{min-width:0}
+.aok-svc-intro{margin-bottom:12px}
+.aok-svc-wide{width:calc(100% - 48px);max-width:1100px;margin:0 auto}
+.aok-svc-lower{padding-top:24px}
+.aok-svc-lower .aok-svc-sec{margin:0 0 80px}
+.aok-svc-head.is-center{text-align:center;max-width:760px;margin:0 auto 34px}
+.aok-svc-head.is-center .aok-svc-h2{margin-bottom:14px}
+.aok-svc-head.is-center .aok-svc-h2::after{margin:14px auto 0}
+.aok-svc-sub{font:400 16.5px/1.6 'Plus Jakarta Sans',sans-serif;color:#6B6E73;margin:0}
 .aok-svc-h2{font:600 clamp(27px,3vw,35px)/1.16 'Cormorant Garamond',Georgia,serif;color:#1E2022;margin:0 0 22px;scroll-margin-top:100px;letter-spacing:-.005em}
 .aok-svc-h2::after{content:'';display:block;width:64px;height:2px;margin-top:14px;background:linear-gradient(90deg,#A68446,#DFC286)}
-.aok-feats{display:grid;gap:16px}
-.aok-feat,.aok-step,.aok-sfaq{position:relative;background:rgba(255,252,247,.82);border:1px solid rgba(166,132,70,.24);border-radius:18px;box-shadow:0 1px 0 #fff inset,0 14px 30px -18px rgba(120,96,50,.28)}
-.aok-feat{padding:20px 22px 18px;transition:transform .25s,box-shadow .25s}
-.aok-feat:hover{transform:translateY(-3px);box-shadow:0 1px 0 #fff inset,0 22px 40px -20px rgba(120,96,50,.38)}
-.aok-feat h3{font:700 16px/1.35 'Plus Jakarta Sans',sans-serif;color:#1E2022;margin:0 0 8px;padding-left:16px;position:relative}
-.aok-feat h3::before{content:'';position:absolute;left:0;top:.42em;width:7px;height:7px;border-radius:50%;background:radial-gradient(circle at 35% 35%,#F3DFA8,#A68446)}
-.aok-feat p{font:400 15px/1.7 'Plus Jakarta Sans',sans-serif;color:#3A3D42;margin:0}
-.aok-steps{display:grid;gap:16px;list-style:none;margin:0;padding:0;counter-reset:none}
-.aok-step{padding:26px 20px 20px}
-.aok-step-n{display:flex;align-items:center;justify-content:center;width:42px;height:42px;border-radius:50%;margin-bottom:14px;font:600 20px/1 'Cormorant Garamond',Georgia,serif;color:#fff;background:radial-gradient(circle at 32% 30%,#F1DCA3,#B8904A 62%,#8C6D33);box-shadow:0 8px 18px -6px rgba(140,109,51,.55),0 0 0 4px rgba(223,194,134,.25)}
-.aok-step h3{font:700 15.5px/1.35 'Plus Jakarta Sans',sans-serif;color:#1E2022;margin:0 0 8px}
-.aok-step p{font:400 14.5px/1.65 'Plus Jakarta Sans',sans-serif;color:#3A3D42;margin:0}
-.aok-sfaqs{display:grid;gap:12px}
-.aok-sfaq summary{list-style:none;cursor:pointer;display:flex;align-items:center;justify-content:space-between;gap:16px;padding:18px 22px;font:700 16px/1.45 'Plus Jakarta Sans',sans-serif;color:#1E2022}
-.aok-sfaq summary::-webkit-details-marker{display:none}
-.aok-sfaq-ic{flex-shrink:0;width:28px;height:28px;border-radius:50%;border:1px solid rgba(166,132,70,.5);position:relative;transition:transform .25s}
-.aok-sfaq-ic::before,.aok-sfaq-ic::after{content:'';position:absolute;left:50%;top:50%;width:11px;height:1.6px;background:#A68446;transform:translate(-50%,-50%)}
-.aok-sfaq-ic::after{transform:translate(-50%,-50%) rotate(90deg)}
-.aok-sfaq[open] .aok-sfaq-ic{transform:rotate(45deg)}
-.aok-sfaq-a{padding:0 22px 6px}.aok-sfaq-a p{margin:0 0 16px!important}
-.aok-svc-side{position:sticky;top:100px;display:grid;gap:16px}
+/* sticky booking card */
+.aok-svc-side{position:sticky;top:100px;display:grid;gap:16px;min-width:0}
+.aok-svc-side .aok-card{background:rgba(255,255,255,.74)!important;border:1px solid rgba(212,175,55,.3)!important;box-shadow:0 1px 0 rgba(255,255,255,.95) inset,0 18px 40px -22px rgba(120,96,50,.35)!important}
+.aok-svc-fee{padding:28px 26px;text-align:center}
+.aok-svc-fee-k{font:600 12px 'Plus Jakarta Sans',sans-serif;letter-spacing:.2em;text-transform:uppercase;color:#8A6A2E;margin-bottom:12px}
+.aok-svc-fee-price{font:600 42px/1 'Cormorant Garamond',Georgia,serif}
+.aok-svc-fee-unit{font:500 14px 'Plus Jakarta Sans',sans-serif;color:#6B6E73;margin:8px 0 16px}
+.aok-svc-fee-btns{display:grid;gap:10px;margin-top:18px}
 .aok-svc-facts{list-style:none;margin:0;padding:0;display:grid;gap:9px;text-align:left}
 .aok-svc-facts li{display:flex;gap:10px;align-items:flex-start;font:500 14px/1.5 'Plus Jakarta Sans',sans-serif;color:#3A3D42}
 .aok-svc-toc{padding:20px 22px;display:grid;gap:8px}
 .aok-svc-toc-t{font:600 12px 'Plus Jakarta Sans',sans-serif;letter-spacing:.18em;text-transform:uppercase;color:#8A6A2E;margin-bottom:4px}
-.aok-svc-toc a{font:500 14px/1.45 'Plus Jakarta Sans',sans-serif;color:#3A3D42;text-decoration:none;padding:4px 0 4px 12px;border-left:2px solid rgba(166,132,70,.3)}
+.aok-svc-toc a{font:500 14px/1.45 'Plus Jakarta Sans',sans-serif;color:#3A3D42;text-decoration:none;padding:4px 0 4px 12px;border-left:2px solid rgba(166,132,70,.3);transition:color .2s,border-color .2s}
 .aok-svc-toc a:hover{color:#8C6D33;border-left-color:#A68446}
+/* methodology & chart factors: one structured panel, hairline-divided, equal-height cells */
+.aok-feats{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:1px;background:var(--aok-line);border:1px solid var(--aok-line);border-radius:20px;overflow:hidden;box-shadow:0 1px 0 #fff inset,0 22px 44px -30px rgba(120,96,50,.4)}
+.aok-feat{position:relative;display:flex;flex-direction:column;padding:24px;background:linear-gradient(165deg,#FFFFFF 0%,#FDFAF4 100%);transition:background .25s}
+.aok-feat:hover{background:#FFFFFF}
+.aok-feats>.aok-feat:last-child:nth-child(odd){grid-column:1/-1}
+.aok-feat h3{font:700 .85rem/1.45 'Plus Jakarta Sans',sans-serif;letter-spacing:.08em;text-transform:uppercase;color:var(--aok-gold-label);margin:0 0 10px}
+.aok-site .aok-feat h3{font-family:'Plus Jakarta Sans',sans-serif!important;font-weight:700!important;letter-spacing:.08em!important;font-size-adjust:none}   /* crisp sans labels (headings are serif site-wide) */
+.aok-feat p{font:400 15.5px/1.6 'Plus Jakarta Sans',sans-serif;color:#333333;margin:0}
+/* how the consultation works: a connected 4-step workflow, equal-height cards */
+.aok-steps{display:grid;grid-template-columns:repeat(var(--n,4),minmax(0,1fr));gap:22px;list-style:none;margin:0;padding:0;align-items:stretch}
+.aok-step{position:relative;display:flex;flex-direction:column;height:100%;box-sizing:border-box;padding:26px 22px 24px;border-radius:16px;background:linear-gradient(160deg,#FFFFFF 0%,#FBF7EF 58%,#F5EDDF 100%);border:1px solid rgba(212,175,55,.2);box-shadow:0 1px 0 #fff inset,0 18px 36px -24px rgba(120,96,50,.38)}
+.aok-step:not(:last-child)::after{content:'';position:absolute;top:45px;right:-23px;width:24px;height:2px;background:linear-gradient(90deg,#DFC286,#A68446);z-index:1}
+.aok-step-top{display:flex;align-items:center;gap:12px;margin-bottom:18px}
+.aok-step-n{display:flex;align-items:center;justify-content:center;flex:0 0 auto;width:40px;height:40px;border-radius:50%;font:600 19px/1 'Cormorant Garamond',Georgia,serif;color:#fff;background:radial-gradient(circle at 32% 30%,#F1DCA3,#B8904A 62%,#8C6D33);box-shadow:0 8px 18px -6px rgba(140,109,51,.55),0 0 0 4px rgba(223,194,134,.22)}
+.aok-step-k{font:700 11.5px 'Plus Jakarta Sans',sans-serif;letter-spacing:.16em;text-transform:uppercase;color:var(--aok-gold-label)}
+.aok-step h3{font:600 19px/1.3 'Cormorant Garamond',Georgia,serif;color:#1E2022;margin:0 0 8px}
+.aok-step p{font:400 14.5px/1.65 'Plus Jakarta Sans',sans-serif;color:#3A3D42;margin:0}
+/* FAQ: centred full-width accordion bars, + / − indicator, smooth opening */
+.aok-sfaqs{display:grid;gap:12px;width:100%;max-width:900px;margin:0 auto}
+.aok-sfaq{position:relative;background:rgba(255,252,247,.86);border:1px solid rgba(212,175,55,.26);border-radius:16px;box-shadow:0 1px 0 #fff inset,0 14px 30px -22px rgba(120,96,50,.3);transition:border-color .25s,box-shadow .25s}
+.aok-sfaq[open]{border-color:rgba(166,132,70,.45);box-shadow:0 1px 0 #fff inset,0 20px 40px -24px rgba(120,96,50,.38)}
+.aok-sfaq summary{list-style:none;cursor:pointer;display:flex;align-items:center;justify-content:space-between;gap:16px;padding:20px 24px;font:700 16.5px/1.45 'Plus Jakarta Sans',sans-serif;color:#1E2022}
+.aok-sfaq summary::-webkit-details-marker{display:none}
+.aok-sfaq summary:focus-visible{outline:2px solid #A68446;outline-offset:3px;border-radius:14px}
+.aok-sfaq-ic{flex-shrink:0;width:30px;height:30px;border-radius:50%;border:1px solid rgba(166,132,70,.5);position:relative;transition:background .25s}
+.aok-sfaq-ic::before,.aok-sfaq-ic::after{content:'';position:absolute;left:50%;top:50%;width:12px;height:1.6px;background:#A68446;transform:translate(-50%,-50%);transition:transform .3s ease}
+.aok-sfaq-ic::after{transform:translate(-50%,-50%) rotate(90deg)}
+.aok-sfaq[open] .aok-sfaq-ic{background:rgba(223,194,134,.22)}
+.aok-sfaq[open] .aok-sfaq-ic::after{transform:translate(-50%,-50%) rotate(90deg) scaleX(0)}
+.aok-sfaq-a{margin:0 24px;padding:2px 0 8px;border-top:1px solid rgba(212,175,55,.18)}
+.aok-sfaq-a p{margin:16px 0!important;color:#333333}
+.aok-sfaq::details-content{block-size:0;overflow:clip;transition:block-size .35s ease,content-visibility .35s allow-discrete}
+.aok-sfaq[open]::details-content{block-size:auto}
+@keyframes aokfaqin{from{opacity:0;transform:translateY(-4px)}to{opacity:1;transform:none}}
+.aok-sfaq[open] .aok-sfaq-a{animation:aokfaqin .35s ease}
+/* related articles */
+.aok-svc-rel{margin-bottom:80px}
+.aok-rel-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:22px}
+.aok-rel-card{display:flex;flex-direction:column;padding:24px 26px;text-decoration:none;transition:transform .3s ease,box-shadow .3s ease}
+.aok-rel-card:hover{transform:translateY(-4px);box-shadow:0 1px 0 rgba(255,255,255,.95) inset,0 26px 50px -24px rgba(120,96,50,.38)!important}
+.aok-rel-k{font:600 11.5px 'Plus Jakarta Sans',sans-serif;letter-spacing:.14em;text-transform:uppercase;color:#8A6A2E;margin-bottom:10px}
+.aok-rel-t{font:600 21px/1.22 'Cormorant Garamond',Georgia,serif;color:#1E2022;margin-bottom:10px}
+.aok-rel-x{font:400 14px/1.6 'Plus Jakarta Sans',sans-serif;color:#3A3D42;flex:1}
+.aok-rel-more{margin-top:16px;font:600 13px 'Plus Jakarta Sans',sans-serif;color:#8C6D33}
+/* about the astrologer (E-E-A-T): two columns */
+.aok-svc-author{max-width:960px;margin:60px auto 40px;width:100%}
+.aok-author{display:grid;grid-template-columns:250px minmax(0,1fr);gap:36px;padding:36px 38px;align-items:start}
+.aok-author-l{display:flex;flex-direction:column;align-items:center;text-align:center;gap:6px;padding-right:34px;border-right:1px solid var(--aok-line);align-self:stretch}
+.aok-author-photo{width:132px;height:132px;border-radius:50%;padding:7px;box-sizing:border-box;background:linear-gradient(135deg,#F3E6C6,#C5A869);box-shadow:0 14px 30px -14px rgba(110,84,38,.6);margin-bottom:10px}
+.aok-author-photo>div{width:100%;height:100%;border-radius:50%;overflow:hidden;background:#FFFCF7;display:flex;align-items:center;justify-content:center}
+.aok-author-photo img{width:100%;height:100%;object-fit:cover}
+.aok-author-name{font:600 24px/1.2 'Cormorant Garamond',Georgia,serif;color:#1E2022}
+.aok-author-role{font:500 13px/1.45 'Plus Jakarta Sans',sans-serif;color:#6B6E73}
+.aok-author-pills{display:flex;flex-wrap:wrap;justify-content:center;gap:6px;margin-top:12px}
+.aok-author-pills span{padding:5px 11px;border-radius:999px;background:rgba(255,255,255,.75);border:1px solid rgba(166,132,70,.35);font:600 11.5px/1.3 'Plus Jakarta Sans',sans-serif;color:#1E2022}
+.aok-author-k{font:600 11.5px 'Plus Jakarta Sans',sans-serif;letter-spacing:.2em;text-transform:uppercase;color:#8A6A2E;margin-bottom:8px}
+.aok-author-h{font:600 30px/1.15 'Cormorant Garamond',Georgia,serif;color:#1E2022;margin:0 0 16px}
+.aok-author-p{font:400 15px/1.7 'Plus Jakarta Sans',sans-serif;color:#333333;margin:0 0 12px}
+.aok-author-fee{font:600 13.5px/1.5 'Plus Jakarta Sans',sans-serif;color:#8A6A2E;margin:6px 0 20px}
+.aok-author-btns{display:flex;gap:10px;flex-wrap:wrap}
+/* booking */
+.aok-svc-bookgrid{display:grid;grid-template-columns:minmax(0,.86fr) minmax(0,1.14fr);gap:30px;align-items:start}
 .aok-svc-card-img{display:block;margin:8px 8px 0;border-radius:14px;overflow:hidden;aspect-ratio:16/9}
 .aok-svc-card-img img{display:block;width:100%;height:100%;object-fit:cover;transition:transform .6s}
 .aok-svc-card:hover .aok-svc-card-img img{transform:scale(1.04)}
-@media (max-width:1024px){.aok-steps{grid-template-columns:repeat(2,1fr)!important}}
-@media (max-width:900px){.aok-svc-side{position:static}}
+@media (max-width:1024px){
+.aok-svc-top{grid-template-columns:minmax(0,1fr);gap:28px}
+.aok-svc-side{position:static;order:-1}
+.aok-svc-fee{display:grid;grid-template-columns:auto minmax(0,1fr);gap:0 32px;align-items:center;text-align:left;padding:24px 28px}
+.aok-svc-fee-top{padding-right:32px;border-right:1px solid var(--aok-line);text-align:center}
+.aok-svc-fee-body .aok-svc-facts{grid-template-columns:repeat(2,minmax(0,1fr));gap:8px 20px}
+.aok-svc-fee-btns{grid-template-columns:repeat(2,minmax(0,1fr))}
+.aok-svc-toc{display:flex;flex-wrap:wrap;align-items:center;gap:8px}
+.aok-svc-toc-t{margin:0 6px 0 0}
+.aok-svc-toc a{border:1px solid var(--aok-line);border-radius:999px;padding:6px 14px;background:rgba(255,255,255,.7)}
+.aok-steps{grid-template-columns:repeat(2,minmax(0,1fr))}
+.aok-step::after{display:none}
+.aok-svc-bookgrid{grid-template-columns:minmax(0,1fr)}
+}
+@container site (max-width:1024px){
+.aok-svc-top{grid-template-columns:minmax(0,1fr);gap:28px}
+.aok-svc-side{position:static;order:-1}
+.aok-svc-fee{display:grid;grid-template-columns:auto minmax(0,1fr);gap:0 32px;align-items:center;text-align:left;padding:24px 28px}
+.aok-svc-fee-top{padding-right:32px;border-right:1px solid var(--aok-line);text-align:center}
+.aok-svc-fee-body .aok-svc-facts{grid-template-columns:repeat(2,minmax(0,1fr));gap:8px 20px}
+.aok-svc-fee-btns{grid-template-columns:repeat(2,minmax(0,1fr))}
+.aok-svc-toc{display:flex;flex-wrap:wrap;align-items:center;gap:8px}
+.aok-svc-toc-t{margin:0 6px 0 0}
+.aok-svc-toc a{border:1px solid var(--aok-line);border-radius:999px;padding:6px 14px;background:rgba(255,255,255,.7)}
+.aok-steps{grid-template-columns:repeat(2,minmax(0,1fr))}
+.aok-step::after{display:none}
+.aok-svc-bookgrid{grid-template-columns:minmax(0,1fr)}
+}
+@media (max-width:767px){
+.aok-svc-page .aok-wrap{padding-left:16px!important;padding-right:16px!important}
+.aok-svc-top{padding:0 16px}
+.aok-svc-wide{width:calc(100% - 32px)}
+.aok-svc-fee{grid-template-columns:minmax(0,1fr);text-align:center;padding:24px 20px}
+.aok-svc-fee-top{padding:0 0 16px;margin-bottom:16px;border-right:0;border-bottom:1px solid var(--aok-line)}
+.aok-svc-fee-body .aok-svc-facts,.aok-svc-fee-btns{grid-template-columns:minmax(0,1fr)}
+.aok-steps,.aok-feats{grid-template-columns:minmax(0,1fr)}
+.aok-feats>.aok-feat:last-child:nth-child(odd){grid-column:auto}
+.aok-author{grid-template-columns:minmax(0,1fr);gap:22px;padding:26px 22px}
+.aok-author-l{padding:0 0 22px;border-right:0;border-bottom:1px solid var(--aok-line)}
+.aok-svc-author{margin:40px auto 28px}
+.aok-svc-lower .aok-svc-sec,.aok-svc-rel{margin-bottom:56px}
+.aok-sfaq summary{padding:16px 18px}.aok-sfaq-a{margin:0 18px}
+}
+@container site (max-width:767px){
+.aok-svc-page .aok-wrap{padding-left:16px!important;padding-right:16px!important}
+.aok-svc-top{padding:0 16px}
+.aok-svc-wide{width:calc(100% - 32px)}
+.aok-svc-fee{grid-template-columns:minmax(0,1fr);text-align:center;padding:24px 20px}
+.aok-svc-fee-top{padding:0 0 16px;margin-bottom:16px;border-right:0;border-bottom:1px solid var(--aok-line)}
+.aok-svc-fee-body .aok-svc-facts,.aok-svc-fee-btns{grid-template-columns:minmax(0,1fr)}
+.aok-steps,.aok-feats{grid-template-columns:minmax(0,1fr)}
+.aok-feats>.aok-feat:last-child:nth-child(odd){grid-column:auto}
+.aok-author{grid-template-columns:minmax(0,1fr);gap:22px;padding:26px 22px}
+.aok-author-l{padding:0 0 22px;border-right:0;border-bottom:1px solid var(--aok-line)}
+.aok-svc-author{margin:40px auto 28px}
+.aok-svc-lower .aok-svc-sec,.aok-svc-rel{margin-bottom:56px}
+.aok-sfaq summary{padding:16px 18px}.aok-sfaq-a{margin:0 18px}
+}
 @media (prefers-reduced-motion:reduce){.aok-svc-art{animation:none}.aok-feat,.aok-svc-card-img img{transition:none}}
 @media print{.aok-svc-art,.aok-svc-side,.aok-svc-book{display:none}}
 /* service page in the visual editor: click any text to type; dashed gold = editable */
@@ -303,7 +425,7 @@ img{height:auto}
 </head>
 <body>
 <div id="root"></div>
-<script src="/assets/app.js?v=239352adb1" defer></script>
+<script src="/assets/app.js?v=6eb6d2f1c3" defer></script>
 <!-- Hero 3D scene (assets/hero3d.js, Three.js via the import map): started once the page is idle, and skipped on
      data-saver / 2G connections and low-memory phones (they keep the static pearl background) -->
 <script type="module">

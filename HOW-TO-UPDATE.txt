@@ -1,7 +1,20 @@
 ANALYSIS OF KARMA — Update (SEO, local SEO, AI search & security)
 ===================================================================
 
-NEW IN THIS VERSION: SECURITY UPDATE
+NEW IN THIS VERSION: SERVICE PAGE LAYOUT
+  • The 16 service pages have a new, balanced layout: the methodology and
+    chart-factor sections sit beside the sticky "Consultation fee" card;
+    from "How Your Consultation Works" on, the page runs in one centred
+    full-width column (4 connected step cards, a centred FAQ with +/-
+    bars, related articles, and a two-column About the Astrologer card),
+    so there is no empty space on the right any more.
+  • Tablets: the fee card sits under the top banner as a compact strip.
+    Phones: everything is one column with even 16px margins.
+  • The main menu switches to the menu button below 1140px wide, so the
+    logo never overlaps the links on tablets and small laptops.
+  • Nothing to set up: all service pages, including new ones, use it.
+
+ALSO IN THIS UPDATE (if not uploaded yet): SECURITY
   • After uploading, log in once: you will be asked to choose a new admin
     password (10+ characters). The old website made its password readable,
     so it can no longer be trusted. Saving it signs every other device out.

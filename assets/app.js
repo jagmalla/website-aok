@@ -721,16 +721,34 @@ class Component extends DCLogic {
         h('div',{style:{marginBottom:12}},this.badge(s.icon)), h('div',{style:{font:'600 20px/1.2 '+this.SERIF,color:P.maroon,marginBottom:8}},s.title),
         h('div',{style:{font:'400 14px/1.6 Plus Jakarta Sans',color:P.ink,marginBottom:12}},this.cut(this.txt(s.desc),120)), h('span',{style:{font:'600 13px '+this.HEAD,color:'#8A6A2E'}},'Explore '+this.txt(s.title)+' →'))))); }
   relatedPostsBlock(svc){ const h=React.createElement,P=this.P; const rel=this.relatedPosts(svc); if(!rel.length) return null;
-    return h('section',{'aria-labelledby':'related-posts-h',style:{padding:'0 0 64px'}}, this.wrap(h('div',null,
-      h('h2',{id:'related-posts-h',style:{font:'600 clamp(26px,3vw,34px)/1.15 '+this.SERIF,color:P.maroon,margin:'0 0 20px'}},'Articles on '+this.txt(svc.title)),
-      h('div',{style:{display:'grid',gridTemplateColumns:'repeat(3,1fr)',gap:18}}, ...rel.map(p=>h('a',this.linkTo('/blog/'+encodeURIComponent(p.slug),()=>this.setState({route:'blog',postId:p.id,serviceId:null,menuOpen:false}),{key:p.id,className:'aok-card aok-tilt',style:{display:'block',padding:'22px 24px',textDecoration:'none'}}),
-        h('div',{style:{font:'600 11.5px '+this.HEAD,letterSpacing:'.14em',textTransform:'uppercase',color:'#8A6A2E',marginBottom:10}},'Article'),
-        h('div',{style:{font:'600 21px/1.22 '+this.SERIF,color:P.maroon,marginBottom:10}},p.title), h('div',{style:{font:'400 14px/1.6 Plus Jakarta Sans',color:P.ink}},this.cut(this.txt(p.excerpt),140)))))))); }
+    return h('section',{'aria-labelledby':'related-posts-h',className:'aok-svc-wide aok-svc-rel'},
+      h('div',{className:'aok-svc-head is-center'}, h('h2',{id:'related-posts-h',className:'aok-svc-h2'},'Articles on '+this.txt(svc.title)), h('p',{className:'aok-svc-sub'},'Related reading on the same topic.')),
+      h('div',{className:'aok-rel-grid'}, ...rel.map(p=>h('a',this.linkTo('/blog/'+encodeURIComponent(p.slug),()=>this.setState({route:'blog',postId:p.id,serviceId:null,menuOpen:false}),{key:p.id,className:'aok-card aok-rel-card'}),
+        h('div',{className:'aok-rel-k'},'Article'),
+        h('div',{className:'aok-rel-t'},p.title), h('div',{className:'aok-rel-x'},this.cut(this.txt(p.excerpt),140)), h('span',{className:'aok-rel-more'},'Read the article →'))))); }
 
   // visible E-E-A-T card — the same facts as the Person in the structured data
-  authorCard(){ const h=React.createElement,P=this.P,d=this.state.data,pe=d.person||{},L=d.local||{}; const name=pe.name||d.brand.astrologer;
+  authorCard(opts){ const h=React.createElement,P=this.P,d=this.state.data,pe=d.person||{},L=d.local||{}; const name=pe.name||d.brand.astrologer;
     const studies=(pe.studies||[]).filter(Boolean), texts=(pe.classicalTexts||[]).filter(Boolean); const pr=(d.about&&d.about.pricing)||{};
     const chip=t=>h('span',{key:t,style:{display:'inline-block',padding:'5px 12px',borderRadius:999,background:'rgba(255,255,255,.7)',border:'1px solid rgba(166,132,70,.35)',font:'600 12px '+this.HEAD,color:P.maroon,margin:'0 6px 6px 0'}},t);
+    if(opts&&opts.wide){ const para=(t,k)=>h('p',{key:k,className:'aok-author-p'},t);
+      // service pages: portrait, name and credentials on the left; lineage, research and booking on the right
+      return h('aside',{id:'about-the-astrologer','aria-labelledby':'about-the-astrologer-h',className:'aok-card aok-author'},
+        h('div',{className:'aok-author-l'},
+          h('div',{className:'aok-author-photo'}, h('div',null, pe.image?h('img',{src:pe.image,alt:name,loading:'lazy',width:118,height:118}):this.mark(92))),
+          h('div',{className:'aok-author-name'},name),
+          h('div',{className:'aok-author-role'},(pe.jobTitle||'Vedic Astrologer')),
+          h('div',{className:'aok-author-role'},this.locLabel()+' \u00b7 Online worldwide'),
+          studies.length?h('div',{className:'aok-author-pills'},...studies.map(t=>h('span',{key:t},t))):null),
+        h('div',{className:'aok-author-r'},
+          h('div',{className:'aok-author-k'},'About the astrologer'),
+          h('h2',{id:'about-the-astrologer-h',className:'aok-author-h'},'About the Astrologer \u2014 '+name),
+          studies.length?para('Formal training in '+this.joinList(studies)+(pe.mentor?' under '+pe.mentor:'')+'.','t'):null,
+          texts.length?para('Classical research'+(pe.traditions?': '+pe.traditions+', through ':': ')+this.joinList(texts)+'.','r'):null,
+          (pe.philosophy||[]).filter(Boolean).length?para('Grounded in '+this.joinList(pe.philosophy)+'.','g'):null,
+          (L.languages||[]).filter(Boolean).length?para('Consultations in '+this.joinList(L.languages)+'.','l'):null,
+          h('div',{className:'aok-author-fee'},((pr.fee||'$100 CAD')+' '+(pr.unit||'per hour')).trim()+' \u00b7 '+((L.onlineChannels||['Zoom','WhatsApp']).filter(Boolean).join(' & '))+' \u00b7 New clients pay only if satisfied'),
+          h('div',{className:'aok-author-btns'}, h('a',{href:'#book',onClick:e=>{ e.preventDefault(); this.scrollToBook(); },className:'aok-btn aok-fx-lift',style:{display:'inline-flex',alignItems:'center',font:'600 15px '+this.HEAD,padding:'13px 24px',borderRadius:999,textDecoration:'none',...this.btnVariants().solid}},'Book a consultation \u2192'), this.linkBtn('More about '+name,'/about',()=>this.go('about'),'outline')))); }
     return h('aside',{id:'about-the-astrologer','aria-labelledby':'about-the-astrologer-h',className:'aok-card',style:{marginTop:44,padding:'30px 32px',display:'grid',gridTemplateColumns:'86px 1fr',gap:24,alignItems:'start'}},
       h('div',{style:{width:86,height:86,borderRadius:'50%',padding:6,background:'linear-gradient(135deg,#F3E6C6,#C5A869)',boxShadow:'0 10px 24px -12px rgba(110,84,38,.6)'}}, h('div',{style:{width:'100%',height:'100%',borderRadius:'50%',overflow:'hidden',background:'#FFFCF7',display:'flex',alignItems:'center',justifyContent:'center'}}, pe.image?h('img',{src:pe.image,alt:name,loading:'lazy',width:74,height:74,style:{width:'100%',height:'100%',objectFit:'cover'}}):this.mark(62))),
       h('div',null,
@@ -756,8 +774,8 @@ class Component extends DCLogic {
     return out; }
   areasIntro(){ const d=this.state.data,L=d.local||{},pe=d.person||{}; const near=(L.nearbyCities||[]).filter(Boolean);
     return 'Based in '+(L.locality||'Surrey')+', '+(L.region||'British Columbia')+', '+(pe.name||d.brand.astrologer)+' offers Vedic astrology consultations over '+this.joinList((L.onlineChannels||['Zoom','WhatsApp']).filter(Boolean))+' to clients across '+(near.length?(L.nearbyLabel||'Greater Vancouver')+', ':'')+(L.region||'British Columbia')+', Canada'+(L.onlineWorldwide!==false?' and worldwide.':'.'); }
-  areasBlock(){ const h=React.createElement,P=this.P;
-    return h('section',{id:'service-areas','aria-labelledby':'service-areas-h',style:{padding:'0 0 64px'}}, this.wrap(h('div',{className:'aok-card',style:{padding:'30px 32px',display:'grid',gridTemplateColumns:'1fr 1.2fr',gap:28,alignItems:'center'}},
+  areasBlock(opts){ const h=React.createElement,P=this.P; const box=c=>(opts&&opts.wide)?h('div',{className:'aok-svc-wide'},c):this.wrap(c);
+    return h('section',{id:'service-areas','aria-labelledby':'service-areas-h',style:{padding:'0 0 64px'}}, box(h('div',{className:'aok-card',style:{padding:'30px 32px',display:'grid',gridTemplateColumns:'1fr 1.2fr',gap:28,alignItems:'center'}},
       h('div',null, h('div',{style:{font:'600 11.5px '+this.HEAD,letterSpacing:'.2em',textTransform:'uppercase',color:'#8A6A2E',marginBottom:8}},'Where I consult'),
         h('h2',{id:'service-areas-h',style:{font:'600 clamp(26px,3vw,34px)/1.15 '+this.SERIF,color:P.maroon,margin:'0 0 12px'}},'Service Areas & Online Consultations'),
         h('p',{style:{font:'400 15px/1.7 Plus Jakarta Sans',color:P.ink,margin:'0 0 18px'}},this.areasIntro()),
@@ -805,15 +823,21 @@ class Component extends DCLogic {
   ep(value,onCommit,opts){ opts=opts||{}; if(!this.state.editMode) return opts.render?opts.render(value):value;
     return React.createElement(this.EditablePlain,{key:opts.key,value:value||'',onCommit,tag:opts.tag||'span',multiline:!!opts.multiline,placeholder:opts.placeholder||'Type here\u2026',style:opts.style,className:opts.className,onInput:opts.onInput}); }
   wordCount2(t){ return String(t||'').replace(/\*\*/g,'').split(/\s+/).filter(Boolean).length; }
-  svcSection(sec,i){ const h=React.createElement,P=this.P,k='ss'+i,t=sec.title,bl=sec.blocks;
-    const head=h('h2',{id:'section-'+(i+1),className:'aok-svc-h2'},this.mdInline(t,k));
+  // Layout zones of a service page: the editorial sections sit beside the sticky booking card; from the first
+  // "wide" section on (the consultation steps or the FAQ) the page runs in one centred full-width column.
+  // Mirrors aok_service_split() in api/seo-lib.php.
+  svcIsWide(sec){ const bl=sec.blocks||[]; return (bl.length===1&&bl[0][0]==='ol')||(/frequently asked/i.test(sec.title)&&bl.some(b=>b[0]==='h3')); }
+  svcSplit(secs){ const k=secs.findIndex(x=>this.svcIsWide(x)); return k<0?[secs,[]]:[secs.slice(0,k),secs.slice(k)]; }
+  svcSubtitle(sec,s){ const bl=sec.blocks||[]; if(bl.length===1&&bl[0][0]==='ol') return 'From your birth details to clear, practical guidance — '+(bl[0][1].length===4?'four':bl[0][1].length)+' simple steps.'; if(/frequently asked/i.test(sec.title)) return 'Common questions about '+this.txt(s.title)+'.'; return null; }
+  svcSection(sec,i,s){ const h=React.createElement,k='ss'+i,t=sec.title,bl=sec.blocks; const wide=this.svcIsWide(sec), sub=wide&&s?this.svcSubtitle(sec,s):null;
+    const head=h('div',{className:'aok-svc-head'+(wide?' is-center':'')}, h('h2',{id:'section-'+(i+1),className:'aok-svc-h2'},this.mdInline(t,k)), sub?h('p',{className:'aok-svc-sub'},sub):null);
     const one=type=>bl.length===1&&bl[0][0]===type; let body;
     if(/frequently asked/i.test(t)&&bl.some(b=>b[0]==='h3')){ const qa=[]; bl.forEach(b=>{ if(b[0]==='h3') qa.push({q:b[1],a:[]}); else if(qa.length) qa[qa.length-1].a.push(b); });
       body=h('div',{className:'aok-sfaqs'}, ...qa.map((x,j)=>h('details',{key:k+j,className:'aok-sfaq',open:j===0}, h('summary',null,h('span',null,this.mdInline(x.q,k+'q'+j)),h('span',{className:'aok-sfaq-ic','aria-hidden':'true'})), h('div',{className:'aok-sfaq-a'}, this.mdRenderBlocks(x.a,16,k+'a'+j))))); }
-    else if(one('ol')){ const it=bl[0][1]; body=h('ol',{className:'aok-steps',style:{gridTemplateColumns:'repeat('+Math.min(it.length,4)+',1fr)'}}, ...it.map((li,j)=>{ const m=this.mdLabel(li); return h('li',{key:k+j,className:'aok-step'}, h('span',{className:'aok-step-n','aria-hidden':'true'},String(j+1)), m?h('h3',null,m[0]):null, h('p',null,this.mdInline(m?m[1]:li,k+'s'+j))); })); }
-    else if(one('ul')&&bl[0][1].every(li=>this.mdLabel(li))){ body=h('div',{className:'aok-feats',style:{gridTemplateColumns:'repeat(2,1fr)'}}, ...bl[0][1].map((li,j)=>{ const m=this.mdLabel(li); return h('div',{key:k+j,className:'aok-feat'}, h('h3',null,this.mdInline(m[0],k+'t'+j)), h('p',null,this.mdInline(m[1],k+'f'+j))); })); }
+    else if(one('ol')){ const it=bl[0][1]; body=h('ol',{className:'aok-steps',style:{'--n':Math.min(it.length,4)}}, ...it.map((li,j)=>{ const m=this.mdLabel(li); return h('li',{key:k+j,className:'aok-step'}, h('div',{className:'aok-step-top'},h('span',{className:'aok-step-n','aria-hidden':'true'},String(j+1)),h('span',{className:'aok-step-k'},'Step '+(j+1))), m?h('h3',null,m[0]):null, h('p',null,this.mdInline(m?m[1]:li,k+'s'+j))); })); }
+    else if(one('ul')&&bl[0][1].every(li=>this.mdLabel(li))){ body=h('div',{className:'aok-feats'}, ...bl[0][1].map((li,j)=>{ const m=this.mdLabel(li); return h('div',{key:k+j,className:'aok-feat'}, h('h3',null,this.mdInline(m[0],k+'t'+j)), h('p',null,this.mdInline(m[1],k+'f'+j))); })); }
     else body=h('div',{className:'aok-md'}, this.mdRenderBlocks(bl,16.5,k));
-    return h('section',{key:k,className:'aok-svc-sec','aria-labelledby':'section-'+(i+1)}, head, body); }
+    return h('section',{key:k,className:'aok-svc-sec'+(wide?' is-wide':''),'aria-labelledby':'section-'+(i+1)}, head, body); }
   // ---------- the service page in the visual editor: every part is plain text you click and type into ----------
   // Saves go through svcOps (the same operations as the Services Manager), so the page text stays clean Markdown.
   svcTool(label,fn,title,danger){ return React.createElement('button',{type:'button',className:'aok-pe-btn'+(danger?' is-danger':''),title,'aria-label':title,onMouseDown:e=>e.preventDefault(),onClick:e=>{ e.preventDefault(); e.stopPropagation(); fn(); }},label); }
@@ -828,9 +852,9 @@ class Component extends DCLogic {
     if(t==='answer') return h('aside',{key:k,className:'aok-answer'},this.ep(b[1],v=>ops.setText(i,v,true),{key:k+'e',tag:'p',multiline:true,style:{margin:0}}));
     if(t==='ul'||t==='ol') return h('div',{key:k},h(t,{className:'aok-mdlist',style:{font:'400 16.5px/1.75 Plus Jakarta Sans',color:P.ink,margin:'0 0 8px',paddingLeft:24}},...b[1].map((li,j)=>h('li',{key:k+'l'+j,className:'aok-pe-li'},this.ep(li,v=>ops.setItem(i,j,v),{key:k+'l'+j+'e',placeholder:'Empty — leave empty to remove'}),h('span',{className:'aok-pe-tools is-inline'},this.svcTool('✕',()=>ops.setItem(i,j,''),'Remove this point',true))))),this.svcAdd(t==='ol'?'Add step':'Add point',()=>ops.addItem(i,b[1].length-1,'New point.')));
     return h('p',{key:k,style:{font:'400 16.5px/1.8 Plus Jakarta Sans',color:P.ink,margin:'0 0 18px'}},this.ep(b[1],v=>ops.setText(i,v,true),{key:k+'e',tag:'span',multiline:true,placeholder:'Empty — leave empty to remove',style:{display:'block'}})); }
-  svcSectionEdit(sec,i,ops){ const h=React.createElement,k='se'+i,t=sec.title,bl=sec.blocks; const one=type=>bl.length===1&&bl[0][0]===type;
+  svcSectionEdit(sec,i,ops,s){ const h=React.createElement,k='se'+i,t=sec.title,bl=sec.blocks; const one=type=>bl.length===1&&bl[0][0]===type; const wide=this.svcIsWide(sec), sub=wide&&s?this.svcSubtitle(sec,s):null;
     const tools=h('div',{className:'aok-pe-tools'}, this.svcTool('↑',()=>ops.moveSection(sec.at,-1),'Move section up'), this.svcTool('↓',()=>ops.moveSection(sec.at,1),'Move section down'), this.svcTool('✕',()=>{ if(confirm('Delete the section “'+t.replace(/\*\*/g,'')+'” and its text?')) ops.delSection(sec.at); },'Delete this section',true));
-    const head=h('h2',{id:'section-'+(i+1),className:'aok-svc-h2'},this.ep(t,v=>ops.setText(sec.at,v),{key:k+'h',placeholder:'Section heading'}));
+    const head=h('div',{className:'aok-svc-head'+(wide?' is-center':'')}, h('h2',{id:'section-'+(i+1),className:'aok-svc-h2'},this.ep(t,v=>ops.setText(sec.at,v),{key:k+'h',placeholder:'Section heading'})), sub?h('p',{className:'aok-svc-sub'},sub):null);
     const card=(cls,j,a,b2,bi,len,extra)=>h('div',{key:k+j,className:cls+' aok-pe-card'}, extra||null, h('h3',null,this.ep(a,v=>ops.setLabeled(bi,j,v,b2),{key:k+j+'a',placeholder:'Title'})), h('p',null,this.ep(b2,v=>ops.setLabeled(bi,j,a,v),{key:k+j+'b',multiline:true,placeholder:'Text'})),
       h('div',{className:'aok-pe-tools is-corner'}, j>0?this.svcTool('←',()=>ops.moveItem(bi,j,-1),'Move earlier'):null, j<len-1?this.svcTool('→',()=>ops.moveItem(bi,j,1),'Move later'):null, this.svcTool('✕',()=>ops.setItem(bi,j,''),'Remove',true)));
     let body;
@@ -840,24 +864,24 @@ class Component extends DCLogic {
           h('div',{className:'aok-sfaq-a'},...(x.a.length?x.a.map((b,m)=>this.svcBlockEdit(b,ops,k+'a'+j+'.'+m)):[this.svcAdd('Add the answer',()=>ops.insertAfter(x.q[2],['p','Write a clear, direct answer here.']))])),
           h('div',{className:'aok-pe-tools is-corner'},this.svcTool('✕',()=>ops.delFaq(x.q[2]),'Remove this question',true)))
         : h('div',{key:k+'p'+j},...x.a.map((b,m)=>this.svcBlockEdit(b,ops,k+'p'+j+'.'+m)))), this.svcAdd('Add question',()=>ops.addFaq(sec.at))); }
-    else if(one('ol')){ const it=bl[0][1], bi=bl[0][2]; body=h('div',null,h('div',{className:'aok-steps',style:{display:'grid',gridTemplateColumns:'repeat('+Math.min(it.length,4)+',1fr)'}}, ...it.map((li,j)=>{ const m=this.mdLabel(li)||['',li]; return card('aok-step',j,m[0],m[1],bi,it.length,h('span',{className:'aok-step-n','aria-hidden':'true'},String(j+1))); })), this.svcAdd('Add step',()=>ops.addItem(bi,it.length-1))); }
-    else if(one('ul')&&bl[0][1].every(li=>this.mdLabel(li))){ const it=bl[0][1], bi=bl[0][2]; body=h('div',null,h('div',{className:'aok-feats',style:{gridTemplateColumns:'repeat(2,1fr)'}}, ...it.map((li,j)=>{ const m=this.mdLabel(li); return card('aok-feat',j,m[0],m[1],bi,it.length); })), this.svcAdd('Add point',()=>ops.addItem(bi,it.length-1))); }
+    else if(one('ol')){ const it=bl[0][1], bi=bl[0][2]; body=h('div',null,h('div',{className:'aok-steps',style:{'--n':Math.min(it.length,4)}}, ...it.map((li,j)=>{ const m=this.mdLabel(li)||['',li]; return card('aok-step',j,m[0],m[1],bi,it.length,h('div',{className:'aok-step-top'},h('span',{className:'aok-step-n','aria-hidden':'true'},String(j+1)),h('span',{className:'aok-step-k'},'Step '+(j+1)))); })), this.svcAdd('Add step',()=>ops.addItem(bi,it.length-1))); }
+    else if(one('ul')&&bl[0][1].every(li=>this.mdLabel(li))){ const it=bl[0][1], bi=bl[0][2]; body=h('div',null,h('div',{className:'aok-feats'}, ...it.map((li,j)=>{ const m=this.mdLabel(li); return card('aok-feat',j,m[0],m[1],bi,it.length); })), this.svcAdd('Add point',()=>ops.addItem(bi,it.length-1))); }
     else body=h('div',{className:'aok-md'}, ...bl.map((b,m)=>this.svcBlockEdit(b,ops,k+'b'+m)), this.svcAdd('Add paragraph',()=>ops.addPara(sec.at)));
-    return h('section',{key:k,className:'aok-svc-sec aok-pe-sec','aria-labelledby':'section-'+(i+1)}, tools, head, body); }
+    return h('section',{key:k,className:'aok-svc-sec aok-pe-sec'+(wide?' is-wide':''),'aria-labelledby':'section-'+(i+1)}, tools, head, body); }
   svcAddSectionBar(ops){ const h=React.createElement; return h('div',{className:'aok-pe-addsec'}, h('span',null,'Add a section:'), ...[['points','Points (cards)'],['steps','Steps'],['faq','FAQ'],['text','Text']].map(([k,t])=>this.svcAdd(t,()=>ops.addSection(k)))); }
   renderServiceDetail(){ const h=React.createElement,P=this.P,d=this.state.data; const s=(d.services||[]).find(x=>x.id===this.state.serviceId);
     if(!s) return this.renderNotFound();
     const others=(d.services||[]).filter(x=>x.id!==s.id&&this.serviceIsLive(x)).slice(0,3);
     const crumb=(label,href,fn)=>h('a',this.linkTo(href,fn,{style:{color:'#8A6A2E',cursor:'pointer'}}),label);
     const pr=(d.about&&d.about.pricing)||{}, L=d.local||{}, c=d.contact||{};
-    const fee=s.price||pr.fee||'$100 CAD', unit=s.priceUnit||pr.unit||'per hour', img=this.serviceImg(s), {intro,secs}=this.serviceSections(s.detail||'');
+    const fee=s.price||pr.fee||'$100 CAD', unit=s.priceUnit||pr.unit||'per hour', img=this.serviceImg(s), {intro,secs}=this.serviceSections(s.detail||''); const [topSecs,lowSecs]=this.svcSplit(secs);
     const E=this.state.editMode, ops=E?this.svcOps(s):null, cta=s.ctaLabel||'Book Consultation';
     const pickImg=()=>{ const el=document.createElement('input'); el.type='file'; el.accept='image/*'; el.onchange=e=>{ const fl=e.target.files[0]; if(fl) this.scaleImage(fl,u=>this.svcSet(s,'image',u),1600); }; el.click(); };
     const book=e=>{ if(e) e.preventDefault(); this.scrollToBook(); };
     const wa=this.waUrl('Hello Jag Mallah, I would like to book a '+s.title+' consultation.');
     const waBtn=(label,variant)=>wa?h('a',{href:wa,target:'_blank',rel:'noopener',className:'aok-btn aok-fx-lift',style:{display:'inline-flex',alignItems:'center',gap:8,font:'600 15px '+this.HEAD,padding:'14px 24px',borderRadius:999,textDecoration:'none',...this.btnVariants()[variant||'outline']}},'✆ '+(label||'WhatsApp')):null;
     const facts=[['◷','60-minute live session'],['✦',fee+' · '+unit],['✓','New clients pay after, only if satisfied'],['☎','Zoom · WhatsApp · Phone'],['अ',((L.languages||['English','Hindi','Punjabi']).join(', '))]];
-    return h('main',{style:{animation:'aokfade .4s'}},
+    return h('main',{className:'aok-svc-page',style:{animation:'aokfade .4s'}},
       h('section',{className:'aok-pagehero aok-svc-hero'}, this.wrap(h('div',{className:'aok-svc-hero-grid',style:{display:'grid',gridTemplateColumns:'1.04fr .96fr',gap:48,alignItems:'center',padding:'30px 0 54px'}},
         h('div',null,
           E? h('div',{className:'aok-pe-hint'}, h('b',null,'✎'), h('span',null,'Click any text on this page to change it — it saves when you click away. ',s.unpublished?h('b',null,'This service is unpublished: visitors are forwarded to '+(s.redirectTo||'/services')+'.'):null)):null,
@@ -875,25 +899,32 @@ class Component extends DCLogic {
           h('div',{className:'aok-svc-art-badge'},this.badge(s.icon,'lg')),
           E? h('div',{className:'aok-pe-imgbar'}, this.svcTool(s.image?'Replace image':'Upload image',pickImg,s.image?'Replace the banner image':'Upload your own banner image'), s.image?this.svcTool('Use the 3D banner',()=>this.svcSet(s,'image',null),'Go back to the 3D banner'):null):null))),
         h('div',{className:'aok-hairline'})),
-      h('section',{style:{padding:'56px 0 30px'}}, this.wrap(h('div',{style:{display:'grid',gridTemplateColumns:'minmax(0,1fr) 300px',gap:40,alignItems:'start'}},
+      // top: the editorial sections beside the sticky booking card (a 1200px grid)
+      h('section',{className:'aok-svc-upper'}, h('div',{className:'aok-svc-top'},
         h('article',{className:'aok-svc-body'},
-          E? h('div',{className:'aok-md',style:{marginBottom:10}}, this.svcAnswerEdit(s,ops,intro.find(b=>b[0]==='answer')), ...intro.filter(b=>b[0]!=='answer').map((b,m)=>this.svcBlockEdit(b,ops,'si'+m)))
-            : intro.length? h('div',{className:'aok-md',style:{marginBottom:10}}, this.mdRenderBlocks(intro,17,'si')) : null,
-          ...secs.map((sec,i)=>E?this.svcSectionEdit(sec,i,ops):this.svcSection(sec,i)),
-          E? this.svcAddSectionBar(ops):null,
+          E? h('div',{className:'aok-md aok-svc-intro'}, this.svcAnswerEdit(s,ops,intro.find(b=>b[0]==='answer')), ...intro.filter(b=>b[0]!=='answer').map((b,m)=>this.svcBlockEdit(b,ops,'si'+m)))
+            : intro.length? h('div',{className:'aok-md aok-svc-intro'}, this.mdRenderBlocks(intro,17,'si')) : null,
+          ...topSecs.map((sec,i)=>E?this.svcSectionEdit(sec,i,ops,s):this.svcSection(sec,i,s)),
           !E&&!intro.length&&!secs.length? h('p',{style:{font:'400 17px/1.8 Plus Jakarta Sans',color:P.ink}}, s.desc):null),
-        h('aside',{className:'aok-svc-side'},
-          h('div',{className:'aok-card',style:{padding:'28px 26px',textAlign:'center'}},
-            h('div',{style:{font:'600 12px '+this.HEAD,letterSpacing:'.2em',textTransform:'uppercase',color:'#8A6A2E',marginBottom:12}},'Consultation fee'),
-            h('div',{className:'aok-goldtext',style:{font:'600 42px/1 '+this.SERIF}}, E?this.ep(fee,v=>this.svcSet(s,'price',v),{key:'fee',placeholder:pr.fee||'$100 CAD'}):fee),
-            h('div',{style:{font:'500 14px Plus Jakarta Sans',color:P.muted,margin:'8px 0 16px'}}, E?this.ep(unit,v=>this.svcSet(s,'priceUnit',v===(pr.unit||'per hour')?'':v),{key:'unit',placeholder:pr.unit||'per hour'}):unit),
-            h('ul',{className:'aok-svc-facts'}, ...facts.map((f,i)=>h('li',{key:i},h('b',{'aria-hidden':'true'},f[0]),f[1]))),
-            h('a',{href:'#book',onClick:book,className:'aok-btn aok-fx-lift',style:{display:'flex',justifyContent:'center',font:'600 14.5px '+this.HEAD,padding:'13px 20px',borderRadius:999,textDecoration:'none',marginTop:18,...this.btnVariants().solid}},cta),
-            wa?h('a',{href:wa,target:'_blank',rel:'noopener',className:'aok-btn aok-fx-lift',style:{display:'flex',justifyContent:'center',font:'600 14px '+this.HEAD,padding:'12px 18px',borderRadius:999,textDecoration:'none',marginTop:10,...this.btnVariants().outline}},'✆ WhatsApp '+(c.whatsapp||c.phone||'')):null),
-          secs.length>1? h('nav',{className:'aok-card aok-svc-toc','aria-label':'On this page'}, h('div',{className:'aok-svc-toc-t'},'On this page'), ...secs.map((sec,i)=>h('a',{key:i,href:'#section-'+(i+1),onClick:e=>{ e.preventDefault(); const el=document.getElementById('section-'+(i+1)); if(el) el.scrollIntoView({behavior:'smooth',block:'start'}); }},sec.title.replace(/\*\*/g,'')))):null)))),
+        h('aside',{className:'aok-svc-side','aria-label':'Book this consultation'},
+          h('div',{className:'aok-card aok-svc-fee'},
+            h('div',{className:'aok-svc-fee-top'},
+              h('div',{className:'aok-svc-fee-k'},'Consultation fee'),
+              h('div',{className:'aok-goldtext aok-svc-fee-price'}, E?this.ep(fee,v=>this.svcSet(s,'price',v),{key:'fee',placeholder:pr.fee||'$100 CAD'}):fee),
+              h('div',{className:'aok-svc-fee-unit'}, E?this.ep(unit,v=>this.svcSet(s,'priceUnit',v===(pr.unit||'per hour')?'':v),{key:'unit',placeholder:pr.unit||'per hour'}):unit)),
+            h('div',{className:'aok-svc-fee-body'},
+              h('ul',{className:'aok-svc-facts'}, ...facts.map((f,i)=>h('li',{key:i},h('b',{'aria-hidden':'true'},f[0]),f[1]))),
+              h('div',{className:'aok-svc-fee-btns'},
+                h('a',{href:'#book',onClick:book,className:'aok-btn aok-fx-lift',style:{display:'flex',justifyContent:'center',font:'600 14.5px '+this.HEAD,padding:'13px 20px',borderRadius:999,textDecoration:'none',...this.btnVariants().solid}},cta),
+                wa?h('a',{href:wa,target:'_blank',rel:'noopener',className:'aok-btn aok-fx-lift',style:{display:'flex',justifyContent:'center',font:'600 14px '+this.HEAD,padding:'12px 18px',borderRadius:999,textDecoration:'none',...this.btnVariants().outline}},'✆ WhatsApp '+(c.whatsapp||c.phone||'')):null))),
+          secs.length>1? h('nav',{className:'aok-card aok-svc-toc','aria-label':'On this page'}, h('div',{className:'aok-svc-toc-t'},'On this page'), ...secs.map((sec,i)=>h('a',{key:i,href:'#section-'+(i+1),onClick:e=>{ e.preventDefault(); const el=document.getElementById('section-'+(i+1)); if(el) el.scrollIntoView({behavior:'smooth',block:'start'}); }},sec.title.replace(/\*\*/g,'')))):null))),
+      // below: one centred full-width column (1100px), so nothing is left beside an empty sidebar
+      (lowSecs.length||E)? h('div',{className:'aok-svc-wide aok-svc-lower'},
+        ...lowSecs.map((sec,j)=>E?this.svcSectionEdit(sec,topSecs.length+j,ops,s):this.svcSection(sec,topSecs.length+j,s)),
+        E? this.svcAddSectionBar(ops):null):null,
       this.relatedPostsBlock(s),
-      h('section',{style:{padding:'10px 0 40px'}}, this.wrap(h('div',{style:{maxWidth:1000,margin:'0 auto'}}, this.authorCard()))),
-      h('section',{id:'book',className:'aok-svc-book',style:{padding:'30px 0 76px',scrollMarginTop:96}}, this.wrap(h('div',{style:{display:'grid',gridTemplateColumns:'.86fr 1.14fr',gap:30,alignItems:'start'}},
+      h('div',{className:'aok-svc-wide'}, h('div',{className:'aok-svc-author'}, this.authorCard({wide:true}))),
+      h('section',{id:'book',className:'aok-svc-book',style:{padding:'30px 0 76px',scrollMarginTop:96}}, h('div',{className:'aok-svc-wide aok-svc-bookgrid'},
         h('div',{className:'aok-card',style:{padding:'34px 32px'}},
           this.kicker('Book your consultation'),
           h('h2',{style:{font:'600 clamp(28px,3vw,36px)/1.15 '+this.SERIF,color:P.maroon,margin:'14px 0 12px'}}, 'Book: '+s.title),
@@ -901,16 +932,16 @@ class Component extends DCLogic {
           h('ul',{className:'aok-svc-facts'}, ...facts.map((f,i)=>h('li',{key:i},h('b',{'aria-hidden':'true'},f[0]),f[1]))),
           h('div',{style:{display:'flex',gap:10,flexWrap:'wrap',marginTop:22}}, waBtn('WhatsApp','solid'),
             this.telHref()?h('a',{href:this.telHref(),className:'aok-btn aok-fx-lift',style:{display:'inline-flex',alignItems:'center',gap:8,font:'600 15px '+this.HEAD,padding:'14px 24px',borderRadius:999,textDecoration:'none',...this.btnVariants().outline}},'☎ Call '+(c.phone||'')):null)),
-        this.renderLeadForm({service:s.title})))),
-      this.areasBlock(),
-      others.length? h('section',{style:{background:P.bgAlt,padding:'70px 0'}}, this.wrap(h('div',null,
+        this.renderLeadForm({service:s.title}))),
+      this.areasBlock({wide:true}),
+      others.length? h('section',{style:{background:P.bgAlt,padding:'70px 0'}}, h('div',{className:'aok-svc-wide'},h('div',null,
         h('div',{style:{textAlign:'center',marginBottom:36}}, this.etext('home.servicesIntro.title',{tag:'h2',style:{font:'800 clamp(28px,3.3vw,40px) '+this.HEAD,color:P.maroon,margin:0,letterSpacing:'-.015em'}})),
         h('div',{style:{display:'grid',gridTemplateColumns:'repeat(3,1fr)',gap:22}}, ...others.map((x,i)=>this.serviceCard(x,i))),
         h('div',{style:{textAlign:'center',marginTop:36}}, h('a',this.linkTo('/services',()=>this.go('services'),{className:'aok-btn',style:{display:'inline-flex',font:'600 15px '+this.HEAD,padding:'14px 26px',borderRadius:999,...this.btnVariants().outline}}),'See all services \u2192'))))):null,
       this.ctaBand('home.cta')); }
   twoToneText(t){ const h=React.createElement; const m=String(t||'').match(/^(.+?(?::| \u2014))\s+(\S.*)$/); return m? [h('span',{key:'a',className:'aok-tt-a'},m[1]),' ',h('span',{key:'b',className:'aok-tt-b'},m[2])] : t; }
 
-  wrap(children,style){ return React.createElement('div',{style:{maxWidth:1200,margin:'0 auto',padding:'0 24px',...style}}, children); }
+  wrap(children,style){ return React.createElement('div',{className:'aok-wrap',style:{maxWidth:1200,margin:'0 auto',padding:'0 24px',...style}}, children); }
 
   // ---------- HOME ----------
   renderHome(){ const h=React.createElement,P=this.P,d=this.state.data; const em=this.state.editMode; const heroImg=this.getIn(d,'home.hero.image');

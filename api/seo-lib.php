@@ -135,15 +135,44 @@ function aok_md_inline(string $s): string {
 }
 
 function aok_paras($html): string {
+    return aok_md_html(aok_md_blocks((string)$html));
+}
+// Markdown blocks from aok_md_blocks() as HTML. With $h2Ids, every ## heading gets id="section-N" (N counting from $h2Ids),
+// the anchors of a service page's "On this page" menu.
+function aok_md_html(array $blocks, int $h2Ids = 0): string {
     $out = '';
-    foreach (aok_md_blocks((string)$html) as $bk) {
+    foreach ($blocks as $bk) {
         list($t, $v) = $bk;
-        if ($t === 'h2' || $t === 'h3') $out .= '<' . $t . '>' . aok_md_inline($v) . '</' . $t . '>';
+        if ($t === 'h2' && $h2Ids > 0) $out .= '<h2 id="section-' . ($h2Ids++) . '">' . aok_md_inline($v) . '</h2>';
+        elseif ($t === 'h2' || $t === 'h3') $out .= '<' . $t . '>' . aok_md_inline($v) . '</' . $t . '>';
         elseif ($t === 'answer') $out .= '<aside class="aok-answer"><p>' . nl2br(aok_md_inline($v), false) . '</p></aside>';
         elseif ($t === 'ul' || $t === 'ol') { $out .= '<' . $t . '>'; foreach ($v as $li) $out .= '<li>' . aok_md_inline($li) . '</li>'; $out .= '</' . $t . '>'; }
         else $out .= '<p>' . nl2br(aok_md_inline($v), false) . '</p>';
     }
     return $out;
+}
+
+// A service page's text in its two layout zones: [the part beside the booking card, the full-width part, sections].
+// The full-width part starts at the first "wide" section: the consultation steps (one numbered list) or the FAQ.
+// Mirrors svcIsWide()/svcSplit() in assets/app.js.
+function aok_service_split(string $md): array {
+    $intro = []; $secs = [];
+    foreach (aok_md_blocks($md) as $b) {
+        if ($b[0] === 'h2') $secs[] = ['title' => $b[1], 'blocks' => [$b]];
+        elseif ($secs) $secs[count($secs) - 1]['blocks'][] = $b;
+        else $intro[] = $b;
+    }
+    $wide = null;
+    foreach ($secs as $i => $sec) {
+        $body = array_slice($sec['blocks'], 1);
+        $hasQ = (bool)array_filter($body, function ($b) { return $b[0] === 'h3'; });
+        if ((count($body) === 1 && $body[0][0] === 'ol') || (stripos($sec['title'], 'frequently asked') !== false && $hasQ)) { $wide = $i; break; }
+    }
+    $top = $intro; $low = [];
+    foreach ($secs as $i => $sec) {
+        if ($wide !== null && $i >= $wide) $low = array_merge($low, $sec['blocks']); else $top = array_merge($top, $sec['blocks']);
+    }
+    return [$top, $low, $secs];
 }
 
 // "## Frequently Asked Questions" + "### Question" + answer paragraphs -> [[question, answer], …] for FAQPage schema
@@ -979,10 +1008,24 @@ function aok_main_html(array $d, array $r): string {
         $o .= '<article><header><p>' . aok_e($eyebrow) . '</p><h1>' . aok_e($title) . '</h1><p>' . aok_rich($s['desc'] ?? '') . '</p>'
             . '<p><a href="#book">' . aok_e($cta) . ' →</a></p>'
             . ($img !== '' ? '<p><img src="' . aok_e($img) . '" width="1200" height="675" alt="' . aok_e($title . ' — Vedic astrology consultation with Jag Mallah') . '" style="max-width:100%;height:auto"></p>' : '')
-            . '</header>' . aok_paras($s['detail'] ?? '');
-        if (!empty($s['price'])) $o .= '<p>Consultation fee: <strong>' . aok_e(aok_text($s['price'])) . '</strong> ' . aok_e(aok_text(($s['priceUnit'] ?? '') !== '' ? $s['priceUnit'] : aok_get($d, 'about.pricing.unit', 'per hour'))) . ', for a 60-minute session. New clients pay after the consultation, only if satisfied.</p>';
+            . '</header>';
+        // the page text beside a booking card, then (from the steps / FAQ on) one full-width column — as in the app
+        [$top, $low, $secs] = aok_service_split((string)($s['detail'] ?? ''));
+        $fee = aok_text(($s['price'] ?? '') !== '' ? $s['price'] : aok_get($d, 'about.pricing.fee', '$100 CAD'));
+        $unit = aok_text(($s['priceUnit'] ?? '') !== '' ? $s['priceUnit'] : aok_get($d, 'about.pricing.unit', 'per hour'));
+        $side = '<aside class="aok-ssr-side" aria-label="Book this consultation"><p>Consultation fee: <strong>' . aok_e($fee) . '</strong> ' . aok_e($unit) . ', for a 60-minute session. New clients pay after the consultation, only if satisfied.</p>'
+            . '<p><a class="aok-ssr-btn" href="#book">' . aok_e($cta) . '</a></p>';
+        if (count($secs) > 1) {
+            $side .= '<nav aria-label="On this page"><p><strong>On this page</strong></p><ul>';
+            foreach ($secs as $i => $sec) $side .= '<li><a href="#section-' . ($i + 1) . '">' . aok_e(aok_text(str_replace('**', '', $sec['title']))) . '</a></li>';
+            $side .= '</ul></nav>';
+        }
+        $side .= '</aside>';
+        $nTop = count(array_filter($top, function ($b) { return $b[0] === 'h2'; }));
+        $o .= '<div class="aok-ssr-top"><div class="aok-ssr-main">' . aok_md_html($top, 1) . '</div>' . $side . '</div>';
+        if ($low) $o .= '<div class="aok-ssr-wide">' . aok_md_html($low, $nTop + 1) . '</div>';
         $o .= '</article>';
-        $o .= aok_related_posts_html($d, $s) . aok_author_card_html($d);
+        $o .= '<div class="aok-ssr-wide">' . aok_related_posts_html($d, $s) . aok_author_card_html($d) . '</div>';
         $o .= '<section id="book"><h2>Book: ' . aok_e($title) . '</h2><p>Send your birth details and your question through the booking form, and Jag Mallah will reply '
             . aok_e(aok_text(aok_get($d, 'contact.replyTime', 'within 12–24 hours'))) . '.</p><p>' . aok_btn($d, 'servicesPage.cardBtn', 'Book this →', 'contact') . '</p>' . aok_contact_links_html($d) . '</section>';
         $o .= aok_areas_html($d);

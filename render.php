@@ -111,7 +111,16 @@ try {
         // it stays invisible (with a safety reveal after 4s in case scripts are blocked)
         . "<script>document.documentElement.className+=' aok-js'</script>\n"
         . '<style>.aok-ssr{max-width:1100px;margin:0 auto;padding:24px;font:16px/1.7 system-ui,sans-serif;color:#3A3D42}.aok-ssr h1,.aok-ssr h2,.aok-ssr h3{font-family:Georgia,serif;color:#1E2022}.aok-ssr ul{padding-left:20px}.aok-ssr header ul,.aok-ssr footer ul{list-style:none;padding:0;display:flex;flex-wrap:wrap;gap:6px 18px}.aok-ssr a{color:#8A6A2E}.aok-ssr-btn{display:inline-block;margin:4px 8px 4px 0;padding:10px 18px;border:1px solid #C5A869;border-radius:999px;text-decoration:none}'
-        . '.aok-js .aok-ssr{visibility:hidden;animation:aokssr 0s 4s forwards}@keyframes aokssr{to{visibility:visible}}</style>' . "\n";
+        . '.aok-js .aok-ssr{visibility:hidden;animation:aokssr 0s 4s forwards}@keyframes aokssr{to{visibility:visible}}'
+        // service pages: page text beside a sticky booking card, then one centred full-width column (as in the app)
+        . '.aok-ssr-top{display:grid;grid-template-columns:minmax(0,1fr) 340px;gap:40px;align-items:start}.aok-ssr-main{min-width:0}'
+        . '.aok-ssr-side{position:sticky;top:24px;padding:20px 22px;border:1px solid rgba(212,175,55,.3);border-radius:16px;background:#FFFDF8}'
+        . '.aok-ssr-wide{max-width:1100px;margin:0 auto}.aok-ssr-wide>h2,.aok-ssr-wide>section>h2{text-align:center}'
+        . '.aok-ssr-wide ol{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:20px;padding:0;list-style-position:inside}'
+        . '.aok-ssr-wide h3,.aok-ssr-wide h3+p{max-width:900px;margin-left:auto;margin-right:auto}'
+        . '.aok-ssr #about-the-astrologer{max-width:960px;margin:60px auto 40px;padding:28px;border:1px solid rgba(212,175,55,.3);border-radius:20px}'
+        . '@media (max-width:1024px){.aok-ssr-top{grid-template-columns:minmax(0,1fr)}.aok-ssr-side{position:static;order:-1}.aok-ssr-wide ol{grid-template-columns:repeat(2,minmax(0,1fr))}}'
+        . '@media (max-width:767px){.aok-ssr{padding:16px}.aok-ssr-wide ol{grid-template-columns:minmax(0,1fr)}}</style>' . "\n";
 
     // one title + description: replace the template's static ones
     $html = preg_replace('#<title>.*?</title>\s*#s', '', $tpl, 1);
