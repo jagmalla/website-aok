@@ -1,4 +1,5 @@
 <?php
+if (realpath((string)($_SERVER['SCRIPT_FILENAME'] ?? '')) === __FILE__) { http_response_code(403); exit; }   // a library: never run on its own
 // Runs on every admin save (api/data.php). Keeps services, addresses and search engines in step with the edit:
 //   - each changed service gets a fresh updatedAt (the sitemap's <lastmod>);
 //   - a service whose address changed, or that was deleted, leaves a 301 behind, so no URL ever 404s;
@@ -109,6 +110,8 @@ function aok_indexnow_flush(array $d): ?array {
         if (!$urls) return null;
         $last = db()->query("SELECT MAX(sent_at) AS t, NOW() AS n FROM aok_indexnow_queue")->fetch();
         if (!empty($last['t']) && strtotime($last['n']) - strtotime($last['t']) < AOK_INDEXNOW_EVERY) return null;
+        // one attempt per 10 minutes, successful or not (a failing IndexNow must not slow down page views)
+        if (!aok_rate_ok('indexnow-try', 1, AOK_INDEXNOW_EVERY)) return null;
         $r = aok_indexnow_submit($urls, $key, $base);
         if ($r['status'] === 200 || $r['status'] === 202) {
             $st = db()->prepare("UPDATE aok_indexnow_queue SET sent_at = NOW() WHERE url = :u");

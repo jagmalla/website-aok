@@ -1,7 +1,26 @@
 ANALYSIS OF KARMA — Update (SEO, local SEO, AI search & security)
 ===================================================================
 
-NEW IN THIS VERSION: SERVICES MANAGER AND ON-PAGE EDITING
+NEW IN THIS VERSION: SECURITY UPDATE
+  • After uploading, log in once: you will be asked to choose a new admin
+    password (10+ characters). The old website made its password readable,
+    so it can no longer be trusted. Saving it signs every other device out.
+  • You get an email when the admin is opened from a new device, and when
+    many wrong passwords are tried. Admin sessions end after 8 hours idle.
+  • The contact form is now protected on the server (spam bots can no
+    longer skip the question), and enquiries are kept only on the server.
+    Older enquiries you deleted may show once more, marked FROM BACKUP;
+    delete them again if you don't need them.
+  • Pages are protected against injected code (Content-Security-Policy),
+    the 3D library is served from your own site, uploads must be real
+    pictures, and private files (error logs, backups, settings) are blocked.
+  • New files: api/leads.php, the folder assets/vendor/ and the hidden file
+    uploads/.htaccess (turn on "Show Hidden Files"). Also replace your
+    .htaccess with the new one, keeping your cPanel PHP lines (DEPLOY.md A3).
+  • Fresh installs: there is no default password any more. Use "Forgot
+    password?" on the login page to set the first one.
+
+EARLIER: SERVICES MANAGER AND ON-PAGE EDITING
   • Admin -> Services is now a Services Manager. "+ Add new service" opens
     a form (title, page address, summary, direct answer, methodology, life
     questions, the 4 consultation steps, 3 FAQs, image); the $100 CAD rate,

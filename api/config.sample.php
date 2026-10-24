@@ -23,3 +23,8 @@ define('MAX_UPLOAD_MB', 5);
 
 // CORS — change to your domain before going live
 define('ALLOWED_ORIGIN', 'https://www.analysisofkarma.com');
+
+// Emergency admin access when the reset email can't arrive (see DEPLOY.md, Troubleshooting): with no password
+// stored (table aok_auth emptied), this one-time password logs in once and must be replaced at once.
+// Delete the line again afterwards.
+//   define('ADMIN_SETUP_PASSWORD', 'a temporary password of 10+ characters');

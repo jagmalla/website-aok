@@ -24,6 +24,36 @@ if (($_SERVER['REDIRECT_STATUS'] ?? '') === '404'
     exit;
 }
 
+// Content-Security-Policy for a page: scripts only from this site and React's pinned CDN, plus the page's own
+// inline scripts by hash (any script injected into the content would run nowhere). Inline event handlers
+// (onerror=…) and javascript: links are blocked too. Pictures, fonts, video/map embeds keep working.
+function aok_csp(string $html): string {
+    $hashes = [];
+    if (preg_match_all('#<script\b([^>]*)>(.*?)</script>#is', $html, $m, PREG_SET_ORDER)) {
+        foreach ($m as $x) {
+            if (preg_match('#\bsrc\s*=#i', $x[1]) || preg_match('#\btype\s*=\s*["\']?application/(ld\+)?json#i', $x[1])) continue;
+            $hashes[] = "'sha256-" . base64_encode(hash('sha256', $x[2], true)) . "'";
+        }
+    }
+    $p = [
+        "default-src 'self'",
+        "script-src 'self' https://unpkg.com " . implode(' ', array_unique($hashes)),
+        "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
+        "font-src 'self' data: https://fonts.gstatic.com",
+        "img-src 'self' data: blob: https:",
+        "media-src 'self' data: blob: https:",
+        "connect-src 'self' https://translate.googleapis.com",
+        "frame-src https:",
+        "worker-src 'self' blob:",
+        "object-src 'none'",
+        "base-uri 'self'",
+        "form-action 'self'",
+        "frame-ancestors 'self'",
+    ];
+    if (aok_https()) $p[] = 'upgrade-insecure-requests';
+    return implode('; ', $p);
+}
+
 try {
     require_once __DIR__ . '/api/seo-lib.php';
     $tpl = file_get_contents($tplFile);
@@ -99,6 +129,7 @@ try {
     if ($m['robots'] !== '' && stripos($m['robots'], 'noindex') !== false) header('X-Robots-Tag: ' . $m['robots']);
     header('Content-Type: text/html; charset=utf-8');
     header('Cache-Control: no-cache');
+    header('Content-Security-Policy: ' . aok_csp($html));
     if ($_SERVER['REQUEST_METHOD'] !== 'HEAD') echo $html;
     // service changes queued for IndexNow go out after the page has been sent (at most every 10 minutes)
     if (!defined('AOK_OFFLINE')) { require_once __DIR__ . '/api/sync.php'; aok_finish_response(); aok_indexnow_flush($d); }

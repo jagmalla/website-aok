@@ -14,17 +14,23 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
         require_once __DIR__ . '/seo-lib.php';
         json_out(aok_site());
     }
-    json_out(is_admin() ? $d : public_payload($d));   // full data (incl. leads) for the logged-in admin only
+    if (!is_admin()) json_out(public_payload($d));
+    try { aok_leads_migrate(); } catch (Throwable $e) {}   // enquiries are fetched separately (api/leads.php)
+    unset($d['leads']);
+    json_out($d);   // the full site data (with private settings) for the logged-in admin only
 }
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     require_admin();   // only the logged-in admin may change the site
-    // Validate it is real JSON
-    $test = json_decode(file_get_contents('php://input'), true);
-    if (!is_array($test)) {
+    // Validate it is real JSON (the whole site, images included, stays far below 20 MB)
+    $test = json_in_limited(20 * 1024 * 1024);
+    if (!$test) {
         json_out(['ok' => false, 'error' => 'invalid_json'], 400);
     }
     unset($test['adminPass']);   // passwords live hashed in aok_auth, never in the site data
+    // enquiries live in their own table (api/leads.php): move any older copy across first, then never save one here
+    try { aok_leads_migrate(); } catch (Throwable $e) {}
+    unset($test['leads']);
     $test = aok_upgrade_payload($test);   // an editor opened before this release still gets the content upgrades
     // keep the IndexNow key the server created, if this save came from an editor opened before it existed
     $old = site_data();

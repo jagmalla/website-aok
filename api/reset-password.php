@@ -9,6 +9,7 @@ header('Cache-Control: no-store');
 header('X-Robots-Tag: noindex, nofollow');
 header('X-Frame-Options: DENY');
 header('Referrer-Policy: no-referrer');   // the token never leaves this page in a Referer header
+header("Content-Security-Policy: default-src 'none'; style-src 'unsafe-inline'; img-src 'self'; form-action 'self'; base-uri 'none'; frame-ancestors 'none'");
 
 $token = (string)($_POST['token'] ?? $_GET['token'] ?? '');
 $state = 'invalid'; $error = '';
@@ -25,13 +26,14 @@ if (reset_valid($token)) {
     $state = 'form';
     if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $pw = (string)($_POST['password'] ?? ''); $pw2 = (string)($_POST['confirm'] ?? '');
-        if (strlen($pw) < 8) $error = 'The new password needs at least 8 characters.';
+        if (($weak = aok_password_problem($pw)) !== '') $error = $weak;
         elseif ($pw !== $pw2) $error = 'The two passwords do not match.';
         else {
             db()->exec("CREATE TABLE IF NOT EXISTS aok_auth (id INT PRIMARY KEY, pass_hash VARCHAR(255) NOT NULL, updated_at DATETIME)");
             $h = password_hash($pw, PASSWORD_DEFAULT);
             db()->prepare("INSERT INTO aok_auth (id, pass_hash, updated_at) VALUES (1, :h1, NOW()) ON DUPLICATE KEY UPDATE pass_hash = :h2, updated_at = NOW()")
                 ->execute([':h1' => $h, ':h2' => $h]);
+            try { db()->exec("UPDATE aok_auth SET must_change = 0 WHERE id = 1"); } catch (Throwable $e) {}   // a freshly chosen password
             db()->exec("DELETE FROM aok_reset");
             try { db()->exec("DELETE FROM aok_login_attempts"); } catch (Throwable $e) {}
             $state = 'done';
@@ -60,16 +62,16 @@ button,.btn{display:inline-block;width:100%;box-sizing:border-box;text-align:cen
 <div class="kick">Analysis of Karma · Admin</div>
 <?php if ($state === 'done'): ?>
   <h1>Password changed</h1>
-  <p>Your new admin password is saved. Any lockout from wrong attempts has been cleared.</p>
+  <p>Your new admin password is saved, every other admin session has been signed out, and any lockout from wrong attempts has been cleared.</p>
   <a class="btn" href="/#admin">Go to the admin login</a>
 <?php elseif ($state === 'form'): ?>
   <h1>Choose a new password</h1>
-  <p>At least 8 characters. This link works once and expires 30 minutes after it was sent.</p>
+  <p>At least 10 characters. This link works once and expires 30 minutes after it was sent. Saving it signs out every device that is logged in to the admin.</p>
   <?php if ($error): ?><div class="err"><?= $e($error) ?></div><?php endif; ?>
   <form method="post" action="reset-password.php" autocomplete="off">
     <input type="hidden" name="token" value="<?= $e($token) ?>">
-    <label for="pw">New password</label><input id="pw" type="password" name="password" minlength="8" required autocomplete="new-password" autofocus>
-    <label for="pw2">Repeat the new password</label><input id="pw2" type="password" name="confirm" minlength="8" required autocomplete="new-password">
+    <label for="pw">New password</label><input id="pw" type="password" name="password" minlength="10" required autocomplete="new-password" autofocus>
+    <label for="pw2">Repeat the new password</label><input id="pw2" type="password" name="confirm" minlength="10" required autocomplete="new-password">
     <button type="submit">Save new password</button>
   </form>
 <?php else: ?>

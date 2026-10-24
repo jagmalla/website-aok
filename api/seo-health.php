@@ -23,10 +23,23 @@ $G = 'Security';
 $hash = null;
 try { $row = db()->query("SELECT pass_hash FROM aok_auth WHERE id = 1")->fetch(); $hash = $row ? $row['pass_hash'] : null; } catch (Exception $e) {}
 if ($hash && password_verify('admin123', $hash)) $add($G, 'fail', 'The admin password is still the default (admin123)', 'Change it in Settings → Security.', 'settings');
+elseif (aok_must_change()) $add($G, 'fail', 'Choose a new admin password', 'The current one was set before the security update (the old website made its password readable). Log out and in again: you will be asked for a new one.', 'settings');
 else $add($G, 'ok', 'Admin password is private and stored hashed');
 if (array_key_exists('adminPass', $raw)) $add($G, 'fail', 'An old plain-text password is still in the site data', 'Log out and log in once — it is removed automatically on login.');
 else $add($G, 'ok', 'No password in the public site data');
 $add($G, 'ok', 'Client enquiries (leads) are only visible to the logged-in admin');
+// Code hidden in the saved text: before the security update anyone could overwrite the site data, so look for
+// scripts, event handlers (onerror=…) and javascript: links anywhere in it. The pages never run them any more
+// (they are cleaned out and blocked by the Content-Security-Policy), but they should be removed.
+$sus = [];
+$scan = function ($v, string $path) use (&$scan, &$sus) {
+    if (is_array($v)) { foreach ($v as $k => $x) $scan($x, $path === '' ? (string)$k : $path . '.' . $k); return; }
+    if (!is_string($v) || strpos($v, '<') === false && stripos($v, 'script:') === false) return;
+    if (preg_match('#<\s*(script|object|embed|applet|base|meta|link|svg|math|form)\b|\son[a-z]+\s*=|(java|vb)script\s*:|srcdoc\s*=|data:text/html#i', $v)) $sus[] = $path;
+};
+$scan($raw, '');
+$add($G, $sus ? 'fail' : 'ok', $sus ? count($sus) . ' saved texts contain code (scripts, event handlers or javascript: links)' : 'No hidden code in the saved site text',
+    $sus ? "This can be left over from before the security update, when the site data could be changed by anyone. The pages no longer run it, but please open these places and delete the code (ask your developer if unsure):\n" . $list($sus, 10) : '');
 
 // ---------------------------------------------------------------- titles & descriptions
 $G = 'Titles & descriptions';

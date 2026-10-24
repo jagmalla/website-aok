@@ -25,7 +25,9 @@ Either way, finish with **[Part C — Verify the upload](#part-c--verify-the-upl
 | `assets/hero3d.js` | The 3D hero scene (loads after the page; skipped on data-saver connections). |
 | `assets/*.webp, *.png, *.jpg` | Logo, favicons and the social-sharing image. |
 | `assets/img/` | `services/`: the 3D Pearl & Gold banner of each of the 16 service pages; `posts/`: the branded image of each blog post (16:9, 4:3 and 1:1). Used on the pages, in Google's structured data and in social previews when you haven't uploaded an image for that page. |
-| `uploads/` | Photos you upload in the admin. Must be writable. |
+| `uploads/` | Photos you upload in the admin. Must be writable. Its own `.htaccess` stops anything there from running as a program. |
+| `assets/vendor/three-0.160.0/` | The 3D library for the hero (from the official `three` package, version 0.160.0), served from your own site instead of a public CDN. |
+| `api/leads.php` | Admin → Leads: the contact-form enquiries, kept in their own database table. |
 | `api/config.sample.php` | Template for **`api/config.php`** (your database and email settings). Only used on a fresh install. |
 | `api/db.php` | Database connection and shared helpers (admin session, CSRF, table setup). |
 | `api/auth.php` | Admin login: hashed password, lockout after repeated failures. Creates the database tables on first login. |
@@ -79,9 +81,11 @@ In File Manager, open each folder below, click **Upload**, tick
 |---|---|
 | `public_html/` | `index.html` · `render.php` · `robots.txt` · `sitemap.xml` · `llms.txt` · `llms-full.txt` — **not `.htaccess` yet** |
 | `public_html/assets/` | `app.js` · `hero3d.js` · `og-image.jpg` · `logo-192.webp` · `logo-512.webp` · `logo-512.png` · `favicon-32.png` · `favicon-48.png` · `apple-touch-icon.png` |
-| `public_html/api/` | `auth.php` · `data.php` · `db.php` · `defaults.json` · `discovery-lib.php` · `sync.php` · `health.php` · `indexnow.php` · `llms.php` · `robots.php` · `seo-health.php` · `seo-lib.php` · `sitemap.php` · `test-email.php` · `upload.php` · `upgrades.php` · `upgrade-content.php` · `reset-password.php` · `contact.php` · `config.sample.php` |
+| `public_html/api/` | `auth.php` · `data.php` · `db.php` · `defaults.json` · `discovery-lib.php` · `sync.php` · `leads.php` · `health.php` · `indexnow.php` · `llms.php` · `robots.php` · `seo-health.php` · `seo-lib.php` · `sitemap.php` · `test-email.php` · `upload.php` · `upgrades.php` · `upgrade-content.php` · `reset-password.php` · `contact.php` · `config.sample.php` |
 | `public_html/api/content/` | the folders `services/`, `posts/` and `v3/` with all their `.md` files (48 files) |
 | `public_html/assets/img/` | the folders `services/` and `posts/` with all their images (160 files). Delete the old `assets/img/services/` folder first: the service images have new names. |
+| `public_html/assets/vendor/` | the folder `three-0.160.0/` (the 3D library, now served from your own site) |
+| `public_html/uploads/` | `.htaccess` (a hidden file: turn on **Show Hidden Files**). It stops anything in `uploads/` from running as a program. Leave your photos as they are. |
 
 > **Tip for the two folders:** zip `api/content` and `assets/img` on your computer,
 > upload each zip into its parent folder (`public_html/api/`, `public_html/assets/`),
@@ -104,10 +108,12 @@ In File Manager, open each folder below, click **Upload**, tick
 ### A4 — Log in and secure the admin
 
 - [ ] Go to **`https://www.analysisofkarma.com/admin`** and log in with your
-      **current** password. On this first login the server stores it as a secure hash
-      and removes the readable copy from your site data. Nothing is reset and you are
-      not locked out.
-- [ ] **Settings → Security → Change password.**
+      **current** password. Nothing is reset and you are not locked out.
+- [ ] You are asked to **choose a new password** (10+ characters) before anything else.
+      This happens once: the old website made its password readable, so it can't be
+      trusted. Saving it signs every other device out.
+- [ ] **Admin → SEO Health → Security** should show no failures. If it lists "saved texts
+      contain code", open those places and delete the code.
 
 ### A5 — Run the post-upload check
 
@@ -176,9 +182,11 @@ define('ALLOWED_ORIGIN', 'https://www.analysisofkarma.com');
 `DEPLOY.md` and `HOW-TO-UPDATE.txt`. Upload `.htaccess` last; it is a hidden file, so
 turn on **Show Hidden Files**. Make sure `uploads/` exists with permissions `755`.
 
-**B4 — Log in** at `https://www.analysisofkarma.com/admin` with **`admin123`**. The
-database tables are created automatically on this first login; there is no install
-script. Then go straight to **Settings → Security → Change password**.
+**B4 — Set your password and log in.** There is no default password. Open
+`https://www.analysisofkarma.com/admin` and click **Forgot password?**: a one-time link
+goes to the owner's private recovery address. Open it, choose a password (10+ characters),
+then log in. The database tables are created automatically; there is no install script.
+(No email yet? See "Forgot the admin password" under Troubleshooting.)
 
 **B5 — Email.** Go to **Settings → Email settings**. Set the recipient and a From
 address on your own domain, **Save**, then click **✉ Send test email**. If nothing
@@ -227,9 +235,10 @@ ongoing to-do list. "Fix →" opens the right admin tab.
 - **Your content** lives in MySQL (table `aok_site_data`). The admin saves it there,
   and every page is built from it, both on the server for search engines and in the
   browser for visitors.
-- **Contact form** messages are emailed to you and stored in `aok_leads`. Only you can
-  see them, in **Admin → Leads**. The form has a math captcha, a honeypot and a
-  30-second cooldown.
+- **Contact form** messages are emailed to you and stored in `aok_leads` (their own
+  table, never in the page data). Only you can see them, in **Admin → Leads**. The
+  server checks the verification question, a hidden spam trap, the time taken and
+  how often one visitor writes (5 per 10 minutes, 20 a day).
 - **Uploaded photos** are saved as image files in `uploads/`.
 
 ---
@@ -243,8 +252,10 @@ ongoing to-do list. "Fix →" opens the right admin tab.
 | Edits don't persist across devices | Admin → SEO Health → "Database accepts writes". |
 | Contact emails not arriving | **Settings → Email settings → Send test email**; use a From address on your own domain. |
 | Photo upload fails | `uploads/` must exist and be writable (755). Max size is 5 MB (`MAX_UPLOAD_MB` in `config.php`). |
-| "Too many attempts" at login | 8 wrong passwords lock that connection for 15 minutes. Wait, then try again. |
-| Forgot the admin password | On the login screen click **Forgot password?**. A one-time link (valid 30 minutes) is emailed to the owner's recovery address, set as `AOK_RECOVERY_EMAIL` in `api/db.php`. If email isn't working: cPanel → phpMyAdmin → table `aok_auth` → **Empty**; the next login accepts the old password or `admin123`. Change it straight away. |
+| "Too many attempts" at login | 8 wrong passwords lock that connection for 15 minutes. Wait, or use **Forgot password?** (a reset clears the lock). |
+| Forgot the admin password | On the login screen click **Forgot password?**. A one-time link (valid 30 minutes) is emailed to the owner's recovery address, set as `AOK_RECOVERY_EMAIL` in `api/db.php`. If email isn't working: in cPanel → File Manager add `define('ADMIN_SETUP_PASSWORD', 'a temporary password of 10+ characters');` to `api/config.php`, then cPanel → phpMyAdmin → table `aok_auth` → **Empty**. Log in with that temporary password, choose your own when asked, then delete the line from `config.php`. |
+| "Choose a new admin password" after logging in | Expected once after the security update: the old website made its password readable. Pick a new one (10+ characters); every other device is signed out. |
+| Email "new admin sign-in" | Sent when the admin is opened from a new device or network. If it wasn't you, click **Forgot password?** and choose a new password at once. |
 | Google sees no content / pages 404 | `.htaccess` or `render.php` missing. See Part C. |
 | Site broke right after uploading `.htaccess` | Put the old `.htaccess` back (admin at `/#admin`), then check the PHP handler lines at the top. |
 

@@ -1,4 +1,5 @@
 <?php
+if (realpath((string)($_SERVER['SCRIPT_FILENAME'] ?? '')) === __FILE__) { http_response_code(403); exit; }   // a library: never run on its own
 // Generators for the discovery files: robots.txt, sitemap.xml, llms.txt and llms-full.txt. Used by the live
 // endpoints (api/robots.php, api/sitemap.php, api/llms.php), by the static backups written after every save
 // (aok_write_static_files, called from api/data.php) and by tools/build-static.php.

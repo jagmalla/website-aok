@@ -9,7 +9,7 @@ $urls = aok_sitemap_urls($d);
 
 $xml = aok_sitemap_xml($d);
 
-if ($_SERVER['REQUEST_METHOD'] === 'POST' || (($_GET['action'] ?? '') === 'write')) {
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {   // only a POST (with the admin's CSRF token) writes the file
     cors();
     require_admin();   // only the admin may write files
     $written = @file_put_contents(__DIR__ . '/../sitemap-static.xml', $xml) !== false;

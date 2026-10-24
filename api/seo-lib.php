@@ -1,4 +1,5 @@
 <?php
+if (realpath((string)($_SERVER['SCRIPT_FILENAME'] ?? '')) === __FILE__) { http_response_code(403); exit; }   // a library: never run on its own
 // Shared SEO / AEO / GEO library: site data, routing, titles, structured data and server-rendered HTML.
 // Used by render.php, sitemap.php, robots.php, llms.php and seo-health.php. Not reachable from the web.
 // Keep in step with the matching JavaScript (serviceSlugs, seoTitleFor, routing) in assets/app.js.
@@ -87,6 +88,13 @@ function aok_text($html): string {   // plain text (for titles, schema, llms.txt
 
 function aok_e($s): string { return htmlspecialchars((string)$s, ENT_QUOTES | ENT_HTML5, 'UTF-8'); }
 
+// A link target typed in the admin, only if it is a web, email or phone link or a path on this site
+// (never javascript: or data:), else ''.
+function aok_safe_url($u): string {
+    $u = trim((string)$u);
+    return preg_match('#^(https?://|mailto:|tel:|/(?!/)|\#)#i', $u) ? $u : '';
+}
+
 // Inline rich text written in the editor: keep simple formatting and safe links only.
 function aok_rich($html): string {
     $s = strip_tags((string)$html, '<a><b><strong><i><em><u><br><ul><ol><li><p><span>');
@@ -94,7 +102,7 @@ function aok_rich($html): string {
     $s = preg_replace_callback('#<a\b[^>]*>#i', function ($m) {
         return preg_match('#href\s*=\s*["\']((?:https?:|mailto:|tel:|/)[^"\']*)["\']#i', $m[0], $h) ? '<a href="' . aok_e(html_entity_decode($h[1])) . '">' : '<a>';
     }, $s);
-    return preg_replace('#<(b|strong|i|em|u|ul|ol|li|p)\b[^>]*>#i', '<$1>', $s);
+    return preg_replace('#<(b|strong|i|em|u|ul|ol|li|p|br)\b[^>]*>#i', '<$1>', $s);   // no attributes (event handlers, styles)
 }
 
 // Multi-paragraph text (the editor stores blank-line separated paragraphs).
@@ -731,7 +739,7 @@ function aok_link_for($link, array $d): string {   // button / nav targets -> hr
 
 function aok_nav_href(array $it, array $d): string {
     $t = $it['type'] ?? 'route'; $v = (string)($it['value'] ?? '');
-    if ($t === 'url') return $v;
+    if ($t === 'url') return aok_safe_url($v) !== '' ? $v : '/';
     if ($t === 'page') { foreach ($d['pages'] ?? [] as $pg) if (($pg['id'] ?? '') === $v && !empty($pg['slug'])) return '/' . rawurlencode($pg['slug']); return '/'; }
     return aok_route_path($v ?: 'home');
 }
@@ -753,8 +761,8 @@ function aok_contact_links_html(array $d): string {
 
 function aok_review_links_html(array $d): string {
     $l = [];
-    if ($u = trim((string)(aok_get($d, 'local.reviewUrl', '') ?: aok_get($d, 'local.mapsCidUrl', '') ?: aok_get($d, 'contact.gmb', '')))) $l[] = '<a href="' . aok_e($u) . '" rel="noopener">Review us on Google Maps</a>';
-    if ($u = trim((string)aok_get($d, 'contact.trustpilot', ''))) $l[] = '<a href="' . aok_e($u) . '" rel="noopener">Review us on Trustpilot</a>';
+    if ($u = aok_safe_url(aok_get($d, 'local.reviewUrl', '') ?: aok_get($d, 'local.mapsCidUrl', '') ?: aok_get($d, 'contact.gmb', ''))) $l[] = '<a href="' . aok_e($u) . '" rel="noopener">Review us on Google Maps</a>';
+    if ($u = aok_safe_url(aok_get($d, 'contact.trustpilot', ''))) $l[] = '<a href="' . aok_e($u) . '" rel="noopener">Review us on Trustpilot</a>';
     return $l ? '<p>' . implode(' · ', $l) . '</p>' : '';
 }
 

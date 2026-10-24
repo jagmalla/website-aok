@@ -292,17 +292,18 @@ img{height:auto}
 <script defer src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.production.min.js"
   integrity="sha384-gTGxhz21lVGYNMcdJOyq01Edg0jhn/c22nsx0kyqP0TxaV5WVdsSH1fSDUf5YJj1"
   crossorigin="anonymous"></script>
-<!-- Three.js r160 (ES modules) via CDN import map — no build step, pure browser imports -->
+<!-- Three.js r160 (ES modules), served from this site (assets/vendor: the two files the hero needs, taken from the
+     official npm package three@0.160.0) — no third-party script runs on the site except React, pinned with SRI -->
 <script type="importmap">
 { "imports": {
-  "three": "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.min.js",
-  "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/"
+  "three": "/assets/vendor/three-0.160.0/three.module.min.js",
+  "three/addons/": "/assets/vendor/three-0.160.0/addons/"
 } }
 </script>
 </head>
 <body>
 <div id="root"></div>
-<script src="/assets/app.js?v=ddd6dcc2f7" defer></script>
+<script src="/assets/app.js?v=239352adb1" defer></script>
 <!-- Hero 3D scene (assets/hero3d.js, Three.js via the import map): started once the page is idle, and skipped on
      data-saver / 2G connections and low-memory phones (they keep the static pearl background) -->
 <script type="module">

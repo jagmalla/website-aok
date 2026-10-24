@@ -1,4 +1,5 @@
 <?php
+if (realpath((string)($_SERVER['SCRIPT_FILENAME'] ?? '')) === __FILE__) { http_response_code(403); exit; }   // a library: never run on its own
 // One-time content upgrades for sites saved before this release.
 //
 // site_data() (api/db.php) runs aok_upgrade_payload() on the saved site data. If anything changes it

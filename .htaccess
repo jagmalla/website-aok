@@ -37,11 +37,18 @@ RewriteCond %{HTTP_HOST} ^analysisofkarma\.com$ [NC]
 RewriteRule ^ https://www.analysisofkarma.com%{REQUEST_URI} [R=301,L,NE]
 
 # ---- 2. Private files and folders
-RewriteRule ^(\.git|tools)(/|$) - [F,L]
-RewriteRule ^api/(config|config\.sample|db|seo-lib|upgrades)\.php$ - [F,L]
+# hidden files and folders (.git, .env, .user.ini, .gitignore …), except /.well-known/ for SSL certificates
+RewriteRule (^|/)\.(?!well-known(/|$)) - [F,L]
+RewriteRule ^tools(/|$) - [F,L]
+# the PHP libraries and settings (also as /api/db.php/anything)
+RewriteRule ^api/(config|config\.sample|db|seo-lib|upgrades|sync|discovery-lib)\.php(/|$) - [F,L]
 RewriteRule ^api/(defaults\.json|content/) - [F,L]
 RewriteRule ^(DEPLOY\.md|HOW-TO-UPDATE\.txt)$ - [F,L]
-RewriteRule ^uploads/.*\.(php\d?|phtml|phar|cgi|pl)$ - [F,L,NC]
+# server error logs, PHP settings, backups and archives left in the web folders
+RewriteRule (^|/)(error_log|php_errorlog|php\.ini)$ - [F,L,NC]
+RewriteRule \.(bak|old|orig|save|swp|sql|log|tar|gz|tgz|7z|rar|zip)$ - [F,L,NC]
+# nothing in /uploads may run as a program (pictures only)
+RewriteRule ^uploads/.*\.(php\d?|phtml|phar|pht|phps|cgi|pl|py|sh|shtml|inc)(/|$) - [F,L,NC]
 
 # ---- 3. One URL per page
 RewriteCond %{THE_REQUEST} \s/+(index\.html|render\.php)[\s?] [NC]
@@ -85,13 +92,13 @@ RewriteRule ^ render.php [L,QSA]
     Header set Cache-Control "public, max-age=604800"
   </FilesMatch>
 
-  # ---- Security headers
-  Header always set X-Content-Type-Options "nosniff"
-  Header always set Referrer-Policy "strict-origin-when-cross-origin"
-  Header always set X-Frame-Options "SAMEORIGIN"
-  Header always set Permissions-Policy "camera=(), microphone=(), geolocation=(), payment=()"
-  # Turn on once https://www.analysisofkarma.com works everywhere (tells browsers to always use HTTPS):
-  # Header always set Strict-Transport-Security "max-age=31536000"
+  # ---- Security headers (the PHP pages send these too, plus the Content-Security-Policy and, on the live
+  #      https domain, Strict-Transport-Security; "set" replaces theirs instead of sending them twice)
+  Header set X-Content-Type-Options "nosniff"
+  Header set Referrer-Policy "strict-origin-when-cross-origin"
+  Header set X-Frame-Options "SAMEORIGIN"
+  Header set Permissions-Policy "camera=(), microphone=(), geolocation=(), payment=(), usb=(), interest-cohort=()"
+  Header unset X-Powered-By
 </IfModule>
 
 <IfModule mod_mime.c>
