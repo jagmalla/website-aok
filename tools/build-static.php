@@ -26,3 +26,14 @@ foreach ($files as $name => $text) {
     file_put_contents($root . '/' . $name, $text);
     echo str_pad($name, 15), strlen($text), " bytes\n";
 }
+
+// index.html is served as-is when render.php isn't in front of it (no .htaccess yet), so its script links
+// carry a version from each file's content: any change to app.js / hero3d.js gives browsers a new URL.
+$idx = $root . '/index.html';
+$html = (string)file_get_contents($idx);
+$html = preg_replace_callback('#/assets/([a-z0-9_-]+\.js)\?v=[A-Za-z0-9]*#i', function ($m) use ($root) {
+    $f = $root . '/assets/' . $m[1];
+    return '/assets/' . $m[1] . '?v=' . (is_file($f) ? substr(md5_file($f), 0, 10) : '1');
+}, $html);
+file_put_contents($idx, $html);
+echo "index.html     script versions updated\n";
