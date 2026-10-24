@@ -112,8 +112,10 @@ $add($G, $bad ? 'warn' : 'ok', $bad ? count($bad) . ' of ' . count($faq) . ' FAQ
 $posts = array_values(array_filter($d['blog'] ?? [], function ($p) { return !empty($p['published']) && empty($p['redirectTo']); }));
 $noEx = array_map(function ($p) { return aok_cut(aok_text($p['title'] ?? ''), 60); }, array_filter($posts, function ($p) { return trim(aok_text($p['excerpt'] ?? '')) === ''; }));
 $add($G, $noEx ? 'warn' : 'ok', $noEx ? count($noEx) . ' published posts have no excerpt (used as their description)' : 'Every published post has an excerpt', $noEx ? $list($noEx) : '', 'blog');
-$noImg = count(array_filter($posts, function ($p) { return empty($p['image']); }));
-$add($G, $noImg ? 'info' : 'ok', $noImg ? "$noImg of " . count($posts) . ' published posts have no featured image' : 'Every post has a featured image', $noImg ? 'Posts without an image share the site’s default image on social media.' : '', 'blog');
+$noImg = count(array_filter($posts, function ($p) use ($d) { return empty($p['image']) && !aok_post_images($d, $p); }));
+$add($G, $noImg ? 'info' : 'ok', $noImg ? "$noImg of " . count($posts) . ' published posts have no featured image' : 'Every post has a featured image (uploaded, or the branded 16:9, 4:3 and 1:1 images in the structured data)', $noImg ? 'Posts without an image share the site’s default image on social media. Upload one in Blog, or run tools/build-images.js for new posts.' : '', 'blog');
+$svcNoImg = count(array_filter(aok_live_services($d), function ($s) use ($d) { return empty($s['image']) && !aok_service_images($d, $s); }));
+$add($G, $svcNoImg ? 'info' : 'ok', $svcNoImg ? "$svcNoImg services have no image for search results and social media" : 'Every service has an image in its structured data and social preview', $svcNoImg ? 'Upload one in Services, or run tools/build-images.js for new services.' : '', 'services');
 
 // duplicates (same rule as Admin -> Redirects)
 $tok = function ($t) {

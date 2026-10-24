@@ -344,19 +344,21 @@ function aok_meta(array $d, array $r): array {
     $base = aok_base($d); $brand = aok_brand($d);
     $t = $r['type']; $seo = (array)aok_get($d, 'seo.' . $t, []);
     $m = ['title' => '', 'description' => '', 'robots' => 'index, follow', 'canonical' => $base . ($r['path'] ?? '/'),
-          'ogType' => 'website', 'image' => $base . '/assets/og-image.jpg'];
+          'ogType' => 'website', 'image' => $base . '/assets/og-image.jpg', 'imageSize' => [1200, 630], 'imageAlt' => aok_brand($d)];
     if (in_array($t, ['home', 'about', 'services', 'meditation', 'blog', 'contact', 'faq'], true)) {
         $m['title'] = (string)($seo['title'] ?? '') ?: $brand;
         $m['description'] = (string)($seo['metaDescription'] ?? '');
         $m['robots'] = (string)($seo['robots'] ?? '') ?: 'index, follow';
         if ($t !== 'blog') $m['title'] = aok_with_location($m['title'], $d);
-        if ($t === 'home' && aok_get($d, 'home.hero.image')) $m['image'] = aok_abs($base, aok_get($d, 'home.hero.image'));
+        if ($t === 'home' && aok_get($d, 'home.hero.image')) { $m['image'] = aok_abs($base, aok_get($d, 'home.hero.image')); $m['imageSize'] = null; }
         if ($t === 'faq' && $m['title'] === $brand) $m['title'] = aok_text(aok_get($d, 'faqPage.hero.title', 'FAQ')) . ' | ' . $brand;
     } elseif ($t === 'service') {
         $s = $r['item'];
         $m['title'] = trim((string)($s['seoTitle'] ?? '')) ?: aok_with_location(aok_text($s['title'] ?? '') . ' | ' . $brand, $d);
         $m['description'] = trim((string)($s['seoDescription'] ?? '')) ?: aok_cut(aok_text($s['desc'] ?? ''), 158);
-        if (!empty($s['image'])) $m['image'] = aok_abs($base, $s['image']);
+        $m['imageAlt'] = aok_text($s['title'] ?? '') . ' — ' . aok_brand($d);
+        if (!empty($s['image']) && !preg_match('#^data:#i', (string)$s['image'])) { $m['image'] = aok_abs($base, $s['image']); $m['imageSize'] = null; }
+        elseif ($img = aok_service_images($d, $s)) { $m['image'] = $img[0]; $m['imageSize'] = [1200, 675]; }
         if (!empty($s['canonical'])) $m['canonical'] = aok_abs($base, $s['canonical']);
         if (!empty($s['noindex'])) $m['robots'] = 'noindex, follow';
     } elseif ($t === 'post') {
@@ -365,7 +367,9 @@ function aok_meta(array $d, array $r): array {
         $m['description'] = aok_cut(aok_text($p['excerpt'] ?? ''), 158);
         $m['robots'] = (string)($p['robots'] ?? '') ?: 'index, follow';
         $m['ogType'] = 'article';
-        if (!empty($p['image'])) $m['image'] = aok_abs($base, $p['image']);
+        $m['imageAlt'] = aok_text($p['title'] ?? '');
+        if (!empty($p['image']) && !preg_match('#^data:#i', (string)$p['image'])) { $m['image'] = aok_abs($base, $p['image']); $m['imageSize'] = null; }
+        elseif ($img = aok_post_images($d, $p)) { $m['image'] = $img[0]; $m['imageSize'] = [1200, 675]; }
         if (!empty($p['canonical'])) $m['canonical'] = aok_abs($base, $p['canonical']);
     } elseif ($t === 'page') {
         $m['title'] = aok_fit_brand(aok_text($r['item']['title'] ?? ''), $brand);
@@ -390,6 +394,32 @@ function aok_abs(string $base, $url): string {
     if ($url === '' || preg_match('#^data:#i', $url)) return $base . '/assets/og-image.jpg';
     if (preg_match('#^https?://#i', $url)) return $url;
     return $base . '/' . ltrim($url, '/');
+}
+
+// The branded images made by tools/build-images.js (assets/img/<kind>/<slug>-16x9|4x3|1x1.jpg):
+// absolute URLs of the three shapes for the first slug that has them, or [] if none exist.
+function aok_brand_images(string $base, string $kind, array $slugs): array {
+    $dir = dirname(__DIR__) . '/assets/img/' . $kind . '/';
+    foreach (array_unique(array_filter($slugs)) as $slug) {
+        if (!preg_match('/^[a-z0-9-]+$/', $slug) || !is_file($dir . $slug . '-16x9.jpg')) continue;
+        $out = [];
+        foreach (['16x9', '4x3', '1x1'] as $r) if (is_file($dir . $slug . '-' . $r . '.jpg')) $out[] = $base . '/assets/img/' . $kind . '/' . $slug . '-' . $r . '.jpg';
+        return $out;
+    }
+    return [];
+}
+// the featured image at the top of a server-rendered post (uploaded image, else the branded 16:9 one)
+function aok_featured_img_html(array $d, array $p): string {
+    $alt = aok_text(($p['focusKeyword'] ?? '') !== '' ? $p['focusKeyword'] : ($p['title'] ?? ''));
+    if (!empty($p['image']) && !preg_match('#^data:#i', (string)$p['image'])) return '<p><img src="' . aok_e(aok_abs(aok_base($d), $p['image'])) . '" alt="' . aok_e($alt) . '" style="max-width:100%;height:auto"></p>';
+    $img = aok_post_images($d, $p);
+    return $img ? '<p><img src="' . aok_e($img[0]) . '" width="1200" height="675" alt="' . aok_e($alt) . '" style="max-width:100%;height:auto"></p>' : '';
+}
+function aok_service_images(array $d, array $s): array {
+    return aok_brand_images(aok_base($d), 'services', [aok_slugify((string)($s['slug'] ?? '')), aok_slugify((string)($s['title'] ?? ''))]);
+}
+function aok_post_images(array $d, array $p): array {
+    return aok_brand_images(aok_base($d), 'posts', [(string)($p['slug'] ?? '')]);
 }
 
 // ------------------------------------------------------------------ local business ----
@@ -570,6 +600,8 @@ function aok_graph(array $d, array $r, array $meta): array {
         $n = ['@type' => 'Service', '@id' => $base . '/services/' . $slug . '#service', 'name' => aok_text($s['title'] ?? ''),
               'description' => aok_text($s['desc'] ?? ''), 'url' => $base . '/services/' . $slug, 'provider' => ['@id' => $ORG],
               'serviceType' => aok_text($s['title'] ?? ''), 'category' => 'Vedic astrology', 'areaServed' => aok_area_served($d)];
+        if (!empty($s['image']) && !preg_match('#^data:#i', (string)$s['image'])) $n['image'] = aok_abs($base, $s['image']);
+        elseif ($img = aok_service_images($d, $s)) $n['image'] = $img;
         list($price, $cur) = aok_price((string)($s['price'] ?? ''));
         if ($price !== '') {
             $unit = stripos((string)aok_get($d, 'about.pricing.unit', ''), 'hour') !== false ? 'hour' : null;
@@ -626,7 +658,7 @@ function aok_graph(array $d, array $r, array $meta): array {
         $p = $r['item'];
         $post = ['@type' => 'BlogPosting', '@id' => $url . '#article', 'headline' => aok_cut(aok_text($p['title'] ?? ''), 110),
             'description' => $meta['description'], 'url' => $url, 'mainEntityOfPage' => ['@id' => $url . '#webpage'],
-            'author' => ['@id' => $PERSON], 'publisher' => ['@id' => $ORG], 'image' => $meta['image'], 'inLanguage' => 'en-CA',
+            'author' => ['@id' => $PERSON], 'publisher' => ['@id' => $ORG], 'image' => (empty($p['image']) && ($img = aok_post_images($d, $p))) ? $img : $meta['image'], 'inLanguage' => 'en-CA',
             'wordCount' => str_word_count(aok_text($p['body'] ?? ''))];
         if (!empty($p['date'])) { $post['datePublished'] = substr($p['date'], 0, 10); $post['dateModified'] = substr($p['date'], 0, 10); }
         if (!empty($p['focusKeyword'])) $post['keywords'] = $p['focusKeyword'];
@@ -944,7 +976,7 @@ function aok_main_html(array $d, array $r): string {
         $o .= aok_crumbs([['Home', '/'], ['Blog', '/blog'], [aok_text($p['title'] ?? ''), '']]);
         $o .= '<article><h1>' . aok_e(aok_text($p['title'] ?? '')) . '</h1><p>'
             . (!empty($p['date']) ? '<time datetime="' . aok_e(substr($p['date'], 0, 10)) . '">' . aok_e(date('j F Y', strtotime($p['date']))) . '</time> · ' : '')
-            . 'By <a href="/about">' . aok_e($g('brand.astrologer', 'Jag Mallah')) . '</a>, Vedic astrologer · Analysis of Karma</p>' . aok_paras($p['body'] ?? '') . '</article>'
+            . 'By <a href="/about">' . aok_e($g('brand.astrologer', 'Jag Mallah')) . '</a>, Vedic astrologer · Analysis of Karma</p>' . aok_featured_img_html($d, $p) . aok_paras($p['body'] ?? '') . '</article>'
             . aok_author_card_html($d) . aok_related_services_html($d, $p) . '<p><a href="/blog">← Blog</a> · <a href="/services">Services</a> · <a href="/contact">Contact</a></p>' . aok_cta($d);
     } elseif ($t === 'contact') {
         $o .= '<section><p>' . aok_e(aok_text($g('seo.contact.focusKeyword'))) . '</p><h1>' . aok_e(aok_text($g('contactPage.title'))) . '</h1><p>' . aok_rich($g('contactPage.sub')) . '</p></section>';

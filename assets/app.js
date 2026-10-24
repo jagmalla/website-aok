@@ -944,7 +944,7 @@ class Component extends DCLogic {
     const ph='linear-gradient(135deg,#FFFFFF 0%,#F4EEE3 55%,#E9DCC2 100%)';
     return h('main',{style:{animation:'aokfade .4s'}}, this.pageHero('blogPage.hero','blog'),
       h('section',{style:{padding:'70px 0'}}, this.wrap(posts.length? h('div',{style:{display:'grid',gridTemplateColumns:'repeat(3,1fr)',gap:24}}, ...posts.map(p=>h('article',{key:p.id,onClick:()=>this.setState({postId:p.id,menuOpen:false}),className:'aok-card aok-tilt aok-reveal',style:{overflow:'hidden',cursor:'pointer',display:'flex',flexDirection:'column'}},
-        h('div',{style:{aspectRatio:'16/10',margin:8,borderRadius:14,overflow:'hidden',background:p.image?'transparent':ph}}, p.image?h('img',{loading:'lazy',decoding:'async',src:p.image,alt:p.focusKeyword||p.title,style:{width:'100%',height:'100%',objectFit:'cover',display:'block'}}):h('div',{style:{height:'100%',display:'flex',alignItems:'center',justifyContent:'center',color:'#A68446',fontFamily:'monospace',fontSize:12}},'blog image')),
+        h('div',{style:{aspectRatio:'16/10',margin:8,borderRadius:14,overflow:'hidden',background:p.image?'transparent':ph}}, this.postImg(p)?h('img',{loading:'lazy',decoding:'async',src:this.postImg(p),alt:p.focusKeyword||p.title,onError:e=>{ e.currentTarget.style.display='none'; },style:{width:'100%',height:'100%',objectFit:'cover',display:'block'}}):h('div',{style:{height:'100%',display:'flex',alignItems:'center',justifyContent:'center',color:'#A68446',fontFamily:'monospace',fontSize:12}},'blog image')),
         h('div',{style:{padding:'14px 24px 26px',flex:1,display:'flex',flexDirection:'column'}},
           h('div',{style:{font:'600 12px '+this.HEAD,letterSpacing:'.12em',textTransform:'uppercase',color:'#8A6A2E',marginBottom:10}}, this.fmtDate(p.date)+(p.published?'':' · DRAFT')),
           h('h3',{style:{font:'700 19px/1.3 '+this.HEAD,color:P.maroon,margin:'0 0 10px'}}, h('a',this.linkTo('/blog/'+encodeURIComponent(p.slug||''),()=>this.setState({postId:p.id,menuOpen:false}),{style:{color:'inherit'}}), p.title)),
@@ -959,7 +959,7 @@ class Component extends DCLogic {
         h('div',{style:{font:'600 12px '+this.HEAD,letterSpacing:'.14em',textTransform:'uppercase',color:'#8A6A2E',margin:'24px 0 14px'}}, this.fmtDate(p.date),' \u00b7 By ',h('a',{href:'#about-the-astrologer',style:{color:'#8A6A2E'}},(d.person&&d.person.name)||d.brand.astrologer)),
         h('h1',{style:{font:'800 clamp(30px,3.9vw,48px)/1.1 '+this.HEAD,color:P.maroon,margin:0,letterSpacing:'-.015em'}}, p.title))), h('div',{className:'aok-hairline'})),
       h('section',{style:{padding:'52px 0 70px'}}, this.wrap(h('div',{style:{maxWidth:780,margin:'0 auto'}},
-        h('div',{className:'aok-card',style:{padding:8,marginBottom:36}}, h('div',{style:{aspectRatio:'16/8',borderRadius:14,overflow:'hidden',background:p.image?'transparent':'linear-gradient(135deg,#FFFFFF 0%,#F4EEE3 55%,#E9DCC2 100%)'}}, p.image?h('img',{loading:'lazy',decoding:'async',src:p.image,alt:p.focusKeyword||p.title,style:{width:'100%',height:'100%',objectFit:'cover'}}):h('div',{style:{height:'100%',display:'flex',alignItems:'center',justifyContent:'center',color:'#A68446',fontFamily:'monospace',fontSize:12}},'featured image — alt: '+(p.focusKeyword||'')))),
+        h('div',{className:'aok-card',style:{padding:8,marginBottom:36}}, h('div',{style:{aspectRatio:p.image?'16/8':'16/9',borderRadius:14,overflow:'hidden',background:p.image?'transparent':'linear-gradient(135deg,#FFFFFF 0%,#F4EEE3 55%,#E9DCC2 100%)'}}, this.postImg(p)?h('img',{decoding:'async',src:this.postImg(p),alt:p.focusKeyword||p.title,onError:e=>{ e.currentTarget.style.display='none'; },style:{width:'100%',height:'100%',objectFit:'cover',display:'block'}}):h('div',{style:{height:'100%',display:'flex',alignItems:'center',justifyContent:'center',color:'#A68446',fontFamily:'monospace',fontSize:12}},'featured image — alt: '+(p.focusKeyword||'')))),
         h('div',{className:'aok-md'}, this.mdRender(p.body,18)),
         this.authorCard(), this.relatedServicesBlock(p)))),
       this.ctaBand('home.cta')); }
@@ -1245,6 +1245,8 @@ class Component extends DCLogic {
   }; }
   faqUpgradable(){ const orig=this.faqShortOriginals(), d=this.state.data, def={}; (this.defaults().faqPage.items||[]).forEach(it=>{ def[it.q]=it.a; });
     return (((d.faqPage||{}).items)||[]).map((it,i)=>({i,q:it.q,a:def[it.q]})).filter(x=>orig[x.q]!==undefined&&this.txt(d.faqPage.items[x.i].a).trim()===this.txt(orig[x.q]).trim()&&x.a); }
+  // a post's featured image: the uploaded one, else the branded image made by tools/build-images.js (hidden if missing)
+  postImg(p){ return p&&p.image?p.image:(p&&/^[a-z0-9-]+$/.test(p.slug||'')?'/assets/img/posts/'+p.slug+'-16x9.webp':''); }
   // Admin → SEO Health: add the classical sections (api/content/) to every service and post, including edited ones.
   // Saves the editor first so nothing unsaved is lost, then reloads the upgraded site from the server.
   applyContentUpgrade(){ if(this._cuBusy) return;

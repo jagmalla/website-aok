@@ -59,6 +59,8 @@ try {
         . '<meta property="og:description" content="' . $e($m['description']) . '">' . "\n"
         . ($m['canonical'] !== '' ? '<meta property="og:url" content="' . $e($m['canonical']) . '">' . "\n" : '')
         . '<meta property="og:image" content="' . $e($m['image']) . '">' . "\n"
+        . (!empty($m['imageSize']) ? '<meta property="og:image:width" content="' . (int)$m['imageSize'][0] . '">' . "\n" . '<meta property="og:image:height" content="' . (int)$m['imageSize'][1] . '">' . "\n" : '')
+        . (!empty($m['imageAlt']) ? '<meta property="og:image:alt" content="' . $e($m['imageAlt']) . '">' . "\n" : '')
         . '<meta name="twitter:card" content="summary_large_image">' . "\n"
         . '<meta name="twitter:title" content="' . $e($m['title']) . '">' . "\n"
         . '<meta name="twitter:description" content="' . $e($m['description']) . '">' . "\n"
