@@ -34,7 +34,6 @@ $o .= '- Languages: ' . implode(', ', (array)aok_get($d, 'local.languages', ['En
 $o .= "- Consultation fee: $fee ($channels calls)\n";
 if ($pol = $T(aok_get($d, 'local.paymentPolicy', ''))) $o .= "- Payment policy: $pol\n";
 if ($ph = trim((string)aok_get($d, 'contact.phone', ''))) $o .= "- Phone: $ph\n";
-if ($em = trim((string)aok_get($d, 'contact.email', ''))) $o .= "- Email: $em\n";
 $o .= "- Book or ask a question: $base/contact\n\n";
 
 $o .= "## Practitioner credentials\n\n";

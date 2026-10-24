@@ -151,7 +151,7 @@ class Component extends DCLogic {
       this.forceUpdate(); if(!silent) this.flash(j&&j.skipped?'\u2139 IndexNow is only sent from the live domain (key is ready)':(j&&j.ok)?('\u2713 IndexNow: '+j.count+' URLs submitted'):('\u26a0 IndexNow failed'+(j&&j.status?' (HTTP '+j.status+')':''))); })
       .catch(()=>{ if(!silent) this.flash('\u26a0 Could not reach the server for IndexNow'); }); }
   sendTestEmail(){ if(this._emailTesting) return; const to=(this.getIn(this.state.data,'contact.email')||'').trim();
-    if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(to)){ this._emailTestOk=false; this._emailTestMsg='Please enter a valid recipient email address first.'; this.forceUpdate(); return; }
+    if(to&&!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(to)){ this._emailTestOk=false; this._emailTestMsg='Please enter a valid recipient email address first.'; this.forceUpdate(); return; }   // empty: the server's default inbox
     this._emailTesting=true; this._emailTestMsg=null; this.forceUpdate();
     const done=(ok,msg)=>{ this._emailTesting=false; this._emailTestOk=ok; this._emailTestMsg=msg; this.forceUpdate(); };
     try{
@@ -206,7 +206,7 @@ class Component extends DCLogic {
     const svc=(icon,title,price,desc,detail)=>({id:this.uid(),icon,title,price,desc,...(detail?{detail}:{}),image:null});
     return {
       brand:{ name:'Analysis of Karma', astrologer:'Jag Mallah', tagline:'Vedic astrology guidance for love, career, health & life\u2019s bigger questions.', logo:null },
-      contact:{ email:'analysisofkarma@gmail.com', mailFrom:'', phone:'+1 (236) 660-2000', whatsapp:'+1 (236) 660-2000',
+      contact:{ email:'', mailFrom:'', /* the enquiry inbox is set on the server (api/db.php) and never shown on the site */ phone:'+1 (236) 660-2000', whatsapp:'+1 (236) 660-2000',
         whatsappText:'Hello Jag Mallah, I would like to book a Vedic astrology consultation.', address:'', mapQuery:'', mapUrl:'', mapEmbed:'',
         instagram:'https://www.instagram.com/analysisofkarma', youtube:'https://www.youtube.com/@analysisofkarma',
         gmb:'https://share.google/r37d5nGpSJCeEXhvt', facebook:'', trustpilot:'https://ca.trustpilot.com/review/analysisofkarma.com',
@@ -975,7 +975,7 @@ class Component extends DCLogic {
     if(raw){ if(isEmbedUrl(raw)) mapSrc=raw; else if(coord) mapSrc='https://maps.google.com/maps?q='+coord[1]+','+coord[2]+'&z=15&ie=UTF8&iwloc=&output=embed'; else if(isShort||looksUrl) mapSrc=null; else mapSrc='https://maps.google.com/maps?q='+encodeURIComponent(raw)+'&t=&z=14&ie=UTF8&iwloc=&output=embed'; }
     else if(mq){ mapSrc='https://maps.google.com/maps?q='+encodeURIComponent(mq)+'&t=&z=14&ie=UTF8&iwloc=&output=embed'; }
     const mapLink=(looksUrl?raw:'')||c.gmb||(raw?('https://maps.google.com/maps?q='+encodeURIComponent(raw)):'');
-    const rows=[c.phone&&['Phone',c.phone,this.telHref()],c.whatsapp&&['WhatsApp',c.whatsapp,this.waUrl()],c.email&&['Email',c.email,'mailto:'+c.email],c.bookingUrl&&['Book online','Choose a time',c.bookingUrl],c.address&&['Visit',c.address,null]].filter(Boolean);
+    const rows=[c.phone&&['Phone',c.phone,this.telHref()],c.whatsapp&&['WhatsApp',c.whatsapp,this.waUrl()],c.bookingUrl&&['Book online','Choose a time',c.bookingUrl],c.address&&['Visit',c.address,null]].filter(Boolean);
     const pearl='radial-gradient(120% 90% at 30% 10%,#FFFFFF 0%,#F7F1E6 55%,#EADDC3 100%)';
     return h('main',{style:{animation:'aokfade .4s'}}, this.pageHero('contactPage','contact'),
       h('section',{style:{padding:'64px 0'}}, this.wrap(h('div',{style:{display:'grid',gridTemplateColumns:'1.1fr .9fr',gap:40,alignItems:'start'}},
@@ -1128,7 +1128,6 @@ class Component extends DCLogic {
     if(!L.serviceAreaBusiness&&L.streetAddress) parts.push(br('b1'),L.streetAddress);
     parts.push(br('b2'),[L.locality||'Surrey',L.region||'British Columbia',(L.country||'CA')==='CA'?'Canada':L.country].join(', '));
     if(c.phone) parts.push(br('b3'),'Phone & WhatsApp: ',h('a',{key:'tel',href:this.telHref(),className:'aok-footlink'},c.phone));
-    if(c.email) parts.push(br('b4'),'Email: ',h('a',{key:'em',href:'mailto:'+c.email,className:'aok-footlink'},c.email));
     const areas=this.areaShortNames(); if(areas.length) parts.push(br('b5'),'Serving: '+areas.join(', ')+(L.onlineWorldwide!==false?' \u00b7 Worldwide online ('+(L.onlineChannels||['Zoom','WhatsApp']).filter(Boolean).join(' & ')+')':''));
     const days=[['Mo','Mon'],['Tu','Tue'],['We','Wed'],['Th','Thu'],['Fr','Fri'],['Sa','Sat'],['Su','Sun']].filter(x=>L.hours&&L.hours[x[0]]&&L.hours[x[0]].o&&L.hours[x[0]].c).map(x=>x[1]+' '+L.hours[x[0]].o+'\u2013'+L.hours[x[0]].c);
     if(days.length) parts.push(br('b6'),'Hours: '+(days.length===7&&new Set(days.map(x=>x.slice(4))).size===1?'Mon\u2013Sun '+days[0].slice(4):days.join(' \u00b7 '))+(L.timezone==='America/Vancouver'?' (Pacific Time)':''));
@@ -1694,7 +1693,15 @@ class Component extends DCLogic {
         h('p',{style:{font:'400 14px Plus Jakarta Sans',color:P.muted,textAlign:'center',margin:'0 0 24px'}},'Analysis of Karma \u00b7 Website Builder'),
         h('input',{type:'password',value:this.state.pass,onChange:e=>this.setState({pass:e.target.value}),placeholder:'Password',autoFocus:true,style:{width:'100%',padding:'13px 15px',borderRadius:11,border:'1px solid '+P.line,background:P.white,font:'400 15px Plus Jakarta Sans',marginBottom:14}}),
         this.btn('Enter dashboard',null,{variant:'solid',style:{width:'100%',justifyContent:'center'}}),
-        h('div',{style:{textAlign:'center',marginTop:18}}, h('a',{onClick:()=>this.go('home'),style:{cursor:'pointer',font:'500 13px Plus Jakarta Sans',color:P.muted}},'\u2190 Back to website'))), this.renderToast());}
+        h('div',{style:{textAlign:'center',marginTop:14}}, h('button',{type:'button',onClick:()=>this.forgotPassword(),disabled:!!this._forgotBusy,style:{background:'none',border:0,cursor:'pointer',font:'600 13px Plus Jakarta Sans',color:P.red,padding:4}},this._forgotBusy?'Sending\u2026':'Forgot password?')),
+        this._forgotMsg?h('p',{role:'status',style:{font:'400 13px/1.55 Plus Jakarta Sans',color:P.muted,textAlign:'center',margin:'8px 0 0'}},this._forgotMsg):null,
+        h('div',{style:{textAlign:'center',marginTop:14}}, h('a',{onClick:()=>this.go('home'),style:{cursor:'pointer',font:'500 13px Plus Jakarta Sans',color:P.muted}},'\u2190 Back to website'))), this.renderToast());}
+  // "Forgot password?": the server emails a one-time reset link to the owner's private recovery address
+  forgotPassword(){ if(this._forgotBusy) return; this._forgotBusy=true; this._forgotMsg=null; this.forceUpdate();
+    const done=msg=>{ this._forgotBusy=false; this._forgotMsg=msg; this.forceUpdate(); };
+    fetch('/api/auth.php',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({action:'forgot'})}).then(r=>r.json().catch(()=>null))
+      .then(j=>done(j&&j.ok&&j.sent!==false?'\u2713 A password-reset link has been sent to the owner\u2019s recovery email. It works once, for 30 minutes \u2014 check the spam folder too.':'\u26a0 The reset email could not be sent'+(j&&j.ok?' (the server\u2019s mail() failed)':'')+'. Please try again in a few minutes.'))
+      .catch(()=>done('\u26a0 Could not reach the server. Check your connection and try again.')); }
 
   renderAdminShell(){ const h=React.createElement,P=this.P;
     const tabs=[['dashboard','\u25C8 Dashboard'],['pages','\u270e Visual Editor'],['services','\u2609 Services'],['blog','\u270d Blog'],['leads','\u2709 Leads'],['seo','\u2191 SEO'],['schema','{ } Schema'],['submit','\u2691 Search Engines'],['local','\u2316 Local & Business'],['person','\u2726 Practitioner'],['ai','\u25ce AI & GEO'],['redirects','\u21aa Redirects'],['health','\u271a SEO Health'],['settings','\u2699 Settings']];
@@ -1859,7 +1866,7 @@ class Component extends DCLogic {
 
   // ----- leads -----
   tabLeads(){ const h=React.createElement,P=this.P,d=this.state.data; const leads=d.leads||[];
-    return h('div',null, this.adminHead('Leads / Enquiries','Every contact-form submission is saved here and emailed to '+d.contact.email+'. The form is protected with a verification question to block spam bots.'),
+    return h('div',null, this.adminHead('Leads / Enquiries','Every contact-form submission is saved here and emailed to '+(d.contact.email||'your enquiry inbox')+'. The form is protected with a verification question to block spam bots.'),
       leads.length? h('div',{style:{display:'grid',gap:12}}, ...leads.map(l=>this.card(h('div',null,
         h('div',{style:{display:'flex',justifyContent:'space-between',alignItems:'flex-start',gap:12,marginBottom:10}},
           h('div',null, h('div',{style:{font:'700 17px '+this.HEAD,color:P.maroon}},l.name||'(no name)', l.read?null:h('span',{style:{marginLeft:10,background:P.goldL,color:P.maroonD,borderRadius:999,padding:'2px 9px',font:'700 10px '+this.HEAD,verticalAlign:'middle'}},'NEW')), h('div',{style:{font:'400 12.5px Plus Jakarta Sans',color:P.muted,marginTop:2}}, this.fmtDate(l.at)+' '+new Date(l.at).toLocaleTimeString('en-IN',{hour:'2-digit',minute:'2-digit'}))),
@@ -2012,7 +2019,7 @@ class Component extends DCLogic {
             this.inp('contact.whatsappText',{label:'WhatsApp greeting',hint:'pre-filled message when a visitor taps WhatsApp'}),
             this.inp('contact.replyTime',{label:'Typical reply time',placeholder:'within 12–24 hours'}),
             this.inp('contact.bookingUrl',{label:'Online booking link',hint:'optional: Calendly, Google appointments …',placeholder:'https://calendly.com/…'}),
-            this.inp('contact.email',{label:'Email',type:'email'}),
+            this.inp('contact.email',{label:'Enquiry email (private)',hint:'receives the contact form; never shown on the website',type:'email'}),
             h('div',{style:{padding:'14px 16px',borderRadius:12,border:'1px dashed '+P.gold,background:P.white,font:'400 13.5px/1.6 Plus Jakarta Sans',color:P.ink}},
               h('div',{style:{font:'600 11px '+this.HEAD,letterSpacing:'.1em',textTransform:'uppercase',color:P.gold,marginBottom:6}},'Footer preview'),
               this.napBlock()),
@@ -2179,7 +2186,7 @@ class Component extends DCLogic {
             this.inp('brand.name',{label:'Business name'}), this.inp('brand.astrologer',{label:'Astrologer name'}), this.inp('brand.tagline',{label:'Tagline',multiline:true,rows:2,mb:0}))),
           this.card(h('div',null, h('div',{style:{font:'700 16px '+this.HEAD,color:P.maroon,marginBottom:6}},'Email settings'),
             h('p',{style:{font:'400 13px Plus Jakarta Sans',color:P.muted,margin:'0 0 12px'}},'Contact-form submissions are emailed to the address below. Click “Save changes” after editing, then send a test to confirm delivery.'),
-            this.inp('contact.email',{label:'Send enquiries to (recipient)',hint:'where you receive messages',type:'email'}),
+            this.inp('contact.email',{label:'Send enquiries to (recipient)',hint:'private \u2014 never shown on the website',type:'email'}),
             this.inp('contact.mailFrom',{label:'From address',hint:'use an address on your own domain for best delivery',type:'email',mb:8}),
             h('p',{style:{font:'400 12px/1.5 Plus Jakarta Sans',color:P.muted,margin:'0 0 14px'}},'Tip: a “From” address on your own domain (e.g. noreply@yourdomain.com) is far less likely to be marked as spam than a Gmail address.'),
             h('div',{style:{display:'flex',gap:10,alignItems:'center',flexWrap:'wrap'}},

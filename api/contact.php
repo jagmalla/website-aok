@@ -29,7 +29,7 @@ foreach ($data as $key => $val) {
 }
 $body = implode("\n", $lines);
 
-$subject = $data['_subject'] ?? ('New enquiry from ' . $name . ' — Analysis of Karma');
+$subject = str_replace(["\r", "\n"], ' ', (string)($data['_subject'] ?? ('New enquiry from ' . $name . ' — Analysis of Karma')));   // no header injection
 $replyTo = filter_var($data['_replyto'] ?? $email, FILTER_VALIDATE_EMAIL) ?: $email;
 
 // Recipient + from address come from the admin-managed settings (fall back to config)

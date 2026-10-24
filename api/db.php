@@ -10,6 +10,13 @@ if (defined('AOK_OFFLINE')) {
     require_once __DIR__ . '/config.php';
 }
 
+// Private email addresses. They live only here on the server: never in the site data, the page HTML, the
+// structured data or llms.txt, so spam harvesters can't find them. config.php may override them.
+//   AOK_CONTACT_EMAIL  receives contact-form enquiries (unless Admin -> Settings names another inbox)
+//   AOK_RECOVERY_EMAIL receives admin password-reset links
+define('AOK_CONTACT_EMAIL', defined('CONTACT_EMAIL') ? CONTACT_EMAIL : 'analysisofkarma@gmail.com');
+define('AOK_RECOVERY_EMAIL', defined('ADMIN_RECOVERY_EMAIL') ? ADMIN_RECOVERY_EMAIL : 'jagmanmeet@gmail.com');
+
 function db(): PDO {
     static $pdo = null;
     if ($pdo !== null) return $pdo;
@@ -112,14 +119,31 @@ function require_admin(): void {
 // What the public (and search engines) may see of the site data: never credentials or client leads.
 function public_payload(array $d): array {
     unset($d['adminPass'], $d['leads']);
-    return $d;
+    // email addresses are private (spam): the contact form is the only way to write in
+    $priv = array_filter([trim((string)($d['contact']['email'] ?? '')), trim((string)($d['contact']['mailFrom'] ?? '')), AOK_CONTACT_EMAIL, AOK_RECOVERY_EMAIL,
+        defined('MAIL_TO') ? MAIL_TO : '', defined('MAIL_FROM') ? MAIL_FROM : '']);
+    if (isset($d['contact']) && is_array($d['contact'])) unset($d['contact']['email'], $d['contact']['mailFrom']);
+    return aok_scrub_emails($d, array_values(array_unique($priv)));
 }
 
-// Resolve the recipient + from address: admin-managed values win, config constants are the fallback
+// Replaces the private addresses wherever they were typed into page text: links go to /contact,
+// plain mentions become "the contact form".
+function aok_scrub_emails($v, array $addrs) {
+    if (is_array($v)) { foreach ($v as $k => $x) $v[$k] = aok_scrub_emails($x, $addrs); return $v; }
+    if (!is_string($v) || $v === '' || strpos($v, '@') === false) return $v;
+    foreach ($addrs as $a) {
+        $q = preg_quote($a, '/');
+        $v = preg_replace('/mailto:' . $q . '(\?[^"\'\s>]*)?/i', '/contact', $v);
+        $v = preg_replace('/' . $q . '/i', 'the contact form', $v);
+    }
+    return $v;
+}
+
+// Resolve the recipient + from address: the admin's private settings win, then AOK_CONTACT_EMAIL / MAIL_FROM
 function mail_settings(?array $site = null): array {
     if ($site === null) $site = site_data();
     $c = $site['contact'] ?? [];
-    $to   = (!empty($c['email'])    && filter_var($c['email'],    FILTER_VALIDATE_EMAIL)) ? $c['email']    : MAIL_TO;
-    $from = (!empty($c['mailFrom']) && filter_var($c['mailFrom'], FILTER_VALIDATE_EMAIL)) ? $c['mailFrom'] : MAIL_FROM;
+    $to   = (!empty($c['email'])    && filter_var($c['email'],    FILTER_VALIDATE_EMAIL)) ? $c['email']    : AOK_CONTACT_EMAIL;
+    $from = (!empty($c['mailFrom']) && filter_var($c['mailFrom'], FILTER_VALIDATE_EMAIL)) ? $c['mailFrom'] : (defined('MAIL_FROM') ? MAIL_FROM : 'noreply@analysisofkarma.com');
     return ['to' => $to, 'from' => $from];
 }

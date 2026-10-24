@@ -37,6 +37,11 @@ Either way, finish with **[Part C — Verify the upload](#part-c--verify-the-upl
 | `api/robots.php`, `api/sitemap.php`, `api/llms.php`, `api/indexnow.php` | Live `/robots.txt`, `/sitemap.xml`, `/llms.txt`, `/llms-full.txt` and IndexNow. |
 | `api/seo-health.php` | Admin → SEO Health, including the post-upload server checks. |
 | `api/contact.php`, `api/test-email.php`, `api/upload.php`, `api/health.php` | Contact form, test email, photo uploads, database diagnostic. |
+| `api/reset-password.php` | The page the "Forgot password?" email links to. |
+
+> **Email addresses are private.** Contact-form enquiries go to the inbox in Admin → Settings (default
+> `AOK_CONTACT_EMAIL` in `api/db.php`), and reset links to `AOK_RECOVERY_EMAIL`. Neither address is shown
+> anywhere on the website, in the structured data or in llms.txt, so spam bots can't collect them.
 | `tools/`, `DEPLOY.md`, `HOW-TO-UPDATE.txt` | For you and developers; not needed on the server (blocked by `.htaccess`). |
 
 > There is **no `api/config.php` in this folder**, on purpose. Your live one stays on
@@ -72,7 +77,7 @@ In File Manager, open each folder below, click **Upload**, tick
 |---|---|
 | `public_html/` | `index.html` · `render.php` · `robots.txt` · `sitemap.xml` · `llms.txt` · `llms-full.txt` — **not `.htaccess` yet** |
 | `public_html/assets/` | `app.js` · `hero3d.js` · `og-image.jpg` · `logo-192.webp` · `logo-512.webp` · `logo-512.png` · `favicon-32.png` · `favicon-48.png` · `apple-touch-icon.png` |
-| `public_html/api/` | `auth.php` · `data.php` · `db.php` · `defaults.json` · `health.php` · `indexnow.php` · `llms.php` · `robots.php` · `seo-health.php` · `seo-lib.php` · `sitemap.php` · `test-email.php` · `upload.php` · `upgrades.php` · `upgrade-content.php` · `config.sample.php` |
+| `public_html/api/` | `auth.php` · `data.php` · `db.php` · `defaults.json` · `health.php` · `indexnow.php` · `llms.php` · `robots.php` · `seo-health.php` · `seo-lib.php` · `sitemap.php` · `test-email.php` · `upload.php` · `upgrades.php` · `upgrade-content.php` · `reset-password.php` · `contact.php` · `config.sample.php` |
 | `public_html/api/content/` | the folders `services/` and `posts/` with all their `.md` files (32 files) |
 | `public_html/assets/img/` | the folders `services/` and `posts/` with all their images (128 files) |
 
@@ -81,7 +86,7 @@ In File Manager, open each folder below, click **Upload**, tick
 > then right-click the zip → **Extract** and delete the zip. File Manager keeps the
 > folder structure that way.
 
-- Keep `assets/logo.png`, `api/contact.php`, `api/config.php` and the `uploads/` folder
+- Keep `assets/logo.png`, `api/config.php` and the `uploads/` folder
   exactly as they are.
 - If `public_html/install.php` exists from an earlier setup, **delete it**. It is no
   longer used.
@@ -237,7 +242,7 @@ ongoing to-do list. "Fix →" opens the right admin tab.
 | Contact emails not arriving | **Settings → Email settings → Send test email**; use a From address on your own domain. |
 | Photo upload fails | `uploads/` must exist and be writable (755). Max size is 5 MB (`MAX_UPLOAD_MB` in `config.php`). |
 | "Too many attempts" at login | 8 wrong passwords lock that connection for 15 minutes. Wait, then try again. |
-| Forgot the admin password | cPanel → phpMyAdmin → table `aok_auth` → **Empty**. The next login accepts `admin123`; change it straight away. |
+| Forgot the admin password | On the login screen click **Forgot password?**. A one-time link (valid 30 minutes) is emailed to the owner's recovery address, set as `AOK_RECOVERY_EMAIL` in `api/db.php`. If email isn't working: cPanel → phpMyAdmin → table `aok_auth` → **Empty**; the next login accepts the old password or `admin123`. Change it straight away. |
 | Google sees no content / pages 404 | `.htaccess` or `render.php` missing. See Part C. |
 | Site broke right after uploading `.htaccess` | Put the old `.htaccess` back (admin at `/#admin`), then check the PHP handler lines at the top. |
 

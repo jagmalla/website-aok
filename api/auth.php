@@ -3,6 +3,8 @@
 //   POST {action:'login', password}            -> starts an admin session, returns {ok, csrf}
 //   POST {action:'change', current, next}      -> changes the password (logged in + CSRF)
 //   POST {action:'logout'}                     -> ends the session
+//   POST {action:'forgot'}                     -> emails a password-reset link to the owner's recovery
+//                                                 address (AOK_RECOVERY_EMAIL in api/db.php); see reset-password.php
 //   GET  ?action=status                        -> {ok, authed, csrf?}
 //
 // Passwords are stored only as a hash (table aok_auth). On the very first login the existing
@@ -120,6 +122,27 @@ if ($action === 'change') {
     if (strlen($next) < 8) json_out(['ok' => false, 'error' => 'too_short'], 400);
     save_hash($next);
     json_out(['ok' => true]);
+}
+
+if ($action === 'forgot') {
+    // The link only ever goes to the fixed recovery address, so asking for one reveals nothing and changes
+    // nothing until the owner clicks it. At most one email every 3 minutes; a link works once, for 30 minutes.
+    db()->exec("CREATE TABLE IF NOT EXISTS aok_reset (id INT PRIMARY KEY, token_hash CHAR(64) NOT NULL, expires_at DATETIME NOT NULL, sent_at DATETIME NOT NULL)");
+    $recent = db()->query("SELECT 1 FROM aok_reset WHERE id = 1 AND sent_at > NOW() - INTERVAL 3 MINUTE")->fetch();
+    if ($recent) json_out(['ok' => true, 'sent' => true, 'cooldown' => true]);
+    $token = bin2hex(random_bytes(32));
+    db()->prepare("REPLACE INTO aok_reset (id, token_hash, expires_at, sent_at) VALUES (1, :h, NOW() + INTERVAL 30 MINUTE, NOW())")
+        ->execute([':h' => hash('sha256', $token)]);
+    require_once __DIR__ . '/seo-lib.php';
+    $link = aok_base(aok_site()) . '/api/reset-password.php?token=' . $token;   // the configured site address, never the request's Host
+    $ms = mail_settings();
+    $body = "Someone asked to reset the admin password of your Analysis of Karma website.\n\n"
+          . "To choose a new password, open this link within 30 minutes (it works once):\n\n$link\n\n"
+          . "If this wasn't you, ignore this email: your password stays as it is.\n\n"
+          . 'Requested ' . date('r') . ' from IP ' . client_ip() . "\n";
+    $headers = "From: " . $ms['from'] . "\r\nMIME-Version: 1.0\r\nContent-Type: text/plain; charset=UTF-8\r\n";
+    $sent = @mail(AOK_RECOVERY_EMAIL, 'Reset your Analysis of Karma admin password', $body, $headers);
+    json_out(['ok' => true, 'sent' => (bool)$sent]);
 }
 
 json_out(['ok' => false, 'error' => 'unknown_action'], 400);

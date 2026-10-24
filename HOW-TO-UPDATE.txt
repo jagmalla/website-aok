@@ -21,6 +21,11 @@ NEW IN THIS VERSION (content version 3)
     Admin -> SEO Health -> "Apply Full 32-Page Classical Content Upgrade"
     to add the sections after your text there too.
   • Admin -> AI & GEO has fields for the Google and Bing verification codes.
+  • "Forgot password?" on the admin login emails a one-time reset link
+    (valid 30 minutes) to the owner's private recovery address.
+  • Email addresses are no longer shown anywhere on the website (spam).
+    Contact-form messages go to analysisofkarma@gmail.com (Admin ->
+    Settings can change the inbox; it stays private).
 
 EARLIER IN THIS UPDATE
   • Google and AI assistants now see your real pages. Every page is built on

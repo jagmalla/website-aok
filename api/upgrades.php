@@ -18,9 +18,12 @@
 //      existing text of every service and post whose text is still as shipped. Edited pages are left
 //      alone; Admin -> SEO Health -> "Apply Full 32-Page Classical Content Upgrade" adds them there too
 //      (api/upgrade-content.php).
+// Version 4:
+//   Contact-form enquiries go to the owner's inbox (AOK_CONTACT_EMAIL in api/db.php). Email addresses are
+//   never shown on the website any more (see public_payload in api/db.php).
 // Only text that is still exactly as first shipped is replaced. Text you have edited is kept. Nothing is deleted.
 
-const AOK_CONTENT_VERSION = 3;
+const AOK_CONTENT_VERSION = 4;
 
 // fingerprints (md5 of the normalised text) of the originally shipped FAQ answers, by question
 const AOK_OLD_FAQ = [
@@ -98,7 +101,8 @@ function aok_upgrade_payload(array $d): array {
     $def = is_file(__DIR__ . '/defaults.json') ? json_decode((string)file_get_contents(__DIR__ . '/defaults.json'), true) : null;
     if (!is_array($def)) return $d;   // can't upgrade without the defaults; tried again on the next request
     if ($v < 2) $d = aok_upgrade_v2($d, $def);
-    $d = aok_upgrade_v3($d, $def);
+    if ($v < 3) $d = aok_upgrade_v3($d, $def);
+    $d = aok_upgrade_v4($d);
     $d['contentVersion'] = AOK_CONTENT_VERSION;
     return $d;
 }
@@ -279,4 +283,10 @@ function aok_apply_content(array &$d, array $def, bool $force): array {
         $out['posts'][] = (string)($p['title'] ?? $key);
     }
     return $out;
+}
+
+function aok_upgrade_v4(array $d): array {
+    if (!isset($d['contact']) || !is_array($d['contact'])) $d['contact'] = [];
+    $d['contact']['email'] = AOK_CONTACT_EMAIL;   // the owner's enquiry inbox (private; stripped from public data)
+    return $d;
 }

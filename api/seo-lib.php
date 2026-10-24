@@ -556,10 +556,9 @@ function aok_graph(array $d, array $r, array $meta): array {
     if ($v = aok_get($d, 'local.legalName')) $org['legalName'] = $v;
     $tel = aok_e164((string)aok_get($d, 'contact.phone', ''));
     if ($tel !== '') $org['telephone'] = $tel;
-    if ($v = trim((string)aok_get($d, 'contact.email', ''))) $org['email'] = $v;
     if ($pm = array_values(array_filter((array)aok_get($d, 'local.paymentMethods', [])))) $org['paymentAccepted'] = implode(', ', $pm);
-    if ($tel !== '' || !empty($org['email'])) {
-        $cp = ['@type' => 'ContactPoint', 'contactType' => 'customer service', 'telephone' => $tel, 'email' => $org['email'] ?? '',
+    if ($tel !== '') {   // no email in the schema: addresses stay private (spam); the contact page is the channel
+        $cp = ['@type' => 'ContactPoint', 'contactType' => 'customer service', 'telephone' => $tel,
                'availableLanguage' => $lang, 'areaServed' => ['CA', 'US', 'GB', 'IN'], 'url' => $base . '/contact'];
         if ($h = aok_hours($d)) $cp['hoursAvailable'] = $h;
         $org['contactPoint'] = [$cp];
@@ -672,7 +671,7 @@ function aok_graph(array $d, array $r, array $meta): array {
         $list = isset($extra['@graph']) ? (array)$extra['@graph'] : (aok_is_list($extra) ? $extra : [$extra]);
         foreach ($list as $node) {
             if (!is_array($node)) continue;
-            unset($node['@context']);
+            unset($node['@context'], $node['email']);   // email addresses stay private
             $type = (array)($node['@type'] ?? []);
             if (array_intersect($type, ['ProfessionalService', 'LocalBusiness', 'Organization'])) {
                 foreach (['sameAs', 'knowsAbout'] as $k) {
@@ -681,7 +680,7 @@ function aok_graph(array $d, array $r, array $meta): array {
                     foreach ((array)$node[$k] as $v) if (is_string($v) && !isset($have[aok_url_key($v)])) { $graph[1][$k][] = $v; $have[aok_url_key($v)] = 1; }
                 }
                 foreach ($node as $k => $v) {   // only adds what the admin settings don't already provide
-                    if (in_array($k, ['@type', '@id', 'sameAs', 'knowsAbout', 'founder', 'areaServed', 'url', 'name'], true)) continue;
+                    if (in_array($k, ['@type', '@id', 'sameAs', 'knowsAbout', 'founder', 'areaServed', 'url', 'name', 'email', 'contactPoint'], true)) continue;
                     if ($v === '' || $v === [] || $v === null || (isset($graph[1][$k]) && $graph[1][$k] !== '' && $graph[1][$k] !== [])) continue;
                     $graph[1][$k] = $v;
                 }
@@ -766,7 +765,6 @@ function aok_nap_html(array $d): string {
     if (!aok_get($d, 'local.serviceAreaBusiness', true) && $street !== '') $o .= '<br>' . aok_e($street);
     $o .= '<br>' . aok_e(aok_get($d, 'local.locality', 'Surrey')) . ', ' . aok_e(aok_get($d, 'local.region', 'British Columbia')) . ', ' . aok_e(aok_get($d, 'local.country', 'CA') === 'CA' ? 'Canada' : aok_get($d, 'local.country'));
     if ($ph = trim((string)aok_get($d, 'contact.phone', ''))) $o .= '<br>Phone &amp; WhatsApp: <a href="tel:' . aok_e(aok_e164($ph)) . '">' . aok_e($ph) . '</a>';
-    if ($em = trim((string)aok_get($d, 'contact.email', ''))) $o .= '<br>Email: <a href="mailto:' . aok_e($em) . '">' . aok_e($em) . '</a>';
     $areas = aok_area_short_names($d);
     if ($areas) $o .= '<br>Serving: ' . aok_e(implode(', ', $areas)) . (aok_get($d, 'local.onlineWorldwide', true) ? ' · Worldwide online (' . aok_e(implode(' & ', array_filter((array)aok_get($d, 'local.onlineChannels', ['Zoom', 'WhatsApp'])))) . ')' : '');
     if ($hrs = aok_hours_text($d)) {
