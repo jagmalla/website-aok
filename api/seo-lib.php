@@ -332,6 +332,12 @@ function aok_meta(array $d, array $r): array {
     return $m;
 }
 
+// indexable pages also allow large image previews (Google Discover) and full snippets
+function aok_robots_full(string $robots): string {
+    if ($robots === '' || stripos($robots, 'noindex') !== false || stripos($robots, 'max-image-preview') !== false) return $robots;
+    return $robots . ', max-image-preview:large, max-snippet:-1, max-video-preview:-1';
+}
+
 function aok_abs(string $base, $url): string {
     $url = (string)$url;
     if ($url === '' || preg_match('#^data:#i', $url)) return $base . '/assets/og-image.jpg';
@@ -347,31 +353,76 @@ function aok_price(string $s): array {   // "$100 CAD" -> ['100', 'CAD']
     return [$num, $cur];
 }
 
+// +1 (236) 660-2000 -> +12366602000 (North American numbers without a country code get +1)
+function aok_e164(string $phone): string {
+    $digits = preg_replace('/\D/', '', $phone);
+    if ($digits === '') return '';
+    if (strpos(trim($phone), '+') === 0) return '+' . $digits;
+    return strlen($digits) === 10 ? '+1' . $digits : '+' . $digits;
+}
+
+function aok_lang_codes(array $names): array {
+    $map = ['english' => 'en', 'hindi' => 'hi', 'punjabi' => 'pa', 'urdu' => 'ur', 'gujarati' => 'gu', 'sanskrit' => 'sa', 'french' => 'fr'];
+    $out = [];
+    foreach ($names as $n) { $k = strtolower(trim((string)$n)); if ($k !== '') $out[] = $map[$k] ?? $k; }
+    return array_values(array_unique($out));
+}
+
+// "+1 (236) 660-2000" -> https://wa.me/12366602000?text=…
+function aok_whatsapp_url(array $d): string {
+    $n = preg_replace('/\D/', '', (string)(aok_get($d, 'contact.whatsapp', '') ?: aok_get($d, 'contact.phone', '')));
+    if ($n === '') return '';
+    if (strlen($n) === 10) $n = '1' . $n;
+    $t = trim((string)aok_get($d, 'contact.whatsappText', ''));
+    return 'https://wa.me/' . $n . ($t !== '' ? '?text=' . rawurlencode($t) : '');
+}
+
+// "@analysisofkarma" from the X / Twitter profile in the social links
+function aok_x_handle(array $d): string {
+    foreach ($d['socials'] ?? [] as $s) {
+        if (preg_match('#^https?://(www\.)?(x|twitter)\.com/([A-Za-z0-9_]{1,15})/?$#i', trim((string)($s['url'] ?? '')), $m)) return '@' . $m[3];
+    }
+    return '';
+}
+
+// same profile, different spelling: https://www.x.com/a/ == http://x.com/a
+function aok_url_key(string $u): string {
+    return rtrim(preg_replace('#^https?://(www\.)?#i', '', strtolower(trim($u))), '/');
+}
+
 function aok_same_as(array $d): array {
     $urls = [];
     foreach (['facebook', 'instagram', 'youtube', 'gmb'] as $k) $urls[] = aok_get($d, 'contact.' . $k, '');
     foreach ($d['socials'] ?? [] as $s) $urls[] = $s['url'] ?? '';
     $urls[] = aok_get($d, 'local.mapsCidUrl', '');
+    $urls[] = aok_get($d, 'contact.trustpilot', '');
     foreach ((array)aok_get($d, 'local.directories', []) as $u) $urls[] = $u;
     $out = [];
-    foreach ($urls as $u) { $u = trim((string)$u); if (preg_match('#^https?://#i', $u) && !in_array($u, $out, true)) $out[] = $u; }
+    $seen = [];
+    foreach ($urls as $u) { $u = trim((string)$u); $k = aok_url_key($u); if (preg_match('#^https?://#i', $u) && !isset($seen[$k])) { $out[] = $u; $seen[$k] = 1; } }
     return $out;
 }
 
+// areaServed: "Surrey, BC, Canada" -> City, "Punjab, India" -> AdministrativeArea, "Canada" -> Country
 function aok_area_served(array $d): array {
-    $out = [];
-    $types = ['canada' => 'Country', 'british columbia' => 'State', 'greater vancouver' => 'AdministrativeArea'];
+    $out = []; $seen = [];
+    $countries = ['canada', 'united states', 'usa', 'united kingdom', 'uk', 'india'];
     foreach ((array)aok_get($d, 'local.areasServed', []) as $a) {
         $a = trim((string)$a); if ($a === '') continue;
-        $out[] = ['@type' => $types[strtolower($a)] ?? (strpos($a, ',') !== false ? 'City' : 'Place'), 'name' => $a];
+        $parts = array_map('trim', explode(',', $a));
+        if (count($parts) === 1) $type = in_array(strtolower($a), $countries, true) ? 'Country' : 'Place';
+        elseif (count($parts) >= 3 || preg_match('/^[A-Z]{2}$/', $parts[1])) $type = 'City';
+        else $type = 'AdministrativeArea';
+        $out[] = ['@type' => $type, 'name' => $a];
+        $seen[strtolower($parts[0])] = 1;
     }
     $rc = trim((string)aok_get($d, 'local.regionCode', 'BC'));
-    foreach ((array)aok_get($d, 'local.nearbyCities', []) as $c) {   // the cities named in "Service Areas" on the page
-        $c = trim((string)$c); if ($c === '') continue;
+    foreach ((array)aok_get($d, 'local.nearbyCities', []) as $c) {   // cities named on the page but not in the list above
+        $c = trim((string)$c); if ($c === '' || isset($seen[strtolower($c)])) continue;
         $out[] = ['@type' => 'City', 'name' => $c . ($rc !== '' && strpos($c, ',') === false ? ', ' . $rc : '')];
     }
     if (aok_get($d, 'local.onlineWorldwide', true)) {
-        $ch = implode(' & ', (array)aok_get($d, 'local.onlineChannels', ['Zoom', 'WhatsApp']));
+        $ch = implode(' & ', array_filter((array)aok_get($d, 'local.onlineChannels', ['Zoom', 'WhatsApp'])));
         $out[] = ['@type' => 'Place', 'name' => 'Worldwide (online consultations' . ($ch ? ' via ' . $ch : '') . ')'];
     }
     return $out;
@@ -412,6 +463,7 @@ function aok_graph(array $d, array $r, array $meta): array {
     $logo = $base . (is_file(__DIR__ . '/../assets/logo-512.png') ? '/assets/logo-512.png' : '/assets/logo.png');
     $sameAs = aok_same_as($d);
     $lang = array_values(array_filter((array)aok_get($d, 'local.languages', ['English', 'Hindi'])));
+    $langCodes = aok_lang_codes($lang);
 
     $address = ['@type' => 'PostalAddress', 'addressLocality' => aok_get($d, 'local.locality', 'Surrey'),
                 'addressRegion' => aok_get($d, 'local.regionCode', 'BC'), 'addressCountry' => aok_get($d, 'local.country', 'CA')];
@@ -422,11 +474,19 @@ function aok_graph(array $d, array $r, array $meta): array {
         'name' => $brand, 'url' => $base . '/', 'logo' => ['@type' => 'ImageObject', 'url' => $logo], 'image' => $logo,
         'description' => aok_text(aok_get($d, 'seo.home.metaDescription', '') ?: aok_get($d, 'brand.tagline', '')),
         'slogan' => aok_text(aok_get($d, 'brand.tagline', '')), 'address' => $address, 'areaServed' => aok_area_served($d),
-        'founder' => ['@id' => $PERSON], 'knowsLanguage' => $lang, 'hasOfferCatalog' => ['@id' => $CATALOG],
+        'founder' => ['@id' => $PERSON], 'employee' => ['@id' => $PERSON], 'knowsLanguage' => $langCodes, 'hasOfferCatalog' => ['@id' => $CATALOG],
         'priceRange' => aok_get($d, 'local.priceRange', ''), 'currenciesAccepted' => aok_get($d, 'local.currency', 'CAD')];
     if ($v = aok_get($d, 'local.legalName')) $org['legalName'] = $v;
-    if ($v = trim((string)aok_get($d, 'contact.phone', ''))) $org['telephone'] = $v;
+    $tel = aok_e164((string)aok_get($d, 'contact.phone', ''));
+    if ($tel !== '') $org['telephone'] = $tel;
     if ($v = trim((string)aok_get($d, 'contact.email', ''))) $org['email'] = $v;
+    if ($pm = array_values(array_filter((array)aok_get($d, 'local.paymentMethods', [])))) $org['paymentAccepted'] = implode(', ', $pm);
+    if ($tel !== '' || !empty($org['email'])) {
+        $cp = ['@type' => 'ContactPoint', 'contactType' => 'customer service', 'telephone' => $tel, 'email' => $org['email'] ?? '',
+               'availableLanguage' => $lang, 'areaServed' => ['CA', 'US', 'GB', 'IN'], 'url' => $base . '/contact'];
+        if ($h = aok_hours($d)) $cp['hoursAvailable'] = $h;
+        $org['contactPoint'] = [$cp];
+    }
     $lat = trim((string)aok_get($d, 'local.lat', '')); $lng = trim((string)aok_get($d, 'local.lng', ''));
     if (is_numeric($lat) && is_numeric($lng)) $org['geo'] = ['@type' => 'GeoCoordinates', 'latitude' => (float)$lat, 'longitude' => (float)$lng];
     if ($v = trim((string)(aok_get($d, 'local.mapsCidUrl', '') ?: aok_get($d, 'contact.gmb', '')))) $org['hasMap'] = $v;
@@ -439,8 +499,9 @@ function aok_graph(array $d, array $r, array $meta): array {
 
     $person = ['@type' => 'Person', '@id' => $PERSON, 'name' => aok_get($d, 'person.name', aok_get($d, 'brand.astrologer', 'Jag Mallah')),
         'jobTitle' => aok_get($d, 'person.jobTitle', 'Vedic Astrologer'), 'url' => $base . '/about', 'worksFor' => ['@id' => $ORG],
-        'knowsLanguage' => $lang];
+        'knowsLanguage' => $langCodes];
     if ($v = aok_text(aok_get($d, 'person.shortBio', ''))) $person['description'] = $v;
+    $person['image'] = $logo;   // the Analysis of Karma emblem until a portrait is uploaded (below)
     if ($kn) $person['knowsAbout'] = $kn;
     $img = aok_get($d, 'person.image') ?: aok_get($d, 'home.about.image') ?: aok_get($d, 'home.hero.image');
     if ($img && !preg_match('#^data:#', (string)$img)) $person['image'] = aok_abs($base, $img);
@@ -448,7 +509,7 @@ function aok_graph(array $d, array $r, array $meta): array {
     $person['hasOccupation'] = ['@type' => 'Occupation', 'name' => aok_get($d, 'person.jobTitle', 'Vedic Astrologer'),
         'occupationLocation' => ['@type' => 'City', 'name' => aok_location_label($d)]] + ($occSkills ? ['skills' => implode(', ', $occSkills)] : []);
     if ($m = trim((string)aok_get($d, 'person.mentor', ''))) $person['knows'] = ['@type' => 'Person', 'name' => $m, 'description' => 'Teacher and mentor in Vedic astrology'];
-    $ps = array_values(array_filter((array)aok_get($d, 'person.sameAs', []), function ($u) { return preg_match('#^https?://#i', (string)$u); }));
+    $ps = array_values(array_unique(array_filter((array)aok_get($d, 'person.sameAs', []), function ($u) { return preg_match('#^https?://#i', (string)$u); })));
     if ($ps) $person['sameAs'] = $ps;
 
     $website = ['@type' => 'WebSite', '@id' => $SITE, 'url' => $base . '/', 'name' => $brand,
@@ -530,7 +591,11 @@ function aok_graph(array $d, array $r, array $meta): array {
             unset($node['@context']);
             $type = (array)($node['@type'] ?? []);
             if (array_intersect($type, ['ProfessionalService', 'LocalBusiness', 'Organization'])) {
-                foreach (['sameAs', 'knowsAbout'] as $k) if (!empty($node[$k])) $graph[1][$k] = array_values(array_unique(array_merge((array)($graph[1][$k] ?? []), (array)$node[$k])));
+                foreach (['sameAs', 'knowsAbout'] as $k) {
+                    if (empty($node[$k])) continue;
+                    $have = []; foreach ((array)($graph[1][$k] ?? []) as $v) $have[aok_url_key((string)$v)] = 1;
+                    foreach ((array)$node[$k] as $v) if (is_string($v) && !isset($have[aok_url_key($v)])) { $graph[1][$k][] = $v; $have[aok_url_key($v)] = 1; }
+                }
                 foreach ($node as $k => $v) {   // only adds what the admin settings don't already provide
                     if (in_array($k, ['@type', '@id', 'sameAs', 'knowsAbout', 'founder', 'areaServed', 'url', 'name'], true)) continue;
                     if ($v === '' || $v === [] || $v === null || (isset($graph[1][$k]) && $graph[1][$k] !== '' && $graph[1][$k] !== [])) continue;

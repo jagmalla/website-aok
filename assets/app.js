@@ -206,33 +206,40 @@ class Component extends DCLogic {
     const svc=(icon,title,price,desc,detail)=>({id:this.uid(),icon,title,price,desc,...(detail?{detail}:{}),image:null});
     return {
       brand:{ name:'Analysis of Karma', astrologer:'Jag Mallah', tagline:'Vedic astrology guidance for love, career, health & life\u2019s bigger questions.', logo:null },
-      contact:{ email:'analysisofkarma@gmail.com', mailFrom:'', phone:'', whatsapp:'', address:'', mapQuery:'', mapUrl:'', mapEmbed:'',
-        instagram:'https://www.instagram.com/analysisofkarma/', youtube:'https://www.youtube.com/@analysisofkarma',
-        gmb:'https://share.google/r37d5nGpSJCeEXhvt', facebook:'' },
+      contact:{ email:'analysisofkarma@gmail.com', mailFrom:'', phone:'+1 (236) 660-2000', whatsapp:'+1 (236) 660-2000',
+        whatsappText:'Hello Jag Mallah, I would like to book a Vedic astrology consultation.', address:'', mapQuery:'', mapUrl:'', mapEmbed:'',
+        instagram:'https://www.instagram.com/analysisofkarma', youtube:'https://www.youtube.com/@analysisofkarma',
+        gmb:'https://share.google/r37d5nGpSJCeEXhvt', facebook:'', trustpilot:'https://ca.trustpilot.com/review/analysisofkarma.com',
+        bookingUrl:'', replyTime:'within 12\u201324 hours' },
       siteUrl:'https://www.analysisofkarma.com',
       sitemapAuto:'off',
       // Local SEO / Google Business Profile — a service-area business (no street address shown)
       local:{ businessName:'Analysis of Karma', legalName:'', businessType:'ProfessionalService',
-        gbpPrimaryCategory:'Astrologer', gbpAdditionalCategories:['Psychic','Spiritual consultant'],
+        gbpPrimaryCategory:'Astrologer', gbpAdditionalCategories:['Spiritual Consultant','Psychic','Vedic Astrology & Karmic Consultation Service'],
         serviceAreaBusiness:true, streetAddress:'', locality:'Surrey', region:'British Columbia', regionCode:'BC', postalCode:'', country:'CA',
-        lat:'49.1913', lng:'-122.8490', areasServed:['Surrey, BC','Greater Vancouver','British Columbia','Canada'],
-        nearbyLabel:'Greater Vancouver & Fraser Valley', nearbyCities:['Burnaby','Richmond','Delta','Langley','Abbotsford'],
+        lat:'49.1913', lng:'-122.8490', areasServed:['Surrey, BC, Canada','Vancouver, BC, Canada','Delta, BC, Canada','Langley, BC, Canada','Abbotsford, BC, Canada','Chilliwack, BC, Canada','Maple Ridge, BC, Canada','British Columbia, Canada','Canada','Washington, USA','United States','United Kingdom','Punjab, India','Delhi, India','Haryana, India','Mumbai, Maharashtra, India','India'],
+        neighbourhoods:['Newton','Fleetwood','Cloverdale','Guildford','Panorama Ridge','South Surrey'],
+        nearbyLabel:'Lower Mainland & Fraser Valley', nearbyCities:['Vancouver','Delta','Langley','Abbotsford','Chilliwack','Maple Ridge'],
+        abroad:['the United States (Washington State)','the United Kingdom','India (Punjab, Delhi, Haryana and Mumbai)'],
         onlineWorldwide:true, onlineChannels:['Zoom','WhatsApp'],
-        hours:{Mo:{o:'',c:''},Tu:{o:'',c:''},We:{o:'',c:''},Th:{o:'',c:''},Fr:{o:'',c:''},Sa:{o:'',c:''},Su:{o:'',c:''}},
-        mapsCidUrl:'', reviewUrl:'', priceRange:'$100 CAD per hour', currency:'CAD', languages:['English','Hindi'],
-        paymentPolicy:'Satisfaction-based payment: new clients do not pay if they are not satisfied with their consultation.',
+        hours:{Mo:{o:'10:00',c:'20:00'},Tu:{o:'10:00',c:'20:00'},We:{o:'10:00',c:'20:00'},Th:{o:'10:00',c:'20:00'},Fr:{o:'10:00',c:'20:00'},Sa:{o:'10:00',c:'20:00'},Su:{o:'10:00',c:'20:00'}},
+        timezone:'America/Vancouver', hoursNote:'Pacific Time, by appointment \u2014 early-morning and evening slots available for clients in India, the UK and across North America.',
+        mapsCidUrl:'https://maps.app.goo.gl/XrwSpDBGaVsFQ5dV8', reviewUrl:'https://maps.app.goo.gl/XrwSpDBGaVsFQ5dV8', priceRange:'$100 CAD per hour', currency:'CAD', languages:['English','Hindi','Punjabi'],
+        sessionLength:'60 minutes', paymentMethods:['Interac e-Transfer','PayPal','Credit card','Debit card','International bank transfer'],
+        paymentPolicy:'Pay after your reading: new clients pay only if they are completely satisfied with their consultation.',
         directories:[], locationInTitles:true },
       // Practitioner (E-E-A-T) — used in structured data and llms.txt
       person:{ name:'Jag Mallah', jobTitle:'Independent Vedic Astrologer', additionalRoles:['Meditation Guide'],
-        shortBio:'Jag Mallah is an independent Vedic astrologer and professional meditation guide based in Surrey, British Columbia, consulting worldwide over Zoom and WhatsApp in English and Hindi. He completed formal studies in Advanced Astrology, Tajika (Varshaphala and Prashna Shastra), Muhurta and Medical Astrology under his mentor Sh. Sharawan Jha, and researches the classical texts Brihat Parashara Hora Shastra, Phaladeepika, Tajika Neelakanthi, Bhrigu Nandi Nadi, Jaimini Sutras and Swarodaya Shastra.',
-        mentor:'Sh. Sharawan Jha', traditions:'Parashari and Nadi astrology',
+        shortBio:'Jag Mallah is an independent Vedic astrologer and professional meditation guide based in Surrey, British Columbia, consulting worldwide over Zoom and WhatsApp in English, Hindi and Punjabi. He completed formal studies in Advanced Astrology, Tajika (Varshaphala and Prashna Shastra), Muhurta and Medical Astrology under his mentor Sh. Sharawan Jha, and researches the classical texts Brihat Parashara Hora Shastra, Phaladeepika, Tajika Neelakanthi, Bhrigu Nandi Nadi, the Jaimini Upadesa Sutras and Swarodaya Shastra, grounded in the six classical Darshanas and Pancha Mahabhuta elemental balance.',
+        mentor:'Sh. Sharawan Jha', traditions:'Parashari, Jaimini, Tajika and Bhrigu Nandi Nadi astrology',
+        philosophy:['The six classical Darshanas (Shaddarshana)','Pancha Mahabhuta elemental balance'],
         studies:['Advanced Astrology','Tajika (Varshaphala and Prashna Shastra)','Muhurta','Medical Astrology'],
-        classicalTexts:['Brihat Parashara Hora Shastra','Phaladeepika','Tajika Neelakanthi','Bhrigu Nandi Nadi','Jaimini Sutras','Swarodaya Shastra'],
-        knowsAbout:['Vedic astrology','Jyotish','Kundli (birth chart) reading','Kundli Milan (marriage matching)','Dasha and transit analysis','Mangal Dosha and other doshas','Muhurta (auspicious timing)','Tajika / Varshaphala (annual charts)','Prashna Shastra (horary astrology)','Medical astrology','Gemstone recommendation','Meditation','Pranayama (breathwork)','Mantra practice'],
-        sameAs:[], image:'' },
+        classicalTexts:['Brihat Parashara Hora Shastra (BPHS)','Phaladeepika','Tajika Neelakanthi','Bhrigu Nandi Nadi (BNN)','Jaimini Upadesa Sutras','Swarodaya Shastra (Shiva Swarodaya)'],
+        knowsAbout:['Vedic astrology','Jyotish','Kundli (birth chart) reading','Kundli Milan (marriage matching)','Dasha and transit analysis','Mangal Dosha and other doshas','Muhurta (auspicious timing)','Tajika / Varshaphala (annual charts)','Prashna Shastra (horary astrology)','Jaimini astrology','Bhrigu Nandi Nadi','Swarodaya Shastra (breath science)','Pancha Mahabhuta (five elements)','Medical astrology','Gemstone recommendation','Meditation','Pranayama (breathwork)','Mantra practice'],
+        sameAs:['https://www.youtube.com/channel/UCIHA2ZtOmAYP91GbK5RYkCQ','https://www.youtube.com/@analysisofkarma','https://www.instagram.com/analysisofkarma','https://www.linkedin.com/in/analysisofkarma/','https://x.com/analysisofkarma','https://www.pinterest.com/analysisofkarma','https://ca.trustpilot.com/review/analysisofkarma.com','https://maps.app.goo.gl/XrwSpDBGaVsFQ5dV8','https://share.google/r37d5nGpSJCeEXhvt'], image:'' },
       // AI & GEO control centre
       ai:{ bots:{'GPTBot':true,'OAI-SearchBot':true,'ChatGPT-User':true,'ClaudeBot':true,'Claude-SearchBot':true,'Claude-User':true,'PerplexityBot':true,'Perplexity-User':true,'Google-Extended':true,'Applebot-Extended':true,'Amazonbot':true,'meta-externalagent':true,'CCBot':true,'Bytespider':true},
-        llmsOverride:'', llmsFullOverride:'', indexNowKey:'', indexNowAuto:true },
+        llmsOverride:'', llmsFullOverride:'', indexNowKey:'', indexNowAuto:true, googleVerification:'', bingVerification:'' },
       // admin-managed 301 redirects (used when merging duplicate services or posts): [{from:'/old', to:'/new'}]
       redirects:[],
       contentVersion:2,   // content upgrades already included (see api/upgrades.php)
@@ -246,7 +253,7 @@ class Component extends DCLogic {
         {id:this.uid(),label:'Contact',type:'route',value:'contact'}
       ] },
       pages:[],
-      socials:[],
+      socials:[{net:'youtube',url:'https://www.youtube.com/channel/UCIHA2ZtOmAYP91GbK5RYkCQ'},{net:'linkedin',url:'https://www.linkedin.com/in/analysisofkarma/'},{net:'x',url:'https://x.com/analysisofkarma'},{net:'pinterest',url:'https://www.pinterest.com/analysisofkarma'}],
       disclaimer:'Astrology readings are provided for guidance, fun, and educational purposes only. My services do not replace professional medical, psychiatric, or legal advice.',
       home:{
         hero:{ kicker:'Vedic Astrologer \u00b7 Jyotish \u00b7 Meditation Guide',
@@ -438,8 +445,11 @@ class Component extends DCLogic {
     else if(r==='admin'){ m.title='Admin | '+brand; m.robots='noindex, nofollow'; m.canonical=''; }
     else if(r==='notfound'){ m.title='Page not found | '+brand; m.robots='noindex, follow'; m.canonical=''; }
     return m; }
+  // mirrors aok_robots_full / aok_x_handle in api/seo-lib.php
+  robotsFull(r){ r=r||''; return (!r||/noindex|max-image-preview/i.test(r))?r:r+', max-image-preview:large, max-snippet:-1, max-video-preview:-1'; }
+  xHandle(){ const s=((this.state.data&&this.state.data.socials)||[]).map(x=>String(x.url||'').trim()).map(u=>u.match(/^https?:\/\/(www\.)?(x|twitter)\.com\/([A-Za-z0-9_]{1,15})\/?$/i)).find(Boolean); return s?'@'+s[3]:''; }
   syncHead(){ const d=this.state.data; if(!d) return; const m=this.headMeta();
-    try{ document.title=m.title; this.setMeta('description',m.description); this.setMeta('robots',m.robots); this.setCanonical(m.canonical);
+    try{ document.title=m.title; this.setMeta('description',m.description); this.setMeta('robots',this.robotsFull(m.robots)); const xh=this.xHandle(); if(xh){ this.setMeta('twitter:site',xh); this.setMeta('twitter:creator',xh); } this.setCanonical(m.canonical);
       this.setMeta('og:title',m.title,'property'); this.setMeta('og:description',m.description,'property'); if(m.canonical) this.setMeta('og:url',m.canonical,'property'); this.setMeta('twitter:title',m.title); this.setMeta('twitter:description',m.description);
       // the server (render.php) supplies the full structured-data graph; without it, fall back to the basic markup
       if(document.getElementById('aok-graph')) return;

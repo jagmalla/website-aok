@@ -50,7 +50,7 @@ try {
 
     $head = '<title>' . $e($m['title']) . "</title>\n"
         . '<meta name="description" content="' . $e($m['description']) . '" data-aok="1">' . "\n"
-        . '<meta name="robots" content="' . $e($m['robots']) . '" data-aok="1">' . "\n"
+        . '<meta name="robots" content="' . $e(aok_robots_full($m['robots'])) . '" data-aok="1">' . "\n"
         . ($m['canonical'] !== '' ? '<link rel="canonical" href="' . $e($m['canonical']) . '">' . "\n" : '')
         . '<meta property="og:site_name" content="' . $e(aok_brand($d)) . '">' . "\n"
         . '<meta property="og:locale" content="en_CA">' . "\n"
@@ -63,9 +63,15 @@ try {
         . '<meta name="twitter:title" content="' . $e($m['title']) . '">' . "\n"
         . '<meta name="twitter:description" content="' . $e($m['description']) . '">' . "\n"
         . '<meta name="twitter:image" content="' . $e($m['image']) . '">' . "\n"
+        . (($xh = aok_x_handle($d)) !== '' ? '<meta name="twitter:site" content="' . $e($xh) . '">' . "\n" . '<meta name="twitter:creator" content="' . $e($xh) . '">' . "\n" : '')
         . '<meta name="geo.region" content="' . $e(aok_get($d, 'local.country', 'CA') . '-' . aok_get($d, 'local.regionCode', 'BC')) . '">' . "\n"
         . '<meta name="geo.placename" content="' . $e(aok_get($d, 'local.locality', 'Surrey')) . '">' . "\n";
     $lat = trim((string)aok_get($d, 'local.lat', '')); $lng = trim((string)aok_get($d, 'local.lng', ''));
+    // Search Console / Bing Webmaster verification codes (Admin -> AI & GEO)
+    foreach (['google-site-verification' => 'ai.googleVerification', 'msvalidate.01' => 'ai.bingVerification'] as $mn => $path) {
+        $code = preg_replace('/[^A-Za-z0-9_\-]/', '', (string)aok_get($d, $path, ''));
+        if ($code !== '') $head .= '<meta name="' . $mn . '" content="' . $code . '">' . "\n";
+    }
     if (is_numeric($lat) && is_numeric($lng)) $head .= '<meta name="geo.position" content="' . $e($lat . ';' . $lng) . '">' . "\n" . '<meta name="ICBM" content="' . $e($lat . ', ' . $lng) . '">' . "\n";
     $head .= '<link rel="alternate" type="text/plain" href="/llms.txt" title="llms.txt">' . "\n"
         . '<script type="application/ld+json" id="aok-graph">' . json_encode($graph, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE | JSON_HEX_TAG) . "</script>\n"
