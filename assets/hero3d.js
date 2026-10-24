@@ -1,4 +1,5 @@
-/* Hero 3D scene (Three.js via import map): pearl silk, golden astronomical dial, glass & pearl orbs */
+/* Hero 3D scene (Three.js via import map): pearl silk, a golden astronomical clock and pearls revolving on
+   elliptical gold orbits. Drag the clock to spin it, click or tap it for a twirl; it follows the cursor. */
 import * as THREE from 'three';
 import { RoomEnvironment } from 'three/addons/environments/RoomEnvironment.js';
 
@@ -111,20 +112,22 @@ async function createHero(el){
   const silk=new THREE.Mesh(new THREE.PlaneGeometry(64,60,MOBILE?150:300,MOBILE?140:280),silkMaterial(uniforms));
   silk.rotation.x=-Math.PI/2; silk.position.y=-1.7; silk.receiveShadow=true; scene.add(silk);
 
-  // stage: dial + orbits (parallax rotates the stage, never the silk)
-  const stage=new THREE.Group(); scene.add(stage);
+  // stage: the clock and its orbits, pivoting on the dial's centre (parallax and dragging rotate the stage, never the silk)
+  const stage=new THREE.Group(); stage.position.set(0,.75,0); scene.add(stage);
   const gold=new THREE.MeshPhysicalMaterial({color:0xD2AE68,metalness:.85,roughness:.2,clearcoat:.5,clearcoatRoughness:.15});
   const brushed=new THREE.MeshPhysicalMaterial({color:0xC9A35E,metalness:.85,roughness:.34,side:THREE.DoubleSide});
   const steel=new THREE.MeshPhysicalMaterial({color:0x23262B,metalness:.9,roughness:.28,clearcoat:1,clearcoatRoughness:.1});
   const dialTex=dialTexture(MOBILE?1024:2048);
   const faceMat=new THREE.MeshPhysicalMaterial({map:dialTex,color:0xEFE8DC,roughness:.34,clearcoat:.6,clearcoatRoughness:.12,iridescence:.22,iridescenceIOR:1.3,envMapIntensity:.8});
-  const dial=new THREE.Group(); dial.position.set(0,.75,0); dial.rotation.set(-.92,-.42,.14); stage.add(dial);
+  const tilt=new THREE.Group(); stage.add(tilt);   // the clock's resting pose: ~25° pitch, -15° yaw
+  const dial=new THREE.Group(); dial.rotation.set(THREE.MathUtils.degToRad(-25),THREE.MathUtils.degToRad(-15),.06); tilt.add(dial);
+  const hitTargets=[];
   const add=(geo,mat,setup)=>{ const m=new THREE.Mesh(geo,mat); m.castShadow=true; if(setup) setup(m); dial.add(m); return m; };
-  add(new THREE.CircleGeometry(1.62,128),faceMat);
+  hitTargets.push(add(new THREE.CircleGeometry(1.62,128),faceMat));
   add(new THREE.TorusGeometry(1.64,.05,24,220),gold,m=>m.position.z=.02);
   add(new THREE.RingGeometry(1.64,1.84,160),brushed,m=>m.position.z=-.01);
-  add(new THREE.TorusGeometry(1.84,.09,32,240),gold);
-  add(new THREE.CylinderGeometry(1.86,1.78,.24,128),gold,m=>{ m.rotation.x=Math.PI/2; m.position.z=-.14; });
+  hitTargets.push(add(new THREE.TorusGeometry(1.84,.09,32,240),gold));
+  hitTargets.push(add(new THREE.CylinderGeometry(1.86,1.78,.24,128),gold,m=>{ m.rotation.x=Math.PI/2; m.position.z=-.14; }));
   add(new THREE.CylinderGeometry(.075,.075,.2,24),gold,m=>m.position.y=2.02);
   add(new THREE.SphereGeometry(.11,24,24),gold,m=>m.position.y=2.14);
   [1,3,5,7].forEach(q=>add(new THREE.SphereGeometry(.065,20,20),gold,m=>m.position.set(Math.cos(q*Math.PI/4)*1.84,Math.sin(q*Math.PI/4)*1.84,.07)));
@@ -132,20 +135,44 @@ async function createHero(el){
   hHour.position.z=.03; hMin.position.z=.06; hSec.position.z=.09; dial.add(hHour,hMin,hSec);
   add(new THREE.CylinderGeometry(.07,.07,.1,24),gold,m=>{ m.rotation.x=Math.PI/2; m.position.z=.11; });
 
-  // five glass / mother-of-pearl orbs on thin gold wire orbits
-  const orbMat=(pearly)=>new THREE.MeshPhysicalMaterial({ color:pearly?0xFBF5EC:0xFFFFFF, metalness:0, roughness:pearly?.24:.05,
-    transmission:MOBILE?0:.9, ior:1.5, thickness:1.2, iridescence:.8, iridescenceIOR:1.3, iridescenceThicknessRange:[120,420],
-    clearcoat:1, clearcoatRoughness:.05, sheen:pearly?1:0, sheenColor:new THREE.Color(0xFFF2E0),
-    attenuationColor:new THREE.Color(pearly?0xF0E2CA:0xFFF6E8), attenuationDistance:pearly?.9:2.6 });
-  const orbits=[];
-  [[2.75,[1.3,.25,0],[[0,.46,0],[2.2,.36,1],[4.3,.30,0]]],[3.1,[1.05,-.35,.35],[[1.1,.40,1],[3.9,.52,0]]]].forEach(([R,rot,orbs])=>{
-    const g=new THREE.Group(); g.position.copy(dial.position); g.rotation.set(...rot); stage.add(g);
-    const wire=new THREE.Mesh(new THREE.TorusGeometry(R,.008,8,320),gold); g.add(wire);
-    const spin=new THREE.Group(); g.add(spin);
-    orbs.forEach(([a,rad,pearly])=>{ const s=new THREE.Mesh(new THREE.SphereGeometry(rad,MOBILE?40:64,MOBILE?28:48),orbMat(pearly));
-      s.position.set(Math.cos(a)*R,Math.sin(a)*R,0); s.castShadow=true; spin.add(s); });
-    orbits.push(spin);
+  // three elliptical gold wire orbits carrying four mother-of-pearl spheres
+  // nacre: a cream base, a glossy clearcoat and a thin-film shimmer that shifts pink/green at the edges
+  const pearlMat=tint=>new THREE.MeshPhysicalMaterial({ color:tint, metalness:0, roughness:.15, clearcoat:.9, clearcoatRoughness:.06,
+    iridescence:1, iridescenceIOR:1.25, iridescenceThicknessRange:[260,640], sheen:.55, sheenRoughness:.4, sheenColor:new THREE.Color(0xF2D9B4),
+    specularIntensity:.7, envMapIntensity:.8, emissive:new THREE.Color(0xE8C47A), emissiveIntensity:0 });
+  const ellipse=(a,b)=>{ const pts=[]; for(let i=0;i<160;i++){ const u=i/160*TAU; pts.push(new THREE.Vector3(Math.cos(u)*a,Math.sin(u)*b,0)); } return new THREE.CatmullRomCurve3(pts,true); };
+  // [semi-axes a,b], tilt of the orbit plane, speed (rad/s, sign = direction), pearls [phase, radius, tint]
+  const ORBITS=[
+    [[2.95,2.3],[1.28,.22,.18],.34,[[0,.42,0xEFE2CC],[3.3,.28,0xF4EBDD]]],
+    [[3.2,2.55],[.98,-.5,.62],-.23,[[1.6,.46,0xF1E5D2]]],
+    [[2.4,2.12],[.3,.95,-.35],.29,[[4.4,.24,0xF2E2DA]]] ];
+  const orbits=[], pearls=[];
+  ORBITS.forEach(([[A,B],rot,speed,list],oi)=>{
+    const g=new THREE.Group(); g.rotation.set(...rot); stage.add(g);
+    g.add(new THREE.Mesh(new THREE.TubeGeometry(ellipse(A,B),MOBILE?260:420,oi===2?.006:.009,6,true),gold));
+    [.55,2.35+oi].forEach(u=>{ const bead=new THREE.Mesh(new THREE.SphereGeometry(.042,16,16),gold); bead.position.set(Math.cos(u)*A,Math.sin(u)*B,0); g.add(bead); });
+    list.forEach(([phase,rad,tint])=>{
+      const m=new THREE.Mesh(new THREE.SphereGeometry(rad,MOBILE?40:64,MOBILE?28:48),pearlMat(tint)); m.castShadow=true; g.add(m);
+      const p={m,A,B,speed,phase,rad,glow:0}; pearls.push(p); hitTargets.push(m); m.userData.pearl=p;
+    });
+    orbits.push(g);
   });
+  const placePearl=(p,u)=>{ const th=u+.24*Math.sin(u);   // faster near the ends of the orbit, like a planet near perihelion
+    p.m.position.set(Math.cos(th)*p.A,Math.sin(th)*p.B,0); };
+
+  // a few motes of gold dust drifting around the orbits (desktop)
+  let dust=null;
+  if(!MOBILE){
+    const N=90, pos=new Float32Array(N*3);
+    for(let i=0;i<N;i++){ const u=Math.random()*TAU, v=Math.acos(Math.random()*2-1), R=2.2+Math.random()*1.6;
+      pos.set([Math.sin(v)*Math.cos(u)*R,Math.cos(v)*R*.6,Math.sin(v)*Math.sin(u)*R],i*3); }
+    const geo=new THREE.BufferGeometry(); geo.setAttribute('position',new THREE.BufferAttribute(pos,3));
+    const c=document.createElement('canvas'); c.width=c.height=64; const x=c.getContext('2d'); const gr=x.createRadialGradient(32,32,0,32,32,32);
+    gr.addColorStop(0,'rgba(214,170,92,1)'); gr.addColorStop(.35,'rgba(214,170,92,.55)'); gr.addColorStop(1,'rgba(214,170,92,0)'); x.fillStyle=gr; x.fillRect(0,0,64,64);
+    const tex=new THREE.CanvasTexture(c);
+    dust=new THREE.Points(geo,new THREE.PointsMaterial({map:tex,size:.07,transparent:true,opacity:.75,depthWrite:false,sizeAttenuation:true}));
+    stage.add(dust);
+  }
 
   // framing: fit the stage to whatever shape the container has
   const look=new THREE.Vector3(), base=new THREE.Vector3();
@@ -161,11 +188,30 @@ async function createHero(el){
   }
 
   // input: damped cursor parallax + ripple source on the silk, plus scroll response
-  const ptr={x:innerWidth/2,y:innerHeight/2,t:-1e9}, cur={x:0,y:0,s:0};
-  const onMove=e=>{ ptr.x=e.clientX; ptr.y=e.clientY; ptr.t=performance.now(); };
-  if(!REDUCE) addEventListener('pointermove',onMove,{passive:true});
+  const ptr={x:innerWidth/2,y:innerHeight/2,t:-1e9,moved:false}, cur={x:0,y:0,s:0};
+  // spin: the user's extra rotation of the clock (yaw/pitch), its velocity, and a pearl speed boost
+  const spin={yaw:0,pitch:0,vy:0,vp:0,boost:0,idle:1e9}, drag={on:false,id:null,x:0,y:0,dist:0,lastT:0};
+  const section=el.parentElement||el; let hover=null, overClock=false;
+  // the clock only reacts where nothing else wants the pointer (buttons, links, text, the visual editor)
+  const busy=t=>!t||!t.closest||!!t.closest('a,button,input,textarea,select,label,[contenteditable="true"],h1,h2,h3,p,li,.aok-ed-ui');
+  const pick=(cx,cy)=>{ const b=el.getBoundingClientRect(); if(cx<b.left||cx>b.right||cy<b.top||cy>b.bottom) return null;
+    ndc.set((cx-b.left)/b.width*2-1,-(cy-b.top)/b.height*2+1); ray.setFromCamera(ndc,cam); return ray.intersectObjects(hitTargets,false)[0]||null; };
+  const onMove=e=>{ ptr.x=e.clientX; ptr.y=e.clientY; ptr.t=performance.now(); ptr.moved=true;
+    if(drag.on&&e.pointerId===drag.id){ const dx=e.clientX-drag.x, dy=e.clientY-drag.y, dt=Math.max(8,ptr.t-drag.lastT)/1000;
+      drag.x=e.clientX; drag.y=e.clientY; drag.lastT=ptr.t; drag.dist+=Math.abs(dx)+Math.abs(dy);
+      spin.yaw+=dx*.0075; spin.pitch=Math.max(-.7,Math.min(.7,spin.pitch+dy*.005)); spin.vy=dx*.0075/dt*.6; spin.vp=dy*.005/dt*.6; spin.idle=0; } };
+  const twirl=()=>{ spin.vy+=5.2*(Math.random()<.5?-1:1)*(.8+Math.random()*.4); spin.boost=2.4; spin.idle=0; };
+  const onDown=e=>{ if(e.button>0||busy(e.target)) return; const h=pick(e.clientX,e.clientY); if(!h) return;
+    if(e.pointerType==='touch'){ drag.tap={x:e.clientX,y:e.clientY,t:performance.now()}; return; }   // touch: tap to twirl, never block scrolling
+    drag.on=true; drag.id=e.pointerId; drag.x=e.clientX; drag.y=e.clientY; drag.dist=0; drag.lastT=performance.now();
+    spin.vy=spin.vp=0; section.style.cursor='grabbing'; e.preventDefault(); };
+  const onUp=e=>{
+    if(drag.tap){ const tp=drag.tap; drag.tap=null; if(Math.hypot(e.clientX-tp.x,e.clientY-tp.y)<12&&performance.now()-tp.t<500) twirl(); return; }
+    if(!drag.on||e.pointerId!==drag.id) return; drag.on=false; section.style.cursor=overClock?'grab':'';
+    if(drag.dist<6) twirl(); else if(performance.now()-drag.lastT>90){ spin.vy=spin.vp=0; } };
+  if(!REDUCE){ addEventListener('pointermove',onMove,{passive:true}); addEventListener('pointerdown',onDown); addEventListener('pointerup',onUp); addEventListener('pointercancel',onUp); }
 
-  let prev=performance.now(), t=0;
+  let prev=performance.now(), t=0; const born=performance.now();
   function frame(now){
     const dt=Math.min(.05,Math.max(0,(now-prev)/1000)); prev=now; t+=dt; const k=1-Math.exp(-dt*3.2);
     const rect=el.getBoundingClientRect();
@@ -177,11 +223,25 @@ async function createHero(el){
     if(ray.ray.intersectPlane(floor,hit)) uniforms.uMouse.value.lerp(new THREE.Vector2(hit.x,-hit.z),k);
     const active=now-ptr.t<1400&&Math.abs(ndc.x)<1.2&&Math.abs(ndc.y)<1.2;
     uniforms.uMouseAmt.value+=((active?1:0)-uniforms.uMouseAmt.value)*k*.8;
+    // intro: the clock settles in, the hands sweep from XII to the real time, the pearls glide into place
+    const ip=REDUCE?1:Math.min(1,(now-born)/2400), ie=1-Math.pow(1-ip,3);   // wall-clock, so slow devices don't drag it out
     // the dial keeps real time
     const d=new Date(), s=d.getSeconds()+d.getMilliseconds()/1000, m=d.getMinutes()+s/60, hr=(d.getHours()%12)+m/60;
-    hSec.rotation.z=-s/60*TAU; hMin.rotation.z=-m/60*TAU; hHour.rotation.z=-hr/12*TAU;
-    dial.position.y=.75+Math.sin(t*.8)*.06;
-    orbits[0].rotation.z=t*.16; orbits[1].rotation.z=-t*.11;
+    hSec.rotation.z=-s/60*TAU*ie; hMin.rotation.z=-m/60*TAU*ie; hHour.rotation.z=-hr/12*TAU*ie;
+    tilt.position.y=Math.sin(t*.8)*.06; stage.scale.setScalar(.82+.18*ie);
+    // spin: inertia while free, then a gentle spring back to the resting pose
+    if(!drag.on){ spin.idle+=dt; spin.yaw+=spin.vy*dt; spin.pitch+=spin.vp*dt; const damp=Math.exp(-dt*1.6); spin.vy*=damp; spin.vp*=damp;
+      if(spin.idle>1.2&&Math.abs(spin.vy)<.6){ const tgt=Math.round(spin.yaw/TAU)*TAU; spin.yaw+=(tgt-spin.yaw)*(1-Math.exp(-dt*1.4)); spin.pitch+=(0-spin.pitch)*(1-Math.exp(-dt*1.4)); } }
+    spin.boost*=Math.exp(-dt*.9);
+    tilt.rotation.set(spin.pitch,spin.yaw+Math.sin(t*.23)*.07,0);
+    orbits.forEach((g,i)=>{ g.rotation.z+=dt*(i===1?-.05:.04); });
+    // hover: the pearl (or clock) under the cursor; the hovered pearl swells and warms
+    if(ptr.moved&&!MOBILE&&!drag.on){ ptr.moved=false; const target=document.elementFromPoint(ptr.x,ptr.y); const h=busy(target)?null:pick(ptr.x,ptr.y);
+      hover=h&&h.object.userData.pearl||null; const over=!!h; if(over!==overClock){ overClock=over; section.style.cursor=over?'grab':''; } }
+    pearls.forEach(p=>{ const u=p.phase+t*p.speed*(1+spin.boost)-(1-ie)*2.2*Math.sign(p.speed); placePearl(p,u);
+      p.m.rotation.y+=dt*.5; p.glow+=((hover===p?1:0)-p.glow)*k*1.6;
+      p.m.scale.setScalar(ie*(1+p.glow*.16)); p.m.material.emissiveIntensity=p.glow*.22; });
+    if(dust){ dust.rotation.y=t*.03; dust.material.opacity=.55+Math.sin(t*.7)*.2; }
     stage.rotation.set(cur.y*.12+cur.s*.18,cur.x*.28,0);
     cam.position.set(base.x+cur.x*.5,base.y-cur.y*.3-cur.s*.9,base.z); cam.lookAt(look);
     r.render(scene,cam);
@@ -199,7 +259,7 @@ async function createHero(el){
 
   return { el, dispose(){
     dead=true; cancelAnimationFrame(raf);
-    try{ io.disconnect(); ro.disconnect(); removeEventListener('pointermove',onMove); }catch(e){}
+    try{ io.disconnect(); ro.disconnect(); removeEventListener('pointermove',onMove); removeEventListener('pointerdown',onDown); removeEventListener('pointerup',onUp); removeEventListener('pointercancel',onUp); section.style.cursor=''; }catch(e){}
     scene.traverse(o=>{ if(o.geometry) o.geometry.dispose(); if(o.material){ (Array.isArray(o.material)?o.material:[o.material]).forEach(mt=>{ if(mt.map) mt.map.dispose(); mt.dispose(); }); } });
     envTex.dispose(); pmrem.dispose(); r.dispose(); el.classList.remove('is-live');
     if(r.domElement.parentNode) r.domElement.parentNode.removeChild(r.domElement);
