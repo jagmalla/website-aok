@@ -1245,6 +1245,18 @@ class Component extends DCLogic {
   }; }
   faqUpgradable(){ const orig=this.faqShortOriginals(), d=this.state.data, def={}; (this.defaults().faqPage.items||[]).forEach(it=>{ def[it.q]=it.a; });
     return (((d.faqPage||{}).items)||[]).map((it,i)=>({i,q:it.q,a:def[it.q]})).filter(x=>orig[x.q]!==undefined&&this.txt(d.faqPage.items[x.i].a).trim()===this.txt(orig[x.q]).trim()&&x.a); }
+  // Admin → SEO Health: add the classical sections (api/content/) to every service and post, including edited ones.
+  // Saves the editor first so nothing unsaved is lost, then reloads the upgraded site from the server.
+  applyContentUpgrade(){ if(this._cuBusy) return;
+    if(!confirm('Add the classical content sections to every service and blog post that does not have them yet?\n\nYour own text is kept; the new sections are added after it. Pages that already have them are skipped.')) return;
+    this._cuBusy=true; this._cuMsg=null; this.forceUpdate(); clearTimeout(this._srvTimer);
+    const done=(ok,msg)=>{ this._cuBusy=false; this._cuOk=ok; this._cuMsg=msg; Object.keys(this._live||{}).forEach(k=>{ delete this._live[k]; }); this.forceUpdate(); };
+    fetch('/api/data.php',{ method:'POST', headers:this.apiHeaders(), body:JSON.stringify(this.state.data) }).then(r=>r.json().catch(()=>null))
+      .then(j=>{ if(!j||!j.ok) throw new Error(j&&j.error||'save'); return fetch('/api/upgrade-content.php',{ method:'POST', headers:this.apiHeaders(), body:'{}' }).then(r=>r.json().catch(()=>null)); })
+      .then(j=>{ if(!j||!j.ok){ done(false,'\u26a0 The upgrade could not run'+(j&&j.error?' ('+j.error+')':'')+'. Make sure api/upgrade-content.php and the api/content folder are uploaded.'); return; }
+        this._loadFromServer(); const n=(j.services||0)+(j.posts||0);
+        done(true, n?'\u2713 Added the classical sections to '+j.services+(j.services===1?' service':' services')+' and '+j.posts+(j.posts===1?' blog post':' blog posts')+'. They are live now.':'\u2713 Every service and blog post already has the classical sections \u2014 nothing to add.'); })
+      .catch(e=>done(false,(e&&/not_logged_in|bad_csrf/.test(e.message))?'\u26a0 Your admin session has ended \u2014 please log in again.':'\u26a0 Could not save to the server, so the upgrade was not run. Check your connection and try again.')); }
   upgradeFaq(){ const list=this.faqUpgradable(); if(!list.length) return; const items=this.state.data.faqPage.items.map((it,i)=>{ const u=list.find(x=>x.i===i); return u?{...it,a:u.a}:it; });
     this.commit('faqPage.items',items); this.flash('\u2713 '+list.length+' FAQ answers expanded \u2014 click Save changes to publish'); }
   wordCount(html){ return this.txt(html).split(/\s+/).filter(Boolean).length; }
@@ -2137,6 +2149,9 @@ class Component extends DCLogic {
         h('div',{style:{width:84,height:84,borderRadius:'50%',background:'conic-gradient('+(score>=80?P.ok:score>=55?P.gold:P.bad)+' '+(score*3.6)+'deg,'+P.bgAlt+' 0)',display:'flex',alignItems:'center',justifyContent:'center'}}, h('div',{style:{width:66,height:66,borderRadius:'50%',background:P.card,display:'flex',alignItems:'center',justifyContent:'center',font:'800 22px '+this.HEAD,color:P.maroon}},x.loading?'…':score)),
         h('div',{style:{flex:1,minWidth:220}}, h('div',{style:{font:'700 17px '+this.HEAD,color:P.maroon}},'Health score'), h('div',{style:{font:'400 13.5px Plus Jakarta Sans',color:P.muted,marginTop:4}},counts.fail+' to fix · '+counts.warn+' to improve · '+counts.ok+' passing'), x.status&&x.status!==200&&!x.loading?h('div',{style:{font:'500 13px Plus Jakarta Sans',color:P.bad,marginTop:6}},'The server check could not run (HTTP '+x.status+'). Upload api/seo-health.php and log in again.'):null),
         this.btn('↻ Run again',rerun,{variant:'solid',pad:'10px 18px',style:{fontSize:13.5}})),{marginBottom:20}),
+      this.card(h('div',null, this.cardTitle('\u2726 Apply Full 32-Page Classical Content Upgrade','Adds the in-depth sections to all 16 services and 16 blog posts: a direct-answer box, the classical methodology and texts, the chart factors analysed, how a consultation works, FAQs and remedies. Pages still as first shipped received them automatically. This button adds them to pages you have edited too \u2014 your text is kept and the sections are added after it. Pages that already have them are skipped.'),
+          h('div',{style:{display:'flex',alignItems:'center',gap:14,flexWrap:'wrap'}}, this.btn(this._cuBusy?'Applying\u2026':'Apply Full 32-Page Classical Content Upgrade',()=>this.applyContentUpgrade(),{variant:'solid',pad:'10px 18px',style:{fontSize:13.5}}),
+            this._cuMsg?h('div',{style:{font:'500 13.5px Plus Jakarta Sans',color:this._cuOk?P.ok:P.bad}},this._cuMsg):null)),{marginBottom:20,borderColor:P.gold}),
       (()=>{ const up=this.faqUpgradable(); if(!up.length) return null;
         return this.card(h('div',null, this.cardTitle('✨ '+up.length+' FAQ answers can be expanded for AI answers','These answers are still exactly as first shipped and are shorter than the 40–60 words answer engines quote most. The expanded versions keep the same wording and policies, with one or two sentences added. Answers you have edited are never touched.'),
           h('ul',{style:{margin:'0 0 14px',paddingLeft:20,font:'400 13.5px/1.7 Plus Jakarta Sans',color:P.ink}}, ...up.map(x=>h('li',{key:x.i},this.txt(x.q)+' → '+this.wordCount(x.a)+' words'))),

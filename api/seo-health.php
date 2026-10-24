@@ -144,6 +144,24 @@ $livePosts = aok_live_posts($d); $liveSvcs = aok_live_services($d);
 $thin = array_map(function ($p) { return aok_cut(aok_text($p['title'] ?? ''), 60); }, array_filter($livePosts, function ($p) use ($d) { return count(aok_related_services($d, $p)) < 2; }));
 $linked = count(array_filter($liveSvcs, function ($s) use ($d) { return count(aok_related_posts($d, $s)) > 0; }));
 $add($G, $thin ? 'warn' : 'ok', $thin ? count($thin) . ' posts link to fewer than 2 services' : 'Topic clusters: every post links to 2–3 related services; ' . $linked . ' of ' . count($liveSvcs) . ' service pages link back to matching articles', $thin ? $list($thin) : 'Links are chosen automatically from shared keywords in titles, excerpts and descriptions.', 'blog');
+// long-form depth: the classical sections from api/content/ and the word counts AI answers favour
+$noMd = []; $short = []; $deep = 0; $all = 0;
+foreach ($liveSvcs as $sv) {
+    $md = aok_content_md('services', aok_slugify((string)($sv['title'] ?? '')));
+    $all++; $w = $words(($sv['desc'] ?? '') . ' ' . preg_replace('/^[#>\-*]+\s*|\*\*/m', ' ', (string)($sv['detail'] ?? '')));
+    if ($md !== '' && !aok_has_content((string)($sv['detail'] ?? ''), $md)) $noMd[] = aok_cut(aok_text($sv['title'] ?? ''), 60);
+    elseif ($w < 600) $short[] = aok_cut(aok_text($sv['title'] ?? ''), 60) . " ($w words)";
+    else $deep++;
+}
+foreach ($livePosts as $po) {
+    $md = aok_content_md('posts', (string)($po['slug'] ?? ''));
+    $all++; $w = $words(preg_replace('/^[#>\-*]+\s*|\*\*/m', ' ', (string)($po['body'] ?? '')));
+    if ($md !== '' && !aok_has_content((string)($po['body'] ?? ''), $md)) $noMd[] = aok_cut(aok_text($po['title'] ?? ''), 60);
+    elseif ($w < 600) $short[] = aok_cut(aok_text($po['title'] ?? ''), 60) . " ($w words)";
+    else $deep++;
+}
+$add($G, $noMd ? 'warn' : 'ok', $noMd ? count($noMd) . ' pages don’t have the classical content sections yet' : 'All ' . count($liveSvcs) . ' services and ' . count($livePosts) . ' posts have the classical content sections (direct answer, methodology, chart factors' . ', remedies)', $noMd ? "These pages were edited, so the automatic upgrade left them alone. The “Apply Full 32-Page Classical Content Upgrade” button above adds the sections after your text.\n" . $list($noMd, 5) : '');
+$add($G, $short ? 'warn' : 'ok', $short ? count($short) . ' pages have fewer than 600 words' : "$deep of $all service and blog pages have 600+ words of in-depth content", $short ? "Longer, well-structured pages are the ones search engines and AI assistants trust as sources.\n" . $list($short, 5) : '', 'pages');
 $cities = array_filter((array)aok_get($d, 'local.nearbyCities', []));
 $add($G, $cities ? 'ok' : 'warn', $cities ? 'Service-area block names ' . count($cities) . ' nearby cities (' . aok_join_list($cities) . ')' : 'No nearby cities listed for the service-area block', 'Shown on the contact page, every service page and in the footer, and listed in the structured data.', 'local');
 
@@ -184,7 +202,7 @@ $root = realpath(__DIR__ . '/..');
 $add($G, version_compare(PHP_VERSION, '7.4', '>=') ? 'ok' : 'fail', 'PHP ' . PHP_VERSION . (version_compare(PHP_VERSION, '7.4', '>=') ? '' : ' — needs 7.4 or newer (cPanel → MultiPHP Manager)'));
 $ht = is_file($root . '/.htaccess') ? (string)file_get_contents($root . '/.htaccess') : '';
 $add($G, $ht === '' ? 'fail' : (strpos($ht, 'render.php') !== false ? 'ok' : 'warn'), $ht === '' ? '.htaccess is missing from the web root' : (strpos($ht, 'render.php') !== false ? '.htaccess is the new version' : '.htaccess is an old version'), $ht === '' || strpos($ht, 'render.php') === false ? 'Upload the new .htaccess (File Manager → Settings → Show Hidden Files).' : '');
-$missing = array_values(array_filter(['render.php', 'index.html', 'assets/app.js', 'assets/hero3d.js', 'api/seo-lib.php', 'api/upgrades.php', 'api/defaults.json', 'api/robots.php', 'api/sitemap.php', 'api/llms.php', 'api/indexnow.php'], function ($f) use ($root) { return !is_file($root . '/' . $f); }));
+$missing = array_values(array_filter(['render.php', 'index.html', 'assets/app.js', 'assets/hero3d.js', 'api/seo-lib.php', 'api/upgrades.php', 'api/upgrade-content.php', 'api/defaults.json', 'api/content/services/kundli-birth-chart-reading.md', 'api/content/posts/ultimate-guide-birth-chart.md', 'api/robots.php', 'api/sitemap.php', 'api/llms.php', 'api/indexnow.php'], function ($f) use ($root) { return !is_file($root . '/' . $f); }));
 $add($G, $missing ? 'fail' : 'ok', $missing ? 'Files missing on the server: ' . implode(', ', $missing) : 'All site files are in place');
 if (is_file($root . '/install.php')) $add($G, 'fail', 'install.php is still on the server', 'It is not needed any more — delete it in File Manager.');
 

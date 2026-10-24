@@ -47,6 +47,8 @@ function aok_site(): array {
     $add = [];
     foreach ($seedP as $p) if (empty($have[$p['slug'] ?? ''])) $add[] = $p;
     $d['blog'] = array_merge($add, $d['blog'] ?? []);
+    // no saved site yet (fresh install, offline build): the defaults still need the version 3 content
+    if ((int)($d['contentVersion'] ?? 0) < AOK_CONTENT_VERSION) $d = aok_upgrade_payload($d);
     $site = public_payload($d);
     return $site;
 }

@@ -1,21 +1,26 @@
 <?php
-// One-time content upgrades for sites saved before this release ("content version 2").
+// One-time content upgrades for sites saved before this release.
 //
 // site_data() (api/db.php) runs aok_upgrade_payload() on the saved site data. If anything changes it
-// is saved back once, together with contentVersion = 2, so it never runs again — and a merge you
-// undo later in Admin -> Redirects stays undone. A fresh install already starts at version 2
-// (the defaults in assets/app.js / api/defaults.json contain the upgraded content).
+// is saved back once, together with the new contentVersion, so it never runs again — and a merge you
+// undo later in Admin -> Redirects stays undone. The defaults in assets/app.js / api/defaults.json are
+// content version 2; version 3 is applied to them on the server (data.php, render.php, the static files).
 //
-// What it does:
+// Version 2:
 //   1. FAQ: the 7 short answers become the expanded 45–55-word versions.
 //   2. SEO: the /services and /faq titles and the /meditation description become the shorter versions.
 //   3. Duplicates: 3 duplicate services and 2 duplicate blog posts get a 301 redirect to their primary
 //      page, and the primary absorbs the duplicate's text.
-// Only text that is still exactly as first shipped is replaced. Text you have edited is kept, and the
-// duplicate's missing paragraphs are added to it instead. Nothing is deleted: a merged duplicate keeps
-// all its text in the admin.
+// Version 3:
+//   1. Business details: phone, WhatsApp, hours, the 17 service areas, categories, languages, map and
+//      review links, socials and the practitioner profile — wherever they are empty or still as first shipped.
+//   2. Content: the classical sections in api/content/services|posts/<slug>.md are added after the
+//      existing text of every service and post whose text is still as shipped. Edited pages are left
+//      alone; Admin -> SEO Health -> "Apply Full 32-Page Classical Content Upgrade" adds them there too
+//      (api/upgrade-content.php).
+// Only text that is still exactly as first shipped is replaced. Text you have edited is kept. Nothing is deleted.
 
-const AOK_CONTENT_VERSION = 2;
+const AOK_CONTENT_VERSION = 3;
 
 // fingerprints (md5 of the normalised text) of the originally shipped FAQ answers, by question
 const AOK_OLD_FAQ = [
@@ -52,6 +57,27 @@ const AOK_OLD_POST_BODY = [
     'mangal-dosha-myths-facts-remedies' => '7cec63d86fadcea758fb8ee4e9dbc8bc',
 ];
 
+// v3: business details as first shipped (a value still equal to these, or empty, takes the new default)
+const AOK_V2_SETTINGS = [
+    'contact.phone' => '',
+    'contact.whatsapp' => '',
+    'contact.instagram' => 'https://www.instagram.com/analysisofkarma/',
+    'local.gbpAdditionalCategories' => ['Psychic', 'Spiritual consultant'],
+    'local.areasServed' => ['Surrey, BC', 'Greater Vancouver', 'British Columbia', 'Canada'],
+    'local.nearbyLabel' => 'Greater Vancouver & Fraser Valley',
+    'local.nearbyCities' => ['Burnaby', 'Richmond', 'Delta', 'Langley', 'Abbotsford'],
+    'local.mapsCidUrl' => '',
+    'local.reviewUrl' => '',
+    'local.languages' => ['English', 'Hindi'],
+    'local.paymentPolicy' => 'Satisfaction-based payment: new clients do not pay if they are not satisfied with their consultation.',
+    'person.shortBio' => 'Jag Mallah is an independent Vedic astrologer and professional meditation guide based in Surrey, British Columbia, consulting worldwide over Zoom and WhatsApp in English and Hindi. He completed formal studies in Advanced Astrology, Tajika (Varshaphala and Prashna Shastra), Muhurta and Medical Astrology under his mentor Sh. Sharawan Jha, and researches the classical texts Brihat Parashara Hora Shastra, Phaladeepika, Tajika Neelakanthi, Bhrigu Nandi Nadi, Jaimini Sutras and Swarodaya Shastra.',
+    'person.traditions' => 'Parashari and Nadi astrology',
+    'person.classicalTexts' => ['Brihat Parashara Hora Shastra', 'Phaladeepika', 'Tajika Neelakanthi', 'Bhrigu Nandi Nadi', 'Jaimini Sutras', 'Swarodaya Shastra'],
+    'person.knowsAbout' => ['Vedic astrology', 'Jyotish', 'Kundli (birth chart) reading', 'Kundli Milan (marriage matching)', 'Dasha and transit analysis', 'Mangal Dosha and other doshas', 'Muhurta (auspicious timing)', 'Tajika / Varshaphala (annual charts)', 'Prashna Shastra (horary astrology)', 'Medical astrology', 'Gemstone recommendation', 'Meditation', 'Pranayama (breathwork)', 'Mantra practice'],
+];
+// the first heading of each added section, so text that already has it is never added twice
+const AOK_CONTENT_MARKERS = ['## Classical Vedic Methodology & Texts Used', '## Classical Foundations in Jyotish'];
+
 function aok_norm($s): string {
     return trim(preg_replace('/\s+/u', ' ', html_entity_decode(strip_tags((string)$s), ENT_QUOTES | ENT_HTML5, 'UTF-8')));
 }
@@ -67,10 +93,17 @@ function aok_merge_paragraphs(string $text, string $extra): string {
 }
 
 function aok_upgrade_payload(array $d): array {
-    if ((int)($d['contentVersion'] ?? 0) >= AOK_CONTENT_VERSION) return $d;
+    $v = (int)($d['contentVersion'] ?? 0);
+    if ($v >= AOK_CONTENT_VERSION) return $d;
     $def = is_file(__DIR__ . '/defaults.json') ? json_decode((string)file_get_contents(__DIR__ . '/defaults.json'), true) : null;
     if (!is_array($def)) return $d;   // can't upgrade without the defaults; tried again on the next request
+    if ($v < 2) $d = aok_upgrade_v2($d, $def);
+    $d = aok_upgrade_v3($d, $def);
+    $d['contentVersion'] = AOK_CONTENT_VERSION;
+    return $d;
+}
 
+function aok_upgrade_v2(array $d, array $def): array {
     // 1. FAQ answers still exactly as shipped -> expanded versions
     if (isset($d['faqPage']['items']) && is_array($d['faqPage']['items'])) {
         $new = [];
@@ -146,6 +179,104 @@ function aok_upgrade_payload(array $d): array {
         }
     }
 
-    $d['contentVersion'] = AOK_CONTENT_VERSION;
+    $d['contentVersion'] = 2;
     return $d;
+}
+
+function aok_upgrade_v3(array $d, array $def): array {
+    require_once __DIR__ . '/seo-lib.php';   // aok_get, aok_url_key, aok_slugify
+    $norm = function ($v) { return is_array($v) ? array_map('aok_norm', $v) : aok_norm($v); };
+
+    // 1. business details that are empty or still as first shipped -> the owner's details
+    foreach (AOK_V2_SETTINGS as $path => $old) {
+        $cur = aok_get($d, $path);
+        $new = aok_get($def, $path);
+        if ($new === null || ($cur !== null && $cur !== '' && $cur !== [] && $norm($cur) !== $norm($old))) continue;
+        [$a, $b] = explode('.', $path);
+        if (!isset($d[$a]) || !is_array($d[$a])) $d[$a] = [];
+        $d[$a][$b] = $new;
+    }
+    // opening hours: only when no day has hours yet
+    $hours = aok_get($d, 'local.hours');
+    $set = false;
+    if (is_array($hours)) foreach ($hours as $h) if (!empty($h['o']) || !empty($h['c'])) $set = true;
+    if (!$set && isset($def['local']['hours'])) { if (!isset($d['local']) || !is_array($d['local'])) $d['local'] = []; $d['local']['hours'] = $def['local']['hours']; }
+    // social profiles and the practitioner's profile links: add the missing ones, keep the rest
+    if (isset($def['socials']) && is_array($def['socials'])) {
+        $cur = (isset($d['socials']) && is_array($d['socials'])) ? $d['socials'] : [];
+        $have = [];
+        foreach ($cur as $x) if (!empty($x['url'])) $have[aok_url_key($x['url'])] = 1;
+        foreach ($def['socials'] as $x) if (!empty($x['url']) && empty($have[aok_url_key($x['url'])])) { $cur[] = $x; $have[aok_url_key($x['url'])] = 1; }
+        $d['socials'] = $cur;
+    }
+    $sameAs = aok_get($def, 'person.sameAs');
+    if (is_array($sameAs) && isset($d['person']) && is_array($d['person'])) {
+        $cur = is_array($d['person']['sameAs'] ?? null) ? $d['person']['sameAs'] : [];
+        $have = [];
+        foreach ($cur as $u) $have[aok_url_key((string)$u)] = 1;
+        foreach ($sameAs as $u) if (empty($have[aok_url_key($u)])) { $cur[] = $u; $have[aok_url_key($u)] = 1; }
+        $d['person']['sameAs'] = $cur;
+    }
+
+    // 2. services and posts: make sure the shipped ones are there (as the browser adds them), then add the content
+    if (!isset($d['services']) || !is_array($d['services'])) $d['services'] = $def['services'] ?? [];
+    if (!isset($d['blog']) || !is_array($d['blog'])) $d['blog'] = $def['blog'] ?? [];
+    $have = [];
+    foreach ($d['services'] as $s) if (!empty($s['seedKey'])) $have[$s['seedKey']] = 1;
+    foreach ($def['_seedServices'] ?? [] as $s) if (empty($have[$s['seedKey'] ?? ''])) $d['services'][] = $s;
+    $have = []; $add = [];
+    foreach ($d['blog'] as $p) if (!empty($p['slug'])) $have[$p['slug']] = 1;
+    foreach ($def['_seedPosts'] ?? [] as $p) if (empty($have[$p['slug'] ?? ''])) $add[] = $p;
+    $d['blog'] = array_merge($add, $d['blog']);
+    aok_apply_content($d, $def, false);
+    return $d;
+}
+
+// The added section text for a service or post, or '' if there is none.
+function aok_content_md(string $kind, string $key): string {
+    if ($key === '' || !preg_match('/^[a-z0-9-]+$/', $key)) return '';
+    $f = __DIR__ . '/content/' . $kind . '/' . $key . '.md';
+    return is_file($f) ? trim(str_replace("\r\n", "\n", (string)file_get_contents($f))) : '';
+}
+
+// true if $text already contains the added sections (or their first line)
+function aok_has_content(string $text, string $md): bool {
+    foreach (AOK_CONTENT_MARKERS as $m) if (strpos($text, $m) !== false) return true;
+    $first = trim(strtok($md, "\n"));
+    return $first !== '' && strpos(aok_norm($text), aok_norm($first)) !== false;
+}
+
+// Adds the api/content sections after the existing text. $force = false: only where the text is still as
+// shipped; $force = true (the admin button): also where it was edited. Returns what changed and what was skipped.
+function aok_apply_content(array &$d, array $def, bool $force): array {
+    require_once __DIR__ . '/seo-lib.php';
+    $out = ['services' => [], 'posts' => [], 'skipped' => []];
+    $defS = [];
+    foreach (array_merge($def['services'] ?? [], $def['_seedServices'] ?? []) as $s) if (!empty($s['id'])) $defS[$s['id']] = $s;
+    foreach ($d['services'] ?? [] as $i => $s) {
+        if (!is_array($s) || !empty($s['redirectTo'])) continue;
+        $orig = $defS[$s['id'] ?? ''] ?? null;
+        $key = aok_slugify((string)($orig['title'] ?? $s['title'] ?? ''));
+        $md = aok_content_md('services', $key);
+        if ($md === '') continue;
+        $detail = (string)($s['detail'] ?? '');
+        if (aok_has_content($detail, $md)) continue;
+        if (!$force && ($orig === null || aok_norm($detail) !== aok_norm($orig['detail'] ?? ''))) { $out['skipped'][] = (string)($s['title'] ?? $key); continue; }
+        $d['services'][$i]['detail'] = trim(rtrim($detail) . "\n\n" . $md);
+        $out['services'][] = (string)($s['title'] ?? $key);
+    }
+    $defP = [];
+    foreach (array_merge($def['blog'] ?? [], $def['_seedPosts'] ?? []) as $p) if (!empty($p['slug'])) $defP[$p['slug']] = $p;
+    foreach ($d['blog'] ?? [] as $i => $p) {
+        if (!is_array($p) || !empty($p['redirectTo'])) continue;
+        $key = (string)($p['slug'] ?? '');
+        $md = aok_content_md('posts', $key);
+        if ($md === '') continue;
+        $body = (string)($p['body'] ?? '');
+        if (aok_has_content($body, $md)) continue;
+        if (!$force && (!isset($defP[$key]) || aok_norm($body) !== aok_norm($defP[$key]['body'] ?? ''))) { $out['skipped'][] = (string)($p['title'] ?? $key); continue; }
+        $d['blog'][$i]['body'] = trim(rtrim($body) . "\n\n" . $md);
+        $out['posts'][] = (string)($p['title'] ?? $key);
+    }
+    return $out;
 }

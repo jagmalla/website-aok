@@ -8,7 +8,10 @@ cors();
 if ($_SERVER['REQUEST_METHOD'] === 'GET') {
     $d = site_data();   // includes the one-time content upgrades (api/upgrades.php)
     header('Cache-Control: no-store');
-    if ($d === null) json_out(['ok' => false, 'error' => 'no_data']);
+    if ($d === null) {   // nothing saved yet: the defaults with the content upgrades applied
+        require_once __DIR__ . '/seo-lib.php';
+        json_out(aok_site());
+    }
     json_out(is_admin() ? $d : public_payload($d));   // full data (incl. leads) for the logged-in admin only
 }
 
