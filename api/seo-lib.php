@@ -1048,10 +1048,26 @@ function aok_main_html(array $d, array $r): string {
     } elseif ($t === 'post') {
         $p = $r['item'];
         $o .= aok_crumbs([['Home', '/'], ['Blog', '/blog'], [aok_text($p['title'] ?? ''), '']]);
+        // the article beside a booking card (with an "In this article" menu), then the author card and related
+        // services in one full-width column — the same layout as the app and the service pages
+        $blocks = aok_md_blocks((string)($p['body'] ?? ''));
+        $heads = array_values(array_filter($blocks, function ($b) { return $b[0] === 'h2'; }));
+        $who = aok_text($g('person.name', $g('brand.astrologer', 'Jag Mallah')));
+        $side = '<aside class="aok-ssr-side" aria-label="Book a consultation"><p>Consultation fee: <strong>' . aok_e(aok_text($g('about.pricing.fee', '$100 CAD'))) . '</strong> '
+            . aok_e(aok_text($g('about.pricing.unit', 'per hour'))) . ', a 60-minute session with ' . aok_e($who) . '. New clients pay after the consultation, only if satisfied.</p>'
+            . '<p><a class="aok-ssr-btn" href="/contact">Book a consultation</a></p>';
+        if (count($heads) > 1) {
+            $side .= '<nav aria-label="In this article"><p><strong>In this article</strong></p><ul>';
+            foreach ($heads as $i => $hd) $side .= '<li><a href="#section-' . ($i + 1) . '">' . aok_e(aok_text(str_replace('**', '', (string)$hd[1]))) . '</a></li>';
+            $side .= '</ul></nav>';
+        }
+        $side .= '</aside>';
         $o .= '<article><h1>' . aok_e(aok_text($p['title'] ?? '')) . '</h1><p>'
             . (!empty($p['date']) ? '<time datetime="' . aok_e(substr($p['date'], 0, 10)) . '">' . aok_e(date('j F Y', strtotime($p['date']))) . '</time> · ' : '')
-            . 'By <a href="/about">' . aok_e($g('brand.astrologer', 'Jag Mallah')) . '</a>, Vedic astrologer · Analysis of Karma</p>' . aok_featured_img_html($d, $p) . aok_paras($p['body'] ?? '') . '</article>'
-            . aok_author_card_html($d) . aok_related_services_html($d, $p) . '<p><a href="/blog">← Blog</a> · <a href="/services">Services</a> · <a href="/contact">Contact</a></p>' . aok_cta($d);
+            . 'By <a href="/about">' . aok_e($g('brand.astrologer', 'Jag Mallah')) . '</a>, Vedic astrologer · Analysis of Karma</p>'
+            . '<div class="aok-ssr-top"><div class="aok-ssr-main">' . aok_featured_img_html($d, $p) . aok_md_html($blocks, 1) . '</div>' . $side . '</div></article>'
+            . '<div class="aok-ssr-wide">' . aok_author_card_html($d) . aok_related_services_html($d, $p) . '</div>'
+            . '<p><a href="/blog">← Blog</a> · <a href="/services">Services</a> · <a href="/contact">Contact</a></p>' . aok_cta($d);
     } elseif ($t === 'contact') {
         $o .= '<section><p>' . aok_e(aok_text($g('seo.contact.focusKeyword'))) . '</p><h1>' . aok_e(aok_text($g('contactPage.title'))) . '</h1><p>' . aok_rich($g('contactPage.sub')) . '</p></section>';
         $o .= '<section><h2>Send your details</h2><p>' . aok_rich($g('contactPage.note')) . '</p><p>Consultation fee: <strong>' . aok_e(aok_text($g('about.pricing.fee', '$100 CAD'))) . '</strong> ' . aok_e(aok_text($g('about.pricing.unit', 'per hour'))) . '</p>' . aok_contact_links_html($d)

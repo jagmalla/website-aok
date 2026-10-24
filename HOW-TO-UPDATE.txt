@@ -1,7 +1,25 @@
 ANALYSIS OF KARMA — Update (SEO, local SEO, AI search & security)
 ===================================================================
 
-NEW IN THIS VERSION: SERVICE PAGE LAYOUT
+NEW IN THIS VERSION: PHONES, TABLETS AND LARGE SCREENS
+  • Checked on every page at 11 screen widths, from small phones (320px)
+    to large monitors (1920px): nothing is wider than the screen any more,
+    so pages never slide sideways on a phone.
+  • Blog posts now use the service-page layout: the article beside a
+    sticky "Book a consultation" card with an "In this article" menu, then
+    the About the Astrologer card and related consultations below.
+  • The menu bar and the booking card stay in view while you scroll on
+    computers again (an old style rule had switched this off).
+  • On tablets the booking card becomes a compact strip above the text;
+    on phones it is shorter, so the article starts sooner.
+  • Every link and button is at least 44px tall, easy to tap with a thumb.
+    Form fields use 16px text, so iPhones no longer zoom in when tapped.
+  • The WhatsApp / Call buttons keep clear of the iPhone home bar, and the
+    footer leaves room so its last lines are never hidden behind them.
+  • Headlines scale smoothly with the screen size.
+  • Nothing to set up. Search-engine data (schema) is unchanged.
+
+EARLIER: SERVICE PAGE LAYOUT
   • The 16 service pages have a new, balanced layout: the methodology and
     chart-factor sections sit beside the sticky "Consultation fee" card;
     from "How Your Consultation Works" on, the page runs in one centred

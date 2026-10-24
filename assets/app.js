@@ -715,11 +715,11 @@ class Component extends DCLogic {
 
   // "Related consultations" under a blog post / "Articles on …" on a service page
   relatedServicesBlock(post){ const h=React.createElement,P=this.P; const rel=this.relatedServices(post); if(!rel.length) return null;
-    return h('section',{'aria-labelledby':'related-services-h',style:{marginTop:44}},
-      h('h2',{id:'related-services-h',style:{font:'600 30px/1.15 '+this.SERIF,color:P.maroon,margin:'0 0 18px'}},'Related consultations'),
-      h('div',{style:{display:'grid',gridTemplateColumns:'repeat('+rel.length+',1fr)',gap:16}}, ...rel.map(s=>h('a',this.linkTo(this.serviceHref(s),()=>this.go('service',{serviceId:s.id}),{key:s.id,className:'aok-card aok-tilt',style:{display:'block',padding:'22px 22px 20px',textDecoration:'none'}}),
-        h('div',{style:{marginBottom:12}},this.badge(s.icon)), h('div',{style:{font:'600 20px/1.2 '+this.SERIF,color:P.maroon,marginBottom:8}},s.title),
-        h('div',{style:{font:'400 14px/1.6 Plus Jakarta Sans',color:P.ink,marginBottom:12}},this.cut(this.txt(s.desc),120)), h('span',{style:{font:'600 13px '+this.HEAD,color:'#8A6A2E'}},'Explore '+this.txt(s.title)+' →'))))); }
+    return h('section',{'aria-labelledby':'related-services-h',className:'aok-svc-wide aok-svc-rel'},
+      h('div',{className:'aok-svc-head is-center'}, h('h2',{id:'related-services-h',className:'aok-svc-h2'},'Related consultations'), h('p',{className:'aok-svc-sub'},'One-to-one readings on the topics of this article.')),
+      h('div',{className:'aok-rel-grid'}, ...rel.map(s=>h('a',this.linkTo(this.serviceHref(s),()=>this.go('service',{serviceId:s.id}),{key:s.id,className:'aok-card aok-rel-card'}),
+        h('div',{style:{marginBottom:12}},this.badge(s.icon)), h('div',{className:'aok-rel-t'},s.title),
+        h('div',{className:'aok-rel-x'},this.cut(this.txt(s.desc),120)), h('span',{className:'aok-rel-more'},'Explore '+this.txt(s.title)+' →'))))); }
   relatedPostsBlock(svc){ const h=React.createElement,P=this.P; const rel=this.relatedPosts(svc); if(!rel.length) return null;
     return h('section',{'aria-labelledby':'related-posts-h',className:'aok-svc-wide aok-svc-rel'},
       h('div',{className:'aok-svc-head is-center'}, h('h2',{id:'related-posts-h',className:'aok-svc-h2'},'Articles on '+this.txt(svc.title)), h('p',{className:'aok-svc-sub'},'Related reading on the same topic.')),
@@ -793,9 +793,9 @@ class Component extends DCLogic {
       else out.push(['p',b]); }); return out; }
   mdInline(s,key){ const h=React.createElement; const parts=[]; String(s||'').split(/(\*\*[^*]+?\*\*|\n)/).forEach((x,i)=>{ if(!x) return; if(x==='\n') parts.push(h('br',{key:key+'b'+i})); else if(/^\*\*[^*]+\*\*$/.test(x)) parts.push(h('strong',{key:key+'s'+i,style:{fontWeight:700,color:this.P.maroon}},x.slice(2,-2))); else parts.push(x); }); return parts; }
   mdRender(text,fontSize){ return this.mdRenderBlocks(this.mdBlocks(text),fontSize); }
-  mdRenderBlocks(blocks,fontSize,kp){ const h=React.createElement,P=this.P; const fs=fontSize||17;
+  mdRenderBlocks(blocks,fontSize,kp,opts){ const h=React.createElement,P=this.P; const fs=fontSize||17; let n=0;
     return blocks.map((bk,i)=>{ const t=bk[0],v=bk[1],k=(kp||'md')+i;
-      if(t==='h2') return h('h2',{key:k,style:{font:'600 clamp(26px,3vw,32px)/1.18 '+this.SERIF,color:P.maroon,margin:'40px 0 14px',letterSpacing:'-.005em'}},this.mdInline(v,k));
+      if(t==='h2') return h('h2',{key:k,id:opts&&opts.ids?'section-'+(++n):undefined,style:{font:'600 clamp(26px,3vw,32px)/1.18 '+this.SERIF,color:P.maroon,margin:'40px 0 14px',letterSpacing:'-.005em',scrollMarginTop:100}},this.mdInline(v,k));
       if(t==='h3') return h('h3',{key:k,style:{font:'600 21px/1.3 '+this.SERIF,color:P.maroon,margin:'26px 0 8px'}},this.mdInline(v,k));
       if(t==='answer') return h('aside',{key:k,className:'aok-answer'},h('p',{style:{margin:0}},this.mdInline(v,k)));
       if(t==='ul'||t==='ol') return h(t,{key:k,className:'aok-mdlist',style:{font:'400 '+fs+'px/1.75 Plus Jakarta Sans',color:P.ink,margin:'0 0 18px',paddingLeft:24}},...v.map((li,j)=>h('li',{key:k+'l'+j,style:{marginBottom:6}},this.mdInline(li,k+'l'+j))));
@@ -872,7 +872,7 @@ class Component extends DCLogic {
   renderServiceDetail(){ const h=React.createElement,P=this.P,d=this.state.data; const s=(d.services||[]).find(x=>x.id===this.state.serviceId);
     if(!s) return this.renderNotFound();
     const others=(d.services||[]).filter(x=>x.id!==s.id&&this.serviceIsLive(x)).slice(0,3);
-    const crumb=(label,href,fn)=>h('a',this.linkTo(href,fn,{style:{color:'#8A6A2E',cursor:'pointer'}}),label);
+    const crumb=(label,href,fn)=>h('a',this.linkTo(href,fn,{className:'aok-tap',style:{color:'#8A6A2E',cursor:'pointer'}}),label);
     const pr=(d.about&&d.about.pricing)||{}, L=d.local||{}, c=d.contact||{};
     const fee=s.price||pr.fee||'$100 CAD', unit=s.priceUnit||pr.unit||'per hour', img=this.serviceImg(s), {intro,secs}=this.serviceSections(s.detail||''); const [topSecs,lowSecs]=this.svcSplit(secs);
     const E=this.state.editMode, ops=E?this.svcOps(s):null, cta=s.ctaLabel||'Book Consultation';
@@ -887,7 +887,7 @@ class Component extends DCLogic {
           E? h('div',{className:'aok-pe-hint'}, h('b',null,'✎'), h('span',null,'Click any text on this page to change it — it saves when you click away. ',s.unpublished?h('b',null,'This service is unpublished: visitors are forwarded to '+(s.redirectTo||'/services')+'.'):null)):null,
           h('nav',{'aria-label':'Breadcrumb',style:{font:'500 13px '+this.HEAD,color:P.muted,marginBottom:22}}, crumb('Home','/',()=>this.go('home')),' › ',crumb('Services','/services',()=>this.go('services')),' › ',h('span',null,s.title)),
           h('div',{style:{display:'flex',alignItems:'center',gap:16,marginBottom:18,flexWrap:'wrap'}}, this.badge(s.icon,'lg'), this.kicker(E?this.ep(s.eyebrow||'Vedic astrology service',v=>this.svcSet(s,'eyebrow',v==='Vedic astrology service'?'':v),{key:'eyebrow',placeholder:'Vedic astrology service'}):(s.eyebrow||'Vedic astrology service'))),
-          h('h1',{style:{font:'800 clamp(34px,4.4vw,54px) '+this.HEAD,margin:'0 0 18px',letterSpacing:'-.015em',color:P.maroon,lineHeight:1.07}}, E?this.ep(s.title,v=>{ if(!v.trim()){ this.flash('A service needs a title'); this.forceUpdate(); return; } this.svcSet(s,'title',v); },{key:'title',placeholder:'Service title'}):this.twoToneText(s.title)),
+          h('h1',{style:{font:'800 clamp(30px,calc(1.3rem + 2.3vw),54px) '+this.HEAD,margin:'0 0 18px',letterSpacing:'-.015em',color:P.maroon,lineHeight:1.07}}, E?this.ep(s.title,v=>{ if(!v.trim()){ this.flash('A service needs a title'); this.forceUpdate(); return; } this.svcSet(s,'title',v); },{key:'title',placeholder:'Service title'}):this.twoToneText(s.title)),
           h('p',{className:'aok-svc-lead',style:{font:'400 18.5px/1.7 Plus Jakarta Sans',color:P.ink,margin:'0 0 26px',maxWidth:620}}, E?this.ep(s.desc,v=>this.svcSet(s,'desc',v),{key:'lead',multiline:true,placeholder:'A short summary — shown here and on the service cards'}):s.desc),
           h('div',{style:{display:'flex',gap:12,flexWrap:'wrap',alignItems:'center'}},
             E? h('span',{className:'aok-btn',style:{display:'inline-flex',alignItems:'center',gap:8,font:'600 15px '+this.HEAD,padding:'14px 26px',borderRadius:999,...this.btnVariants().solid}},this.ep(cta,v=>this.svcSet(s,'ctaLabel',v==='Book Consultation'?'':v),{key:'cta',placeholder:'Book Consultation'}),' →')
@@ -916,7 +916,7 @@ class Component extends DCLogic {
               h('ul',{className:'aok-svc-facts'}, ...facts.map((f,i)=>h('li',{key:i},h('b',{'aria-hidden':'true'},f[0]),f[1]))),
               h('div',{className:'aok-svc-fee-btns'},
                 h('a',{href:'#book',onClick:book,className:'aok-btn aok-fx-lift',style:{display:'flex',justifyContent:'center',font:'600 14.5px '+this.HEAD,padding:'13px 20px',borderRadius:999,textDecoration:'none',...this.btnVariants().solid}},cta),
-                wa?h('a',{href:wa,target:'_blank',rel:'noopener',className:'aok-btn aok-fx-lift',style:{display:'flex',justifyContent:'center',font:'600 14px '+this.HEAD,padding:'12px 18px',borderRadius:999,textDecoration:'none',...this.btnVariants().outline}},'✆ WhatsApp '+(c.whatsapp||c.phone||'')):null))),
+                wa?h('a',{href:wa,target:'_blank',rel:'noopener',className:'aok-btn aok-fx-lift',style:{display:'flex',justifyContent:'center',font:'600 14px '+this.HEAD,padding:'12px 18px',borderRadius:999,textDecoration:'none',...this.btnVariants().outline}},'✆ WhatsApp',h('span',{className:'aok-fee-num'},' '+(c.whatsapp||c.phone||''))):null))),
           secs.length>1? h('nav',{className:'aok-card aok-svc-toc','aria-label':'On this page'}, h('div',{className:'aok-svc-toc-t'},'On this page'), ...secs.map((sec,i)=>h('a',{key:i,href:'#section-'+(i+1),onClick:e=>{ e.preventDefault(); const el=document.getElementById('section-'+(i+1)); if(el) el.scrollIntoView({behavior:'smooth',block:'start'}); }},sec.title.replace(/\*\*/g,'')))):null))),
       // below: one centred full-width column (1100px), so nothing is left beside an empty sidebar
       (lowSecs.length||E)? h('div',{className:'aok-svc-wide aok-svc-lower'},
@@ -935,7 +935,7 @@ class Component extends DCLogic {
         this.renderLeadForm({service:s.title}))),
       this.areasBlock({wide:true}),
       others.length? h('section',{style:{background:P.bgAlt,padding:'70px 0'}}, h('div',{className:'aok-svc-wide'},h('div',null,
-        h('div',{style:{textAlign:'center',marginBottom:36}}, this.etext('home.servicesIntro.title',{tag:'h2',style:{font:'800 clamp(28px,3.3vw,40px) '+this.HEAD,color:P.maroon,margin:0,letterSpacing:'-.015em'}})),
+        h('div',{style:{textAlign:'center',marginBottom:36}}, this.etext('home.servicesIntro.title',{tag:'h2',style:{font:'800 clamp(26px,calc(1.2rem + 1.5vw),40px) '+this.HEAD,color:P.maroon,margin:0,letterSpacing:'-.015em'}})),
         h('div',{style:{display:'grid',gridTemplateColumns:'repeat(3,1fr)',gap:22}}, ...others.map((x,i)=>this.serviceCard(x,i))),
         h('div',{style:{textAlign:'center',marginTop:36}}, h('a',this.linkTo('/services',()=>this.go('services'),{className:'aok-btn',style:{display:'inline-flex',font:'600 15px '+this.HEAD,padding:'14px 26px',borderRadius:999,...this.btnVariants().outline}}),'See all services \u2192'))))):null,
       this.ctaBand('home.cta')); }
@@ -951,7 +951,7 @@ class Component extends DCLogic {
         h('div',{className:'aok-wrap aok-hero-grid'},
           h('div',{className:'aok-hero-copy'},
             this.kicker(this.etextInline('home.hero.kicker')),
-            this.twoTone('home.hero.h1',{tag:'h1',block:true,style:{font:'800 clamp(40px,4.7vw,66px) '+this.HEAD,lineHeight:1.02,letterSpacing:'-.015em',margin:'22px 0 0',color:P.maroon}}),
+            this.twoTone('home.hero.h1',{tag:'h1',block:true,style:{font:'800 clamp(34px,calc(1.625rem + 2.6vw),66px) '+this.HEAD,lineHeight:1.02,letterSpacing:'-.015em',margin:'22px 0 0',color:P.maroon}}),
             this.etext('home.hero.sub',{tag:'p',className:'aok-link',style:{font:'400 18px/1.65 Plus Jakarta Sans',color:P.ink,maxWidth:520,margin:'22px 0 34px'}}),
             h('div',{style:{display:'flex',gap:14,flexWrap:'wrap'}}, this.ebtn('home.hero.cta1'), this.ebtn('home.hero.cta2'))),
           h('div',{className:'aok-hero-stage'},
@@ -973,7 +973,7 @@ class Component extends DCLogic {
       h('section',{style:{background:P.bgAlt,padding:'84px 0'}}, this.wrap(h('div',{style:{display:'grid',gridTemplateColumns:'.9fr 1.1fr',gap:56,alignItems:'center'}},
         h('div',{className:'aok-card aok-reveal',style:{padding:10}}, this.eimg('home.about.image',{alt:'Experienced Vedic astrologer Jag Mallah',placeholder:'astrologer\nphoto',radius:14,style:{aspectRatio:'1/1'}})),
         h('div',null, this.kicker(this.etextInline('home.about.kicker')),
-          this.etext('home.about.title',{tag:'h2',style:{font:'800 clamp(28px,3.3vw,40px) '+this.HEAD,color:P.maroon,margin:'16px 0 16px',letterSpacing:'-.015em'}}),
+          this.etext('home.about.title',{tag:'h2',style:{font:'800 clamp(26px,calc(1.2rem + 1.5vw),40px) '+this.HEAD,color:P.maroon,margin:'16px 0 16px',letterSpacing:'-.015em'}}),
           this.etext('home.about.body',{tag:'p',className:'aok-link',style:{font:'400 16.5px/1.75 Plus Jakarta Sans',color:P.ink}}),
           h('div',{style:{display:'grid',gridTemplateColumns:'1fr 1fr',gap:'12px 20px',margin:'26px 0 30px'}}, ...d.home.about.credentials.map((c,i)=>h('div',{key:i,style:{display:'flex',gap:10,alignItems:'flex-start',font:'500 15px Plus Jakarta Sans',color:P.maroon}},h('span',{style:{color:P.gold,fontSize:18,lineHeight:1}},'✧'),c))),
           this.ebtn('home.about.btn',{label:this.t('about'),link:'about',variant:'outline',size:'md'}))))),
@@ -999,9 +999,9 @@ class Component extends DCLogic {
   serviceCard(s,i){ const h=React.createElement,P=this.P;
     return h('div',{key:s.id,className:'aok-card aok-tilt aok-reveal',onClick:()=>this.go('service',{serviceId:s.id}),style:{padding:'30px 28px',cursor:'pointer'}},
       this.badge(s.icon),
-      h('h3',{style:{font:'700 21px '+this.HEAD,color:P.maroon,margin:'20px 0 8px'}}, h('a',this.linkTo(this.serviceHref(s),()=>this.go('service',{serviceId:s.id}),{style:{color:'inherit'}}), s.title)),
+      h('h3',{style:{font:'700 21px '+this.HEAD,color:P.maroon,margin:'20px 0 8px'}}, h('a',this.linkTo(this.serviceHref(s),()=>this.go('service',{serviceId:s.id}),{className:'aok-tap',style:{color:'inherit'}}), s.title)),
       h('p',{style:{font:'400 14.5px/1.65 Plus Jakarta Sans',color:P.muted,margin:0}}, s.desc),
-      h('a',this.linkTo(this.serviceHref(s),()=>this.go('service',{serviceId:s.id}),{style:{display:'inline-block',marginTop:14,color:'#8A6A2E',font:'700 14px '+this.HEAD}}),'Read more \u2192')); }
+      h('a',this.linkTo(this.serviceHref(s),()=>this.go('service',{serviceId:s.id}),{className:'aok-tap',style:{display:'inline-block',marginTop:14,color:'#8A6A2E',font:'700 14px '+this.HEAD}}),'Read more \u2192')); }
 
   ctaBand(path){ const h=React.createElement,P=this.P;
     return h('section',{className:'aok-ctaband'},
@@ -1017,7 +1017,7 @@ class Component extends DCLogic {
     return h('main',{style:{animation:'aokfade .4s'}},
       this.pageHero('about.hero','about'),
       h('section',{style:{padding:'76px 0'}}, this.wrap(h('div',null,
-        this.etext('about.story.title',{tag:'h2',style:{font:'800 clamp(28px,3.3vw,40px) '+this.HEAD,color:P.maroon,margin:'0 0 20px',letterSpacing:'-.015em'}}),
+        this.etext('about.story.title',{tag:'h2',style:{font:'800 clamp(26px,calc(1.2rem + 1.5vw),40px) '+this.HEAD,color:P.maroon,margin:'0 0 20px',letterSpacing:'-.015em'}}),
         h('div',{className:'aok-floatimg aok-card',style:{float:'right',width:220,marginLeft:32,marginBottom:16,padding:8}}, this.eimg('about.story.image',{alt:'Experienced Vedic astrologer Jag Mallah reading a Kundli',placeholder:'astrologer\nat work',radius:14,style:{aspectRatio:'3/4'}})),
         this.etext('about.story.body',{tag:'div',className:'aok-link',style:{font:'400 16.5px/1.8 Plus Jakarta Sans',color:P.ink,whiteSpace:'pre-line'}}),
         h('div',{style:{clear:'both'}})))),
@@ -1037,7 +1037,7 @@ class Component extends DCLogic {
             h('div',{style:{marginBottom:18}},this.kicker(this.getIn(d,'about.privacy.kicker')||'')),
             h('div',{style:{display:'flex',alignItems:'center',gap:16,marginBottom:20}},
               this.badge('⚭',null,true),
-              this.etext('about.privacy.title',{tag:'h2',style:{font:'800 clamp(28px,3.3vw,40px) '+this.HEAD,color:P.maroon,margin:0,letterSpacing:'-.015em'}})),
+              this.etext('about.privacy.title',{tag:'h2',style:{font:'800 clamp(26px,calc(1.2rem + 1.5vw),40px) '+this.HEAD,color:P.maroon,margin:0,letterSpacing:'-.015em'}})),
             this.etext('about.privacy.body',{tag:'div',style:{font:'400 16.5px/1.8 Plus Jakarta Sans',color:P.ink,whiteSpace:'pre-line',maxWidth:520}})),
           h('div',{style:{display:'grid',gap:16}}, ...((d.about.privacy&&d.about.privacy.points)||[]).map((pt,i)=>h('div',{key:i,className:'aok-card aok-tilt aok-reveal',style:{padding:'22px 24px',display:'flex',gap:18,alignItems:'flex-start'}},
             this.badge('✓','sm'),
@@ -1053,12 +1053,12 @@ class Component extends DCLogic {
             h('div',{style:{marginTop:26,padding:'11px 20px',borderRadius:999,background:'#FFFCF7',border:'1px solid #C5A869',font:'600 13px '+this.HEAD,color:P.maroon,display:'inline-block'}},'New clients: pay only if satisfied')),
           h('div',null,
             h('div',{style:{marginBottom:14}},this.kicker(this.getIn(d,'about.pricing.kicker')||'')),
-            this.etext('about.pricing.title',{tag:'h2',style:{font:'800 clamp(28px,3.3vw,40px) '+this.HEAD,color:P.maroon,margin:'0 0 16px',letterSpacing:'-.015em'}}),
+            this.etext('about.pricing.title',{tag:'h2',style:{font:'800 clamp(26px,calc(1.2rem + 1.5vw),40px) '+this.HEAD,color:P.maroon,margin:'0 0 16px',letterSpacing:'-.015em'}}),
             this.etext('about.pricing.body',{tag:'div',style:{font:'400 16.5px/1.8 Plus Jakarta Sans',color:P.ink,whiteSpace:'pre-line'}}))))),
       h('section',{style:{background:P.bgAlt,padding:'80px 0'}}, this.wrap(h('div',null,
         h('div',{style:{textAlign:'center',maxWidth:700,margin:'0 auto 40px'}},
           h('div',{style:{display:'flex',justifyContent:'center',marginBottom:16}},this.kicker(this.getIn(d,'about.boundaries.kicker')||'')),
-          this.etext('about.boundaries.title',{tag:'h2',style:{font:'800 clamp(28px,3.3vw,40px) '+this.HEAD,color:P.maroon,margin:'0 0 12px',letterSpacing:'-.015em'}}),
+          this.etext('about.boundaries.title',{tag:'h2',style:{font:'800 clamp(26px,calc(1.2rem + 1.5vw),40px) '+this.HEAD,color:P.maroon,margin:'0 0 12px',letterSpacing:'-.015em'}}),
           this.etext('about.boundaries.intro',{tag:'p',style:{font:'400 16.5px/1.7 Plus Jakarta Sans',color:P.muted,margin:0}})),
         h('div',{style:{display:'grid',gridTemplateColumns:'1fr 1fr',gap:24}},
           h('div',{className:'aok-card aok-reveal',style:{padding:'32px 32px'}},
@@ -1074,7 +1074,7 @@ class Component extends DCLogic {
       h('section',{style:{padding:'80px 0'}}, this.wrap(h('div',null,
         h('div',{style:{textAlign:'center',maxWidth:660,margin:'0 auto 42px'}},
           h('div',{style:{display:'flex',justifyContent:'center',marginBottom:16}},this.kicker(this.getIn(d,'about.process.kicker')||'')),
-          this.etext('about.process.title',{tag:'h2',style:{font:'800 clamp(28px,3.3vw,40px) '+this.HEAD,color:P.maroon,margin:'0 0 12px',letterSpacing:'-.015em'}}),
+          this.etext('about.process.title',{tag:'h2',style:{font:'800 clamp(26px,calc(1.2rem + 1.5vw),40px) '+this.HEAD,color:P.maroon,margin:'0 0 12px',letterSpacing:'-.015em'}}),
           this.etext('about.process.sub',{tag:'p',style:{font:'400 16.5px/1.7 Plus Jakarta Sans',color:P.muted,margin:0}})),
         h('div',{style:{display:'grid',gridTemplateColumns:'repeat(4,1fr)',gap:20}}, ...d.about.process.steps.map((st,i)=>h('div',{key:i,className:'aok-card aok-tilt aok-reveal',style:{padding:'30px 26px'}},
           h('span',{className:'aok-badge3d is-sm is-round',style:{font:'600 21px/1 '+this.SERIF,color:P.maroon}}, h('span',null,String(i+1))),
@@ -1087,7 +1087,7 @@ class Component extends DCLogic {
     return h('section',{className:'aok-pagehero'},
       this.wrap(h('div',{style:{textAlign:'center',padding:'48px 0 56px',position:'relative',maxWidth:840,margin:'0 auto'}},
         h('div',{style:{display:'flex',justifyContent:'center',marginBottom:20}},this.kicker((d.seo[route]&&d.seo[route].focusKeyword)||'')),
-        this.twoTone(path+'.title',{tag:'h1',style:{font:'800 clamp(34px,4.6vw,58px) '+this.HEAD,margin:'0 0 18px',letterSpacing:'-.015em',color:P.maroon,lineHeight:1.06}}),
+        this.twoTone(path+'.title',{tag:'h1',style:{font:'800 clamp(30px,calc(1.375rem + 2.5vw),58px) '+this.HEAD,margin:'0 0 18px',letterSpacing:'-.015em',color:P.maroon,lineHeight:1.06}}),
         this.etext(path+'.sub',{tag:'p',style:{font:'400 18px/1.7 Plus Jakarta Sans',color:P.ink,maxWidth:680,margin:'0 auto'}}))),
       h('div',{className:'aok-hairline'})); }
 
@@ -1101,10 +1101,10 @@ class Component extends DCLogic {
         h('div',{style:{display:'flex',gap:20,padding:'26px 28px 28px'}},
         this.badge(s.icon,'lg'),
         h('div',{style:{minWidth:0}}, h('div',{style:{display:'flex',justifyContent:'space-between',alignItems:'baseline',gap:12,flexWrap:'wrap'}},
-            h('h3',{style:{font:'700 21px '+this.HEAD,color:P.maroon,margin:'2px 0 0'}}, h('a',this.linkTo(this.serviceHref(s),open,{style:{color:'inherit'}}), s.title))),
+            h('h3',{style:{font:'700 21px '+this.HEAD,color:P.maroon,margin:'2px 0 0'}}, h('a',this.linkTo(this.serviceHref(s),open,{className:'aok-tap',style:{color:'inherit'}}), s.title))),
           h('p',{style:{font:'400 15px/1.7 Plus Jakarta Sans',color:P.muted,margin:'10px 0 14px'}}, s.desc),
           h('div',{style:{display:'flex',alignItems:'center',gap:18,flexWrap:'wrap'}},
-            h('a',this.linkTo(this.serviceHref(s),open,{style:{color:'#8A6A2E',font:'700 14px '+this.HEAD}}),'Read more \u2192'),
+            h('a',this.linkTo(this.serviceHref(s),open,{className:'aok-tap',style:{color:'#8A6A2E',font:'700 14px '+this.HEAD}}),'Read more \u2192'),
             this.ebtn('servicesPage.cardBtn',{label:'Book this \u2192',link:'contact',variant:'outline',size:'sm'},null,()=>this.goServiceBook(s)))))); })))),
       this.ctaBand('home.cta')); }
 
@@ -1114,7 +1114,7 @@ class Component extends DCLogic {
       this.pageHero('meditation.hero','meditation'),
       h('section',{style:{padding:'76px 0'}}, this.wrap(h('div',null,
         this.kicker('Meditation guidance'),
-        this.etext('meditation.intro.title',{tag:'h2',style:{font:'800 clamp(28px,3.3vw,40px) '+this.HEAD,color:P.maroon,margin:'16px 0 18px',letterSpacing:'-.015em'}}),
+        this.etext('meditation.intro.title',{tag:'h2',style:{font:'800 clamp(26px,calc(1.2rem + 1.5vw),40px) '+this.HEAD,color:P.maroon,margin:'16px 0 18px',letterSpacing:'-.015em'}}),
         h('div',{className:'aok-floatimg aok-card',style:{float:'right',width:300,marginLeft:32,marginBottom:16,padding:8}}, this.eimg('meditation.image',{alt:'Professional meditation guide Jag Mallah',placeholder:'meditation\nphoto',radius:14,style:{aspectRatio:'3/4'}})),
         this.etext('meditation.intro.body',{tag:'div',className:'aok-link',style:{font:'400 16.5px/1.8 Plus Jakarta Sans',color:P.ink,whiteSpace:'pre-line'}}),
         h('div',{style:{clear:'both'}})))),
@@ -1145,16 +1145,39 @@ class Component extends DCLogic {
           h('span',{style:{font:'700 14px '+this.HEAD,color:'#8A6A2E'}}, this.t('readmore')+' →')))))
         : h('div',{style:{textAlign:'center',padding:'40px',color:P.muted,font:'400 16px Plus Jakarta Sans'}},'No posts yet. Add one from the admin panel → Blog.')))); }
 
+  // Blog post: the article beside a sticky booking card with an "In this article" menu (the service pages' grid:
+  // ≤1023px the card becomes a compact strip above the article, ≤767px one column), then the author and the
+  // related consultations in the centred full-width column.
   renderPost(){ const h=React.createElement,P=this.P,d=this.state.data; const p=d.blog.find(x=>x.id===this.state.postId); if(!p) return this.renderBlog();
-    return h('main',{style:{animation:'aokfade .4s'}},
-      h('section',{className:'aok-pagehero'}, this.wrap(h('div',{style:{maxWidth:780,margin:'0 auto',padding:'44px 0 50px'}},
-        h('a',this.linkTo('/blog',()=>this.setState({postId:null}),{style:{cursor:'pointer',font:'600 14px '+this.HEAD,color:'#8A6A2E'}}),'← '+this.t('blog')),
-        h('div',{style:{font:'600 12px '+this.HEAD,letterSpacing:'.14em',textTransform:'uppercase',color:'#8A6A2E',margin:'24px 0 14px'}}, this.fmtDate(p.date),' \u00b7 By ',h('a',{href:'#about-the-astrologer',style:{color:'#8A6A2E'}},(d.person&&d.person.name)||d.brand.astrologer)),
-        h('h1',{style:{font:'800 clamp(30px,3.9vw,48px)/1.1 '+this.HEAD,color:P.maroon,margin:0,letterSpacing:'-.015em'}}, p.title))), h('div',{className:'aok-hairline'})),
-      h('section',{style:{padding:'52px 0 70px'}}, this.wrap(h('div',{style:{maxWidth:780,margin:'0 auto'}},
-        h('div',{className:'aok-card',style:{padding:8,marginBottom:36}}, h('div',{style:{aspectRatio:p.image?'16/8':'16/9',borderRadius:14,overflow:'hidden',background:p.image?'transparent':'linear-gradient(135deg,#FFFFFF 0%,#F4EEE3 55%,#E9DCC2 100%)'}}, this.postImg(p)?h('img',{decoding:'async',src:this.postImg(p),alt:p.focusKeyword||p.title,onError:e=>{ e.currentTarget.style.display='none'; },style:{width:'100%',height:'100%',objectFit:'cover',display:'block'}}):h('div',{style:{height:'100%',display:'flex',alignItems:'center',justifyContent:'center',color:'#A68446',fontFamily:'monospace',fontSize:12}},'featured image — alt: '+(p.focusKeyword||'')))),
-        h('div',{className:'aok-md'}, this.mdRender(p.body,18)),
-        this.authorCard(), this.relatedServicesBlock(p)))),
+    const name=(d.person&&d.person.name)||d.brand.astrologer, pr=(d.about&&d.about.pricing)||{}, c=d.contact||{}, L=d.local||{};
+    const heads=this.mdBlocks(p.body||'').filter(b=>b[0]==='h2').map(b=>String(b[1]).replace(/\*\*/g,''));
+    const mins=Math.max(1,Math.round(this.wordCount2(this.txt(p.body))/200));
+    const wa=this.waUrl('Hello Jag Mallah, I read "'+this.txt(p.title)+'" and would like to book a consultation.');
+    const facts=[['◷','60-minute live session'],['✓','New clients pay after, only if satisfied'],['☎','Zoom · WhatsApp · Phone'],['अ',((L.languages||['English','Hindi','Punjabi']).join(', '))]];
+    const jump=(e,i)=>{ e.preventDefault(); const el=document.getElementById('section-'+(i+1)); if(el) el.scrollIntoView({behavior:'smooth',block:'start'}); };
+    return h('main',{className:'aok-svc-page aok-post-page',style:{animation:'aokfade .4s'}},
+      h('section',{className:'aok-pagehero'}, h('div',{className:'aok-svc-top aok-post-hero'}, h('div',{className:'aok-post-head'},
+        h('a',this.linkTo('/blog',()=>this.setState({postId:null}),{style:{cursor:'pointer',font:'600 14px '+this.HEAD,color:'#8A6A2E'},className:'aok-tap'}),'← '+this.t('blog')),
+        h('div',{style:{font:'600 12px '+this.HEAD,letterSpacing:'.14em',textTransform:'uppercase',color:'#8A6A2E',margin:'24px 0 14px'}}, this.fmtDate(p.date),' · ',mins+' min read',' · By ',h('a',{href:'#about-the-astrologer',className:'aok-tap',style:{color:'#8A6A2E'}},name)),
+        h('h1',{className:'aok-post-h1',style:{font:'800 clamp(28px,calc(1.25rem + 2vw),48px)/1.12 '+this.HEAD,color:P.maroon,margin:0,letterSpacing:'-.015em'}}, p.title))), h('div',{className:'aok-hairline'})),
+      h('section',{className:'aok-svc-upper'}, h('div',{className:'aok-svc-top'},
+        h('article',{className:'aok-svc-body aok-post-body'},
+          h('div',{className:'aok-card',style:{padding:8,marginBottom:36}}, h('div',{style:{aspectRatio:p.image?'16/8':'16/9',borderRadius:14,overflow:'hidden',background:p.image?'transparent':'linear-gradient(135deg,#FFFFFF 0%,#F4EEE3 55%,#E9DCC2 100%)'}}, this.postImg(p)?h('img',{decoding:'async',src:this.postImg(p),alt:p.focusKeyword||p.title,onError:e=>{ e.currentTarget.style.display='none'; },style:{width:'100%',height:'100%',objectFit:'cover',display:'block'}}):h('div',{style:{height:'100%',display:'flex',alignItems:'center',justifyContent:'center'}},this.mark(64)))),
+          h('div',{className:'aok-md'}, this.mdRenderBlocks(this.mdBlocks(p.body||''),18,'pb',{ids:true}))),
+        h('aside',{className:'aok-svc-side','aria-label':'Book a consultation'},
+          h('div',{className:'aok-card aok-svc-fee'},
+            h('div',{className:'aok-svc-fee-top'},
+              h('div',{className:'aok-svc-fee-k'},'Book a consultation'),
+              h('div',{className:'aok-goldtext aok-svc-fee-price'}, pr.fee||'$100 CAD'),
+              h('div',{className:'aok-svc-fee-unit'}, (pr.unit||'per hour')+' · with '+name)),
+            h('div',{className:'aok-svc-fee-body'},
+              h('ul',{className:'aok-svc-facts'}, ...facts.map((f,i)=>h('li',{key:i},h('b',{'aria-hidden':'true'},f[0]),f[1]))),
+              h('div',{className:'aok-svc-fee-btns'},
+                h('a',this.linkTo('/contact',()=>this.go('contact'),{className:'aok-btn aok-fx-lift',style:{display:'flex',justifyContent:'center',font:'600 14.5px '+this.HEAD,padding:'13px 20px',borderRadius:999,textDecoration:'none',...this.btnVariants().solid}}),'Book a consultation'),
+                wa?h('a',{href:wa,target:'_blank',rel:'noopener',className:'aok-btn aok-fx-lift',style:{display:'flex',justifyContent:'center',font:'600 14px '+this.HEAD,padding:'12px 18px',borderRadius:999,textDecoration:'none',...this.btnVariants().outline}},'✆ WhatsApp',h('span',{className:'aok-fee-num'},' '+(c.whatsapp||c.phone||''))):null))),
+          heads.length>1? h('nav',{className:'aok-card aok-svc-toc','aria-label':'In this article'}, h('div',{className:'aok-svc-toc-t'},'In this article'), ...heads.map((t,i)=>h('a',{key:i,href:'#section-'+(i+1),onClick:e=>jump(e,i)},t))):null))),
+      h('div',{className:'aok-svc-wide'}, h('div',{className:'aok-svc-author'}, this.authorCard({wide:true}))),
+      this.relatedServicesBlock(p),
       this.ctaBand('home.cta')); }
 
   fmtDate(s){ try{ return new Date(s).toLocaleDateString('en-IN',{day:'numeric',month:'long',year:'numeric'}); }catch(e){ return s; } }
@@ -1181,7 +1204,7 @@ class Component extends DCLogic {
             h('h3',{style:{font:'700 20px '+this.HEAD,color:P.maroon,margin:'0 0 16px'}}, this.t('getintouch')),
             rows.length? rows.map((r,i)=>h('div',{key:i,style:{display:'flex',gap:12,padding:'11px 0',borderBottom:i<rows.length-1?'1px solid '+P.line:'none'}},
               h('span',{style:{font:'600 12px '+this.HEAD,letterSpacing:'.1em',textTransform:'uppercase',color:'#8A6A2E',width:78,flexShrink:0,paddingTop:2}},r[0]),
-              r[2]&&this.safeHref(r[2])?h('a',{href:this.safeHref(r[2]),target:'_blank',rel:'noopener',style:{font:'500 15px Plus Jakarta Sans',color:P.ink,wordBreak:'break-word'}},r[1]):h('span',{style:{font:'500 15px Plus Jakarta Sans',color:P.ink}},r[1])))
+              r[2]&&this.safeHref(r[2])?h('a',{href:this.safeHref(r[2]),target:'_blank',rel:'noopener',className:'aok-tap',style:{font:'500 15px Plus Jakarta Sans',color:P.ink,wordBreak:'break-word'}},r[1]):h('span',{style:{font:'500 15px Plus Jakarta Sans',color:P.ink}},r[1])))
               : h('p',{style:{font:'400 14.5px/1.65 Plus Jakarta Sans',color:P.muted,margin:0}},'Please use the form to reach Jag Mallah — he replies personally to every message.'),
             c.replyTime?h('p',{style:{font:'400 13.5px/1.6 Plus Jakarta Sans',color:P.muted,margin:'14px 0 0'}},'Jag Mallah replies personally, usually '+c.replyTime+'. Consultations in English, Hindi and Punjabi.'):null,
             (this.waUrl()||this.telHref())?h('div',{style:{display:'flex',gap:10,marginTop:16,flexWrap:'wrap'}}, this.waUrl()?h('a',{href:this.waUrl(),target:'_blank',rel:'noopener',className:'aok-btn aok-fx-lift',style:{display:'inline-flex',font:'600 14px '+this.HEAD,padding:'11px 18px',borderRadius:999,textDecoration:'none',...this.btnVariants().solid}},'\u2706 WhatsApp'):null, this.telHref()?h('a',{href:this.telHref(),className:'aok-btn aok-fx-lift',style:{display:'inline-flex',font:'600 14px '+this.HEAD,padding:'11px 18px',borderRadius:999,textDecoration:'none',...this.btnVariants().outline}},'\u260e Call'):null):null,
@@ -1215,7 +1238,7 @@ class Component extends DCLogic {
       h(multi?'textarea':'input',{type:type||'text',value:f[k]||'',onChange:e=>set(k,e.target.value),placeholder:ph||'',rows:multi?4:undefined,style:inpStyle}));
     const conv=this.convertAppt(f.country,f.apptDate,f.apptTime);
     const dial=this.findCountry(f.country);
-    return h('form',{onSubmit:e=>{e.preventDefault();this.submitLead();},className:'aok-card',style:{padding:32}},
+    return h('form',{onSubmit:e=>{e.preventDefault();this.submitLead();},className:'aok-card aok-leadform',style:{padding:32}},
       h('h2',{style:{font:'700 22px '+this.HEAD,color:P.maroon,margin:'0 0 4px'}},svc?'Request your consultation':'Send your details'),
       svc?h('div',{style:{display:'inline-flex',alignItems:'center',gap:8,margin:'8px 0 6px',padding:'7px 14px',borderRadius:999,background:'#FFFCF7',border:'1px solid #C5A869',font:'600 13px '+this.HEAD,color:P.maroon}},h('span',{style:{color:P.gold}},'\u2726'),'Consultation: '+svc):null,
       this.etext('contactPage.note',{tag:'p',style:{font:'400 14px Plus Jakarta Sans',color:P.muted,margin:'0 0 20px'}}),
@@ -1253,10 +1276,10 @@ class Component extends DCLogic {
         h('input',{type:'text',name:'website',tabIndex:-1,autoComplete:'off','aria-hidden':'true',value:f._hp||'',onChange:e=>set('_hp',e.target.value),style:{position:'absolute',left:'-9999px',width:1,height:1,opacity:0}}),
         h('label',{style:{display:'block'}},
           h('span',{style:{display:'block',font:'600 13px '+this.HEAD,color:P.maroon,marginBottom:6}},'Verification',h('span',{style:{color:P.red}},' *'),h('span',{style:{color:P.muted,fontWeight:400}},'  \u2014 confirm you\u2019re human')),
-          h('div',{style:{display:'flex',alignItems:'center',gap:12}},
+          h('div',{style:{display:'flex',alignItems:'center',gap:12,flexWrap:'wrap'}},
             h('div',{style:{display:'flex',alignItems:'center',padding:'12px 16px',borderRadius:10,background:P.bgAlt,border:'1px solid '+P.line,font:'700 17px '+this.HEAD,color:P.maroon,whiteSpace:'nowrap',userSelect:'none',letterSpacing:'.06em'}}, (this._cap.q?String(this._cap.q).replace('+','  +  '):'\u2026')+'  =  ?'),
             h('input',{value:f.captcha||'',onChange:e=>set('captcha',e.target.value),inputMode:'numeric',placeholder:'Answer',style:{width:120,padding:'12px 14px',borderRadius:10,border:'1px solid '+P.line,background:P.white,font:'400 15px Plus Jakarta Sans',color:P.ink}}),
-            h('button',{type:'button',title:'New question',onClick:()=>{this.newCaptcha();this.forceUpdate();},style:{...this.iconBtn(),width:42,height:42,fontSize:16}},'\u21bb'))),
+            h('button',{type:'button',title:'New question','aria-label':'New verification question',onClick:()=>{this.newCaptcha();this.forceUpdate();},style:{...this.iconBtn(),width:44,height:44,fontSize:16}},'\u21bb'))),
         this.btn(this._sending?'Sending\u2026':'Send my message \u2192',null,{variant:'solid',style:{width:'100%',justifyContent:'center',marginTop:4,opacity:this._sending?.6:1,pointerEvents:this._sending?'none':'auto'}}),
         h('div',{style:{display:'flex',alignItems:'flex-start',gap:7,font:'400 12.5px/1.5 Plus Jakarta Sans',color:P.muted,marginTop:2}}, h('span',{style:{color:P.gold,flexShrink:0}},'\u26ed'),'Protected against spam \u00b7 your details are sent securely to the astrologer.'))); }
 
