@@ -1,7 +1,28 @@
 ANALYSIS OF KARMA — Update (SEO, local SEO, AI search & security)
 ===================================================================
 
-WHAT'S NEW IN THIS UPDATE
+NEW IN THIS VERSION (content version 3)
+  • Your phone & WhatsApp +1 (236) 660-2000 is in the header, footer,
+    contact page and Google's structured data, with WhatsApp and Call
+    buttons (a small floating bar on every page) and Google Maps and
+    Trustpilot review buttons on the contact page and in the footer.
+  • Hours Mon-Sun 10:00-20:00 (Pacific), the 17 service areas, your
+    Google Business categories, English/Hindi/Punjabi, the "pay after your
+    reading" policy and your 9 social profiles are filled in for you.
+  • All 16 services (650-1,200+ words) and 16 blog posts (950-2,200 words)
+    now have in-depth classical sections: a short direct answer, the
+    classical texts and methods, the chart factors, how a consultation
+    works, FAQs (services) and remedies. Your existing text stays first.
+  • Every service and post has its own branded Pearl & Gold image for
+    Google and social media, in the three shapes Google asks for.
+  • New uploads: api/upgrade-content.php and the folders api/content/ and
+    assets/img/ (see DEPLOY.md, Part A2). Everything is applied by itself
+    on the first page view. Pages you had edited are left alone: click
+    Admin -> SEO Health -> "Apply Full 32-Page Classical Content Upgrade"
+    to add the sections after your text there too.
+  • Admin -> AI & GEO has fields for the Google and Bing verification codes.
+
+EARLIER IN THIS UPDATE
   • Google and AI assistants now see your real pages. Every page is built on
     the server with its own title, description, structured data and content,
     so ChatGPT, Claude, Perplexity and Google can read and cite it.
@@ -23,8 +44,8 @@ WHAT'S NEW IN THIS UPDATE
   • Every blog post links to its most relevant service pages (and back),
     every service page and post ends with an "About the Astrologer" card
     showing your training, and service and contact pages show "Service
-    Areas & Online Consultations" (Surrey, Burnaby, Richmond, Delta,
-    Langley, Abbotsford, BC, Canada and worldwide via Zoom & WhatsApp).
+    Areas & Online Consultations" (Surrey and its neighbourhoods, the
+    Lower Mainland & Fraser Valley, and clients abroad via Zoom & WhatsApp).
   • Seven short FAQ answers are expanded to 50-55 words, the length AI
     answer engines quote, and three SEO titles/descriptions are shortened.
     This happens by itself on the first page view after upload (answers
@@ -53,11 +74,11 @@ IMPORTANT: THIS UPDATE HAS MORE THAN ONE FILE
      password. It keeps working; the server secures it on that first login.
   5. Change your password: Admin -> Settings -> Security.
      (Recommended, because the old one was publicly readable before.)
-  6. Check the new tabs, add your phone number, click Save changes.
+  6. Check the Local & Business and Practitioner tabs, click Save changes.
   7. Open Admin -> SEO Health. The first group, "Server setup (after
      upload)", should be all green; each red item says how to fix it.
-     The score should be 99-100; adding your phone number (step 6)
-     takes it to 100.
+     If it lists pages without the classical sections, click "Apply Full
+     32-Page Classical Content Upgrade". The score should then be 100.
   8. Hard-refresh: Ctrl+Shift+R (Cmd+Shift+R on Mac).
 
 IF SOMETHING GOES WRONG
