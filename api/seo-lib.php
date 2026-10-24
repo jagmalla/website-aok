@@ -41,6 +41,7 @@ function aok_site(): array {
     // seeded services / posts the browser adds when missing (by seedKey / slug)
     $have = [];
     foreach ($d['services'] ?? [] as $s) if (!empty($s['seedKey'])) $have[$s['seedKey']] = 1;
+    foreach ((array)($d['deletedSeeds'] ?? []) as $k) $have[$k] = 1;   // shipped services the admin deleted stay deleted
     foreach ($seedS as $s) if (empty($have[$s['seedKey'] ?? ''])) $d['services'][] = $s;
     $have = [];
     foreach ($d['blog'] ?? [] as $p) if (!empty($p['slug'])) $have[$p['slug']] = 1;
@@ -199,8 +200,13 @@ function aok_resolve(string $uri, array $d): array {
     $path = rawurldecode((string)parse_url($uri, PHP_URL_PATH));
     $path = '/' . trim($path, '/');
     // admin-managed redirects (used when merging duplicate services / posts)
+    // (a redirect never hides a live service: an address reused by a new service wins over an old redirect)
+    $livePaths = [];
+    $sl = aok_service_slugs($d['services'] ?? []);
+    foreach ($d['services'] ?? [] as $s) if (aok_service_is_live($s)) $livePaths['/services/' . ($sl[(string)($s['id'] ?? '')] ?? '')] = 1;
     foreach ($d['redirects'] ?? [] as $r) {
         $from = '/' . trim((string)($r['from'] ?? ''), '/');
+        if (isset($livePaths[strtolower($from)])) continue;
         $to = trim((string)($r['to'] ?? ''));
         if ($from !== '/' && $to !== '' && strcasecmp($from, $path) === 0 && !aok_same_path($to, $path)) return ['type' => 'redirect', 'to' => $to];
     }
@@ -214,6 +220,7 @@ function aok_resolve(string $uri, array $d): array {
         foreach ($d['services'] ?? [] as $s) {
             if (($slugs[(string)($s['id'] ?? '')] ?? null) === strtolower($parts[1])) {
                 if (!empty($s['redirectTo']) && !aok_same_path($s['redirectTo'], $path)) return ['type' => 'redirect', 'to' => $s['redirectTo']];
+                if (!empty($s['unpublished'])) return ['type' => 'redirect', 'to' => '/services'];   // unpublished without a chosen target
                 return ['type' => 'service', 'item' => $s, 'slug' => $slugs[(string)$s['id']], 'path' => '/services/' . $slugs[(string)$s['id']]];
             }
         }
@@ -275,8 +282,10 @@ function aok_cluster_pick(array $items, callable $score, int $n = 3, int $atLeas
     return array_values($out);
 }
 
+// A service shows on the site unless it was merged into another page (redirectTo) or unpublished.
+function aok_service_is_live(array $s): bool { return empty($s['redirectTo']) && empty($s['unpublished']); }
 function aok_live_services(array $d): array {
-    return array_values(array_filter($d['services'] ?? [], function ($s) { return empty($s['redirectTo']); }));
+    return array_values(array_filter($d['services'] ?? [], 'aok_service_is_live'));
 }
 
 function aok_live_posts(array $d): array {
@@ -415,8 +424,13 @@ function aok_featured_img_html(array $d, array $p): string {
     $img = aok_post_images($d, $p);
     return $img ? '<p><img src="' . aok_e($img[0]) . '" width="1200" height="675" alt="' . aok_e($alt) . '" style="max-width:100%;height:auto"></p>' : '';
 }
-function aok_service_images(array $d, array $s): array {
-    return aok_brand_images(aok_base($d), 'services', [aok_slugify((string)($s['slug'] ?? '')), aok_slugify((string)($s['title'] ?? ''))]);
+// a service's 3D banner: kept under the first address it had (banner), else its address or title; a service
+// added later has none of its own and shares the generic one ($fallback; SEO Health asks with false)
+const AOK_SVC_BANNER_FALLBACK = 'vedic-astrology-jyotish-deep-dives';
+function aok_service_images(array $d, array $s, bool $fallback = true): array {
+    $keys = [(string)($s['banner'] ?? ''), aok_slugify((string)($s['slug'] ?? '')), aok_slugify((string)($s['title'] ?? ''))];
+    if ($fallback) $keys[] = AOK_SVC_BANNER_FALLBACK;
+    return aok_brand_images(aok_base($d), 'services', $keys);
 }
 function aok_post_images(array $d, array $p): array {
     return aok_brand_images(aok_base($d), 'posts', [(string)($p['slug'] ?? '')]);
@@ -594,16 +608,17 @@ function aok_graph(array $d, array $r, array $meta): array {
     $graph = [$website, $org, $person];
 
     // services + catalogue (home, services overview, and the individual service page)
-    $serviceNode = function ($s) use ($d, $base, $slugs, $ORG) {
+    $serviceNode = function ($s) use ($d, $base, $slugs, $ORG, $PERSON) {
         $slug = $slugs[(string)($s['id'] ?? '')] ?? aok_slugify($s['title'] ?? '');
         $n = ['@type' => 'Service', '@id' => $base . '/services/' . $slug . '#service', 'name' => aok_text($s['title'] ?? ''),
-              'description' => aok_text($s['desc'] ?? ''), 'url' => $base . '/services/' . $slug, 'provider' => ['@id' => $ORG],
+              'description' => aok_text($s['desc'] ?? ''), 'url' => $base . '/services/' . $slug, 'provider' => [['@id' => $ORG], ['@id' => $PERSON]],
               'serviceType' => aok_text($s['title'] ?? ''), 'category' => 'Vedic astrology', 'areaServed' => aok_area_served($d)];
+        if (trim((string)($s['focusKeyword'] ?? '')) !== '') $n['keywords'] = aok_text($s['focusKeyword']);
         if (!empty($s['image']) && !preg_match('#^data:#i', (string)$s['image'])) $n['image'] = aok_abs($base, $s['image']);
         elseif ($img = aok_service_images($d, $s)) $n['image'] = $img;
         list($price, $cur) = aok_price((string)($s['price'] ?? ''));
         if ($price !== '') {
-            $unit = stripos((string)aok_get($d, 'about.pricing.unit', ''), 'hour') !== false ? 'hour' : null;
+            $unit = stripos((string)(($s['priceUnit'] ?? '') !== '' ? $s['priceUnit'] : aok_get($d, 'about.pricing.unit', '')), 'hour') !== false ? 'hour' : null;
             $n['offers'] = ['@type' => 'Offer', 'price' => $price, 'priceCurrency' => $cur, 'url' => $base . '/services/' . $slug,
                 'availability' => 'https://schema.org/InStock', 'seller' => ['@id' => $ORG],
                 'description' => aok_text(aok_get($d, 'local.paymentPolicy', ''))]
@@ -611,7 +626,7 @@ function aok_graph(array $d, array $r, array $meta): array {
         }
         return $n;
     };
-    $visibleServices = array_values(array_filter($d['services'] ?? [], function ($s) { return empty($s['redirectTo']); }));
+    $visibleServices = aok_live_services($d);
     if (in_array($r['type'], ['home', 'services'], true)) {
         $items = [];
         foreach ($visibleServices as $s) { $node = $serviceNode($s); $graph[] = $node; $items[] = ['@id' => $node['@id']]; }
@@ -878,7 +893,7 @@ function aok_services_list(array $d, array $services, bool $withDesc = true): st
     $slugs = aok_service_slugs($d['services'] ?? []);
     $o = '<ul>';
     foreach ($services as $s) {
-        if (!empty($s['redirectTo'])) continue;
+        if (!aok_service_is_live($s)) continue;
         $o .= '<li><h3><a href="/services/' . aok_e($slugs[(string)($s['id'] ?? '')] ?? aok_slugify($s['title'] ?? '')) . '">' . aok_e(aok_text($s['title'] ?? '')) . '</a></h3>'
             . ($withDesc ? '<p>' . aok_rich($s['desc'] ?? '') . '</p>' : '') . '</li>';
     }
@@ -924,7 +939,7 @@ function aok_main_html(array $d, array $r): string {
         $o .= '<section><p>' . aok_e(aok_text($g('home.hero.kicker'))) . '</p><h1>' . aok_e(aok_text($g('home.hero.h1'))) . '</h1><p>' . aok_rich($g('home.hero.sub')) . '</p><p>'
             . aok_btn($d, 'home.hero.cta1', 'Book a Consultation', 'contact') . ' ' . aok_btn($d, 'home.hero.cta2', 'Explore Services', 'services') . '</p></section>';
         $o .= '<section><p>' . aok_e(aok_text($g('home.servicesIntro.kicker'))) . '</p><h2>' . aok_e(aok_text($g('home.servicesIntro.title'))) . '</h2><p>' . aok_rich($g('home.servicesIntro.sub')) . '</p>'
-            . aok_services_list($d, array_slice(array_values(array_filter($d['services'] ?? [], function ($x) { return empty($x['redirectTo']); })), 0, 6)) . '<p>' . aok_btn($d, 'home.servicesIntro.btn', 'See all services →', 'services') . '</p></section>';
+            . aok_services_list($d, array_slice(aok_live_services($d), 0, 6)) . '<p>' . aok_btn($d, 'home.servicesIntro.btn', 'See all services →', 'services') . '</p></section>';
         $o .= '<section><p>' . aok_e(aok_text($g('home.about.kicker'))) . '</p><h2>' . aok_e(aok_text($g('home.about.title'))) . '</h2>' . aok_paras($g('home.about.body')) . '<ul>';
         foreach ((array)$g('home.about.credentials', []) as $c) $o .= '<li>' . aok_e(aok_text($c)) . '</li>';
         $o .= '</ul><p>' . aok_btn($d, 'home.about.btn', 'About Us', 'about') . '</p></section>' . aok_cta($d);
@@ -951,17 +966,19 @@ function aok_main_html(array $d, array $r): string {
         $o .= aok_crumbs([['Home', '/'], ['Services', '/services'], [aok_text($s['title'] ?? ''), '']]);
         $title = aok_text($s['title'] ?? '');
         $img = (!empty($s['image']) && !preg_match('#^data:#i', (string)$s['image'])) ? aok_abs(aok_base($d), $s['image']) : (aok_service_images($d, $s)[0] ?? '');
-        $o .= '<article><header><p>Vedic astrology service</p><h1>' . aok_e($title) . '</h1><p>' . aok_rich($s['desc'] ?? '') . '</p>'
-            . '<p><a href="#book">Book Consultation →</a></p>'
+        $eyebrow = aok_text(($s['eyebrow'] ?? '') !== '' ? $s['eyebrow'] : 'Vedic astrology service');
+        $cta = aok_text(($s['ctaLabel'] ?? '') !== '' ? $s['ctaLabel'] : 'Book Consultation');
+        $o .= '<article><header><p>' . aok_e($eyebrow) . '</p><h1>' . aok_e($title) . '</h1><p>' . aok_rich($s['desc'] ?? '') . '</p>'
+            . '<p><a href="#book">' . aok_e($cta) . ' →</a></p>'
             . ($img !== '' ? '<p><img src="' . aok_e($img) . '" width="1200" height="675" alt="' . aok_e($title . ' — Vedic astrology consultation with Jag Mallah') . '" style="max-width:100%;height:auto"></p>' : '')
             . '</header>' . aok_paras($s['detail'] ?? '');
-        if (!empty($s['price'])) $o .= '<p>Consultation fee: <strong>' . aok_e(aok_text($s['price'])) . '</strong> per 60-minute session. New clients pay after the consultation, only if satisfied.</p>';
+        if (!empty($s['price'])) $o .= '<p>Consultation fee: <strong>' . aok_e(aok_text($s['price'])) . '</strong> ' . aok_e(aok_text(($s['priceUnit'] ?? '') !== '' ? $s['priceUnit'] : aok_get($d, 'about.pricing.unit', 'per hour'))) . ', for a 60-minute session. New clients pay after the consultation, only if satisfied.</p>';
         $o .= '</article>';
         $o .= aok_related_posts_html($d, $s) . aok_author_card_html($d);
         $o .= '<section id="book"><h2>Book: ' . aok_e($title) . '</h2><p>Send your birth details and your question through the booking form, and Jag Mallah will reply '
             . aok_e(aok_text(aok_get($d, 'contact.replyTime', 'within 12–24 hours'))) . '.</p><p>' . aok_btn($d, 'servicesPage.cardBtn', 'Book this →', 'contact') . '</p>' . aok_contact_links_html($d) . '</section>';
         $o .= aok_areas_html($d);
-        $others = array_values(array_filter($d['services'] ?? [], function ($x) use ($s) { return ($x['id'] ?? '') !== ($s['id'] ?? '') && empty($x['redirectTo']); }));
+        $others = array_values(array_filter($d['services'] ?? [], function ($x) use ($s) { return ($x['id'] ?? '') !== ($s['id'] ?? '') && aok_service_is_live($x); }));
         $o .= '<section><h2>' . aok_e(aok_text($g('home.servicesIntro.title', 'Vedic astrology services'))) . '</h2>' . aok_services_list($d, array_slice($others, 0, 6), false) . '<p><a href="/services">See all services</a></p></section>' . aok_cta($d);
     } elseif ($t === 'meditation') {
         $o .= aok_hero($d, 'meditation.hero', aok_text($g('seo.meditation.focusKeyword')));
@@ -1018,8 +1035,9 @@ function aok_sitemap_urls(array $d): array {
         if ($indexable(aok_get($d, 'seo.' . $r . '.robots', 'index, follow'))) $out[] = [$base . aok_route_path($r), $mod, $cf];
     $slugs = aok_service_slugs($d['services'] ?? []);
     foreach ($d['services'] ?? [] as $s) {
-        if (!empty($s['redirectTo']) || !empty($s['canonical']) || !empty($s['noindex'])) continue;
-        $out[] = [$base . '/services/' . $slugs[(string)($s['id'] ?? '')], $mod, 'monthly'];
+        if (!aok_service_is_live($s) || !empty($s['canonical']) || !empty($s['noindex'])) continue;
+        $lm = preg_match('/^\d{4}-\d{2}-\d{2}/', (string)($s['updatedAt'] ?? '')) ? substr($s['updatedAt'], 0, 10) : $mod;   // set on every save that changes it
+        $out[] = [$base . '/services/' . $slugs[(string)($s['id'] ?? '')], $lm, 'monthly'];
     }
     foreach ($d['blog'] ?? [] as $p) {
         if (empty($p['published']) || empty($p['slug']) || !empty($p['redirectTo']) || !empty($p['canonical']) || !$indexable($p['robots'] ?? '')) continue;

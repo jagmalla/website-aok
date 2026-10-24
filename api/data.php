@@ -1,5 +1,7 @@
 <?php
 require_once __DIR__ . '/db.php';
+require_once __DIR__ . '/sync.php';           // services, addresses and search engines kept in step on save
+require_once __DIR__ . '/discovery-lib.php';
 cors();
 
 // GET  /api/data.php  → saved site JSON (public copy without credentials/leads; full copy for the admin)
@@ -29,6 +31,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if (empty($test['ai']['indexNowKey']) && !empty($old['ai']['indexNowKey']) && isset($test['ai']) && is_array($test['ai'])) {
         $test['ai']['indexNowKey'] = $old['ai']['indexNowKey'];
     }
+    $changed = aok_save_sync($old, $test);   // service timestamps, 301s for moved/deleted services
     $body = json_encode($test, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
     try {
         // Use two distinct placeholders — native prepared statements don't allow
@@ -39,7 +42,17 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
              ON DUPLICATE KEY UPDATE payload = :p2, updated_at = NOW()"
         );
         $stmt->execute([':p1' => $body, ':p2' => $body]);
-        json_out(['ok' => true]);
+        // answer the editor first, then refresh the static copies and tell the search engines
+        header('Content-Type: application/json; charset=utf-8');
+        echo json_encode(['ok' => true, 'sync' => aok_sync_patch($test), 'changed' => $changed], JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
+        aok_finish_response();
+        try {
+            $site = aok_site();
+            aok_write_static_files($site);
+            aok_indexnow_queue($changed, aok_base($site));
+            aok_indexnow_flush($site);
+        } catch (Throwable $e) {}
+        exit;
     } catch (Exception $e) {
         json_out(['ok' => false, 'error' => $e->getMessage()], 500);
     }

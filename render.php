@@ -100,6 +100,8 @@ try {
     header('Content-Type: text/html; charset=utf-8');
     header('Cache-Control: no-cache');
     if ($_SERVER['REQUEST_METHOD'] !== 'HEAD') echo $html;
+    // service changes queued for IndexNow go out after the page has been sent (at most every 10 minutes)
+    if (!defined('AOK_OFFLINE')) { require_once __DIR__ . '/api/sync.php'; aok_finish_response(); aok_indexnow_flush($d); }
 } catch (Throwable $err) {
     error_log('render.php: ' . $err->getMessage());
     aok_fallback($tplFile);

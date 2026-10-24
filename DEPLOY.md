@@ -30,6 +30,8 @@ Either way, finish with **[Part C — Verify the upload](#part-c--verify-the-upl
 | `api/db.php` | Database connection and shared helpers (admin session, CSRF, table setup). |
 | `api/auth.php` | Admin login: hashed password, lockout after repeated failures. Creates the database tables on first login. |
 | `api/data.php` | Loads and saves your site content. |
+| `api/sync.php` | Runs on every admin save: dates changed services for the sitemap, leaves a 301 behind when a service's address changes or it is deleted or unpublished, and queues the changed pages for IndexNow (sent at most every 10 minutes, after the response, on the live domain only). |
+| `api/discovery-lib.php` | Builds `robots.txt`, `sitemap.xml`, `llms.txt` and `llms-full.txt`; after every save it also rewrites the copies in the web root when they changed (so they are current even under the old `.htaccess`). |
 | `api/upgrades.php` | One-time content upgrade of the saved site (expanded FAQ answers, shorter SEO texts, the 5 duplicate merges; your business details and the in-depth content for all 32 pages). Runs by itself on the first page view after upload. |
 | `api/content/` | The page text of the 16 services (`services/<page address>.md`, from the Services specification) and the classical sections of the 16 blog posts (`posts/`). Applied to your pages by the upgrade; `v3/` only lets the upgrade recognise the earlier sections. Not reachable from the web. |
 | `api/upgrade-content.php` | The **Apply Full 32-Page Classical Content Upgrade** button in Admin → SEO Health. |
@@ -77,7 +79,7 @@ In File Manager, open each folder below, click **Upload**, tick
 |---|---|
 | `public_html/` | `index.html` · `render.php` · `robots.txt` · `sitemap.xml` · `llms.txt` · `llms-full.txt` — **not `.htaccess` yet** |
 | `public_html/assets/` | `app.js` · `hero3d.js` · `og-image.jpg` · `logo-192.webp` · `logo-512.webp` · `logo-512.png` · `favicon-32.png` · `favicon-48.png` · `apple-touch-icon.png` |
-| `public_html/api/` | `auth.php` · `data.php` · `db.php` · `defaults.json` · `health.php` · `indexnow.php` · `llms.php` · `robots.php` · `seo-health.php` · `seo-lib.php` · `sitemap.php` · `test-email.php` · `upload.php` · `upgrades.php` · `upgrade-content.php` · `reset-password.php` · `contact.php` · `config.sample.php` |
+| `public_html/api/` | `auth.php` · `data.php` · `db.php` · `defaults.json` · `discovery-lib.php` · `sync.php` · `health.php` · `indexnow.php` · `llms.php` · `robots.php` · `seo-health.php` · `seo-lib.php` · `sitemap.php` · `test-email.php` · `upload.php` · `upgrades.php` · `upgrade-content.php` · `reset-password.php` · `contact.php` · `config.sample.php` |
 | `public_html/api/content/` | the folders `services/`, `posts/` and `v3/` with all their `.md` files (48 files) |
 | `public_html/assets/img/` | the folders `services/` and `posts/` with all their images (160 files). Delete the old `assets/img/services/` folder first: the service images have new names. |
 

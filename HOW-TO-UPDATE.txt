@@ -1,7 +1,29 @@
 ANALYSIS OF KARMA — Update (SEO, local SEO, AI search & security)
 ===================================================================
 
-NEW IN THIS VERSION (content version 5)
+NEW IN THIS VERSION: SERVICES MANAGER AND ON-PAGE EDITING
+  • Admin -> Services is now a Services Manager. "+ Add new service" opens
+    a form (title, page address, summary, direct answer, methodology, life
+    questions, the 4 consultation steps, 3 FAQs, image); the $100 CAD rate,
+    Zoom/WhatsApp session and pay-after-satisfaction steps are pre-filled.
+  • Every service has: Edit in Admin (all text, sections, FAQs, SEO title,
+    description, focus keyword, Google preview), Open in Visual Editor,
+    View live page, Unpublish / Publish, Delete and move up/down.
+  • Unpublish keeps the text; Delete removes it. Either way you choose
+    where the old address forwards (the Services page, another service or
+    any address), so no service link ever shows "page not found".
+  • Open a service page with the editor on and click any text to change
+    it: title, the line above it, summary, booking button, rate, the
+    direct-answer box (with a live 45-55 word counter), every heading,
+    card, step and FAQ. Add or remove points, steps, questions and whole
+    sections, and replace the banner image. Changes save by themselves.
+  • Every save updates the sitemap (with the change date), llms.txt,
+    llms-full.txt, the structured data (Service, Offer, FAQPage) and the
+    page Google sees, and tells Bing/IndexNow about the changed pages.
+  • New files: api/sync.php and api/discovery-lib.php (upload the whole
+    zip as usual).
+
+EARLIER: CONTENT VERSION 5
   • Every service now opens its own full page, for example
     /services/kundli-birth-chart-reading, with a 3D Pearl & Gold banner,
     your original description, a direct-answer box, the classical
@@ -13,7 +35,7 @@ NEW IN THIS VERSION (content version 5)
   • Clicking a service card, "Read more" or "Book this" opens the page
     ("Book this" jumps straight to its booking form).
   • Bookings from a service page arrive marked with the service name.
-  • Edit any service page in Admin -> Services -> Detailed description.
+  • Edit any service page in Admin -> Services or right on the page.
 
 EARLIER: CONTENT VERSION 3
   • Your phone & WhatsApp +1 (236) 660-2000 is in the header, footer,

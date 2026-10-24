@@ -171,6 +171,25 @@ img{height:auto}
 @media (max-width:900px){.aok-svc-side{position:static}}
 @media (prefers-reduced-motion:reduce){.aok-svc-art{animation:none}.aok-feat,.aok-svc-card-img img{transition:none}}
 @media print{.aok-svc-art,.aok-svc-side,.aok-svc-book{display:none}}
+/* service page in the visual editor: click any text to type; dashed gold = editable */
+.aok-pe{outline:1.5px dashed rgba(166,132,70,.22);outline-offset:3px;border-radius:4px;cursor:text;transition:outline-color .15s,background .15s;min-width:1ch}
+.aok-pe:hover{outline-color:rgba(166,132,70,.6)}.aok-pe:focus{outline:2px solid #A68446;background:rgba(255,253,248,.92);box-shadow:0 0 0 6px rgba(223,194,134,.18)}
+.aok-pe:empty:before{content:attr(data-ph);color:#9a9ca0;font-style:italic;font-weight:400}
+.aok-pe-sec{position:relative;border:1px dashed rgba(166,132,70,.32);border-radius:20px;padding:6px 18px 18px;margin:22px -19px}
+.aok-pe-sec>.aok-pe-tools{position:absolute;top:-15px;right:14px}
+.aok-pe-tools{display:flex;gap:5px;z-index:2}.aok-pe-tools.is-corner{position:absolute;top:8px;right:8px;opacity:0;transition:opacity .15s}.aok-pe-tools.is-inline{display:inline-flex;margin-left:8px;vertical-align:middle;opacity:0}
+.aok-pe-card:hover>.aok-pe-tools,.aok-pe-card:focus-within>.aok-pe-tools,.aok-pe-li:hover .aok-pe-tools,.aok-pe-faq:hover>.aok-pe-tools{opacity:1}
+.aok-pe-btn{height:28px;min-width:28px;padding:0 9px;border-radius:8px;border:1px solid rgba(166,132,70,.45);background:#fff;color:#1E2022;font:600 12.5px 'Plus Jakarta Sans',sans-serif;cursor:pointer;box-shadow:0 4px 12px -6px rgba(110,84,38,.35)}
+.aok-pe-btn:hover{background:#F7EFE0}.aok-pe-btn.is-danger{color:#b4452f;background:#fbe9e3;border-color:rgba(180,69,47,.35)}
+.aok-pe-add{justify-self:start;align-self:start;margin:10px 8px 0 0;padding:7px 14px;border-radius:999px;border:1.5px dashed rgba(166,132,70,.6);background:rgba(255,253,248,.8);color:#8C6D33;font:600 13px 'Plus Jakarta Sans',sans-serif;cursor:pointer}
+.aok-pe-add:hover{background:#F7EFE0;border-style:solid}
+.aok-pe-addsec{display:flex;flex-wrap:wrap;align-items:center;gap:0 4px;margin:26px 0 10px;padding:16px 18px;border:1.5px dashed rgba(166,132,70,.45);border-radius:18px}.aok-pe-addsec>span{font:600 13px 'Plus Jakarta Sans',sans-serif;color:#6B6E73;margin:10px 8px 0 0}
+.aok-pe-answer-h{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:8px;font:700 12px 'Plus Jakarta Sans',sans-serif;letter-spacing:.08em;text-transform:uppercase;color:#8C6D33}
+.aok-pe-wc{padding:3px 10px;border-radius:999px;font:700 11.5px 'Plus Jakarta Sans',sans-serif;letter-spacing:0;text-transform:none}.aok-pe-wc.is-ok{background:#e4f2e7;color:#3f7d4e}.aok-pe-wc.is-off{background:#fbe9e3;color:#b4452f}
+.aok-pe-faq{padding:16px 20px}.aok-pe-faq-q{font:600 17.5px/1.4 'Plus Jakarta Sans',sans-serif;color:#1E2022;margin:0 40px 8px 0}
+.aok-pe-imgbar{position:absolute;left:50%;bottom:22px;transform:translateX(-50%);display:flex;gap:8px;z-index:3}
+.aok-pe-empty{margin:6px 0 22px}
+.aok-pe-hint{display:flex;gap:10px;align-items:center;margin:0 0 18px;padding:10px 16px;border-radius:12px;background:rgba(255,253,248,.9);border:1px dashed rgba(166,132,70,.5);font:500 13.5px/1.5 'Plus Jakarta Sans',sans-serif;color:#3A3D42}.aok-pe-hint b{color:#8C6D33}
 /* floating WhatsApp / Call buttons */
 .aok-fab{position:fixed;right:18px;bottom:18px;z-index:900;display:flex;flex-direction:column;align-items:flex-end;gap:10px}
 .aok-fab-btn{display:inline-flex;align-items:center;gap:8px;padding:11px 17px;border-radius:999px;background:rgba(255,252,247,.92);-webkit-backdrop-filter:blur(10px);backdrop-filter:blur(10px);border:1px solid rgba(166,132,70,.45);box-shadow:0 12px 28px -12px rgba(110,84,38,.6);color:#1E2022;font:600 13.5px 'Plus Jakarta Sans',sans-serif;text-decoration:none;transition:transform .15s}
@@ -283,7 +302,7 @@ img{height:auto}
 </head>
 <body>
 <div id="root"></div>
-<script src="/assets/app.js?v=b23c19a97e" defer></script>
+<script src="/assets/app.js?v=ddd6dcc2f7" defer></script>
 <!-- Hero 3D scene (assets/hero3d.js, Three.js via the import map): started once the page is idle, and skipped on
      data-saver / 2G connections and low-memory phones (they keep the static pearl background) -->
 <script type="module">

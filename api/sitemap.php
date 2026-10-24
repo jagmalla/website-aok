@@ -2,17 +2,12 @@
 // Live XML sitemap, served at /sitemap.xml (see .htaccess). Always reflects the current site:
 // main pages, the FAQ, every service page, published blog posts and custom pages.
 // POST ?action=write (admin) also saves a static snapshot to /sitemap-static.xml as a backup.
-require_once __DIR__ . '/seo-lib.php';
+require_once __DIR__ . '/discovery-lib.php';
 
 $d = aok_site();
 $urls = aok_sitemap_urls($d);
 
-$xml = '<?xml version="1.0" encoding="UTF-8"?>' . "\n" . '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">' . "\n";
-foreach ($urls as $u) {
-    $xml .= "  <url>\n    <loc>" . htmlspecialchars($u[0], ENT_XML1) . "</loc>\n    <lastmod>" . htmlspecialchars($u[1], ENT_XML1)
-          . "</lastmod>\n    <changefreq>" . $u[2] . "</changefreq>\n  </url>\n";
-}
-$xml .= "</urlset>\n";
+$xml = aok_sitemap_xml($d);
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST' || (($_GET['action'] ?? '') === 'write')) {
     cors();

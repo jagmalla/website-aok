@@ -13,6 +13,7 @@ const StreamableLogic = DCLogic;
 class Component extends DCLogic {
   P = { bg:'#FAF8F5', bgAlt:'#F3EFE6', card:'#FFFCF7', ink:'#3A3D42', maroon:'#1E2022', maroonD:'#141517', red:'#8C6D33', redD:'#6E5426', gold:'#A68446', goldL:'#DFC286', cream:'#FFFDF8', muted:'#6B6E73', line:'rgba(166,132,70,.22)', white:'#FFFFFF', ok:'#3f7d4e', bad:'#b4452f' };
   HEAD = "'Plus Jakarta Sans',sans-serif";
+  SVC_BANNER_FALLBACK = 'vedic-astrology-jyotish-deep-dives';   // the 3D banner shown for a service that has none of its own
   SERIF = "'Cormorant Garamond',Georgia,serif";
   _hist=[]; _fut=[]; _baseline=null; _drag=null;
   STR = {
@@ -36,7 +37,7 @@ class Component extends DCLogic {
   migrateGmb(){ const d=this.state.data; if(!d||!d.contact)return; if(d.contact.gmb==='https://share.google/g70mXkODvmMmpB5w2'){ this.save(this.setIn(d,'contact.gmb','https://share.google/r37d5nGpSJCeEXhvt')); } }
   migrateAbout(){ try{ if(localStorage.getItem('aok_about_v3'))return; }catch(e){ return; } const d=this.state.data; if(d){ this.save(this.setIn(d,'about',this.defaults().about)); } try{ localStorage.setItem('aok_about_v3','1'); }catch(e){} }
   ensureSeedPosts(){ const d=this.state.data; if(!d) return; const have={}; (d.blog||[]).forEach(p=>{ if(p&&p.slug) have[p.slug]=1; }); const add=this.seedPosts().filter(p=>!have[p.slug]); if(add.length){ this.save(this.setIn(d,'blog',[...add,...(d.blog||[])])); } }
-  ensureSeedServices(){ const d=this.state.data; if(!d) return; const have={}; (d.services||[]).forEach(s=>{ if(s&&s.seedKey) have[s.seedKey]=1; }); const add=this.seedServices().filter(s=>!have[s.seedKey]); if(add.length){ this.save(this.setIn(d,'services',[...(d.services||[]),...add])); } }
+  ensureSeedServices(){ const d=this.state.data; if(!d) return; const have={}; (d.services||[]).forEach(s=>{ if(s&&s.seedKey) have[s.seedKey]=1; }); (d.deletedSeeds||[]).forEach(k=>{ have[k]=1; }); const add=this.seedServices().filter(s=>!have[s.seedKey]); if(add.length){ this.save(this.setIn(d,'services',[...(d.services||[]),...add])); } }
   // The 5 duplicate pairs merged in content version 2 (duplicate → primary). The duplicates stay in the admin with a
   // 301 redirect (Admin → Redirects → Undo restores them); api/upgrades.php applies the same merge to saved sites.
   // Page address of each of the 16 services (content version 5); the old automatic addresses 301 here (api/upgrades.php)
@@ -82,13 +83,15 @@ class Component extends DCLogic {
       const parts=(location.pathname||'/').replace(/^\/+|\/+$/g,'').split('/').filter(Boolean);
       // 301s in the browser too (old service addresses, merged pages), for servers still on an older .htaccess
       const follow=to=>{ if((hops||0)>3||!/^\/[^/]/.test(to||'')) return null; history.replaceState(null,'',to+(location.hash||'')); return this._routeFromUrl(data,(hops||0)+1); };
-      const here='/'+parts.join('/').toLowerCase(); const red=((data&&data.redirects)||[]).find(r=>r&&r.from&&('/'+String(r.from).replace(/^\/+|\/+$/g,'')).toLowerCase()===here&&r.to);
+      const here='/'+parts.join('/').toLowerCase(); const svs=(data&&data.services)||[], sl=this.serviceSlugs(svs);
+      const liveHere=parts[0]==='services'&&parts[1]&&svs.some(x=>this.serviceIsLive(x)&&sl[x.id]===decodeURIComponent(parts[1]).toLowerCase());
+      const red=liveHere?null:((data&&data.redirects)||[]).find(r=>r&&r.from&&('/'+String(r.from).replace(/^\/+|\/+$/g,'')).toLowerCase()===here&&r.to);
       if(red&&here!=='/'){ const r2=follow(String(red.to).trim()); if(r2) return r2; }
       if(!parts.length) return {route:'home',postId:null,pageId:null};
       if(parts[0]==='admin') return {route:'admin',postId:null,pageId:null};
       const none={route:'notfound',postId:null,pageId:null,serviceId:null};
       if(parts[0]==='blog'&&parts[1]){ const slug=decodeURIComponent(parts[1]); const post=((data&&data.blog)||[]).find(x=>x.slug===slug&&(x.published||this.state.editMode)); return post?{route:'blog',postId:post.id,pageId:null,serviceId:null}:none; }
-      if(parts[0]==='services'&&parts[1]){ const sv=(data&&data.services)||[]; const slugs=this.serviceSlugs(sv); const s=sv.find(x=>slugs[x.id]===decodeURIComponent(parts[1]).toLowerCase()); if(s&&s.redirectTo){ const r2=follow(s.redirectTo); if(r2) return r2; } return s?{route:'service',serviceId:s.id,postId:null,pageId:null}:none; }
+      if(parts[0]==='services'&&parts[1]){ const sv=(data&&data.services)||[]; const slugs=this.serviceSlugs(sv); const s=sv.find(x=>slugs[x.id]===decodeURIComponent(parts[1]).toLowerCase()); if(s&&(s.redirectTo||s.unpublished)&&!this.state.editMode){ const r2=follow(s.redirectTo||'/services'); if(r2) return r2; } return s?{route:'service',serviceId:s.id,postId:null,pageId:null}:none; }
       const known=['about','services','meditation','blog','contact','faq']; if(parts.length===1&&known.indexOf(parts[0])>-1) return {route:parts[0],postId:null,pageId:null,serviceId:null};
       const pg=((data&&data.pages)||[]).find(p=>p.slug===decodeURIComponent(parts[0])); if(pg&&parts.length===1) return {route:'page',pageId:pg.id,postId:null,serviceId:null};
       return none; }catch(e){ return null; } }
@@ -103,7 +106,8 @@ class Component extends DCLogic {
   // id -> URL slug for each service (custom slug, else from the title; duplicates get -2, -3 …) — same rules as aok_service_slugs()
   serviceSlugify(s){ return String(s||'').replace(/&/g,' and ').toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-+|-+$/g,''); }
   // services merged into another one (Admin → Redirects) stay in the admin but leave the public lists
-  liveServices(){ return ((this.state.data&&this.state.data.services)||[]).filter(s=>!s.redirectTo); }
+  liveServices(){ return ((this.state.data&&this.state.data.services)||[]).filter(s=>this.serviceIsLive(s)); }
+  serviceIsLive(s){ return !!s&&!s.redirectTo&&!s.unpublished; }   // merged (redirectTo) or unpublished services are hidden
   serviceSlugs(services){ const out={},used={}; (services||[]).forEach(s=>{ let base=this.serviceSlugify((s.slug||'')!==''?s.slug:(s.title||'service'))||'service'; let slug=base,n=2; while(used[slug]) slug=base+'-'+(n++); used[slug]=1; out[s.id]=slug; }); return out; }
   serviceHref(s){ return '/services/'+(this.serviceSlugs(this.state.data.services||[])[s.id]||this.serviceSlugify(s.title)); }
   // a real link (crawlable, opens in a new tab with ctrl/cmd-click) that navigates inside the app on a normal click
@@ -139,14 +143,23 @@ class Component extends DCLogic {
   _serverSave(){ // only the logged-in admin may write site content to the server; visitors never do
     if(!this.state.authed && !this.state.editMode) return;
     clearTimeout(this._srvTimer);
-    this._srvTimer=setTimeout(()=>{ try{ fetch('/api/data.php',{ method:'POST', headers:this.apiHeaders(), body:JSON.stringify(this.state.data) }).catch(()=>{}); }catch(e){} },800); }
+    this._srvTimer=setTimeout(()=>{ try{ fetch('/api/data.php',{ method:'POST', headers:this.apiHeaders(), body:JSON.stringify(this.state.data) }).then(r=>r.json()).then(j=>this._applySync(j)).catch(()=>{}); }catch(e){} },800); }
+  // What the server added on save (api/sync.php): 301s for moved/deleted services, deleted shipped services and the
+  // services' updatedAt. Merged into the editor's copy without another save, so the next autosave keeps them.
+  _applySync(j){ const sy=j&&j.ok&&j.sync; if(!sy) return; const d=this.state.data; if(!d) return; let changed=false; const nd={...d};
+    const key=p=>('/'+String(p||'').replace(/^\/+|\/+$/g,'')).toLowerCase(); const have={}; (d.redirects||[]).forEach(r=>{ have[key(r.from)]=1; });
+    const add=(sy.redirects||[]).filter(r=>r&&r.from&&!have[key(r.from)]); if(add.length){ nd.redirects=[...(d.redirects||[]),...add]; changed=true; }
+    const ds=Array.from(new Set([...(d.deletedSeeds||[]),...(sy.deletedSeeds||[])])); if(ds.length!==(d.deletedSeeds||[]).length){ nd.deletedSeeds=ds; changed=true; }
+    const up=sy.updatedAt||{}; if((d.services||[]).some(x=>up[x.id]&&up[x.id]!==x.updatedAt)){ nd.services=d.services.map(x=>up[x.id]&&up[x.id]!==x.updatedAt?{...x,updatedAt:up[x.id]}:x); changed=true; }
+    const bn=sy.banner||{}; if((nd.services||[]).some(x=>bn[x.id]&&!x.banner)){ nd.services=(nd.services||[]).map(x=>bn[x.id]&&!x.banner?{...x,banner:bn[x.id]}:x); changed=true; }
+    if(changed){ try{ localStorage.setItem('aok_site_v1',JSON.stringify(nd)); }catch(e){} this.setState({data:nd}); } }
   saveNow(){ try{ localStorage.setItem('aok_site_v1', JSON.stringify(this.state.data)); }catch(e){}
     clearTimeout(this._srvTimer); // we are saving right now, so cancel any pending auto-save
     this.flash('Saving\u2026'); const body=JSON.stringify(this.state.data);
     try{
       fetch('/api/data.php',{ method:'POST', headers:this.apiHeaders(), body })
         .then(r=>r.json().catch(()=>null))
-        .then(j=>{ if(j&&(j.error==='not_logged_in'||j.error==='bad_csrf')){ this.setState({authed:false,editMode:false,route:'admin'}); this.flash('\u26a0 Your admin session has ended \u2014 please log in again, then click Save.'); return; } if(j&&j.ok){ this.flash('\u2713 Saved \u2014 your changes are now live'); this._live={}; this.forceUpdate(); this._indexNowAuto(); } else { this.flash('\u26a0 Save failed: '+((j&&j.error)?j.error:'database error')+' \u2014 open /api/health.php to diagnose'); } })
+        .then(j=>{ if(j&&(j.error==='not_logged_in'||j.error==='bad_csrf')){ this.setState({authed:false,editMode:false,route:'admin'}); this.flash('\u26a0 Your admin session has ended \u2014 please log in again, then click Save.'); return; } if(j&&j.ok){ this._applySync(j); this.flash('\u2713 Saved \u2014 your changes are now live'); this._live={}; this.forceUpdate(); this._indexNowAuto(); } else { this.flash('\u26a0 Save failed: '+((j&&j.error)?j.error:'database error')+' \u2014 open /api/health.php to diagnose'); } })
         .catch(()=>{ this.flash('\u26a0 Couldn\u2019t reach the server. Check your connection and click Save again.'); });
     }catch(e){ this.flash('\u26a0 Could not save to the server.'); } }
   // IndexNow: tell Bing & co. (and the AI search built on them) that pages changed. Auto mode pings at most once an hour.
@@ -248,6 +261,7 @@ class Component extends DCLogic {
         llmsOverride:'', llmsFullOverride:'', indexNowKey:'', indexNowAuto:true, googleVerification:'', bingVerification:'' },
       // admin-managed 301 redirects (used when merging duplicate services or posts): [{from:'/old', to:'/new'}]
       redirects:[],
+      deletedSeeds:[],   // shipped services the admin deleted (never added back)
       contentVersion:2,   // content upgrades already included (see api/upgrades.php)
       dupIgnore:[],   // duplicate pairs the admin marked as “not duplicates”
       nav:{ items:[
@@ -471,6 +485,18 @@ class Component extends DCLogic {
       componentDidUpdate(){ if(this.el && document.activeElement!==this.el && this.el.innerHTML!==(this.props.html||'')) this.el.innerHTML=this.props.html||''; }
       commit=()=>{ this.props.onCommit(this.el.innerHTML); };
       render(){ const {tag='div',style,editable,className}=this.props; return React.createElement(tag,{ ref:r=>this.el=r, className, style, contentEditable:editable||undefined, suppressContentEditableWarning:true, onBlur:editable?this.commit:undefined }); }
+    };
+    // contentEditable plain text: commits on blur (Enter finishes a one-line field, Esc cancels), pastes as text
+    const PT=(()=>{ try{ const x=document.createElement('div'); x.contentEditable='plaintext-only'; return x.contentEditable==='plaintext-only'; }catch(e){ return false; } })();
+    this.EditablePlain = class extends React.Component {
+      componentDidMount(){ this.sync(); } componentDidUpdate(){ if(document.activeElement!==this.el) this.sync(); }
+      // innerText follows CSS text-transform (an uppercase eyebrow would save in capitals): read the raw text there
+      text(){ const el=this.el; return getComputedStyle(el).textTransform!=='none'?el.textContent:el.innerText; }
+      sync(){ if(this.el&&this.text()!==(this.props.value||'')) this.el.innerText=this.props.value||''; }
+      commit=()=>{ let v=(this.text()||'').replace(/\u00a0/g,' '); v=this.props.multiline?v.replace(/\n{3,}/g,'\n\n').replace(/\s+$/,''):v.replace(/\s*\n\s*/g,' ').trim(); if(v!==(this.props.value||'')) this.props.onCommit(v); };
+      key=e=>{ if(e.key==='Enter'&&!this.props.multiline){ e.preventDefault(); this.el.blur(); } else if(e.key==='Escape'){ this.el.innerText=this.props.value||''; this.el.blur(); } };
+      paste=e=>{ e.preventDefault(); const t=(e.clipboardData||window.clipboardData).getData('text/plain'); document.execCommand('insertText',false,this.props.multiline?t:t.replace(/\s*\n\s*/g,' ')); };
+      render(){ const {tag,style,className,placeholder}=this.props; return React.createElement(tag||'span',{ref:r=>this.el=r,className:'aok-pe'+(className?' '+className:''),style,'data-ph':placeholder,contentEditable:PT?'plaintext-only':'true',suppressContentEditableWarning:true,spellCheck:true,onBlur:this.commit,onKeyDown:this.key,onPaste:this.paste,onInput:this.props.onInput?(()=>this.props.onInput(this.text()||'')):undefined,onClick:e=>e.stopPropagation()}); }
     };
     this.EditableImage = class extends React.Component {
       state={ tx:null, ty:null, grab:false };
@@ -734,12 +760,25 @@ class Component extends DCLogic {
   // ---------- SERVICE PAGE (/services/{slug}) ----------
   // Hero with the service's 3D banner -> the original description -> the page text (answer box, sections as cards,
   // the 4 consultation steps, the FAQ as an accordion) -> related articles -> the astrologer -> the booking form.
-  // The page text is the service's "Detailed description" (light Markdown), so every part stays editable.
-  serviceImg(s,ratio){ if(s&&s.image) return s.image; const slug=s&&this.serviceSlugs((this.state.data&&this.state.data.services)||[])[s.id]; return slug?'/assets/img/services/'+slug+'-'+(ratio||'16x9')+'.webp':''; }
+  // The page text is the service's light Markdown (s.detail): edited in Admin → Services or right on the page (svcSectionEdit).
+  // a service's picture: the uploaded image, else its 3D banner (kept under the first address it had: s.banner), else the shared one
+  serviceImg(s,ratio){ if(s&&s.image) return s.image; const slug=s&&(s.banner||this.serviceSlugs((this.state.data&&this.state.data.services)||[])[s.id]); return slug?'/assets/img/services/'+slug+'-'+(ratio||'16x9')+'.webp':''; }
+  svcImgFallback(e,ratio){ const el=e.currentTarget, fb='/assets/img/services/'+this.SVC_BANNER_FALLBACK+'-'+(ratio||'16x9')+'.webp'; if(el.getAttribute('src')!==fb){ el.setAttribute('src',fb); return true; } return false; }
   scrollToBook(){ const el=document.getElementById('book'); if(el&&el.scrollIntoView) el.scrollIntoView({behavior:'smooth',block:'start'}); }
   goServiceBook(s){ this.go('service',{serviceId:s.id}); setTimeout(()=>this.scrollToBook(),450); }
+  // light Markdown back from blocks (the inverse of mdBlocks), so page edits are saved as the same text format
+  mdSerialize(blocks){ return blocks.map(b=>{ const t=b[0],v=b[1]; if(t==='h2') return '## '+v; if(t==='h3') return '### '+v;
+    if(t==='answer') return String(v).split('\n').map(l=>'> '+l).join('\n'); if(t==='ul') return v.map(x=>'- '+x).join('\n'); if(t==='ol') return v.map((x,i)=>(i+1)+'. '+x).join('\n'); return String(v); }).filter(x=>String(x).trim()!=='').join('\n\n'); }
   mdLabel(li){ const m=String(li||'').match(/^\*\*([^*]+?):\*\*\s*(.+)$/); return m?[m[1],m[2]]:null; }
-  serviceSections(md){ const intro=[],secs=[]; this.mdBlocks(md).forEach(b=>{ if(b[0]==='h2') secs.push({title:b[1],blocks:[]}); else (secs.length?secs[secs.length-1].blocks:intro).push(b); }); return {intro,secs}; }
+  // the page text grouped by ## heading; every block keeps its index (b[2]) so the page editor can write it back
+  serviceSections(md){ const intro=[],secs=[]; this.mdBlocks(md).forEach((b,i)=>{ b=[b[0],b[1],i]; if(b[0]==='h2') secs.push({title:b[1],at:i,blocks:[]}); else (secs.length?secs[secs.length-1].blocks:intro).push(b); }); return {intro,secs}; }
+  // change a service's page text: fn receives the block list (copy) and edits it in place
+  svcEditBlocks(s,fn){ const i=(this.state.data.services||[]).findIndex(x=>x.id===s.id); if(i<0) return; const bl=this.mdBlocks(s.detail||'').map(b=>[b[0],Array.isArray(b[1])?[...b[1]]:b[1]]); fn(bl); this.commit('services.'+i+'.detail',this.mdSerialize(bl)); }
+  svcSet(s,k,v){ const i=(this.state.data.services||[]).findIndex(x=>x.id===s.id); if(i>=0) this.commit('services.'+i+'.'+k,v); }
+  // plain-text inline editing (service pages store text and light Markdown, not HTML)
+  ep(value,onCommit,opts){ opts=opts||{}; if(!this.state.editMode) return opts.render?opts.render(value):value;
+    return React.createElement(this.EditablePlain,{key:opts.key,value:value||'',onCommit,tag:opts.tag||'span',multiline:!!opts.multiline,placeholder:opts.placeholder||'Type here\u2026',style:opts.style,className:opts.className,onInput:opts.onInput}); }
+  wordCount2(t){ return String(t||'').replace(/\*\*/g,'').split(/\s+/).filter(Boolean).length; }
   svcSection(sec,i){ const h=React.createElement,P=this.P,k='ss'+i,t=sec.title,bl=sec.blocks;
     const head=h('h2',{id:'section-'+(i+1),className:'aok-svc-h2'},this.mdInline(t,k));
     const one=type=>bl.length===1&&bl[0][0]===type; let body;
@@ -749,43 +788,81 @@ class Component extends DCLogic {
     else if(one('ul')&&bl[0][1].every(li=>this.mdLabel(li))){ body=h('div',{className:'aok-feats',style:{gridTemplateColumns:'repeat(2,1fr)'}}, ...bl[0][1].map((li,j)=>{ const m=this.mdLabel(li); return h('div',{key:k+j,className:'aok-feat'}, h('h3',null,this.mdInline(m[0],k+'t'+j)), h('p',null,this.mdInline(m[1],k+'f'+j))); })); }
     else body=h('div',{className:'aok-md'}, this.mdRenderBlocks(bl,16.5,k));
     return h('section',{key:k,className:'aok-svc-sec','aria-labelledby':'section-'+(i+1)}, head, body); }
+  // ---------- the service page in the visual editor: every part is plain text you click and type into ----------
+  // Saves go through svcOps (the same operations as the Services Manager), so the page text stays clean Markdown.
+  svcTool(label,fn,title,danger){ return React.createElement('button',{type:'button',className:'aok-pe-btn'+(danger?' is-danger':''),title,'aria-label':title,onMouseDown:e=>e.preventDefault(),onClick:e=>{ e.preventDefault(); e.stopPropagation(); fn(); }},label); }
+  svcAdd(label,fn){ return React.createElement('button',{type:'button',className:'aok-pe-add',onMouseDown:e=>e.preventDefault(),onClick:e=>{ e.preventDefault(); fn(); }},'+ '+label); }
+  svcAnswerEdit(s,ops,b){ const h=React.createElement; const txt=b?String(b[1]).replace(/^\*\*[^*]+\*\*\s*/,''):''; const n=this.wordCount2(txt); const cls=x=>'aok-pe-wc '+(x>=45&&x<=55?'is-ok':'is-off');
+    if(!b) return h('div',{className:'aok-pe-empty'},this.svcAdd('Add the direct answer box',()=>ops.setAnswer('Write a clear 45–55 word answer: what this service is, who it is for and how the session works.')));
+    return h('aside',{className:'aok-answer aok-pe-answer'}, h('div',{className:'aok-pe-answer-h'}, h('b',null,'Direct answer'), h('span',{className:cls(n),title:'45–55 words is the length AI assistants quote most'},n+' words · aim 45–55')),
+      this.ep(txt,v=>ops.setAnswer(v),{key:'ans',tag:'p',multiline:true,style:{margin:0},placeholder:'A clear 45–55 word answer',onInput:t=>{ const el=document.querySelector('.aok-pe-answer .aok-pe-wc'); if(el){ const k=this.wordCount2(t); el.textContent=k+' words · aim 45–55'; el.className=cls(k); } }})); }
+  // one generic block (paragraph, sub-heading, list) of the page text
+  svcBlockEdit(b,ops,k){ const h=React.createElement,P=this.P,t=b[0],i=b[2];
+    if(t==='h3') return h('h3',{key:k,style:{font:'600 21px/1.3 '+this.SERIF,color:P.maroon,margin:'26px 0 8px'}},this.ep(b[1],v=>ops.setText(i,v),{key:k+'e'}));
+    if(t==='answer') return h('aside',{key:k,className:'aok-answer'},this.ep(b[1],v=>ops.setText(i,v,true),{key:k+'e',tag:'p',multiline:true,style:{margin:0}}));
+    if(t==='ul'||t==='ol') return h('div',{key:k},h(t,{className:'aok-mdlist',style:{font:'400 16.5px/1.75 Plus Jakarta Sans',color:P.ink,margin:'0 0 8px',paddingLeft:24}},...b[1].map((li,j)=>h('li',{key:k+'l'+j,className:'aok-pe-li'},this.ep(li,v=>ops.setItem(i,j,v),{key:k+'l'+j+'e',placeholder:'Empty — leave empty to remove'}),h('span',{className:'aok-pe-tools is-inline'},this.svcTool('✕',()=>ops.setItem(i,j,''),'Remove this point',true))))),this.svcAdd(t==='ol'?'Add step':'Add point',()=>ops.addItem(i,b[1].length-1,'New point.')));
+    return h('p',{key:k,style:{font:'400 16.5px/1.8 Plus Jakarta Sans',color:P.ink,margin:'0 0 18px'}},this.ep(b[1],v=>ops.setText(i,v,true),{key:k+'e',tag:'span',multiline:true,placeholder:'Empty — leave empty to remove',style:{display:'block'}})); }
+  svcSectionEdit(sec,i,ops){ const h=React.createElement,k='se'+i,t=sec.title,bl=sec.blocks; const one=type=>bl.length===1&&bl[0][0]===type;
+    const tools=h('div',{className:'aok-pe-tools'}, this.svcTool('↑',()=>ops.moveSection(sec.at,-1),'Move section up'), this.svcTool('↓',()=>ops.moveSection(sec.at,1),'Move section down'), this.svcTool('✕',()=>{ if(confirm('Delete the section “'+t.replace(/\*\*/g,'')+'” and its text?')) ops.delSection(sec.at); },'Delete this section',true));
+    const head=h('h2',{id:'section-'+(i+1),className:'aok-svc-h2'},this.ep(t,v=>ops.setText(sec.at,v),{key:k+'h',placeholder:'Section heading'}));
+    const card=(cls,j,a,b2,bi,len,extra)=>h('div',{key:k+j,className:cls+' aok-pe-card'}, extra||null, h('h3',null,this.ep(a,v=>ops.setLabeled(bi,j,v,b2),{key:k+j+'a',placeholder:'Title'})), h('p',null,this.ep(b2,v=>ops.setLabeled(bi,j,a,v),{key:k+j+'b',multiline:true,placeholder:'Text'})),
+      h('div',{className:'aok-pe-tools is-corner'}, j>0?this.svcTool('←',()=>ops.moveItem(bi,j,-1),'Move earlier'):null, j<len-1?this.svcTool('→',()=>ops.moveItem(bi,j,1),'Move later'):null, this.svcTool('✕',()=>ops.setItem(bi,j,''),'Remove',true)));
+    let body;
+    if(/frequently asked/i.test(t)||bl.some(b=>b[0]==='h3')){ const qa=[]; bl.forEach(b=>{ if(b[0]==='h3') qa.push({q:b,a:[]}); else if(qa.length) qa[qa.length-1].a.push(b); else qa.push({q:null,a:[b]}); });
+      body=h('div',{className:'aok-sfaqs'}, ...qa.map((x,j)=>x.q? h('div',{key:k+'q'+j,className:'aok-sfaq aok-pe-faq'},
+          h('div',{className:'aok-pe-faq-q'},this.ep(x.q[1],v=>ops.setText(x.q[2],v),{key:k+'q'+j+'e',placeholder:'Question'})),
+          h('div',{className:'aok-sfaq-a'},...(x.a.length?x.a.map((b,m)=>this.svcBlockEdit(b,ops,k+'a'+j+'.'+m)):[this.svcAdd('Add the answer',()=>ops.insertAfter(x.q[2],['p','Write a clear, direct answer here.']))])),
+          h('div',{className:'aok-pe-tools is-corner'},this.svcTool('✕',()=>ops.delFaq(x.q[2]),'Remove this question',true)))
+        : h('div',{key:k+'p'+j},...x.a.map((b,m)=>this.svcBlockEdit(b,ops,k+'p'+j+'.'+m)))), this.svcAdd('Add question',()=>ops.addFaq(sec.at))); }
+    else if(one('ol')){ const it=bl[0][1], bi=bl[0][2]; body=h('div',null,h('div',{className:'aok-steps',style:{display:'grid',gridTemplateColumns:'repeat('+Math.min(it.length,4)+',1fr)'}}, ...it.map((li,j)=>{ const m=this.mdLabel(li)||['',li]; return card('aok-step',j,m[0],m[1],bi,it.length,h('span',{className:'aok-step-n','aria-hidden':'true'},String(j+1))); })), this.svcAdd('Add step',()=>ops.addItem(bi,it.length-1))); }
+    else if(one('ul')&&bl[0][1].every(li=>this.mdLabel(li))){ const it=bl[0][1], bi=bl[0][2]; body=h('div',null,h('div',{className:'aok-feats',style:{gridTemplateColumns:'repeat(2,1fr)'}}, ...it.map((li,j)=>{ const m=this.mdLabel(li); return card('aok-feat',j,m[0],m[1],bi,it.length); })), this.svcAdd('Add point',()=>ops.addItem(bi,it.length-1))); }
+    else body=h('div',{className:'aok-md'}, ...bl.map((b,m)=>this.svcBlockEdit(b,ops,k+'b'+m)), this.svcAdd('Add paragraph',()=>ops.addPara(sec.at)));
+    return h('section',{key:k,className:'aok-svc-sec aok-pe-sec','aria-labelledby':'section-'+(i+1)}, tools, head, body); }
+  svcAddSectionBar(ops){ const h=React.createElement; return h('div',{className:'aok-pe-addsec'}, h('span',null,'Add a section:'), ...[['points','Points (cards)'],['steps','Steps'],['faq','FAQ'],['text','Text']].map(([k,t])=>this.svcAdd(t,()=>ops.addSection(k)))); }
   renderServiceDetail(){ const h=React.createElement,P=this.P,d=this.state.data; const s=(d.services||[]).find(x=>x.id===this.state.serviceId);
     if(!s) return this.renderNotFound();
-    const others=(d.services||[]).filter(x=>x.id!==s.id&&!x.redirectTo).slice(0,3);
+    const others=(d.services||[]).filter(x=>x.id!==s.id&&this.serviceIsLive(x)).slice(0,3);
     const crumb=(label,href,fn)=>h('a',this.linkTo(href,fn,{style:{color:'#8A6A2E',cursor:'pointer'}}),label);
     const pr=(d.about&&d.about.pricing)||{}, L=d.local||{}, c=d.contact||{};
-    const fee=s.price||pr.fee||'$100 CAD', img=this.serviceImg(s), {intro,secs}=this.serviceSections(s.detail||'');
+    const fee=s.price||pr.fee||'$100 CAD', unit=s.priceUnit||pr.unit||'per hour', img=this.serviceImg(s), {intro,secs}=this.serviceSections(s.detail||'');
+    const E=this.state.editMode, ops=E?this.svcOps(s):null, cta=s.ctaLabel||'Book Consultation';
+    const pickImg=()=>{ const el=document.createElement('input'); el.type='file'; el.accept='image/*'; el.onchange=e=>{ const fl=e.target.files[0]; if(fl) this.scaleImage(fl,u=>this.svcSet(s,'image',u),1600); }; el.click(); };
     const book=e=>{ if(e) e.preventDefault(); this.scrollToBook(); };
     const wa=this.waUrl('Hello Jag Mallah, I would like to book a '+s.title+' consultation.');
     const waBtn=(label,variant)=>wa?h('a',{href:wa,target:'_blank',rel:'noopener',className:'aok-btn aok-fx-lift',style:{display:'inline-flex',alignItems:'center',gap:8,font:'600 15px '+this.HEAD,padding:'14px 24px',borderRadius:999,textDecoration:'none',...this.btnVariants()[variant||'outline']}},'✆ '+(label||'WhatsApp')):null;
-    const facts=[['◷','60-minute live session'],['✦',fee+' · '+(pr.unit||'per hour')],['✓','New clients pay after, only if satisfied'],['☎','Zoom · WhatsApp · Phone'],['अ',((L.languages||['English','Hindi','Punjabi']).join(', '))]];
+    const facts=[['◷','60-minute live session'],['✦',fee+' · '+unit],['✓','New clients pay after, only if satisfied'],['☎','Zoom · WhatsApp · Phone'],['अ',((L.languages||['English','Hindi','Punjabi']).join(', '))]];
     return h('main',{style:{animation:'aokfade .4s'}},
       h('section',{className:'aok-pagehero aok-svc-hero'}, this.wrap(h('div',{className:'aok-svc-hero-grid',style:{display:'grid',gridTemplateColumns:'1.04fr .96fr',gap:48,alignItems:'center',padding:'30px 0 54px'}},
         h('div',null,
+          E? h('div',{className:'aok-pe-hint'}, h('b',null,'✎'), h('span',null,'Click any text on this page to change it — it saves when you click away. ',s.unpublished?h('b',null,'This service is unpublished: visitors are forwarded to '+(s.redirectTo||'/services')+'.'):null)):null,
           h('nav',{'aria-label':'Breadcrumb',style:{font:'500 13px '+this.HEAD,color:P.muted,marginBottom:22}}, crumb('Home','/',()=>this.go('home')),' › ',crumb('Services','/services',()=>this.go('services')),' › ',h('span',null,s.title)),
-          h('div',{style:{display:'flex',alignItems:'center',gap:16,marginBottom:18,flexWrap:'wrap'}}, this.badge(s.icon,'lg'), this.kicker('Vedic astrology service')),
-          h('h1',{style:{font:'800 clamp(34px,4.4vw,54px) '+this.HEAD,margin:'0 0 18px',letterSpacing:'-.015em',color:P.maroon,lineHeight:1.07}}, this.twoToneText(s.title)),
-          h('p',{className:'aok-svc-lead',style:{font:'400 18.5px/1.7 Plus Jakarta Sans',color:P.ink,margin:'0 0 26px',maxWidth:620}}, s.desc),
+          h('div',{style:{display:'flex',alignItems:'center',gap:16,marginBottom:18,flexWrap:'wrap'}}, this.badge(s.icon,'lg'), this.kicker(E?this.ep(s.eyebrow||'Vedic astrology service',v=>this.svcSet(s,'eyebrow',v==='Vedic astrology service'?'':v),{key:'eyebrow',placeholder:'Vedic astrology service'}):(s.eyebrow||'Vedic astrology service'))),
+          h('h1',{style:{font:'800 clamp(34px,4.4vw,54px) '+this.HEAD,margin:'0 0 18px',letterSpacing:'-.015em',color:P.maroon,lineHeight:1.07}}, E?this.ep(s.title,v=>{ if(!v.trim()){ this.flash('A service needs a title'); this.forceUpdate(); return; } this.svcSet(s,'title',v); },{key:'title',placeholder:'Service title'}):this.twoToneText(s.title)),
+          h('p',{className:'aok-svc-lead',style:{font:'400 18.5px/1.7 Plus Jakarta Sans',color:P.ink,margin:'0 0 26px',maxWidth:620}}, E?this.ep(s.desc,v=>this.svcSet(s,'desc',v),{key:'lead',multiline:true,placeholder:'A short summary — shown here and on the service cards'}):s.desc),
           h('div',{style:{display:'flex',gap:12,flexWrap:'wrap',alignItems:'center'}},
-            h('a',{href:'#book',onClick:book,className:'aok-btn aok-fx-lift',style:{display:'inline-flex',alignItems:'center',gap:8,font:'600 15px '+this.HEAD,padding:'14px 26px',borderRadius:999,textDecoration:'none',...this.btnVariants().solid}},'Book Consultation →'),
+            E? h('span',{className:'aok-btn',style:{display:'inline-flex',alignItems:'center',gap:8,font:'600 15px '+this.HEAD,padding:'14px 26px',borderRadius:999,...this.btnVariants().solid}},this.ep(cta,v=>this.svcSet(s,'ctaLabel',v==='Book Consultation'?'':v),{key:'cta',placeholder:'Book Consultation'}),' →')
+              : h('a',{href:'#book',onClick:book,className:'aok-btn aok-fx-lift',style:{display:'inline-flex',alignItems:'center',gap:8,font:'600 15px '+this.HEAD,padding:'14px 26px',borderRadius:999,textDecoration:'none',...this.btnVariants().solid}},cta+' →'),
             waBtn('WhatsApp Jag Mallah')),
           h('div',{style:{display:'flex',gap:8,flexWrap:'wrap',marginTop:22}}, ...facts.slice(0,3).map((f,i)=>h('span',{key:i,className:'aok-svc-chip'},h('b',{'aria-hidden':'true'},f[0]),f[1])))),
         h('div',{className:'aok-svc-art'+(img?'':' is-empty')}, h('div',{className:'aok-svc-art-glow','aria-hidden':'true'}),
-          img?h('img',{src:img,alt:s.title+' — Vedic astrology consultation with Jag Mallah',width:1200,height:675,decoding:'async',fetchpriority:'high',onError:e=>{ e.currentTarget.style.display='none'; e.currentTarget.parentNode.classList.add('is-empty'); }}):null,
-          h('div',{className:'aok-svc-art-badge'},this.badge(s.icon,'lg'))))),
+          img?h('img',{src:img,alt:s.title+' — Vedic astrology consultation with Jag Mallah',width:1200,height:675,decoding:'async',fetchpriority:'high',onError:e=>{ if(this.svcImgFallback(e)) return; e.currentTarget.style.display='none'; e.currentTarget.parentNode.classList.add('is-empty'); }}):null,
+          h('div',{className:'aok-svc-art-badge'},this.badge(s.icon,'lg')),
+          E? h('div',{className:'aok-pe-imgbar'}, this.svcTool(s.image?'Replace image':'Upload image',pickImg,s.image?'Replace the banner image':'Upload your own banner image'), s.image?this.svcTool('Use the 3D banner',()=>this.svcSet(s,'image',null),'Go back to the 3D banner'):null):null))),
         h('div',{className:'aok-hairline'})),
       h('section',{style:{padding:'56px 0 30px'}}, this.wrap(h('div',{style:{display:'grid',gridTemplateColumns:'minmax(0,1fr) 300px',gap:40,alignItems:'start'}},
         h('article',{className:'aok-svc-body'},
-          intro.length? h('div',{className:'aok-md',style:{marginBottom:10}}, this.mdRenderBlocks(intro,17,'si')) : null,
-          ...secs.map((sec,i)=>this.svcSection(sec,i)),
-          !intro.length&&!secs.length? h('p',{style:{font:'400 17px/1.8 Plus Jakarta Sans',color:P.ink}}, s.desc):null),
+          E? h('div',{className:'aok-md',style:{marginBottom:10}}, this.svcAnswerEdit(s,ops,intro.find(b=>b[0]==='answer')), ...intro.filter(b=>b[0]!=='answer').map((b,m)=>this.svcBlockEdit(b,ops,'si'+m)))
+            : intro.length? h('div',{className:'aok-md',style:{marginBottom:10}}, this.mdRenderBlocks(intro,17,'si')) : null,
+          ...secs.map((sec,i)=>E?this.svcSectionEdit(sec,i,ops):this.svcSection(sec,i)),
+          E? this.svcAddSectionBar(ops):null,
+          !E&&!intro.length&&!secs.length? h('p',{style:{font:'400 17px/1.8 Plus Jakarta Sans',color:P.ink}}, s.desc):null),
         h('aside',{className:'aok-svc-side'},
           h('div',{className:'aok-card',style:{padding:'28px 26px',textAlign:'center'}},
             h('div',{style:{font:'600 12px '+this.HEAD,letterSpacing:'.2em',textTransform:'uppercase',color:'#8A6A2E',marginBottom:12}},'Consultation fee'),
-            h('div',{className:'aok-goldtext',style:{font:'600 42px/1 '+this.SERIF}}, fee),
-            h('div',{style:{font:'500 14px Plus Jakarta Sans',color:P.muted,margin:'8px 0 16px'}}, pr.unit||'per hour'),
+            h('div',{className:'aok-goldtext',style:{font:'600 42px/1 '+this.SERIF}}, E?this.ep(fee,v=>this.svcSet(s,'price',v),{key:'fee',placeholder:pr.fee||'$100 CAD'}):fee),
+            h('div',{style:{font:'500 14px Plus Jakarta Sans',color:P.muted,margin:'8px 0 16px'}}, E?this.ep(unit,v=>this.svcSet(s,'priceUnit',v===(pr.unit||'per hour')?'':v),{key:'unit',placeholder:pr.unit||'per hour'}):unit),
             h('ul',{className:'aok-svc-facts'}, ...facts.map((f,i)=>h('li',{key:i},h('b',{'aria-hidden':'true'},f[0]),f[1]))),
-            h('a',{href:'#book',onClick:book,className:'aok-btn aok-fx-lift',style:{display:'flex',justifyContent:'center',font:'600 14.5px '+this.HEAD,padding:'13px 20px',borderRadius:999,textDecoration:'none',marginTop:18,...this.btnVariants().solid}},'Book Consultation'),
+            h('a',{href:'#book',onClick:book,className:'aok-btn aok-fx-lift',style:{display:'flex',justifyContent:'center',font:'600 14.5px '+this.HEAD,padding:'13px 20px',borderRadius:999,textDecoration:'none',marginTop:18,...this.btnVariants().solid}},cta),
             wa?h('a',{href:wa,target:'_blank',rel:'noopener',className:'aok-btn aok-fx-lift',style:{display:'flex',justifyContent:'center',font:'600 14px '+this.HEAD,padding:'12px 18px',borderRadius:999,textDecoration:'none',marginTop:10,...this.btnVariants().outline}},'✆ WhatsApp '+(c.whatsapp||c.phone||'')):null),
           secs.length>1? h('nav',{className:'aok-card aok-svc-toc','aria-label':'On this page'}, h('div',{className:'aok-svc-toc-t'},'On this page'), ...secs.map((sec,i)=>h('a',{key:i,href:'#section-'+(i+1),onClick:e=>{ e.preventDefault(); const el=document.getElementById('section-'+(i+1)); if(el) el.scrollIntoView({behavior:'smooth',block:'start'}); }},sec.title.replace(/\*\*/g,'')))):null)))),
       this.relatedPostsBlock(s),
@@ -963,7 +1040,7 @@ class Component extends DCLogic {
       h('section',{style:{padding:'70px 0'}}, this.wrap(h('div',{style:{display:'grid',gridTemplateColumns:'repeat(2,1fr)',gap:24}}, ...this.liveServices().map((s,i)=>{ const open=()=>this.go('service',{serviceId:s.id}); const img=this.serviceImg(s);
         // the whole card opens the service page (real links for crawlers, instant for visitors)
         return h('div',{key:s.id,className:'aok-card aok-tilt aok-reveal aok-svc-card',onClick:e=>{ if(e.target.closest&&e.target.closest('a,button')) return; open(); },style:{padding:0,cursor:'pointer',overflow:'hidden',display:'flex',flexDirection:'column'}},
-        img?h('a',{...this.linkTo(this.serviceHref(s),open),tabIndex:-1,'aria-hidden':'true',className:'aok-svc-card-img'}, h('img',{src:img,alt:'',loading:'lazy',decoding:'async',width:1200,height:675,onError:e=>{ e.currentTarget.parentNode.style.display='none'; }})):null,
+        img?h('a',{...this.linkTo(this.serviceHref(s),open),tabIndex:-1,'aria-hidden':'true',className:'aok-svc-card-img'}, h('img',{src:img,alt:'',loading:'lazy',decoding:'async',width:1200,height:675,onError:e=>{ if(this.svcImgFallback(e)) return; e.currentTarget.parentNode.style.display='none'; }})):null,
         h('div',{style:{display:'flex',gap:20,padding:'26px 28px 28px'}},
         this.badge(s.icon,'lg'),
         h('div',{style:{minWidth:0}}, h('div',{style:{display:'flex',justifyContent:'space-between',alignItems:'baseline',gap:12,flexWrap:'wrap'}},
@@ -1725,7 +1802,8 @@ class Component extends DCLogic {
     return h('div',{style:{position:'fixed',top:0,left:0,right:0,height:52,zIndex:1600,background:P.maroon,color:P.cream,display:'flex',alignItems:'center',gap:8,padding:'0 14px',boxShadow:'0 4px 20px rgba(0,0,0,.25)',overflowX:'auto',whiteSpace:'nowrap'}},
       h('span',{style:{font:'700 13px '+this.HEAD,color:P.goldL,flex:'0 0 auto'}},'\u270e Editor'),
       this.state.postId? h('span',{style:{display:'inline-flex',alignItems:'center',gap:7,flex:'0 0 auto',padding:'5px 11px',borderRadius:7,background:P.maroonD,font:'600 12.5px '+this.HEAD,color:P.cream,maxWidth:240,overflow:'hidden',textOverflow:'ellipsis',whiteSpace:'nowrap'}}, '\u270d Post: ', ((this.state.data.blog.find(x=>x.id===this.state.postId)||{}).title||'Untitled'))
-        : h('select',{value:this.state.route,onChange:e=>this.go(e.target.value),style:{padding:'6px 8px',borderRadius:7,border:'1px solid rgba(247,239,224,.3)',background:P.maroonD,color:P.cream,font:'600 12.5px '+this.HEAD,flex:'0 0 auto'}}, ...pages.map(p=>h('option',{key:p[0],value:p[0]},p[1]))),
+        : h('select',{value:this.state.route==='service'?'svc:'+this.state.serviceId:this.state.route,onChange:e=>{ const v=e.target.value; if(v.indexOf('svc:')===0) this.go('service',{serviceId:v.slice(4)}); else this.go(v); },style:{padding:'6px 8px',borderRadius:7,border:'1px solid rgba(247,239,224,.3)',background:P.maroonD,color:P.cream,font:'600 12.5px '+this.HEAD,flex:'0 0 auto',maxWidth:260}}, ...pages.map(p=>h('option',{key:p[0],value:p[0]},p[1])),
+            h('optgroup',{label:'Service pages'}, ...(this.state.data.services||[]).filter(x=>!x.redirectTo||x.unpublished).map(x=>h('option',{key:x.id,value:'svc:'+x.id},'  '+x.title+(x.unpublished?' (unpublished)':''))))),
       sep(),
       h('select',{title:'Text style',onMouseDown:e=>e.stopPropagation(),onChange:e=>{ this.exec('formatBlock',e.target.value); e.target.selectedIndex=0; },style:{padding:'6px 8px',borderRadius:7,border:'1px solid rgba(247,239,224,.3)',background:P.maroonD,color:P.cream,font:'600 12.5px '+this.HEAD,flex:'0 0 auto'}}, h('option',{value:''},'Style'), h('option',{value:'H2'},'Heading'), h('option',{value:'H3'},'Subheading'), h('option',{value:'P'},'Paragraph')),
       h('select',{title:'Text size',onChange:e=>{ this.exec('fontSize',e.target.value); e.target.selectedIndex=0; },style:{padding:'6px 8px',borderRadius:7,border:'1px solid rgba(247,239,224,.3)',background:P.maroonD,color:P.cream,font:'600 12.5px '+this.HEAD,flex:'0 0 auto'}}, h('option',{value:''},'Size'), h('option',{value:'2'},'Small'), h('option',{value:'3'},'Normal'), h('option',{value:'5'},'Large'), h('option',{value:'7'},'Huge')),
@@ -1860,23 +1938,160 @@ class Component extends DCLogic {
       this.card(h('div',null,h('div',{style:{font:'700 15px '+this.HEAD,color:P.maroon,marginBottom:8}},'\u2139 How the visual editor works'),h('ul',{style:{font:'400 14px/1.7 Plus Jakarta Sans',color:P.ink,margin:0,paddingLeft:20}},h('li',null,'Click directly on any heading or paragraph and start typing.'),h('li',null,'Select text, then use the ',h('b',null,'\u2693 Link'),' button in the top bar to turn it into a hyperlink (to your Instagram, YouTube, etc).'),h('li',null,'Hover over any photo and click ',h('b',null,'Replace image'),' to upload a new one.'),h('li',null,'Build side-by-side layouts with ',h('b',null,'＋ Add a block → Columns / Row'),'. Inside each column click ',h('b',null,'＋ Add here'),' to drop in text, images or buttons, drag the gold bars between columns to change their widths, and add/remove columns from the settings panel. Columns stack automatically on mobile.'),h('li',null,'Add a picture anywhere with ',h('b',null,'＋ Add a block → Image'),'. Then click it to select, and drag the gold ',h('b',null,'↔ resize'),' handle to make it bigger or smaller — like in Microsoft Word.'),h('li',null,'With an image block selected, the right-hand panel lets you set its ',h('b',null,'size, alignment (left/centre/right), shape, alt text, caption and SEO description'),'. Drag the image itself to reposition it inside the frame, and use ＋ / − to zoom.'),h('li',null,'Click ',h('b',null,'Done'),' in the top bar to return here. Everything saves automatically.'))),{marginTop:20})); }
 
   // ----- services -----
-  tabServices(){ const h=React.createElement,P=this.P,d=this.state.data;
+  // ---------- service page text: edit operations (Services Manager and the on-page editor share these) ----------
+  // Blocks are [type,value] from mdBlocks; i = block index, j = item index. Empty text removes an item/paragraph.
+  svcOps(s){ const E=fn=>this.svcEditBlocks(s,fn); const clean=t=>String(t||'').replace(/\s*\n\s*/g,' ').trim();
+    const secEnd=(bl,at)=>{ let k=at+1; while(k<bl.length&&bl[k][0]!=='h2') k++; return k; };
+    return {
+      setText:(i,v,multi)=>E(bl=>{ if(!bl[i]) return; const t=bl[i][0]; v=multi?String(v||'').trim():clean(v); if(!v){ if(t==='h2'||t==='h3'){ this.flash('A heading can’t be empty — delete the section instead'); return; } bl.splice(i,1); } else bl[i]=[t,v]; }),
+      setItem:(i,j,v)=>E(bl=>{ if(!bl[i]||!Array.isArray(bl[i][1])) return; v=clean(v); if(v) bl[i][1][j]=v; else { bl[i][1].splice(j,1); if(!bl[i][1].length) bl.splice(i,1); } }),
+      setLabeled:(i,j,label,text)=>E(bl=>{ if(!bl[i]||!Array.isArray(bl[i][1])) return; label=clean(label).replace(/:$/,''); text=clean(text); const v=label?('**'+label+':** '+(text||'…')):text; if(v) bl[i][1][j]=v; else { bl[i][1].splice(j,1); if(!bl[i][1].length) bl.splice(i,1); } }),
+      addItem:(i,j,v)=>E(bl=>{ if(!bl[i]||!Array.isArray(bl[i][1])) return; bl[i][1].splice(j+1,0,v||(bl[i][0]==='ol'?'**New step:** Describe this step.':'**New point:** Describe this point.')); }),
+      moveItem:(i,j,dir)=>E(bl=>{ const a=bl[i]&&bl[i][1]; if(!Array.isArray(a)) return; const k=j+dir; if(k<0||k>=a.length) return; [a[j],a[k]]=[a[k],a[j]]; }),
+      addFaq:(at)=>E(bl=>{ bl.splice(secEnd(bl,at),0,['h3','New question?'],['p','Write a clear, direct answer here.']); }),
+      delFaq:(qi)=>E(bl=>{ let k=qi+1; while(k<bl.length&&bl[k][0]!=='h2'&&bl[k][0]!=='h3') k++; bl.splice(qi,k-qi); }),
+      addPara:(at)=>E(bl=>{ bl.splice(secEnd(bl,at),0,['p','New paragraph.']); }),
+      insertAfter:(i,blk)=>E(bl=>{ bl.splice(i+1,0,blk); }),
+      setAnswer:(v)=>E(bl=>{ v=clean(v); const k=bl.findIndex(b=>b[0]==='answer'); const body=v?('**Direct answer:** '+v.replace(/^\*\*[^*]+\*\*\s*/,'')):''; if(k>=0){ if(body) bl[k]=['answer',body]; else bl.splice(k,1); } else if(body) bl.unshift(['answer',body]); }),
+      addSection:(kind)=>E(bl=>{ const add={points:[['h2','New section'],['ul',['**First point:** Describe it.']]],steps:[['h2','How Your 1-on-1 Consultation Works'],['ol',this.svcDefaultSteps()]],faq:[['h2','Frequently Asked Questions'],['h3','New question?'],['p','Write a clear, direct answer here.']],text:[['h2','New section'],['p','Write this section here.']]}[kind]||[]; bl.push(...add); }),
+      delSection:(at)=>E(bl=>{ bl.splice(at,secEnd(bl,at)-at); }),
+      moveSection:(at,dir)=>E(bl=>{ const end=secEnd(bl,at); const chunk=bl.slice(at,end); if(dir<0){ let p=at-1; while(p>=0&&bl[p][0]!=='h2') p--; if(p<0) return; bl.splice(at,end-at); bl.splice(p,0,...chunk); } else { if(end>=bl.length) return; const e2=secEnd(bl,end); bl.splice(at,end-at); bl.splice(e2-(end-at),0,...chunk); } })
+    }; }
+  svcDefaultSteps(){ return ['**Intake & Birth Details:** Share your birth date, exact birth time and birth city through the booking form or WhatsApp.','**Chart Preparation:** Before the call, Jag Mallah calculates your chart, divisional charts and dasha timeline.','**60-Minute Live Consultation:** Meet on Zoom or WhatsApp in English, Hindi or Punjabi, ask your questions and receive practical guidance.','**Pay After, Only If Satisfied:** The $100 CAD fee is settled after the consultation, only if you are completely satisfied.']; }
+  // a new service's page text from the Add form
+  svcComposeMd(f){ const lines=t=>String(t||'').split('\n').map(x=>x.trim().replace(/^[-*\d.]+\s+/,'')).filter(Boolean);
+    const item=x=>{ const m=x.match(/^([^:]{2,80}):\s+(.+)$/); return m?'**'+m[1].trim()+':** '+m[2].trim():x; };
+    const out=[]; if((f.answer||'').trim()) out.push(['answer','**Direct answer:** '+f.answer.trim().replace(/\s*\n\s*/g,' ')]);
+    if(lines(f.method).length) out.push(['h2','Classical Vedic Methodology & Texts Used'],['ul',lines(f.method).map(item)]);
+    if(lines(f.questions).length) out.push(['h2','Key Life Questions & Chart Factors Analyzed'],['ul',lines(f.questions).map(item)]);
+    const st=(f.steps||[]).filter(x=>x&&(x.t||'').trim()).map(x=>'**'+x.t.trim()+':** '+(x.d||'').trim().replace(/\s*\n\s*/g,' ')); if(st.length) out.push(['h2','How Your 1-on-1 Consultation Works'],['ol',st]);
+    const fq=(f.faqs||[]).filter(x=>x&&(x.q||'').trim()&&(x.a||'').trim()); if(fq.length){ out.push(['h2','Frequently Asked Questions']); fq.forEach(x=>out.push(['h3',x.q.trim()],['p',x.a.trim()])); }
+    return this.mdSerialize(out); }
+  svcNewForm(){ return {title:'',slug:'',slugManual:false,icon:'✧',price:'$100 CAD',priceUnit:'',desc:'',answer:'',method:'',questions:'',image:null,
+    steps:this.svcDefaultSteps().map(x=>{ const m=this.mdLabel(x); return {t:m[0],d:m[1]}; }),faqs:[{q:'',a:''},{q:'',a:''},{q:'',a:''}]}; }
+  svcSlugTaken(slug,exceptId){ const d=this.state.data, sl=this.serviceSlugs(d.services||[]); return (d.services||[]).some(x=>x.id!==exceptId&&sl[x.id]===slug); }
+
+  // ---------- SERVICES MANAGER (admin) ----------
+  tabServices(){ const h=React.createElement,P=this.P,d=this.state.data; const sl=this.serviceSlugs(d.services||[]);
+    const idx=s=>d.services.findIndex(x=>x.id===s.id);
     const upd=(i,k,v)=>{ const arr=[...d.services]; arr[i]={...arr[i],[k]:v}; this.commit('services',arr); };
     const move=(i,dir)=>{ const arr=[...d.services]; const j=i+dir; if(j<0||j>=arr.length)return; [arr[i],arr[j]]=[arr[j],arr[i]]; this.commit('services',arr); };
-    const del=i=>{ if(!confirm('Delete this service?'))return; const arr=[...d.services]; arr.splice(i,1); this.commit('services',arr); };
-    const add=()=>{ this.commit('services',[...d.services,{id:this.uid(),icon:'\u2727',title:'New service',price:'$100 CAD',desc:'Describe this service\u2026',detail:'',image:null}]); this.flash('Service added'); };
-    const icons=['\u2609','\u263d','\u2640','\u2642','\u2643','\u2644','\u2645','\u269a','\u262f','\u2727','\u2728','\u0950','\u2600','\u260e','\u263c','\u2666','\u2606','\u2695'];
-    return h('div',null, this.adminHead('Services','Create, edit and reorder the services shown on your site. Add as many as you like \u2014 they appear on the Home and Services pages automatically.'),
-      h('div',{style:{marginBottom:18}}, this.btn('+ Add new service',add,{variant:'solid'})),
-      h('div',{style:{display:'grid',gap:16}}, ...d.services.map((s,i)=>this.card(h('div',null,
-        h('div',{style:{display:'flex',justifyContent:'space-between',alignItems:'center',marginBottom:14}},
-          h('div',{style:{font:'700 14px '+this.HEAD,color:P.gold}},'Service '+(i+1)),
-          h('div',{style:{display:'flex',gap:6}}, h('button',{onClick:()=>move(i,-1),style:this.iconBtn()},'\u2191'), h('button',{onClick:()=>move(i,1),style:this.iconBtn()},'\u2193'), h('button',{onClick:()=>del(i),style:this.iconBtn(true)},'\u2715'))),
-        h('div',{style:{display:'grid',gridTemplateColumns:'90px 1fr 150px',gap:14,alignItems:'start'}},
-          h('div',null, h('div',{style:{font:'600 12.5px '+this.HEAD,color:P.maroon,marginBottom:6}},'Icon'), h('select',{value:s.icon,onChange:e=>upd(i,'icon',e.target.value),style:{width:'100%',padding:'11px',borderRadius:10,border:'1px solid '+P.line,background:P.white,fontSize:20,textAlign:'center'}},...icons.map(ic=>h('option',{key:ic,value:ic},ic)))),
-          h('div',null, h('div',{style:{font:'600 12.5px '+this.HEAD,color:P.maroon,marginBottom:6}},'Title'), h('input',{value:s.title,onChange:e=>upd(i,'title',e.target.value),style:this.inpStyle()})),
-          h('div',null, h('div',{style:{font:'600 12.5px '+this.HEAD,color:P.maroon,marginBottom:6}},'Price'), h('input',{value:s.price,onChange:e=>upd(i,'price',e.target.value),style:this.inpStyle()}))),
-        h('div',{style:{marginTop:12}}, h('div',{style:{font:'600 12.5px '+this.HEAD,color:P.maroon,marginBottom:6}},'Description'), h('textarea',{value:s.desc,onChange:e=>upd(i,'desc',e.target.value),rows:2,style:this.inpStyle()})), h('div',{style:{marginTop:12}}, h('div',{style:{font:'600 12.5px '+this.HEAD,color:P.maroon,marginBottom:6}},'Detailed description ',h('span',{style:{fontWeight:400,color:P.muted}},'\u2014 the service page text; formatting: ## heading, ### sub-heading, - bullet, > answer box, **bold**')), h('textarea',{value:s.detail||'',onChange:e=>upd(i,'detail',e.target.value),rows:5,style:this.inpStyle()})), this.svcSeoPanel(s,i,upd))))) ); }
+    const icons=['☉','☽','♀','♂','♃','♄','♅','⚚','☯','✧','✨','ॐ','☀','☎','☼','♦','☆','⚕'];
+    const L=(t,hint)=>h('span',{style:this.lbl()},t,hint?h('span',{style:{fontWeight:400,color:P.muted}},'  — ',hint):null);
+    const status=s=>s.unpublished?['Unpublished','#f6e7d3',P.maroon]:s.redirectTo?['Merged','#efe9f7','#5a4a7a']:s.noindex?['Hidden from Google','#eef2f6','#46586b']:['Live','#e4f2e7',P.ok];
+    const live=d.services.filter(s=>this.serviceIsLive(s)).length, unpub=d.services.filter(s=>s.unpublished).length, merged=d.services.filter(s=>s.redirectTo&&!s.unpublished).length;
+    const openVisual=s=>this.setState({route:'service',serviceId:s.id,editMode:true,authed:true,selBlock:null,menuOpen:false},()=>{ window.scrollTo&&window.scrollTo(0,0); this.syncUrl&&this.syncUrl(); });
+    const nf=this._svcNew;
+    return h('div',null, this.adminHead('Services Manager','Add, edit, unpublish or delete services. Every change is saved automatically and updates the service page, the sitemap, llms.txt, the structured data (Service, Offer, FAQPage) and IndexNow — no code, no extra steps.'),
+      h('div',{style:{display:'flex',gap:12,alignItems:'center',flexWrap:'wrap',marginBottom:18}},
+        this.btn('+ Add new service',()=>{ this._svcNew=this.svcNewForm(); this.forceUpdate(); },{variant:'solid'}),
+        h('span',{style:{font:'500 13.5px Plus Jakarta Sans',color:P.muted}}, live+' live · '+unpub+' unpublished · '+merged+' merged')),
+      nf? this.svcNewCard(nf) : null,
+      h('div',{style:{display:'grid',gap:14}}, ...d.services.map((s,i)=>{ const st=status(s), url='/services/'+sl[s.id], open=(this._svcOpen2||{})[s.id], img=this.serviceImg(s);
+        const toggle=()=>{ this._svcOpen2={...(this._svcOpen2||{}),[s.id]:!open}; this.forceUpdate(); };
+        const act=(label,fn,title,danger)=>h('button',{onClick:fn,title:title||label,style:{...this.iconBtn(danger),width:'auto',padding:'0 11px',height:32,font:'600 12.5px '+this.HEAD,whiteSpace:'nowrap'}},label);
+        return this.card(h('div',{'data-svc':s.id},
+          h('div',{style:{display:'flex',gap:14,alignItems:'center',flexWrap:'wrap'}},
+            h('div',{style:{width:96,height:54,borderRadius:10,overflow:'hidden',flexShrink:0,background:P.bgAlt,display:'flex',alignItems:'center',justifyContent:'center',fontSize:24}}, img?h('img',{src:img,alt:'',style:{width:'100%',height:'100%',objectFit:'cover'},onError:e=>{ if(!this.svcImgFallback(e)) e.currentTarget.style.display='none'; }}):s.icon),
+            h('div',{style:{flex:'1 1 240px',minWidth:0}},
+              h('div',{style:{display:'flex',gap:8,alignItems:'center',flexWrap:'wrap'}}, h('b',{style:{font:'700 15.5px '+this.HEAD,color:P.maroon}},s.title||'(untitled)'), h('span',{style:{padding:'2px 9px',borderRadius:999,background:st[1],color:st[2],font:'700 11px '+this.HEAD,letterSpacing:'.03em'}},st[0]+(s.redirectTo?' → '+s.redirectTo:''))),
+              h('div',{style:{font:'500 12.5px ui-monospace,monospace',color:P.red,marginTop:3}},url, s.updatedAt?h('span',{style:{fontFamily:'Plus Jakarta Sans',color:P.muted,marginLeft:10}},'updated '+String(s.updatedAt).slice(0,10)):null)),
+            h('div',{style:{display:'flex',gap:6,flexWrap:'wrap'}},
+              act(open?'▾ Close':'✎ Edit in Admin',toggle),
+              this.serviceIsLive(s)?act('◫ Open in Visual Editor',()=>openVisual(s)):null,
+              this.serviceIsLive(s)?h('a',{href:url,target:'_blank',rel:'noopener',style:{...this.iconBtn(),width:'auto',padding:'0 11px',height:32,font:'600 12.5px '+this.HEAD,display:'inline-flex',alignItems:'center',textDecoration:'none',whiteSpace:'nowrap'}},'↗ View live page'):null,
+              s.unpublished?act('▶ Publish',()=>this.svcPublish(s)):(!s.redirectTo?act('⏸ Unpublish',()=>{ this._svcDlg={mode:'unpublish',id:s.id,to:'/services'}; this.forceUpdate(); }):null),
+              act('✕ Delete',()=>{ this._svcDlg={mode:'delete',id:s.id,to:'/services'}; this.forceUpdate(); },'Delete permanently',true),
+              h('button',{onClick:()=>move(i,-1),title:'Move up',style:{...this.iconBtn(),height:32}},'↑'), h('button',{onClick:()=>move(i,1),title:'Move down',style:{...this.iconBtn(),height:32}},'↓'))),
+          open? this.svcEditor(s,idx(s),upd,icons,L) : null)); })),
+      this.svcDialog()); }
+
+  svcNewCard(nf){ const h=React.createElement,P=this.P; const set=(k,v)=>{ this._svcNew={...this._svcNew,[k]:v}; if(k==='title'&&!this._svcNew.slugManual) this._svcNew.slug=this.serviceSlugify(v); this.forceUpdate(); };
+    const L=(t,hint)=>h('span',{style:this.lbl()},t,hint?h('span',{style:{fontWeight:400,color:P.muted}},'  — ',hint):null);
+    const inp=(k,ph,multi,rows)=>h(multi?'textarea':'input',{value:nf[k]||'',placeholder:ph||'',rows:multi?(rows||3):undefined,onChange:e=>set(k,e.target.value),style:this.inpStyle()});
+    const taken=nf.slug&&this.svcSlugTaken(nf.slug), aw=this.wordCount2(nf.answer);
+    const create=()=>{ const f=this._svcNew; const title=(f.title||'').trim(), slug=this.serviceSlugify(f.slug||title);
+      if(!title){ this.flash('Please enter a service title'); return; } if(!slug||this.svcSlugTaken(slug)){ this.flash('That page address is already used — choose another'); return; }
+      const svc={id:this.uid(),icon:f.icon||'✧',title,slug,price:(f.price||'').trim()||'$100 CAD',...((f.priceUnit||'').trim()?{priceUnit:f.priceUnit.trim()}:{}),desc:(f.desc||'').trim(),detail:this.svcComposeMd(f),image:f.image||null,createdAt:new Date().toISOString()};
+      const d=this.state.data; const reds=(d.redirects||[]).filter(r=>('/'+String(r.from||'').replace(/^\/+|\/+$/g,'')).toLowerCase()!=='/services/'+slug);   // a reused address belongs to the new page
+      this.pushHist(); this.save({...d,services:[...d.services,svc],redirects:reds}); this._svcNew=null; this._svcOpen2={...(this._svcOpen2||{}),[svc.id]:true};
+      this.flash('✓ Service created — live at /services/'+slug); };
+    const pick=()=>{ const el=document.createElement('input'); el.type='file'; el.accept='image/*'; el.onchange=e=>{ const fl=e.target.files[0]; if(fl) this.scaleImage(fl,u=>set('image',u),1600); }; el.click(); };
+    return this.card(h('div',null, this.cardTitle('✧ New service','Fill in what you have — everything can be changed later in the admin or right on the page. The standard rate, session format and pay-after-satisfaction policy are pre-filled.'),
+      h('div',{style:{display:'grid',gridTemplateColumns:'2fr 1.4fr 90px',gap:12}},
+        h('label',null,L('Service title'),inp('title','e.g. Lal Kitab Reading')),
+        h('label',null,L('Page address',nf.slugManual?'custom':'from the title'),h('div',{style:{display:'flex',alignItems:'center',gap:6}},h('span',{style:{font:'500 13px ui-monospace,monospace',color:P.muted}},'/services/'),h('input',{value:nf.slug,onChange:e=>{ this._svcNew={...this._svcNew,slug:e.target.value,slugManual:true}; this.forceUpdate(); },onBlur:e=>set('slug',this.serviceSlugify(e.target.value)),style:this.inpStyle()})),taken?h('div',{style:{font:'600 12px '+this.HEAD,color:P.bad,marginTop:4}},'Already used by another service'):null),
+        h('label',null,L('Icon'),h('select',{value:nf.icon,onChange:e=>set('icon',e.target.value),style:{...this.inpStyle(),fontSize:18,textAlign:'center'}},...['☉','☽','♀','♂','♃','♄','♅','⚚','☯','✧','✨','ॐ','☀','☎','☼','♦','☆','⚕'].map(x=>h('option',{key:x,value:x},x))))),
+      h('div',{style:{display:'grid',gridTemplateColumns:'1fr 1fr',gap:12,marginTop:12}}, h('label',null,L('Rate'),inp('price','$100 CAD')), h('label',null,L('Rate unit','empty = the site default'),inp('priceUnit',(this.state.data.about&&this.state.data.about.pricing&&this.state.data.about.pricing.unit)||'per hour'))),
+      h('label',{style:{display:'block',marginTop:12}},L('Short summary','shown on the cards and as the page’s opening line'),inp('desc','One or two sentences',true,2)),
+      h('label',{style:{display:'block',marginTop:12}},L('Direct answer box',aw+' words · 45–55 is ideal for AI answers'),inp('answer','A clear 45–55 word answer: what the service is and how the session works',true,3)),
+      h('label',{style:{display:'block',marginTop:12}},L('Classical methodology & texts','one point per line, e.g. “BPHS: …”'),inp('method','Textual Authority: Grounded in Brihat Parashara Hora Shastra…',true,4)),
+      h('label',{style:{display:'block',marginTop:12}},L('Key life questions & chart factors','one per line'),inp('questions','7th House: Partnership and marriage…',true,4)),
+      h('div',{style:{marginTop:12}},L('How the consultation works'),...nf.steps.map((st,k)=>h('div',{key:k,style:{display:'grid',gridTemplateColumns:'30px 1fr 2fr',gap:8,marginBottom:6,alignItems:'center'}},h('b',{style:{color:P.gold,textAlign:'center'}},k+1),h('input',{value:st.t,onChange:e=>{ const a=[...nf.steps]; a[k]={...a[k],t:e.target.value}; set('steps',a); },style:this.inpStyle()}),h('input',{value:st.d,onChange:e=>{ const a=[...nf.steps]; a[k]={...a[k],d:e.target.value}; set('steps',a); },style:this.inpStyle()})))),
+      h('div',{style:{marginTop:12}},L('FAQs','question and answer — they become the page’s FAQPage schema'),...nf.faqs.map((x,k)=>h('div',{key:k,style:{display:'grid',gridTemplateColumns:'1fr 1.6fr',gap:8,marginBottom:6}},h('input',{value:x.q,placeholder:'Question '+(k+1),onChange:e=>{ const a=[...nf.faqs]; a[k]={...a[k],q:e.target.value}; set('faqs',a); },style:this.inpStyle()}),h('textarea',{value:x.a,placeholder:'Answer',rows:2,onChange:e=>{ const a=[...nf.faqs]; a[k]={...a[k],a:e.target.value}; set('faqs',a); },style:this.inpStyle()})))),
+      h('div',{style:{display:'flex',alignItems:'center',gap:12,marginTop:12,flexWrap:'wrap'}},L('Image','optional — shown as the page banner, on the cards and in Google'),nf.image?h('img',{src:nf.image,alt:'',style:{width:96,height:54,objectFit:'cover',borderRadius:8}}):null,this.btn(nf.image?'Replace image':'Upload image',pick,{variant:'outline',pad:'8px 14px'}),nf.image?this.btn('Remove',()=>set('image',null),{variant:'outline',pad:'8px 14px'}):null),
+      h('div',{style:{display:'flex',gap:10,marginTop:18}}, this.btn('Create service',create,{variant:'solid'}), this.btn('Cancel',()=>{ this._svcNew=null; this.forceUpdate(); },{variant:'outline'}))),{marginBottom:18,borderColor:P.gold}); }
+
+  // the expanded editor of one service in the Services Manager
+  svcEditor(s,i,upd,icons,L){ const h=React.createElement,P=this.P; const ops=this.svcOps(s); const {intro,secs}=this.serviceSections(s.detail||''); const md=(this._svcMd||{})[s.id];
+    // fields that save when you leave them (so half-typed text never reshapes the page)
+    const bi=(val,onCommit,o)=>h(o&&o.multi?'textarea':'input',{key:(o&&o.k||'')+'|'+val,defaultValue:val,rows:o&&o.multi?(o.rows||2):undefined,placeholder:o&&o.ph,onBlur:e=>{ if(e.target.value!==val) onCommit(e.target.value); },style:{...this.inpStyle(),...(o&&o.style||{})}});
+    const x=(fn,t)=>h('button',{onClick:fn,title:t||'Remove',style:{...this.iconBtn(true),width:30,height:30}},'✕');
+    const ans=intro.find(b=>b[0]==='answer'); const ansTxt=ans?String(ans[1]).replace(/^\*\*[^*]+\*\*\s*/,''):''; const aw=this.wordCount2(ansTxt);
+    const pickImg=()=>{ const el=document.createElement('input'); el.type='file'; el.accept='image/*'; el.onchange=e=>{ const fl=e.target.files[0]; if(fl) this.scaleImage(fl,u=>upd(i,'image',u),1600); }; el.click(); };
+    const secBody=(sec,si)=>{ const bl=sec.blocks; if(/frequently asked/i.test(sec.title)||bl.some(b=>b[0]==='h3')){ const rows=[]; bl.forEach((b,k)=>{ if(b[0]==='h3'){ const a=bl[k+1]&&bl[k+1][0]==='p'?bl[k+1]:null; rows.push(h('div',{key:b[2],style:{display:'grid',gridTemplateColumns:'1fr 1.6fr 30px',gap:8,marginBottom:6}},bi(b[1],v=>ops.setText(b[2],v),{k:'q'+b[2],ph:'Question'}),a?bi(a[1],v=>ops.setText(a[2],v,true),{k:'a'+a[2],multi:true,ph:'Answer'}):h('div'),x(()=>ops.delFaq(b[2]),'Remove this question'))); } else if(b[0]!=='p'||!(bl[k-1]&&bl[k-1][0]==='h3')) rows.push(h('div',{key:b[2],style:{marginBottom:6}},bi(b[0]==='p'?b[1]:this.mdSerialize([[b[0],b[1]]]),v=>ops.setText(b[2],v,true),{k:'t'+b[2],multi:true}))); });
+        return h('div',null,...rows,this.btn('+ Add question',()=>ops.addFaq(sec.at),{variant:'outline',pad:'6px 12px'})); }
+      return h('div',null,...bl.map(b=>{ if(b[0]==='ul'||b[0]==='ol') return h('div',{key:b[2]},...b[1].map((li,j)=>{ const m=this.mdLabel(li); return h('div',{key:j,style:{display:'grid',gridTemplateColumns:(b[0]==='ol'?'26px ':'')+'1fr 2fr 30px 30px',gap:8,marginBottom:6,alignItems:'start'}}, b[0]==='ol'?h('b',{style:{color:P.gold,paddingTop:10,textAlign:'center'}},j+1):null,
+            bi(m?m[0]:'',v=>ops.setLabeled(b[2],j,v,m?m[1]:li),{k:'l'+b[2]+'.'+j,ph:'Label (optional)'}), bi(m?m[1]:li,v=>m?ops.setLabeled(b[2],j,m[0],v):ops.setItem(b[2],j,v),{k:'v'+b[2]+'.'+j,multi:true}),
+            h('button',{onClick:()=>ops.moveItem(b[2],j,-1),title:'Move up',style:{...this.iconBtn(),width:30,height:30}},'↑'), x(()=>ops.setItem(b[2],j,''))); }), this.btn(b[0]==='ol'?'+ Add step':'+ Add point',()=>ops.addItem(b[2],b[1].length-1),{variant:'outline',pad:'6px 12px'}));
+        return h('div',{key:b[2],style:{marginBottom:6}},bi(b[0]==='p'?b[1]:this.mdSerialize([[b[0],b[1]]]),v=>ops.setText(b[2],v,true),{k:'t'+b[2],multi:true,rows:3})); }), !bl.length?this.btn('+ Add paragraph',()=>ops.addPara(sec.at),{variant:'outline',pad:'6px 12px'}):null); };
+    return h('div',{style:{marginTop:16,borderTop:'1px solid '+P.line,paddingTop:16,display:'grid',gap:14}},
+      h('div',{style:{display:'grid',gridTemplateColumns:'90px 2fr 1fr 1fr',gap:12}},
+        h('label',null,L('Icon'),h('select',{value:s.icon,onChange:e=>upd(i,'icon',e.target.value),style:{...this.inpStyle(),fontSize:18,textAlign:'center'}},...icons.map(ic=>h('option',{key:ic,value:ic},ic)))),
+        h('label',null,L('Title'),h('input',{value:s.title,onChange:e=>upd(i,'title',e.target.value),style:this.inpStyle()})),
+        h('label',null,L('Rate'),h('input',{value:s.price||'',onChange:e=>upd(i,'price',e.target.value),style:this.inpStyle()})),
+        h('label',null,L('Rate unit'),h('input',{value:s.priceUnit||'',placeholder:(this.state.data.about.pricing||{}).unit||'per hour',onChange:e=>upd(i,'priceUnit',e.target.value),style:this.inpStyle()}))),
+      h('div',{style:{display:'grid',gridTemplateColumns:'1fr 1fr',gap:12}},
+        h('label',null,L('Eyebrow','small line above the title'),h('input',{value:s.eyebrow||'',placeholder:'Vedic astrology service',onChange:e=>upd(i,'eyebrow',e.target.value),style:this.inpStyle()})),
+        h('label',null,L('Booking button'),h('input',{value:s.ctaLabel||'',placeholder:'Book Consultation',onChange:e=>upd(i,'ctaLabel',e.target.value),style:this.inpStyle()}))),
+      h('label',null,L('Short summary','the cards and the page’s opening line'),h('textarea',{value:s.desc||'',rows:2,onChange:e=>upd(i,'desc',e.target.value),style:this.inpStyle()})),
+      h('div',{style:{display:'flex',alignItems:'center',gap:12,flexWrap:'wrap'}},L('Banner image', s.image?'uploaded':'the 3D banner is used'),this.serviceImg(s)?h('img',{src:this.serviceImg(s),alt:'',style:{width:128,height:72,objectFit:'cover',borderRadius:8},onError:e=>{ if(!this.svcImgFallback(e)) e.currentTarget.style.display='none'; }}):null,this.btn(s.image?'Replace image':'Upload image',pickImg,{variant:'outline',pad:'8px 14px'}),s.image?this.btn('Use the 3D banner',()=>upd(i,'image',null),{variant:'outline',pad:'8px 14px'}):null),
+      h('div',{style:{display:'flex',justifyContent:'space-between',alignItems:'center',borderTop:'1px solid '+P.line,paddingTop:12}}, h('b',{style:{font:'700 14px '+this.HEAD,color:P.maroon}},'Page text'),
+        h('button',{onClick:()=>{ this._svcMd={...(this._svcMd||{}),[s.id]:!md}; this.forceUpdate(); },style:{...this.iconBtn(),width:'auto',padding:'0 12px',font:'600 12.5px '+this.HEAD}},md?'☰ Section editor':'</> Edit as Markdown')),
+      md? h('label',null,L('Page text (light Markdown)','## heading · ### question · - point · 1. step · > answer box · **bold**'),h('textarea',{value:s.detail||'',rows:18,onChange:e=>upd(i,'detail',e.target.value),style:{...this.inpStyle(),fontFamily:'ui-monospace,monospace',fontSize:13}}))
+        : h('div',{style:{display:'grid',gap:12}},
+          h('label',null,L('Direct answer box',h('span',{style:{color:aw>=45&&aw<=55?P.ok:P.bad,fontWeight:700}},aw+' words')),bi(ansTxt,v=>ops.setAnswer(v),{k:'ans',multi:true,rows:3,ph:'A clear 45–55 word answer'}),h('div',{style:{font:'400 12px Plus Jakarta Sans',color:P.muted,marginTop:4}},'45–55 words is the length AI assistants quote most.')),
+          ...intro.filter(b=>b[0]!=='answer').map(b=>h('label',{key:'i'+b[2]},L('Introduction'),bi(b[0]==='p'?b[1]:this.mdSerialize([[b[0],b[1]]]),v=>ops.setText(b[2],v,true),{k:'i'+b[2],multi:true,rows:3}))),
+          ...secs.map((sec,si)=>h('div',{key:'s'+sec.at,style:{border:'1px solid '+P.line,borderRadius:14,padding:14,background:'#FFFDF9'}},
+            h('div',{style:{display:'flex',gap:8,alignItems:'center',marginBottom:10}}, h('div',{style:{flex:1}},bi(sec.title,v=>ops.setText(sec.at,v),{k:'h'+sec.at,style:{font:'700 15px '+this.HEAD}})),
+              h('button',{onClick:()=>ops.moveSection(sec.at,-1),title:'Move section up',style:{...this.iconBtn(),width:30,height:30}},'↑'), h('button',{onClick:()=>ops.moveSection(sec.at,1),title:'Move section down',style:{...this.iconBtn(),width:30,height:30}},'↓'),
+              x(()=>{ if(confirm('Delete the section “'+sec.title+'”?')) ops.delSection(sec.at); },'Delete this section')),
+            secBody(sec,si))),
+          h('div',{style:{display:'flex',gap:8,flexWrap:'wrap',alignItems:'center'}},h('span',{style:{font:'600 12.5px '+this.HEAD,color:P.muted}},'Add a section:'),...[['points','Points'],['steps','Steps'],['faq','FAQ'],['text','Text']].map(([k,t])=>this.btn('+ '+t,()=>ops.addSection(k),{variant:'outline',pad:'6px 12px'})))),
+      this.svcSeoPanel(s,i,upd)); }
+
+  svcPublish(s){ const i=this.state.data.services.findIndex(x=>x.id===s.id); if(i<0) return; const arr=[...this.state.data.services]; const n={...arr[i]}; delete n.unpublished; delete n.redirectTo; arr[i]=n; this.commit('services',arr); this.flash('✓ Published — the page is live again'); }
+  // unpublish / delete: always leaves a 301 behind, to /services or a page the admin chooses
+  svcDialog(){ const dl=this._svcDlg; if(!dl) return null; const h=React.createElement,P=this.P,d=this.state.data; const s=d.services.find(x=>x.id===dl.id); if(!s) return null;
+    const sl=this.serviceSlugs(d.services), url='/services/'+sl[s.id]; const others=d.services.filter(x=>x.id!==s.id&&this.serviceIsLive(x));
+    const close=()=>{ this._svcDlg=null; this.forceUpdate(); }; const to=(dl.to||'/services').trim()||'/services';
+    const go=()=>{ const nd={...d}; this.pushHist();
+      if(dl.mode==='unpublish'){ nd.services=d.services.map(x=>x.id===s.id?{...x,unpublished:true,redirectTo:to}:x); this.save(nd); this.flash('✓ Unpublished — '+url+' now forwards to '+to); }
+      else { nd.services=d.services.filter(x=>x.id!==s.id); const key=p=>('/'+String(p||'').replace(/^\/+|\/+$/g,'')).toLowerCase();
+        nd.redirects=[...(d.redirects||[]).filter(r=>key(r.from)!==key(url)).map(r=>key(r.to)===key(url)?{...r,to}:r),{from:url,to}];
+        nd.services=nd.services.map(x=>x.redirectTo&&key(x.redirectTo)===key(url)?{...x,redirectTo:to}:x);
+        if(s.seedKey) nd.deletedSeeds=Array.from(new Set([...(d.deletedSeeds||[]),s.seedKey]));
+        this.save(nd); this.flash('✓ Deleted — '+url+' now forwards to '+to); }
+      this._svcDlg=null; this.forceUpdate(); };
+    return h('div',{style:{position:'fixed',inset:0,background:'rgba(20,21,23,.45)',zIndex:200,display:'flex',alignItems:'center',justifyContent:'center',padding:20},onClick:e=>{ if(e.target===e.currentTarget) close(); }},
+      h('div',{role:'dialog','aria-modal':'true',style:{background:P.card,borderRadius:20,padding:'28px 28px 24px',maxWidth:520,width:'100%',boxShadow:'0 30px 80px rgba(0,0,0,.35)'}},
+        h('h3',{style:{font:'700 20px '+this.HEAD,color:P.maroon,margin:'0 0 8px'}},(dl.mode==='delete'?'Delete “':'Unpublish “')+s.title+'”?'),
+        h('p',{style:{font:'400 14.5px/1.6 Plus Jakarta Sans',color:P.ink,margin:'0 0 16px'}}, dl.mode==='delete'?'The service and its page text are removed. Its address keeps working: visitors and search engines are sent (301) to the page you choose below.':'The service disappears from the menu, the cards, the sitemap and llms.txt, but all its text is kept — publish it again any time. Its address forwards (301) to the page you choose.'),
+        h('label',null,h('span',{style:this.lbl()},'Send '+url+' to'),
+          h('select',{value:others.some(x=>'/services/'+sl[x.id]===to)||to==='/services'?to:'custom',onChange:e=>{ this._svcDlg={...dl,to:e.target.value==='custom'?'':e.target.value}; this.forceUpdate(); },style:this.inpStyle()},
+            h('option',{value:'/services'},'The Services page (/services)'), ...others.map(x=>h('option',{key:x.id,value:'/services/'+sl[x.id]},x.title)), h('option',{value:'custom'},'Another address…'))),
+        !(others.some(x=>'/services/'+sl[x.id]===to)||to==='/services')?h('input',{value:dl.to,placeholder:'/some-page or https://…',onChange:e=>{ this._svcDlg={...dl,to:e.target.value}; this.forceUpdate(); },style:{...this.inpStyle(),marginTop:8}}):null,
+        h('div',{style:{display:'flex',gap:10,justifyContent:'flex-end',marginTop:20}}, this.btn('Cancel',close,{variant:'outline'}), this.btn(dl.mode==='delete'?'Delete and redirect':'Unpublish and redirect',go,{variant:'solid',style:dl.mode==='delete'?{background:P.bad,color:'#fff'}:{}})))); }
   // per-service page address, SEO title/description, canonical, 301 redirect and noindex (collapsed by default)
   svcSeoPanel(s,i,upd){ const h=React.createElement,P=this.P; const open=(this._svcSeo||{})[s.id]; const url='/services/'+this.serviceSlugs(this.state.data.services)[s.id];
     const toggle=()=>{ this._svcSeo={...(this._svcSeo||{}),[s.id]:!open}; this.forceUpdate(); };
@@ -1889,6 +2104,11 @@ class Component extends DCLogic {
         f('slug','Page address (slug)','empty = made from the title',this.serviceSlugify(s.title||'')),
         f('seoTitle','SEO title','empty = \u201c'+autoTitle+'\u201d'),
         f('seoDescription','Meta description','empty = the short description',null,true),
+        f('focusKeyword','Focus keyword','the main search phrase; added to the Service schema as keywords','e.g. kundli reading surrey'),
+        h('div',{style:{border:'1px solid '+P.line,borderRadius:12,padding:'12px 14px',background:'#fff'}}, h('div',{style:{font:'600 11px '+this.HEAD,letterSpacing:'.12em',textTransform:'uppercase',color:P.muted,marginBottom:6}},'Google preview'),
+          h('div',{style:{font:'400 13px Arial,sans-serif',color:'#202124'}},(this.state.data.siteUrl||'https://www.analysisofkarma.com').replace(/^https?:\/\//,'')+' \u203a services \u203a '+this.serviceSlugs(this.state.data.services)[s.id]),
+          h('div',{style:{font:'400 18px Arial,sans-serif',color:'#1a0dab',margin:'3px 0'}},this.cut((s.seoTitle||'').trim()||autoTitle,62)),
+          h('div',{style:{font:'400 13.5px/1.5 Arial,sans-serif',color:'#4d5156'}},this.cut((s.seoDescription||'').trim()||this.txt(s.desc||''),158))),
         f('canonical','Canonical URL','only if another page should rank instead of this one','/services/\u2026'),
         f('redirectTo','301 redirect to','merges this service into another page: it leaves the site and its address forwards there','/services/\u2026'),
         h('label',{style:{display:'flex',gap:10,alignItems:'center',font:'500 14px Plus Jakarta Sans',color:P.ink}}, h('input',{type:'checkbox',checked:!!s.noindex,onChange:e=>upd(i,'noindex',e.target.checked),style:{width:18,height:18}}),'Hide this page from Google (noindex)')):null); }
@@ -2185,7 +2405,7 @@ class Component extends DCLogic {
           this.btn('Keep right, merge left → right',act(b,a,'redirect'),{variant:'outline',pad:'7px 13px',style:{fontSize:12.5}}),
           this.btn('Keep both, left ranks (canonical)',act(a,b,'canonical'),{variant:'outline',pad:'7px 13px',style:{fontSize:12.5}}),
           this.btn('Not duplicates',()=>ignore(a,b),{variant:'outline',pad:'7px 13px',style:{fontSize:12.5,color:P.muted}}))),{padding:18}); };
-    const merged=[].concat((d.services||[]).filter(s=>s.redirectTo||s.canonical).map(s=>['services',s,svcUrl(s)]),(d.blog||[]).filter(p=>p.redirectTo||p.canonical).map(p=>['blog',p,postUrl(p)]));
+    const merged=[].concat((d.services||[]).filter(s=>(s.redirectTo||s.canonical)&&!s.unpublished).map(s=>['services',s,svcUrl(s)]),(d.blog||[]).filter(p=>p.redirectTo||p.canonical).map(p=>['blog',p,postUrl(p)]));
     const dS=this.findDuplicates(d.services||[]), dP=this.findDuplicates(d.blog||[]);
     return h('div',null, this.adminHead('Redirects & Duplicates','Overlapping services and posts compete with each other in Google. The duplicates found when this site was upgraded are already merged into their main page (listed under “Merged & canonical items”, each with Undo). Anything new that looks similar appears below for you to decide. Nothing is ever deleted.'),
       h('div',{style:{display:'grid',gap:14,marginBottom:26}},
