@@ -95,13 +95,58 @@ function aok_rich($html): string {
 }
 
 // Multi-paragraph text (the editor stores blank-line separated paragraphs).
-function aok_paras($html): string {
-    $out = '';
-    foreach (preg_split("/\n\s*\n/", trim((string)$html)) as $p) {
-        if (trim($p) === '') continue;
-        $out .= '<p>' . nl2br(aok_rich(trim($p)), false) . '</p>';
+// Long-form text: paragraphs, plus light Markdown used by the expanded service and blog pages.
+// Mirrors mdBlocks()/mdRender() in assets/app.js. Text without these marks renders exactly as before.
+//   ## Heading   ### Sub-heading   - bullet   1. numbered   > answer box   **bold**
+function aok_md_blocks(string $text): array {
+    $out = [];
+    foreach (preg_split("/\n\s*\n/", trim(str_replace("\r", '', $text))) as $b) {
+        $b = trim($b); if ($b === '') continue;
+        $lines = preg_split("/\n/", $b);
+        if (preg_match('/^(#{2,3})\s+(.+)$/', $lines[0], $m)) {
+            $out[] = ['h' . strlen($m[1]), trim($m[2])];
+            $rest = trim(implode("\n", array_slice($lines, 1)));
+            if ($rest !== '') $out = array_merge($out, aok_md_blocks($rest));
+            continue;
+        }
+        $all = function ($re) use ($lines) { foreach ($lines as $l) if (!preg_match($re, trim($l))) return false; return true; };
+        if ($all('/^>\s?/')) $out[] = ['answer', trim(implode("\n", array_map(function ($l) { return preg_replace('/^>\s?/', '', trim($l)); }, $lines)))];
+        elseif ($all('/^[-*]\s+/')) $out[] = ['ul', array_map(function ($l) { return preg_replace('/^[-*]\s+/', '', trim($l)); }, $lines)];
+        elseif ($all('/^\d+[.)]\s+/')) $out[] = ['ol', array_map(function ($l) { return preg_replace('/^\d+[.)]\s+/', '', trim($l)); }, $lines)];
+        else $out[] = ['p', $b];
     }
     return $out;
+}
+
+function aok_md_inline(string $s): string {
+    $h = preg_replace('/&(?![a-zA-Z][a-zA-Z0-9]*;|#\d+;|#x[0-9a-fA-F]+;)/', '&amp;', aok_rich($s));   // bare & -> &amp;
+    return preg_replace('/\*\*(.+?)\*\*/s', '<strong>$1</strong>', $h);
+}
+
+function aok_paras($html): string {
+    $out = '';
+    foreach (aok_md_blocks((string)$html) as $bk) {
+        list($t, $v) = $bk;
+        if ($t === 'h2' || $t === 'h3') $out .= '<' . $t . '>' . aok_md_inline($v) . '</' . $t . '>';
+        elseif ($t === 'answer') $out .= '<aside class="aok-answer"><p>' . nl2br(aok_md_inline($v), false) . '</p></aside>';
+        elseif ($t === 'ul' || $t === 'ol') { $out .= '<' . $t . '>'; foreach ($v as $li) $out .= '<li>' . aok_md_inline($li) . '</li>'; $out .= '</' . $t . '>'; }
+        else $out .= '<p>' . nl2br(aok_md_inline($v), false) . '</p>';
+    }
+    return $out;
+}
+
+// "## Frequently Asked Questions" + "### Question" + answer paragraphs -> [[question, answer], …] for FAQPage schema
+function aok_md_faq(string $text): array {
+    $qa = []; $in = false; $q = null; $a = [];
+    foreach (aok_md_blocks($text) as $bk) {
+        list($t, $v) = $bk;
+        if ($t === 'h2') { if ($q !== null && $a) $qa[] = [$q, implode(' ', $a)]; $q = null; $a = []; $in = stripos($v, 'frequently asked') !== false || stripos($v, 'faq') !== false; continue; }
+        if (!$in) continue;
+        if ($t === 'h3') { if ($q !== null && $a) $qa[] = [$q, implode(' ', $a)]; $q = aok_text($v); $a = []; continue; }
+        if ($q !== null) $a[] = aok_text(is_array($v) ? implode('; ', $v) : str_replace('**', '', $v));
+    }
+    if ($q !== null && $a) $qa[] = [$q, implode(' ', $a)];
+    return $qa;
 }
 
 function aok_cut(string $s, int $max): string {
@@ -569,7 +614,12 @@ function aok_graph(array $d, array $r, array $meta): array {
         }
         $page['mainEntity'] = $qs;
     }
-    if ($r['type'] === 'service') { $node = $serviceNode($r['item']); $graph[] = $node; $page['mainEntity'] = ['@id' => $node['@id']]; }
+    if ($r['type'] === 'service') {
+        $node = $serviceNode($r['item']); $graph[] = $node; $page['mainEntity'] = ['@id' => $node['@id']];
+        $qs = [];
+        foreach (aok_md_faq((string)($r['item']['detail'] ?? '')) as $x) $qs[] = ['@type' => 'Question', 'name' => $x[0], 'acceptedAnswer' => ['@type' => 'Answer', 'text' => $x[1]]];
+        if ($qs) $graph[] = ['@type' => 'FAQPage', '@id' => $url . '#faq', 'url' => $url, 'isPartOf' => ['@id' => $SITE], 'about' => ['@id' => $node['@id']], 'mainEntity' => $qs];
+    }
     if ($r['type'] === 'post') {
         $p = $r['item'];
         $post = ['@type' => 'BlogPosting', '@id' => $url . '#article', 'headline' => aok_cut(aok_text($p['title'] ?? ''), 110),

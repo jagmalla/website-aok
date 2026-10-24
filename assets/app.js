@@ -706,6 +706,24 @@ class Component extends DCLogic {
         this.linkBtn('Book an online consultation →','/contact',()=>this.go('contact'),'outline')),
       h('ul',{style:{listStyle:'none',margin:0,padding:0,display:'grid',gap:10}}, ...this.areaItems().map((it,i)=>h('li',{key:i,style:{display:'flex',gap:12,alignItems:'center',padding:'12px 16px',borderRadius:14,background:'rgba(255,255,255,.6)',border:'1px solid rgba(166,132,70,.22)',font:'500 14.5px/1.5 Plus Jakarta Sans',color:P.ink}}, h('span',{'aria-hidden':'true',style:{color:'#A68446',fontSize:18,width:22,textAlign:'center',flexShrink:0}},it[0]), it[1])))))); }
 
+  // Long-form text with light Markdown — mirrors aok_md_blocks / aok_paras in api/seo-lib.php.
+  //   ## Heading   ### Sub-heading   - bullet   1. numbered   > answer box   **bold**
+  mdBlocks(text){ const out=[]; String(text||'').replace(/\r/g,'').trim().split(/\n\s*\n/).forEach(b=>{ b=b.trim(); if(!b) return; const lines=b.split('\n'); const m=lines[0].match(/^(#{2,3})\s+(.+)$/);
+      if(m){ out.push(['h'+m[1].length,m[2].trim()]); const rest=lines.slice(1).join('\n').trim(); if(rest) this.mdBlocks(rest).forEach(x=>out.push(x)); return; }
+      const all=re=>lines.every(l=>re.test(l.trim()));
+      if(all(/^>\s?/)) out.push(['answer',lines.map(l=>l.trim().replace(/^>\s?/,'')).join('\n').trim()]);
+      else if(all(/^[-*]\s+/)) out.push(['ul',lines.map(l=>l.trim().replace(/^[-*]\s+/,''))]);
+      else if(all(/^\d+[.)]\s+/)) out.push(['ol',lines.map(l=>l.trim().replace(/^\d+[.)]\s+/,''))]);
+      else out.push(['p',b]); }); return out; }
+  mdInline(s,key){ const h=React.createElement; const parts=[]; String(s||'').split(/(\*\*[^*]+?\*\*|\n)/).forEach((x,i)=>{ if(!x) return; if(x==='\n') parts.push(h('br',{key:key+'b'+i})); else if(/^\*\*[^*]+\*\*$/.test(x)) parts.push(h('strong',{key:key+'s'+i,style:{fontWeight:700,color:this.P.maroon}},x.slice(2,-2))); else parts.push(x); }); return parts; }
+  mdRender(text,fontSize){ const h=React.createElement,P=this.P; const fs=fontSize||17;
+    return this.mdBlocks(text).map((bk,i)=>{ const t=bk[0],v=bk[1],k='md'+i;
+      if(t==='h2') return h('h2',{key:k,style:{font:'600 clamp(26px,3vw,32px)/1.18 '+this.SERIF,color:P.maroon,margin:'40px 0 14px',letterSpacing:'-.005em'}},this.mdInline(v,k));
+      if(t==='h3') return h('h3',{key:k,style:{font:'600 21px/1.3 '+this.SERIF,color:P.maroon,margin:'26px 0 8px'}},this.mdInline(v,k));
+      if(t==='answer') return h('aside',{key:k,className:'aok-answer'},h('p',{style:{margin:0}},this.mdInline(v,k)));
+      if(t==='ul'||t==='ol') return h(t,{key:k,className:'aok-mdlist',style:{font:'400 '+fs+'px/1.75 Plus Jakarta Sans',color:P.ink,margin:'0 0 18px',paddingLeft:24}},...v.map((li,j)=>h('li',{key:k+'l'+j,style:{marginBottom:6}},this.mdInline(li,k+'l'+j))));
+      return h('p',{key:k,style:{font:'400 '+fs+'px/1.8 Plus Jakarta Sans',color:P.ink,margin:'0 0 18px'}},this.mdInline(v,k)); }); }
+
   renderServiceDetail(){ const h=React.createElement,P=this.P,d=this.state.data; const s=(d.services||[]).find(x=>x.id===this.state.serviceId);
     if(!s) return this.renderNotFound();
     const others=(d.services||[]).filter(x=>x.id!==s.id&&!x.redirectTo).slice(0,3);
@@ -717,7 +735,7 @@ class Component extends DCLogic {
         h('h1',{style:{font:'800 clamp(34px,4.6vw,56px) '+this.HEAD,margin:'0 0 18px',letterSpacing:'-.015em',color:P.maroon,lineHeight:1.06}}, this.twoToneText(s.title)),
         h('p',{style:{font:'400 18px/1.7 Plus Jakarta Sans',color:P.ink,maxWidth:680,margin:'0 auto'}}, s.desc))), h('div',{className:'aok-hairline'})),
       h('section',{style:{padding:'64px 0'}}, this.wrap(h('div',{style:{display:'grid',gridTemplateColumns:'1.3fr .7fr',gap:32,alignItems:'start'}},
-        h('div',{className:'aok-card',style:{padding:'34px 36px'}}, s.detail? h('div',{style:{font:'400 16.5px/1.8 Plus Jakarta Sans',color:P.ink,whiteSpace:'pre-line'}}, s.detail) : h('p',{style:{font:'400 16.5px/1.8 Plus Jakarta Sans',color:P.ink,margin:0}}, s.desc)),
+        h('div',{className:'aok-card',style:{padding:'34px 36px'}}, s.detail? h('div',{className:'aok-md'}, this.mdRender(s.detail,16.5)) : h('p',{style:{font:'400 16.5px/1.8 Plus Jakarta Sans',color:P.ink,margin:0}}, s.desc)),
         h('div',{className:'aok-card',style:{padding:'30px 28px',textAlign:'center'}},
           h('div',{style:{font:'600 12px '+this.HEAD,letterSpacing:'.2em',textTransform:'uppercase',color:'#8A6A2E',marginBottom:12}},'Consultation fee'),
           h('div',{className:'aok-goldtext',style:{font:'600 44px/1 '+this.SERIF}}, s.price||((d.about&&d.about.pricing&&d.about.pricing.fee)||'$100 CAD')),
@@ -942,7 +960,7 @@ class Component extends DCLogic {
         h('h1',{style:{font:'800 clamp(30px,3.9vw,48px)/1.1 '+this.HEAD,color:P.maroon,margin:0,letterSpacing:'-.015em'}}, p.title))), h('div',{className:'aok-hairline'})),
       h('section',{style:{padding:'52px 0 70px'}}, this.wrap(h('div',{style:{maxWidth:780,margin:'0 auto'}},
         h('div',{className:'aok-card',style:{padding:8,marginBottom:36}}, h('div',{style:{aspectRatio:'16/8',borderRadius:14,overflow:'hidden',background:p.image?'transparent':'linear-gradient(135deg,#FFFFFF 0%,#F4EEE3 55%,#E9DCC2 100%)'}}, p.image?h('img',{loading:'lazy',decoding:'async',src:p.image,alt:p.focusKeyword||p.title,style:{width:'100%',height:'100%',objectFit:'cover'}}):h('div',{style:{height:'100%',display:'flex',alignItems:'center',justifyContent:'center',color:'#A68446',fontFamily:'monospace',fontSize:12}},'featured image — alt: '+(p.focusKeyword||'')))),
-        h('div',{style:{font:'400 18px/1.85 Plus Jakarta Sans',color:P.ink,whiteSpace:'pre-line'}}, p.body),
+        h('div',{className:'aok-md'}, this.mdRender(p.body,18)),
         this.authorCard(), this.relatedServicesBlock(p)))),
       this.ctaBand('home.cta')); }
 
@@ -1775,7 +1793,7 @@ class Component extends DCLogic {
           h('div',null, h('div',{style:{font:'600 12.5px '+this.HEAD,color:P.maroon,marginBottom:6}},'Icon'), h('select',{value:s.icon,onChange:e=>upd(i,'icon',e.target.value),style:{width:'100%',padding:'11px',borderRadius:10,border:'1px solid '+P.line,background:P.white,fontSize:20,textAlign:'center'}},...icons.map(ic=>h('option',{key:ic,value:ic},ic)))),
           h('div',null, h('div',{style:{font:'600 12.5px '+this.HEAD,color:P.maroon,marginBottom:6}},'Title'), h('input',{value:s.title,onChange:e=>upd(i,'title',e.target.value),style:this.inpStyle()})),
           h('div',null, h('div',{style:{font:'600 12.5px '+this.HEAD,color:P.maroon,marginBottom:6}},'Price'), h('input',{value:s.price,onChange:e=>upd(i,'price',e.target.value),style:this.inpStyle()}))),
-        h('div',{style:{marginTop:12}}, h('div',{style:{font:'600 12.5px '+this.HEAD,color:P.maroon,marginBottom:6}},'Description'), h('textarea',{value:s.desc,onChange:e=>upd(i,'desc',e.target.value),rows:2,style:this.inpStyle()})), h('div',{style:{marginTop:12}}, h('div',{style:{font:'600 12.5px '+this.HEAD,color:P.maroon,marginBottom:6}},'Detailed description ',h('span',{style:{fontWeight:400,color:P.muted}},'\u2014 shown when a visitor clicks \u201cRead more\u201d')), h('textarea',{value:s.detail||'',onChange:e=>upd(i,'detail',e.target.value),rows:5,style:this.inpStyle()})), this.svcSeoPanel(s,i,upd))))) ); }
+        h('div',{style:{marginTop:12}}, h('div',{style:{font:'600 12.5px '+this.HEAD,color:P.maroon,marginBottom:6}},'Description'), h('textarea',{value:s.desc,onChange:e=>upd(i,'desc',e.target.value),rows:2,style:this.inpStyle()})), h('div',{style:{marginTop:12}}, h('div',{style:{font:'600 12.5px '+this.HEAD,color:P.maroon,marginBottom:6}},'Detailed description ',h('span',{style:{fontWeight:400,color:P.muted}},'\u2014 the service page text; formatting: ## heading, ### sub-heading, - bullet, > answer box, **bold**')), h('textarea',{value:s.detail||'',onChange:e=>upd(i,'detail',e.target.value),rows:5,style:this.inpStyle()})), this.svcSeoPanel(s,i,upd))))) ); }
   // per-service page address, SEO title/description, canonical, 301 redirect and noindex (collapsed by default)
   svcSeoPanel(s,i,upd){ const h=React.createElement,P=this.P; const open=(this._svcSeo||{})[s.id]; const url='/services/'+this.serviceSlugs(this.state.data.services)[s.id];
     const toggle=()=>{ this._svcSeo={...(this._svcSeo||{}),[s.id]:!open}; this.forceUpdate(); };
@@ -1811,7 +1829,7 @@ class Component extends DCLogic {
             h('label',null,h('span',{style:this.lbl()},'Canonical URL ',h('span',{style:{fontWeight:400,color:P.muted}},'\u2014 only if another page should rank instead')),h('input',{value:p.canonical||'',placeholder:'/blog/\u2026',onChange:e=>upd('canonical',e.target.value),style:this.inpStyle()})),
             h('label',null,h('span',{style:this.lbl()},'301 redirect to ',h('span',{style:{fontWeight:400,color:P.muted}},'\u2014 merges this post into another page')),h('input',{value:p.redirectTo||'',placeholder:'/blog/\u2026',onChange:e=>upd('redirectTo',e.target.value),style:this.inpStyle()}))),
           h('label',null,h('span',{style:this.lbl()},'Excerpt'),h('textarea',{value:p.excerpt||'',onChange:e=>upd('excerpt',e.target.value),rows:2,style:this.inpStyle()})),
-          h('label',null,h('span',{style:this.lbl()},'Body'),h('textarea',{value:p.body||'',onChange:e=>upd('body',e.target.value),rows:12,style:this.inpStyle()})),
+          h('label',null,h('span',{style:this.lbl()},'Body ',h('span',{style:{fontWeight:400,color:P.muted}},'\u2014 formatting: ## heading, ### sub-heading, - bullet, 1. numbered, > answer box, **bold**')),h('textarea',{value:p.body||'',onChange:e=>upd('body',e.target.value),rows:12,style:this.inpStyle()})),
           h('label',{style:{display:'flex',gap:10,alignItems:'center',font:'500 15px Plus Jakarta Sans',color:P.ink}},h('input',{type:'checkbox',checked:!!p.published,onChange:e=>upd('published',e.target.checked),style:{width:18,height:18}}),'Published (visible on website)'))) ); }
     const move=(i,dir)=>{ const arr=[...d.blog]; const j=i+dir; if(j<0||j>=arr.length)return;[arr[i],arr[j]]=[arr[j],arr[i]];this.commit('blog',arr); };
     const del=id=>{ if(!confirm('Delete this post?'))return; this.commit('blog',d.blog.filter(x=>x.id!==id)); };
