@@ -49,7 +49,7 @@ Transits (Gochar) describe the planets moving through your natal chart day by da
 Tajika also includes **Prashna**, horary astrology. Where Varshaphala answers "What will this year bring?", Prashna answers one sincere question asked at a particular moment, using a chart cast for that moment and the same Tajika aspects. The two are often combined. A Varshaphala sets the year's map, and a Prashna resolves a specific decision within it, even for people who do not know their exact birth time.
 
 ### When to read your annual chart
-The ideal time is a few weeks before your birthday, when the new Varsha Pravesha is about to begin, so you enter the year prepared. Because the chart depends on location, tell your astrologer where you expect to be on the birthday itself. A trip at that time can change the annual ascendant. Reviewing it again at the halfway point, or when a new Mudda period starts, keeps the forecast practical.
+The ideal time is a few weeks before your birthday, when the new Varsha Pravesha is about to begin, so you enter the year prepared. Because the chart depends on location, tell your astrologer where you expect to be on the birthday itself. A trip at that time can change the annual ascendant, and with it the houses of the whole year. Reviewing it again at the halfway point, or when a new Mudda period starts, keeps the forecast practical.
 
 ## Conscious Karma & Practical Vedic Remedies
 
