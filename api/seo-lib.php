@@ -644,10 +644,35 @@ function aok_btn(array $d, string $path, string $defLabel, string $defLink): str
     return '<a class="aok-ssr-btn" href="' . aok_e(aok_link_for($c['link'] ?? $defLink, $d)) . '">' . aok_e(aok_text($label)) . '</a>';
 }
 
+// "Call +1 (236) 660-2000 · WhatsApp" links (header, contact page, service pages)
+function aok_contact_links_html(array $d): string {
+    $ph = trim((string)aok_get($d, 'contact.phone', '')); $tel = aok_e164($ph); $wa = aok_whatsapp_url($d);
+    $l = [];
+    if ($tel !== '') $l[] = '<a href="tel:' . aok_e($tel) . '">Call ' . aok_e($ph) . '</a>';
+    if ($wa !== '') $l[] = '<a href="' . aok_e($wa) . '" rel="noopener">WhatsApp Jag Mallah</a>';
+    return $l ? '<p>' . implode(' · ', $l) . '</p>' : '';
+}
+
+function aok_review_links_html(array $d): string {
+    $l = [];
+    if ($u = trim((string)(aok_get($d, 'local.reviewUrl', '') ?: aok_get($d, 'local.mapsCidUrl', '') ?: aok_get($d, 'contact.gmb', '')))) $l[] = '<a href="' . aok_e($u) . '" rel="noopener">Review us on Google Maps</a>';
+    if ($u = trim((string)aok_get($d, 'contact.trustpilot', ''))) $l[] = '<a href="' . aok_e($u) . '" rel="noopener">Review us on Trustpilot</a>';
+    return $l ? '<p>' . implode(' · ', $l) . '</p>' : '';
+}
+
+// "Surrey, BC, Canada" -> "Surrey" (+ nearby cities not already listed); mirrors areaShortNames() in app.js
+function aok_area_short_names(array $d): array {
+    $out = [];
+    foreach (array_merge((array)aok_get($d, 'local.areasServed', []), (array)aok_get($d, 'local.nearbyCities', [])) as $a) {
+        $n = trim(explode(',', (string)$a)[0]); if ($n !== '' && !in_array($n, $out, true)) $out[] = $n;
+    }
+    return $out;
+}
+
 function aok_html_header(array $d): string {
     $h = '<header><p><a href="/"><strong>' . aok_e(aok_brand($d)) . '</strong></a> — Vedic Astrology</p><nav aria-label="Main"><ul>';
     foreach ((array)aok_get($d, 'nav.items', []) as $it) $h .= '<li><a href="' . aok_e(aok_nav_href($it, $d)) . '">' . aok_e($it['label'] ?? 'Link') . '</a></li>';
-    $h .= '</ul></nav></header>';
+    $h .= '</ul></nav>' . aok_contact_links_html($d) . '</header>';
     return $h;
 }
 
@@ -656,17 +681,20 @@ function aok_nap_html(array $d): string {
     $street = trim((string)aok_get($d, 'local.streetAddress', ''));
     if (!aok_get($d, 'local.serviceAreaBusiness', true) && $street !== '') $o .= '<br>' . aok_e($street);
     $o .= '<br>' . aok_e(aok_get($d, 'local.locality', 'Surrey')) . ', ' . aok_e(aok_get($d, 'local.region', 'British Columbia')) . ', ' . aok_e(aok_get($d, 'local.country', 'CA') === 'CA' ? 'Canada' : aok_get($d, 'local.country'));
-    if ($ph = trim((string)aok_get($d, 'contact.phone', ''))) $o .= '<br>Phone: <a href="tel:' . aok_e(preg_replace('/[^\d+]/', '', $ph)) . '">' . aok_e($ph) . '</a>';
+    if ($ph = trim((string)aok_get($d, 'contact.phone', ''))) $o .= '<br>Phone &amp; WhatsApp: <a href="tel:' . aok_e(aok_e164($ph)) . '">' . aok_e($ph) . '</a>';
     if ($em = trim((string)aok_get($d, 'contact.email', ''))) $o .= '<br>Email: <a href="mailto:' . aok_e($em) . '">' . aok_e($em) . '</a>';
-    $areas = array_filter((array)aok_get($d, 'local.areasServed', []));
-    $cities = array_values(array_filter((array)aok_get($d, 'local.nearbyCities', [])));
-    if ($areas) $o .= '<br>Serving: ' . aok_e(implode(', ', $areas)) . ($cities ? ' · including ' . aok_e(aok_join_list($cities)) : '') . (aok_get($d, 'local.onlineWorldwide', true) ? ' · Worldwide online (' . aok_e(implode(' & ', array_filter((array)aok_get($d, 'local.onlineChannels', ['Zoom', 'WhatsApp'])))) . ')' : '');
-    if ($hrs = aok_hours_text($d)) { $o .= '<br>Hours: '; $p = []; foreach ($hrs as $day => $t) $p[] = $day . ' ' . $t; $o .= aok_e(implode(' · ', $p)); }
+    $areas = aok_area_short_names($d);
+    if ($areas) $o .= '<br>Serving: ' . aok_e(implode(', ', $areas)) . (aok_get($d, 'local.onlineWorldwide', true) ? ' · Worldwide online (' . aok_e(implode(' & ', array_filter((array)aok_get($d, 'local.onlineChannels', ['Zoom', 'WhatsApp'])))) . ')' : '');
+    if ($hrs = aok_hours_text($d)) {
+        $p = []; foreach ($hrs as $day => $t) $p[] = $day . ' ' . $t;
+        $o .= '<br>Hours: ' . aok_e(count($hrs) === 7 && count(array_unique($hrs)) === 1 ? 'Mon–Sun ' . reset($hrs) : implode(' · ', $p))
+            . (aok_get($d, 'local.timezone', '') === 'America/Vancouver' ? ' (Pacific Time)' : '');
+    }
     return $o . '</address>';
 }
 
 function aok_html_footer(array $d): string {
-    $f = '<footer><p>' . aok_e(aok_text(aok_get($d, 'brand.tagline', ''))) . '</p>' . aok_nap_html($d) . '<nav aria-label="Footer"><ul>';
+    $f = '<footer><p>' . aok_e(aok_text(aok_get($d, 'brand.tagline', ''))) . '</p>' . aok_nap_html($d) . aok_review_links_html($d) . '<nav aria-label="Footer"><ul>';
     foreach ([['/', 'Home'], ['/about', 'About Us'], ['/services', 'Services'], ['/meditation', 'Meditation'], ['/blog', 'Blog'], ['/faq', 'FAQ'], ['/contact', 'Contact']] as $l)
         $f .= '<li><a href="' . $l[0] . '">' . $l[1] . '</a></li>';
     $f .= '</ul></nav>';
@@ -696,6 +724,8 @@ function aok_author_card_html(array $d): string {
     if ($studies) $o .= '<p>Formal training in ' . aok_e(aok_join_list($studies)) . ($mentor !== '' ? ' under ' . aok_e($mentor) : '') . '.</p>';
     $texts = (array)aok_get($d, 'person.classicalTexts', []); $trad = trim((string)aok_get($d, 'person.traditions', ''));
     if ($texts) $o .= '<p>Classical research' . ($trad !== '' ? ': ' . aok_e($trad) . ', through ' : ': ') . aok_e(aok_join_list($texts)) . '.</p>';
+    if ($ph = array_values(array_filter((array)aok_get($d, 'person.philosophy', [])))) $o .= '<p>Grounded in ' . aok_e(aok_join_list($ph)) . '.</p>';
+    if ($ln = array_values(array_filter((array)aok_get($d, 'local.languages', [])))) $o .= '<p>Consultations in ' . aok_e(aok_join_list($ln)) . '.</p>';
     $o .= '<p>' . aok_e(aok_fee_line($d)) . '</p>';
     return $o . '<p><a href="/contact">Book a consultation with ' . aok_e($name) . '</a> · <a href="/about">More about ' . aok_e($name) . '</a></p></aside>';
 }
@@ -704,10 +734,13 @@ function aok_author_card_html(array $d): string {
 function aok_area_items(array $d): array {
     $loc = trim((string)aok_get($d, 'local.locality', 'Surrey')); $region = trim((string)aok_get($d, 'local.region', 'British Columbia'));
     $items = [];
-    if ($loc !== '') $items[] = aok_location_label($d) . ' (home base)';
+    $nb = array_values(array_filter((array)aok_get($d, 'local.neighbourhoods', [])));
+    $ab = array_values(array_filter((array)aok_get($d, 'local.abroad', [])));
+    if ($loc !== '') $items[] = aok_location_label($d) . ' (home base)' . ($nb ? ': ' . aok_join_list($nb) : '');
     $cities = array_values(array_filter((array)aok_get($d, 'local.nearbyCities', [])));
     if ($cities) $items[] = trim((string)aok_get($d, 'local.nearbyLabel', 'Greater Vancouver')) . ': ' . aok_join_list($cities);
     if ($region !== '') $items[] = $region . ' and across ' . (aok_get($d, 'local.country', 'CA') === 'CA' ? 'Canada' : aok_get($d, 'local.country'));
+    if ($ab) $items[] = 'Clients abroad: ' . aok_join_list($ab);
     if (aok_get($d, 'local.onlineWorldwide', true)) {
         $langs = array_values(array_filter((array)aok_get($d, 'local.languages', [])));
         $items[] = 'Worldwide online via ' . implode(' & ', array_filter((array)aok_get($d, 'local.onlineChannels', ['Zoom', 'WhatsApp']))) . ($langs ? ', in ' . aok_join_list($langs) : '');
@@ -836,7 +869,7 @@ function aok_main_html(array $d, array $r): string {
         $o .= aok_crumbs([['Home', '/'], ['Services', '/services'], [aok_text($s['title'] ?? ''), '']]);
         $o .= '<article><h1>' . aok_e(aok_text($s['title'] ?? '')) . '</h1><p>' . aok_rich($s['desc'] ?? '') . '</p>' . aok_paras($s['detail'] ?? '');
         if (!empty($s['price'])) $o .= '<p>Consultation fee: <strong>' . aok_e(aok_text($s['price'])) . '</strong></p>';
-        $o .= '<p>' . aok_btn($d, 'servicesPage.cardBtn', 'Book this →', 'contact') . '</p></article>';
+        $o .= '<p>' . aok_btn($d, 'servicesPage.cardBtn', 'Book this →', 'contact') . '</p>' . aok_contact_links_html($d) . '</article>';
         $o .= aok_related_posts_html($d, $s) . aok_author_card_html($d) . aok_areas_html($d);
         $others = array_values(array_filter($d['services'] ?? [], function ($x) use ($s) { return ($x['id'] ?? '') !== ($s['id'] ?? '') && empty($x['redirectTo']); }));
         $o .= '<section><h2>' . aok_e(aok_text($g('home.servicesIntro.title', 'Vedic astrology services'))) . '</h2>' . aok_services_list($d, array_slice($others, 0, 6), false) . '<p><a href="/services">See all services</a></p></section>' . aok_cta($d);
@@ -863,7 +896,10 @@ function aok_main_html(array $d, array $r): string {
             . aok_author_card_html($d) . aok_related_services_html($d, $p) . '<p><a href="/blog">← Blog</a> · <a href="/services">Services</a> · <a href="/contact">Contact</a></p>' . aok_cta($d);
     } elseif ($t === 'contact') {
         $o .= '<section><p>' . aok_e(aok_text($g('seo.contact.focusKeyword'))) . '</p><h1>' . aok_e(aok_text($g('contactPage.title'))) . '</h1><p>' . aok_rich($g('contactPage.sub')) . '</p></section>';
-        $o .= '<section><h2>Send your details</h2><p>' . aok_rich($g('contactPage.note')) . '</p><p>Consultation fee: <strong>' . aok_e(aok_text($g('about.pricing.fee', '$100 CAD'))) . '</strong> ' . aok_e(aok_text($g('about.pricing.unit', 'per hour'))) . '</p>' . aok_nap_html($d) . '</section>';
+        $o .= '<section><h2>Send your details</h2><p>' . aok_rich($g('contactPage.note')) . '</p><p>Consultation fee: <strong>' . aok_e(aok_text($g('about.pricing.fee', '$100 CAD'))) . '</strong> ' . aok_e(aok_text($g('about.pricing.unit', 'per hour'))) . '</p>' . aok_contact_links_html($d)
+            . (($rt = trim((string)$g('contact.replyTime', ''))) !== '' ? '<p>Jag Mallah replies personally, usually ' . aok_e($rt) . '. Consultations in English, Hindi and Punjabi.</p>' : '')
+            . (($bk = trim((string)$g('contact.bookingUrl', ''))) !== '' && preg_match('#^https?://#i', $bk) ? '<p><a href="' . aok_e($bk) . '" rel="noopener">Book online</a></p>' : '')
+            . aok_nap_html($d) . aok_review_links_html($d) . '</section>';
         $o .= aok_areas_html($d);
         $o .= '<section><h2>' . aok_e(aok_text($g('faqPage.hero.title', 'FAQ'))) . '</h2>' . aok_faq_html($d) . '</section>';
     } elseif ($t === 'faq') {

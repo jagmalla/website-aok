@@ -578,7 +578,7 @@ class Component extends DCLogic {
     if(this.state.route==='admin') return this.renderAdmin();
     const em=this.state.editMode;
     if(em){ if(this._baseline==null) this._baseline=JSON.stringify(this.state.data); } else { this._baseline=null; }
-    const site=h('div',{className:'aok-site',style:{minHeight:'100vh',background:P.bg,containerType:'inline-size',containerName:'site'}}, h('div',{className:'aok-sky','aria-hidden':'true'}), this.renderNav(), this.gapBlocks(this.scopeKey()+'::top'), this.renderPage(), this.renderBlocks(this.scopeKey()), this.renderFooter());
+    const site=h('div',{className:'aok-site',style:{minHeight:'100vh',background:P.bg,containerType:'inline-size',containerName:'site'}}, h('div',{className:'aok-sky','aria-hidden':'true'}), this.renderNav(), this.gapBlocks(this.scopeKey()+'::top'), this.renderPage(), this.renderBlocks(this.scopeKey()), this.renderFooter(), this.renderFab());
     if(!em) return h('div',null, site, this.renderToast());
     const dev=this.state.device||'desktop'; const W=dev==='mobile'?414:dev==='tablet'?834:null;
     const frame=W? h('div',{style:{maxWidth:W,margin:'0 auto',minHeight:'100vh',background:P.bg,boxShadow:'0 0 0 1px '+P.line+', 0 30px 80px rgba(0,0,0,.18)'}}, site) : site;
@@ -602,11 +602,12 @@ class Component extends DCLogic {
         h('a',{...this.linkTo('/',()=>this.go('home')),className:'aok-brand','aria-label':d.brand.name+' home'}, h('span',{className:'aok-brand-mark'},this.mark(46)),
           h('div',{style:{minWidth:0}}, h('div',{className:'aok-brand-name aok-goldtext'}, d.brand.name), h('div',{className:'aok-brand-sub'}, 'Vedic Astrology'))),
         h('nav',{className:'aok-desknav aok-navlinks','aria-label':'Main'}, ...items.map(linkEl)),
-        h('div',{className:'aok-desknav aok-navright'}, langTog(), this.ebtn('nav.cta',{label:this.t('book'),link:'contact',variant:'solid',size:'sm'})),
+        h('div',{className:'aok-desknav aok-navright'}, this.telHref()?h('a',{href:this.telHref(),className:'aok-navphone','aria-label':'Call '+d.contact.phone,title:'Call '+d.contact.phone},'\u260e'):null, langTog(), this.ebtn('nav.cta',{label:this.t('book'),link:'contact',variant:'solid',size:'sm'})),
         h('button',{className:'aok-burger','aria-label':'Menu','aria-expanded':mob?'true':'false',onClick:()=>this.setState({menuOpen:!mob})}, mob?'✕':'☰')),
       h('div',{className:'aok-mobnav'+(mob?' open':'')},
         h('div',{style:{display:'flex',flexDirection:'column'}}, ...items.map(it=>h('a',{key:it.id,...this.navLink(it),className:'aok-moblink'+(this.navActive(it)?' is-active':'')}, it.label||'Link'))),
-        h('div',{style:{display:'flex',alignItems:'center',gap:14,marginTop:16}}, langTog(), this.ebtn('nav.cta',{label:this.t('book'),link:'contact',variant:'solid',size:'sm'},{flex:1,justifyContent:'center'}))));
+        h('div',{style:{display:'flex',alignItems:'center',gap:14,marginTop:16}}, langTog(), this.ebtn('nav.cta',{label:this.t('book'),link:'contact',variant:'solid',size:'sm'},{flex:1,justifyContent:'center'})),
+        (this.telHref()||this.waUrl())?h('div',{style:{display:'flex',gap:10,marginTop:12}}, this.telHref()?h('a',{href:this.telHref(),className:'aok-moblink',style:{flex:1,textAlign:'center'}},'\u260e '+d.contact.phone):null, this.waUrl()?h('a',{href:this.waUrl(),target:'_blank',rel:'noopener',className:'aok-moblink',style:{flex:1,textAlign:'center'}},'\u2706 WhatsApp'):null):null));
   }
 
   // ---------- page switch ----------
@@ -641,6 +642,15 @@ class Component extends DCLogic {
   livePosts(){ return ((this.state.data&&this.state.data.blog)||[]).filter(p=>p.published&&p.slug&&!p.redirectTo); }
   relatedServices(post){ return this.clusterPick(this.liveServices(),s=>this.clusterScore(post,s),3,2); }
   relatedPosts(svc){ return this.clusterPick(this.livePosts(),p=>this.clusterScore(p,svc),3,0); }
+  // contact helpers — mirror aok_whatsapp_url / aok_e164 in api/seo-lib.php
+  waUrl(){ const c=(this.state.data&&this.state.data.contact)||{}; let n=String(c.whatsapp||c.phone||'').replace(/\D/g,''); if(!n) return ''; if(n.length===10) n='1'+n; const t=(c.whatsappText||'').trim(); return 'https://wa.me/'+n+(t?'?text='+encodeURIComponent(t):''); }
+  telHref(){ const p=String(((this.state.data&&this.state.data.contact)||{}).phone||''); const dg=p.replace(/\D/g,''); if(!dg) return ''; return 'tel:'+(p.trim().charAt(0)==='+'?'+'+dg:(dg.length===10?'+1'+dg:'+'+dg)); }
+  reviewLinks(){ const d=this.state.data,L=d.local||{},c=d.contact||{}; return [[ 'Review us on Google Maps',L.reviewUrl||L.mapsCidUrl||c.gmb],['Review us on Trustpilot',c.trustpilot]].filter(x=>x[1]); }
+  // floating WhatsApp / Call buttons (public pages only)
+  renderFab(){ const h=React.createElement; if(this.state.editMode) return null; const wa=this.waUrl(), tel=this.telHref(); if(!wa&&!tel) return null;
+    return h('div',{className:'aok-fab',role:'complementary','aria-label':'Quick contact'},
+      wa?h('a',{href:wa,target:'_blank',rel:'noopener',className:'aok-fab-btn is-wa','aria-label':'WhatsApp Jag Mallah'},h('span',{'aria-hidden':'true'},'\u2706'),h('b',null,'WhatsApp')):null,
+      tel?h('a',{href:tel,className:'aok-fab-btn','aria-label':'Call '+((this.state.data.contact||{}).phone||'')},h('span',{'aria-hidden':'true'},'\u260e'),h('b',null,'Call')):null); }
   joinList(a){ a=(a||[]).map(x=>String(x).trim()).filter(Boolean); return a.length<2?a.join(''):a.slice(0,-1).join(', ')+' and '+a[a.length-1]; }
   linkBtn(label,href,fn,variant){ return React.createElement('a',this.linkTo(href,fn,{className:'aok-btn aok-fx-lift',style:{display:'inline-flex',alignItems:'center',gap:9,font:'600 14.5px '+this.HEAD,padding:'12px 22px',borderRadius:999,textDecoration:'none',whiteSpace:'nowrap',...this.btnVariants()[variant||'solid']}}),label); }
   locLabel(){ const L=this.state.data.local||{}; return (L.locality||'Surrey')+(L.regionCode?', '+L.regionCode:''); }
@@ -672,14 +682,18 @@ class Component extends DCLogic {
         studies.length?h('p',{style:{font:'400 15px/1.7 Plus Jakarta Sans',color:P.ink,margin:'0 0 10px'}},'Formal training in '+this.joinList(studies)+(pe.mentor?' under '+pe.mentor:'')+'.'):null,
         studies.length?h('div',{style:{margin:'0 0 8px'}},...studies.map(chip)):null,
         texts.length?h('p',{style:{font:'400 15px/1.7 Plus Jakarta Sans',color:P.ink,margin:'0 0 14px'}},'Classical research'+(pe.traditions?': '+pe.traditions+', through ':': ')+this.joinList(texts)+'.'):null,
+        (pe.philosophy||[]).filter(Boolean).length?h('p',{style:{font:'400 15px/1.7 Plus Jakarta Sans',color:P.ink,margin:'0 0 10px'}},'Grounded in '+this.joinList(pe.philosophy)+'.'):null,
+        (L.languages||[]).filter(Boolean).length?h('p',{style:{font:'500 14px/1.6 Plus Jakarta Sans',color:P.ink,margin:'0 0 12px'}},'Consultations in '+this.joinList(L.languages)+'.'):null,
         h('div',{style:{font:'600 13.5px '+this.HEAD,color:'#8A6A2E',margin:'0 0 18px'}},((pr.fee||'$100 CAD')+' '+(pr.unit||'per hour')).trim()+' · '+((L.onlineChannels||['Zoom','WhatsApp']).filter(Boolean).join(' & '))+' · New clients pay only if satisfied'),
         h('div',{style:{display:'flex',gap:10,flexWrap:'wrap'}}, this.linkBtn('Book a consultation →','/contact',()=>this.go('contact'),'solid'), this.linkBtn('More about '+name,'/about',()=>this.go('about'),'outline')))); }
 
   // "Service Areas & Online Consultations" (contact + service pages); the footer carries the short version
   areaItems(){ const d=this.state.data,L=d.local||{}; const out=[]; const near=(L.nearbyCities||[]).filter(Boolean), langs=(L.languages||[]).filter(Boolean);
-    if(L.locality!=='') out.push(['⌖',this.locLabel()+' (home base)']);
+    const nb=(L.neighbourhoods||[]).filter(Boolean), ab=(L.abroad||[]).filter(Boolean);
+    if(L.locality!=='') out.push(['⌖',this.locLabel()+' (home base)'+(nb.length?': '+this.joinList(nb):'')]);
     if(near.length) out.push(['◎',(L.nearbyLabel||'Greater Vancouver')+': '+this.joinList(near)]);
     if(L.region) out.push(['✦',L.region+' and across '+((L.country||'CA')==='CA'?'Canada':L.country)]);
+    if(ab.length) out.push(['✈','Clients abroad: '+this.joinList(ab)]);
     if(L.onlineWorldwide!==false) out.push(['☉','Worldwide online via '+(L.onlineChannels||['Zoom','WhatsApp']).filter(Boolean).join(' & ')+(langs.length?', in '+this.joinList(langs):'')]);
     return out; }
   areasIntro(){ const d=this.state.data,L=d.local||{},pe=d.person||{}; const near=(L.nearbyCities||[]).filter(Boolean);
@@ -709,7 +723,8 @@ class Component extends DCLogic {
           h('div',{className:'aok-goldtext',style:{font:'600 44px/1 '+this.SERIF}}, s.price||((d.about&&d.about.pricing&&d.about.pricing.fee)||'$100 CAD')),
           h('div',{style:{font:'500 14px Plus Jakarta Sans',color:P.muted,margin:'8px 0 18px'}}, (d.about&&d.about.pricing&&d.about.pricing.unit)||'per hour'),
           h('div',{style:{marginBottom:20,padding:'9px 16px',borderRadius:999,background:'#FFFCF7',border:'1px solid #C5A869',font:'600 12.5px '+this.HEAD,color:P.maroon,display:'inline-block'}},'New clients: pay only if satisfied'),
-          h('div',null, this.ebtn('servicesPage.cardBtn',{label:'Book this \u2192',link:'contact',variant:'outline',size:'sm'})))))),
+          h('div',null, this.ebtn('servicesPage.cardBtn',{label:'Book this \u2192',link:'contact',variant:'outline',size:'sm'})),
+          this.waUrl()?h('a',{href:this.waUrl(),target:'_blank',rel:'noopener',className:'aok-btn aok-fx-lift',style:{display:'inline-flex',marginTop:12,font:'600 13.5px '+this.HEAD,padding:'10px 18px',borderRadius:999,textDecoration:'none',...this.btnVariants().solid}},'\u2706 WhatsApp Jag Mallah'):null)))),
       this.relatedPostsBlock(s),
       h('section',{style:{padding:'0 0 64px'}}, this.wrap(h('div',{style:{maxWidth:980,margin:'0 auto'}}, this.authorCard()))),
       this.areasBlock(),
@@ -942,7 +957,7 @@ class Component extends DCLogic {
     if(raw){ if(isEmbedUrl(raw)) mapSrc=raw; else if(coord) mapSrc='https://maps.google.com/maps?q='+coord[1]+','+coord[2]+'&z=15&ie=UTF8&iwloc=&output=embed'; else if(isShort||looksUrl) mapSrc=null; else mapSrc='https://maps.google.com/maps?q='+encodeURIComponent(raw)+'&t=&z=14&ie=UTF8&iwloc=&output=embed'; }
     else if(mq){ mapSrc='https://maps.google.com/maps?q='+encodeURIComponent(mq)+'&t=&z=14&ie=UTF8&iwloc=&output=embed'; }
     const mapLink=(looksUrl?raw:'')||c.gmb||(raw?('https://maps.google.com/maps?q='+encodeURIComponent(raw)):'');
-    const rows=[c.phone&&['Phone',c.phone,'tel:'+c.phone],c.whatsapp&&['WhatsApp',c.whatsapp,'https://wa.me/'+c.whatsapp.replace(/\D/g,'')],c.address&&['Visit',c.address,null]].filter(Boolean);
+    const rows=[c.phone&&['Phone',c.phone,this.telHref()],c.whatsapp&&['WhatsApp',c.whatsapp,this.waUrl()],c.email&&['Email',c.email,'mailto:'+c.email],c.bookingUrl&&['Book online','Choose a time',c.bookingUrl],c.address&&['Visit',c.address,null]].filter(Boolean);
     const pearl='radial-gradient(120% 90% at 30% 10%,#FFFFFF 0%,#F7F1E6 55%,#EADDC3 100%)';
     return h('main',{style:{animation:'aokfade .4s'}}, this.pageHero('contactPage','contact'),
       h('section',{style:{padding:'64px 0'}}, this.wrap(h('div',{style:{display:'grid',gridTemplateColumns:'1.1fr .9fr',gap:40,alignItems:'start'}},
@@ -957,7 +972,10 @@ class Component extends DCLogic {
               h('span',{style:{font:'600 12px '+this.HEAD,letterSpacing:'.1em',textTransform:'uppercase',color:'#8A6A2E',width:78,flexShrink:0,paddingTop:2}},r[0]),
               r[2]?h('a',{href:r[2],target:'_blank',style:{font:'500 15px Plus Jakarta Sans',color:P.ink,wordBreak:'break-word'}},r[1]):h('span',{style:{font:'500 15px Plus Jakarta Sans',color:P.ink}},r[1])))
               : h('p',{style:{font:'400 14.5px/1.65 Plus Jakarta Sans',color:P.muted,margin:0}},'Please use the form to reach Jag Mallah — he replies personally to every message.'),
-            h('div',{style:{display:'flex',gap:10,marginTop:20,flexWrap:'wrap'}}, ...this.socialLinks().map((s,i)=>h('a',{key:i,href:s[1],target:'_blank',rel:'noopener',title:s[0],'aria-label':s[0],className:'aok-badge3d is-sm',style:{textTransform:'capitalize',font:'600 17px/1 Plus Jakarta Sans'}},h('span',null,s[2]))))),
+            c.replyTime?h('p',{style:{font:'400 13.5px/1.6 Plus Jakarta Sans',color:P.muted,margin:'14px 0 0'}},'Jag Mallah replies personally, usually '+c.replyTime+'. Consultations in English, Hindi and Punjabi.'):null,
+            (this.waUrl()||this.telHref())?h('div',{style:{display:'flex',gap:10,marginTop:16,flexWrap:'wrap'}}, this.waUrl()?h('a',{href:this.waUrl(),target:'_blank',rel:'noopener',className:'aok-btn aok-fx-lift',style:{display:'inline-flex',font:'600 14px '+this.HEAD,padding:'11px 18px',borderRadius:999,textDecoration:'none',...this.btnVariants().solid}},'\u2706 WhatsApp'):null, this.telHref()?h('a',{href:this.telHref(),className:'aok-btn aok-fx-lift',style:{display:'inline-flex',font:'600 14px '+this.HEAD,padding:'11px 18px',borderRadius:999,textDecoration:'none',...this.btnVariants().outline}},'\u260e Call'):null):null,
+            h('div',{style:{display:'flex',gap:10,marginTop:20,flexWrap:'wrap'}}, ...this.socialLinks().map((s,i)=>h('a',{key:i,href:s[1],target:'_blank',rel:'noopener',title:s[0],'aria-label':s[0],className:'aok-badge3d is-sm',style:{textTransform:'capitalize',font:'600 17px/1 Plus Jakarta Sans'}},h('span',null,s[2])))),
+            this.reviewLinks().length?h('div',{style:{display:'flex',gap:10,marginTop:16,flexWrap:'wrap'}}, ...this.reviewLinks().map((r,i)=>h('a',{key:i,href:r[1],target:'_blank',rel:'noopener',className:'aok-btn',style:{display:'inline-flex',font:'600 13px '+this.HEAD,padding:'9px 16px',borderRadius:999,textDecoration:'none',...this.btnVariants().outline}},'\u2605 '+r[0]))):null),
           h('div',{className:'aok-card',style:{padding:8}}, h('div',{style:{position:'relative',borderRadius:14,overflow:'hidden',aspectRatio:'1/1',background:P.bgAlt}}, this.state.editMode? h('div',{onClick:()=>this.setState({mapEdit:true}),style:{position:'absolute',inset:0,zIndex:20,cursor:'pointer',background:'rgba(30,32,34,.08)',display:'flex',alignItems:'flex-start',justifyContent:'flex-end',padding:10}}, h('span',{style:{padding:'8px 14px',borderRadius:999,background:P.maroon,color:P.cream,font:'600 13px '+this.HEAD,boxShadow:'0 4px 14px rgba(0,0,0,.25)'}},'✎ Edit map')):null, mapEmbed? h('div',{className:'aok-mapembed',style:{width:'100%',height:'100%'},dangerouslySetInnerHTML:{__html:mapEmbed}}) : mapSrc? h('iframe',{src:mapSrc,style:{width:'100%',height:'100%',border:0},loading:'lazy',title:'Business location map'}) : (mapLink? h('a',{href:mapLink,target:'_blank',rel:'noopener',style:{height:'100%',display:'flex',flexDirection:'column',alignItems:'center',justifyContent:'center',textAlign:'center',padding:28,gap:14,cursor:'pointer',textDecoration:'none',background:pearl,position:'relative',overflow:'hidden'}}, h('div',{style:{position:'absolute',inset:0,background:'var(--starmap) center/420px 420px no-repeat',opacity:.9}}), h('div',{className:'aok-badge3d is-lg is-round',style:{position:'relative'}},h('span',null,'⚑')), h('div',{style:{font:'600 24px/1.2 '+this.SERIF,color:P.maroon,position:'relative'}},'Find us on Google Maps'), h('div',{style:{font:'400 14px/1.6 Plus Jakarta Sans',color:P.ink,maxWidth:260,position:'relative'}},'Serving Surrey & the Greater Vancouver area, and worldwide online. Tap to view our business profile and directions.'), h('div',{style:{marginTop:4,padding:'10px 20px',borderRadius:999,background:'#FFFCF7',border:'1px solid #C5A869',font:'600 13px '+this.HEAD,color:P.maroon,position:'relative'}},'Open in Google Maps →')) : h('div',{style:{height:'100%',display:'flex',flexDirection:'column',alignItems:'center',justifyContent:'center',color:P.muted,textAlign:'center',padding:24,gap:8,background:pearl}}, h('div',{style:{fontSize:34,color:P.gold}},'⚑'), h('div',{style:{font:'600 15px '+this.HEAD,color:P.maroon}},'Add your Google Map'), h('div',{style:{font:'400 13px Plus Jakarta Sans',maxWidth:240}},'Set your business address or map query in Admin → Settings to show a live Google Map here.'))))))))),
       this.areasBlock(), this.faqSection({hideAsk:true}), this.renderMapEditor()); }
 
@@ -1085,15 +1103,17 @@ class Component extends DCLogic {
     const extra=((this.state.data.socials)||[]).map(s=>[(s.net||'link'),s.url,map[s.net]||'☍']);
     return base.concat(extra).filter(s=>s[1]); }
   // Name / area / phone, identical to the server-rendered copy and the structured data (local SEO consistency)
+  // "Surrey, BC, Canada" -> "Surrey" (+ nearby cities not already listed); mirrors aok_area_short_names
+  areaShortNames(){ const L=this.state.data.local||{}; const out=[]; ((L.areasServed||[]).concat(L.nearbyCities||[])).forEach(a=>{ const n=String(a||'').split(',')[0].trim(); if(n&&out.indexOf(n)<0) out.push(n); }); return out; }
   napBlock(){ const h=React.createElement,P=this.P,d=this.state.data,L=d.local||{},pe=d.person||{},c=d.contact||{};
     const br=k=>h('br',{key:k}); const parts=[h('strong',{key:'n',style:{color:P.maroon,fontWeight:600}},this.brandName()),br('b0'),(pe.jobTitle||'Vedic Astrologer')+' '+(pe.name||d.brand.astrologer)];
     if(!L.serviceAreaBusiness&&L.streetAddress) parts.push(br('b1'),L.streetAddress);
     parts.push(br('b2'),[L.locality||'Surrey',L.region||'British Columbia',(L.country||'CA')==='CA'?'Canada':L.country].join(', '));
-    if(c.phone) parts.push(br('b3'),'Phone: ',h('a',{key:'tel',href:'tel:'+String(c.phone).replace(/[^\d+]/g,''),className:'aok-footlink'},c.phone));
+    if(c.phone) parts.push(br('b3'),'Phone & WhatsApp: ',h('a',{key:'tel',href:this.telHref(),className:'aok-footlink'},c.phone));
     if(c.email) parts.push(br('b4'),'Email: ',h('a',{key:'em',href:'mailto:'+c.email,className:'aok-footlink'},c.email));
-    const areas=(L.areasServed||[]).filter(Boolean), near=(L.nearbyCities||[]).filter(Boolean); if(areas.length) parts.push(br('b5'),'Serving: '+areas.join(', ')+(near.length?' \u00b7 including '+this.joinList(near):'')+(L.onlineWorldwide!==false?' \u00b7 Worldwide online ('+(L.onlineChannels||['Zoom','WhatsApp']).filter(Boolean).join(' & ')+')':''));
+    const areas=this.areaShortNames(); if(areas.length) parts.push(br('b5'),'Serving: '+areas.join(', ')+(L.onlineWorldwide!==false?' \u00b7 Worldwide online ('+(L.onlineChannels||['Zoom','WhatsApp']).filter(Boolean).join(' & ')+')':''));
     const days=[['Mo','Mon'],['Tu','Tue'],['We','Wed'],['Th','Thu'],['Fr','Fri'],['Sa','Sat'],['Su','Sun']].filter(x=>L.hours&&L.hours[x[0]]&&L.hours[x[0]].o&&L.hours[x[0]].c).map(x=>x[1]+' '+L.hours[x[0]].o+'\u2013'+L.hours[x[0]].c);
-    if(days.length) parts.push(br('b6'),'Hours: '+days.join(' \u00b7 '));
+    if(days.length) parts.push(br('b6'),'Hours: '+(days.length===7&&new Set(days.map(x=>x.slice(4))).size===1?'Mon\u2013Sun '+days[0].slice(4):days.join(' \u00b7 '))+(L.timezone==='America/Vancouver'?' (Pacific Time)':''));
     return h('address',{style:{fontStyle:'normal',font:'400 13.5px/1.75 Plus Jakarta Sans',color:P.ink,marginTop:18,maxWidth:360}},...parts); }
   renderFooter(){ const h=React.createElement,P=this.P,d=this.state.data;
     const links=[['home',this.t('home')],['about',this.t('about')],['services',this.t('services')],['meditation',this.t('meditation')],['blog',this.t('blog')],['faq',this.t('faq')],['contact',this.t('contact')]];
@@ -1106,7 +1126,8 @@ class Component extends DCLogic {
           h('div',{style:{display:'grid',gap:10}}, ...links.map(l=>h('a',{key:l[0],...this.linkTo(this.routeHref(l[0]),()=>this.go(l[0])),className:'aok-footlink'},l[1])))),
         h('div',null, head(this.t('follow')),
           h('div',{style:{display:'flex',gap:10,marginBottom:18,flexWrap:'wrap'}}, ...this.socialLinks().map((s,i)=>h('a',{key:i,href:s[1],target:'_blank',rel:'noopener',title:s[0],'aria-label':s[0],className:'aok-badge3d is-sm',style:{font:'600 16px/1 Plus Jakarta Sans'}},h('span',null,s[2])))),
-          h('a',{...this.linkTo('/contact',()=>this.go('contact')),className:'aok-footlink'}, 'Contact form →'))),
+          h('a',{...this.linkTo('/contact',()=>this.go('contact')),className:'aok-footlink'}, 'Contact form →'),
+          ...this.reviewLinks().map((r,i)=>h('a',{key:'rv'+i,href:r[1],target:'_blank',rel:'noopener',className:'aok-footlink',style:{display:'block',marginTop:10}},'\u2605 '+r[0])))),
       h('div',{style:{borderTop:'1px solid '+P.line,padding:'22px 0 2px',font:'400 12.5px/1.7 Plus Jakarta Sans',color:P.muted,maxWidth:800}}, h('strong',{style:{color:P.ink,fontWeight:600}},'Disclaimer: '), d.disclaimer),
       h('div',{style:{borderTop:'1px solid '+P.line,padding:'20px 0',display:'flex',justifyContent:'space-between',alignItems:'center',flexWrap:'wrap',gap:12,font:'400 13px Plus Jakarta Sans',color:P.muted}},
         h('span',null,'© '+new Date().getFullYear()+' '+d.brand.name+'. All rights reserved.'))))); }
@@ -1941,17 +1962,24 @@ class Component extends DCLogic {
             this.listInp('local.areasServed',{label:'Areas served',hint:'one per line, most local first'}),
             this.inp('local.nearbyLabel',{label:'Nearby region name',hint:'heading for the cities below'}),
             this.listInp('local.nearbyCities',{label:'Nearby cities you serve',hint:'shown in “Service Areas & Online Consultations” and the footer'}),
+            this.listInp('local.neighbourhoods',{label:'Neighbourhoods of your city',hint:'shown with your home base'}),
+            this.listInp('local.abroad',{label:'Clients abroad',hint:'one region per line, e.g. the United Kingdom'}),
             this.chk('local.onlineWorldwide','Also serve clients worldwide online',{def:true}),
             this.listInp('local.onlineChannels',{label:'Online channels',rows:2}),
             this.chk('local.locationInTitles','Add “· '+(loc||'your city')+'” to page titles in Google',{def:true,mb:0,hint:'Only the search-result titles change (blog posts are left as written); the text on your pages stays exactly the same.'}))),
           this.card(h('div',null, this.cardTitle('Pricing & languages'),
             h('div',{style:{display:'grid',gridTemplateColumns:'1.4fr .6fr',gap:12}}, this.inp('local.priceRange',{label:'Price range'}), this.inp('local.currency',{label:'Currency'})),
             this.inp('local.paymentPolicy',{label:'Payment policy',multiline:true,rows:3}),
+            this.inp('local.sessionLength',{label:'Standard session length',placeholder:'60 minutes'}),
+            this.listInp('local.paymentMethods',{label:'Payment methods accepted',rows:4}),
             this.listInp('local.languages',{label:'Languages',rows:2,mb:0})))),
         h('div',{style:{display:'grid',gap:20}},
           this.card(h('div',null, this.cardTitle('Name, area & phone (NAP)','This is what appears in your site footer and in Google’s data. Phone, WhatsApp and email are the same fields as in Settings.'),
             this.inp('contact.phone',{label:'Phone',hint:'use the number on your Google Business Profile',placeholder:'+1 604 …'}),
-            this.inp('contact.whatsapp',{label:'WhatsApp number'}),
+            this.inp('contact.whatsapp',{label:'WhatsApp number',hint:'powers the WhatsApp buttons'}),
+            this.inp('contact.whatsappText',{label:'WhatsApp greeting',hint:'pre-filled message when a visitor taps WhatsApp'}),
+            this.inp('contact.replyTime',{label:'Typical reply time',placeholder:'within 12–24 hours'}),
+            this.inp('contact.bookingUrl',{label:'Online booking link',hint:'optional: Calendly, Google appointments …',placeholder:'https://calendly.com/…'}),
             this.inp('contact.email',{label:'Email',type:'email'}),
             h('div',{style:{padding:'14px 16px',borderRadius:12,border:'1px dashed '+P.gold,background:P.white,font:'400 13.5px/1.6 Plus Jakarta Sans',color:P.ink}},
               h('div',{style:{font:'600 11px '+this.HEAD,letterSpacing:'.1em',textTransform:'uppercase',color:P.gold,marginBottom:6}},'Footer preview'),
@@ -1963,11 +1991,13 @@ class Component extends DCLogic {
               h('input',{type:'time',value:v.o||'',onChange:e=>setH(x[0],'o',e.target.value),style:{...this.inpStyle(),padding:'8px 10px'}}),
               h('input',{type:'time',value:v.c||'',onChange:e=>setH(x[0],'c',e.target.value),style:{...this.inpStyle(),padding:'8px 10px'}}),
               h('button',{title:'Closed',onClick:()=>this.commit('local.hours.'+x[0],{o:'',c:''}),style:{...this.iconBtn(),width:34,height:34}},'✕')); })),
-            h('div',{style:{marginTop:12}}, this.btn('Copy Monday to every day',copyMon,{variant:'outline',pad:'8px 16px',style:{fontSize:13}})))),
+            h('div',{style:{marginTop:12}}, this.btn('Copy Monday to every day',copyMon,{variant:'outline',pad:'8px 16px',style:{fontSize:13}})),
+            h('div',{style:{marginTop:14}}, this.inp('local.timezone',{label:'Time zone',hint:'IANA name, e.g. America/Vancouver'}), this.inp('local.hoursNote',{label:'Note about hours',multiline:true,rows:2,mb:0})))),
           this.card(h('div',null, this.cardTitle('Google Business Profile & reviews','These links tie your website to your Maps listing (they are added to your structured data as “sameAs”).'),
             this.inp('local.mapsCidUrl',{label:'Google Maps CID link',hint:'Maps → your listing → Share, or https://maps.google.com/?cid=…',placeholder:'https://maps.google.com/?cid=…'}),
             this.inp('contact.gmb',{label:'Business Profile share link',hint:'same as Settings'}),
-            this.inp('local.reviewUrl',{label:'“Leave a review” link',hint:'optional',placeholder:'https://g.page/r/…/review'}),
+            this.inp('local.reviewUrl',{label:'“Review us on Google” link',hint:'your Maps link or g.page/r/…/review',placeholder:'https://g.page/r/…/review'}),
+            this.inp('contact.trustpilot',{label:'Trustpilot review page',placeholder:'https://ca.trustpilot.com/review/…'}),
             this.listInp('local.directories',{label:'Other listings',hint:'Bing Places, Apple Business Connect, Yelp, Facebook page … one URL per line',mb:0})))))); }
 
   // ----- Practitioner (E-E-A-T) -----
@@ -1988,7 +2018,8 @@ class Component extends DCLogic {
             this.inp('person.mentor',{label:'Mentor / guru'}),
             this.inp('person.traditions',{label:'Classical traditions',hint:'shown on the credential card, e.g. Parashari and Nadi astrology'}),
             this.listInp('person.studies',{label:'Formal studies'}),
-            this.listInp('person.classicalTexts',{label:'Classical texts researched',mb:0}))),
+            this.listInp('person.classicalTexts',{label:'Classical texts researched'}),
+            this.listInp('person.philosophy',{label:'Philosophical grounding',mb:0}))),
           this.card(h('div',null, this.cardTitle('Areas of expertise','Topics you are an authority on (schema.org “knowsAbout”).'),
             this.listInp('person.knowsAbout',{label:'Topics',rows:10,mb:0})))))); }
 
@@ -2021,6 +2052,9 @@ class Component extends DCLogic {
           this.card(h('div',null, this.cardTitle('Sitemap','Live and always current: every page, service and published post.'),
             this.note([h('b',null,smCount==null?'…':smCount+' URLs'),' in ',h('a',{href:'/sitemap.xml',target:'_blank',style:{color:P.red}},base+'/sitemap.xml'),'. Pages that are hidden, redirected or point to another canonical page are left out automatically.']),
             h('div',{style:{display:'flex',gap:8,flexWrap:'wrap'}}, this.btn('↻ Save a static backup copy',()=>this.updateSitemap(false),{variant:'outline',pad:'8px 16px',style:{fontSize:13}}), this.btn('Re-count',()=>this.live('/sitemap.xml',true),{variant:'outline',pad:'8px 16px',style:{fontSize:13}})))),
+          this.card(h('div',null, this.cardTitle('Search engine verification','Paste only the code from the meta tag Google Search Console or Bing Webmaster Tools gives you (the content="…" part). It is added to every page.'),
+            this.inp('ai.googleVerification',{label:'Google Search Console',hint:'google-site-verification',placeholder:'e.g. 3xAmPlE…'}),
+            this.inp('ai.bingVerification',{label:'Bing Webmaster Tools',hint:'msvalidate.01',placeholder:'e.g. 1A2B3C…',mb:0}))),
           this.card(h('div',null, this.cardTitle('IndexNow','Tells Bing, Yandex, Seznam and Naver (and the AI search built on Bing) about changes within minutes.'),
             this.chk('ai.indexNowAuto','Notify automatically after I save (at most once an hour)',{def:true}),
             h('div',{style:{font:'400 13px/1.6 Plus Jakarta Sans',color:P.ink,marginBottom:12}}, h('b',null,'Key: '), key?h('a',{href:'/'+key+'.txt',target:'_blank',style:{font:'500 12.5px ui-monospace,monospace',color:P.red}},key):h('span',{style:{color:P.muted}},'created on the first notification')),
