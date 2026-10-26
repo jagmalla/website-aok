@@ -205,9 +205,17 @@ function site_data(): ?array {
 
 // ---------- Admin session (server-side login; see api/auth.php) ----------
 // Sessions are only started when the admin cookie is present, so ordinary visitors never get one.
+// Is this request already on https? Checked through every signal a shared host may use: some
+// terminate the certificate on a load balancer, so PHP's own $_SERVER['HTTPS'] stays empty and
+// only a forwarded header or the port says the visitor is on https. Reading all of them matters
+// because aok_canonical_redirect() sends a request it believes is http to https.
 function aok_https(): bool {
-    return (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off')
-        || strtolower($_SERVER['HTTP_X_FORWARDED_PROTO'] ?? '') === 'https';
+    if (!empty($_SERVER['HTTPS']) && strtolower((string)$_SERVER['HTTPS']) !== 'off') return true;
+    if (strtolower((string)($_SERVER['HTTP_X_FORWARDED_PROTO'] ?? '')) === 'https') return true;
+    if (strtolower((string)($_SERVER['HTTP_X_FORWARDED_SSL'] ?? '')) === 'on') return true;
+    if ((int)($_SERVER['HTTP_X_FORWARDED_PORT'] ?? 0) === 443) return true;
+    if ((int)($_SERVER['SERVER_PORT'] ?? 0) === 443) return true;
+    return false;
 }
 
 function aok_session_start(): void {

@@ -60,6 +60,7 @@ try {
     if ($tpl === false || strpos($tpl, '<div id="root"></div>') === false) aok_fallback($tplFile);
 
     $d = aok_site();
+    aok_canonical_redirect($d);   // http:// or no-www -> 301 to the one https://www… address
     $uri = $_SERVER['REQUEST_URI'] ?? '/';
     // reached through ErrorDocument 404 (a missing file): render the not-found page
     $r = (($_SERVER['REDIRECT_STATUS'] ?? '') === '404' && !preg_match('#^/(index\.html|render\.php)?$#', parse_url($uri, PHP_URL_PATH)))

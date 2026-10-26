@@ -69,6 +69,25 @@ function aok_base(array $d): string {
     return preg_replace('#^http://#i', 'https://', $b);
 }
 
+// One address per page. A page reached on http://, or without the www, is answered with a 301 to
+// the single canonical https://www… address, so search engines never see the same page twice (Bing
+// reports those as duplicate titles and descriptions). The .htaccess does this as well; doing it
+// here too means the site still has one address if that file was not updated on the server.
+// Only the site's own domain is redirected, so a local copy or a staging host is left alone.
+function aok_canonical_redirect(array $d): void {
+    if (PHP_SAPI === 'cli' || defined('AOK_OFFLINE')) return;
+    $method = strtoupper((string)($_SERVER['REQUEST_METHOD'] ?? 'GET'));
+    if ($method !== 'GET' && $method !== 'HEAD') return;   // never turn a form post into a GET
+    $canon = strtolower((string)parse_url(aok_base($d), PHP_URL_HOST));
+    $host = strtolower(preg_replace('/:\d+$/', '', (string)($_SERVER['HTTP_HOST'] ?? '')));
+    if ($canon === '' || $host === '') return;
+    if ($host !== $canon && $host !== preg_replace('/^www\./', '', $canon)) return;   // another host: leave it
+    if ($host === $canon && aok_https()) return;                                      // already canonical
+    $uri = str_replace(["\r", "\n"], '', (string)($_SERVER['REQUEST_URI'] ?? '/'));
+    header('Location: https://' . $canon . ($uri === '' || $uri[0] !== '/' ? '/' . ltrim($uri, '/') : $uri), true, 301);
+    exit;
+}
+
 function aok_last_modified(): string {
     static $t = null;
     if ($t === null) {
