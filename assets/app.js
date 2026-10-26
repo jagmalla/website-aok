@@ -2477,7 +2477,8 @@ class Component extends DCLogic {
             this.inp('ai.bingVerification',{label:'Bing Webmaster Tools',hint:'msvalidate.01',placeholder:'e.g. 1A2B3C…',mb:0}))),
           this.card(h('div',null, this.cardTitle('IndexNow','Tells Bing, Yandex, Seznam and Naver (and the AI search built on Bing) about changes within minutes.'),
             this.chk('ai.indexNowAuto','Notify automatically after I save (at most once an hour)',{def:true}),
-            h('div',{style:{font:'400 13px/1.6 Plus Jakarta Sans',color:P.ink,marginBottom:12}}, h('b',null,'Key: '), key?h('a',{href:'/'+key+'.txt',target:'_blank',style:{font:'500 12.5px ui-monospace,monospace',color:P.red}},key):h('span',{style:{color:P.muted}},'created on the first notification')),
+            this.inp('ai.indexNowKey',{label:'IndexNow key',hint:'32 characters, a–f and 0–9',placeholder:'e.g. 7311517b284c485bab538f7163e73214',mb:8}),
+            h('div',{style:{font:'400 12.5px/1.6 Plus Jakarta Sans',color:P.muted,marginBottom:12}}, 'Host a file named ', key?h('a',{href:'/'+key+'.txt',target:'_blank',style:{font:'500 12px ui-monospace,monospace',color:P.red}},key+'.txt'):h('span',null,'<key>.txt'),' at your site root, containing only the key. Bing Webmaster Tools can give you a key for your verified site.'),
             inx?this.note(inx.skipped?'Last run: skipped — notifications are only sent from the live domain.':inx.ok?'✓ Last run: '+inx.count+' URLs accepted ('+new Date(inx.at).toLocaleString()+').':'⚠ Last run failed'+(inx.status?' (HTTP '+inx.status+')':'')+(inx.error?': '+inx.error:'')+(inx.body?' — '+inx.body:'')+'.',inx.ok||inx.skipped?'ok':'bad'):null,
             this.btn('⚑ Notify search engines now',()=>this.indexNow(false),{variant:'solid',pad:'10px 18px',style:{fontSize:13.5}})))))); }
 
