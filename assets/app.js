@@ -176,7 +176,7 @@ class Component extends DCLogic {
   indexNow(silent){ try{ localStorage.setItem('aok_indexnow_at', String(Date.now())); }catch(e){}
     fetch('/api/indexnow.php',{ method:'POST', headers:this.apiHeaders(), body:'{}' }).then(r=>r.json().catch(()=>null)).then(j=>{ this._indexNowInfo=Object.assign({at:new Date().toISOString()},j||{ok:false});
       if(j&&j.key&&this.getIn(this.state.data,'ai.indexNowKey')!==j.key) this.save(this.setIn(this.state.data,'ai.indexNowKey',j.key));
-      this.forceUpdate(); if(!silent) this.flash(j&&j.skipped?'\u2139 IndexNow is only sent from the live domain (key is ready)':(j&&j.ok)?('\u2713 IndexNow: '+j.count+' URLs submitted'):('\u26a0 IndexNow failed'+(j&&j.status?' (HTTP '+j.status+')':''))); })
+      this.forceUpdate(); if(!silent) this.flash(j&&j.skipped?'\u2139 IndexNow is only sent from the live domain (key is ready)':(j&&j.ok)?('\u2713 IndexNow: '+j.count+' URLs submitted'):('\u26a0 IndexNow failed'+(j&&j.status?' (HTTP '+j.status+')':'')+(j&&j.body?' \u2014 '+j.body:''))); })
       .catch(()=>{ if(!silent) this.flash('\u26a0 Could not reach the server for IndexNow'); }); }
   sendTestEmail(){ if(this._emailTesting) return; const to=(this.getIn(this.state.data,'contact.email')||'').trim();
     if(to&&!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(to)){ this._emailTestOk=false; this._emailTestMsg='Please enter a valid recipient email address first.'; this.forceUpdate(); return; }   // empty: the server's default inbox
@@ -2478,7 +2478,7 @@ class Component extends DCLogic {
           this.card(h('div',null, this.cardTitle('IndexNow','Tells Bing, Yandex, Seznam and Naver (and the AI search built on Bing) about changes within minutes.'),
             this.chk('ai.indexNowAuto','Notify automatically after I save (at most once an hour)',{def:true}),
             h('div',{style:{font:'400 13px/1.6 Plus Jakarta Sans',color:P.ink,marginBottom:12}}, h('b',null,'Key: '), key?h('a',{href:'/'+key+'.txt',target:'_blank',style:{font:'500 12.5px ui-monospace,monospace',color:P.red}},key):h('span',{style:{color:P.muted}},'created on the first notification')),
-            inx?this.note(inx.skipped?'Last run: skipped — notifications are only sent from the live domain.':inx.ok?'✓ Last run: '+inx.count+' URLs accepted ('+new Date(inx.at).toLocaleString()+').':'⚠ Last run failed'+(inx.status?' (HTTP '+inx.status+')':'')+(inx.error?': '+inx.error:'')+'.',inx.ok||inx.skipped?'ok':'bad'):null,
+            inx?this.note(inx.skipped?'Last run: skipped — notifications are only sent from the live domain.':inx.ok?'✓ Last run: '+inx.count+' URLs accepted ('+new Date(inx.at).toLocaleString()+').':'⚠ Last run failed'+(inx.status?' (HTTP '+inx.status+')':'')+(inx.error?': '+inx.error:'')+(inx.body?' — '+inx.body:'')+'.',inx.ok||inx.skipped?'ok':'bad'):null,
             this.btn('⚑ Notify search engines now',()=>this.indexNow(false),{variant:'solid',pad:'10px 18px',style:{fontSize:13.5}})))))); }
 
   // ----- Redirects & duplicate review (nothing is ever merged or deleted automatically) -----

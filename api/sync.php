@@ -82,19 +82,22 @@ function aok_indexnow_host_ok(string $base): bool {
 
 function aok_indexnow_submit(array $urls, string $key, string $base): array {
     $payload = json_encode(['host' => parse_url($base, PHP_URL_HOST), 'key' => $key, 'keyLocation' => $base . '/' . $key . '.txt', 'urlList' => array_values($urls)], JSON_UNESCAPED_SLASHES);
-    $status = 0; $err = '';
+    // A real User-Agent: Bing's IndexNow front door answers 403 to requests that don't send one.
+    $ua = 'Mozilla/5.0 (compatible; AnalysisOfKarma-IndexNow/1.0; +' . $base . '/)';
+    $status = 0; $err = ''; $body = '';
     if (function_exists('curl_init')) {
         $ch = curl_init('https://api.indexnow.org/indexnow');
         curl_setopt_array($ch, [CURLOPT_POST => true, CURLOPT_POSTFIELDS => $payload, CURLOPT_RETURNTRANSFER => true, CURLOPT_TIMEOUT => 15,
-            CURLOPT_HTTPHEADER => ['Content-Type: application/json; charset=utf-8']]);
-        curl_exec($ch); $status = (int)curl_getinfo($ch, CURLINFO_HTTP_CODE); $err = curl_error($ch); curl_close($ch);
+            CURLOPT_USERAGENT => $ua, CURLOPT_HTTPHEADER => ['Content-Type: application/json; charset=utf-8', 'Accept: */*']]);
+        $body = (string)curl_exec($ch); $status = (int)curl_getinfo($ch, CURLINFO_HTTP_CODE); $err = curl_error($ch); curl_close($ch);
     } else {
         $ctx = stream_context_create(['http' => ['method' => 'POST', 'timeout' => 15, 'ignore_errors' => true,
-            'header' => "Content-Type: application/json; charset=utf-8\r\n", 'content' => $payload]]);
-        @file_get_contents('https://api.indexnow.org/indexnow', false, $ctx);
+            'header' => "Content-Type: application/json; charset=utf-8\r\nAccept: */*\r\nUser-Agent: " . $ua . "\r\n", 'content' => $payload]]);
+        $body = (string)@file_get_contents('https://api.indexnow.org/indexnow', false, $ctx);
         if (isset($http_response_header[0]) && preg_match('/\s(\d{3})\s/', $http_response_header[0], $m)) $status = (int)$m[1];
     }
-    return ['status' => $status, 'error' => $err];
+    // IndexNow sends an explanation in the body on a rejection (e.g. 403/422) — keep it so the admin can show why.
+    return ['status' => $status, 'error' => $err, 'body' => trim(mb_substr($body, 0, 300))];
 }
 
 // Sends the queued addresses when the last submission is at least AOK_INDEXNOW_EVERY seconds old.

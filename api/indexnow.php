@@ -44,8 +44,8 @@ $urls = array_map(function ($u) { return $u[0]; }, aok_sitemap_urls($d));
 
 // Engines reject submissions for hosts that are not the site's own (e.g. a local test copy)
 if (!aok_indexnow_host_ok($base)) json_out(['ok' => true, 'key' => $key, 'skipped' => 'not_production_host', 'count' => count($urls)]);
-['status' => $status, 'error' => $err] = aok_indexnow_submit($urls, $key, $base);
+['status' => $status, 'error' => $err, 'body' => $body] = aok_indexnow_submit($urls, $key, $base);
 try { aok_indexnow_table(); db()->exec("UPDATE aok_indexnow_queue SET sent_at = NOW()"); } catch (Throwable $e) {}   // everything was just sent
 
 // 200 = accepted, 202 = accepted (key check pending); anything else is reported back to the admin
-json_out(['ok' => $status === 200 || $status === 202, 'key' => $key, 'status' => $status, 'error' => $err, 'count' => count($urls)]);
+json_out(['ok' => $status === 200 || $status === 202, 'key' => $key, 'status' => $status, 'error' => $err, 'body' => $body, 'count' => count($urls)]);
