@@ -1,2 +1,7 @@
 # Live database settings stay on the server only (template: api/config.sample.php)
 api/config.php
+
+# Generated deliverables: release zips and the white-label starter kit.
+# These are build outputs handed to the owner directly, not source. Committing a
+# binary would keep it in the repository's history for good.
+*.zip
