@@ -108,11 +108,11 @@ try {
     if (is_numeric($lat) && is_numeric($lng)) $head .= '<meta name="geo.position" content="' . $e($lat . ';' . $lng) . '">' . "\n" . '<meta name="ICBM" content="' . $e($lat . ', ' . $lng) . '">' . "\n";
     $head .= '<link rel="alternate" type="text/plain" href="/llms.txt" title="llms.txt">' . "\n"
         . '<script type="application/ld+json" id="aok-graph">' . json_encode($graph, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE | JSON_HEX_TAG) . "</script>\n"
-        // the server-rendered copy is for crawlers and no-JS visitors; while the interactive page starts
-        // it stays invisible (with a safety reveal after 4s in case scripts are blocked)
-        . "<script>document.documentElement.className+=' aok-js'</script>\n"
+        // The server-rendered copy is the page until the interactive one takes over: React replaces it
+        // the moment it mounts. It is deliberately NOT hidden in the meantime — hiding it left a moment
+        // with no visible <h1>, which an SEO crawler taking its snapshot then reports as a missing
+        // heading, and it also delayed the first text a visitor sees.
         . '<style>.aok-ssr{max-width:1100px;margin:0 auto;padding:24px;font:16px/1.7 system-ui,sans-serif;color:#3A3D42;overflow-wrap:break-word}.aok-ssr img{max-width:100%;height:auto}.aok-ssr h1,.aok-ssr h2,.aok-ssr h3{font-family:Georgia,serif;color:#1E2022}.aok-ssr ul{padding-left:20px}.aok-ssr header ul,.aok-ssr footer ul{list-style:none;padding:0;display:flex;flex-wrap:wrap;gap:6px 18px}.aok-ssr a{color:#8A6A2E}.aok-ssr-btn{display:inline-block;margin:4px 8px 4px 0;padding:10px 18px;border:1px solid #C5A869;border-radius:999px;text-decoration:none}'
-        . '.aok-js .aok-ssr{visibility:hidden;animation:aokssr 0s 4s forwards}@keyframes aokssr{to{visibility:visible}}'
         // service pages: page text beside a sticky booking card, then one centred full-width column (as in the app)
         . '.aok-ssr-top{display:grid;grid-template-columns:minmax(0,1fr) 340px;gap:40px;align-items:start}.aok-ssr-main{min-width:0}'
         . '.aok-ssr-side{position:sticky;top:96px;padding:20px 22px;border:1px solid rgba(212,175,55,.3);border-radius:16px;background:#FFFDF8}'

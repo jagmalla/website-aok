@@ -962,7 +962,8 @@ function aok_blocks_html(array $blocks): string {
     foreach ($blocks as $b) {
         if (!is_array($b)) continue;
         $t = $b['type'] ?? '';
-        if ($t === 'heading' || $t === 'dualheading') $o .= '<h2>' . aok_e(aok_text(($b['text'] ?? '') . ($b['a'] ?? '') . ($b['accent'] ?? ''))) . '</h2>';
+        // a two-tone heading is two parts shown side by side, so they need the space the app puts between them
+        if ($t === 'heading' || $t === 'dualheading') $o .= '<h2>' . aok_e(aok_text(implode(' ', array_filter([$b['text'] ?? '', $b['a'] ?? '', $b['accent'] ?? ''], function ($x) { return trim((string)$x) !== ''; })))) . '</h2>';
         elseif (in_array($t, ['text', 'toggle', 'alert'], true)) $o .= (!empty($b['title']) ? '<h3>' . aok_e(aok_text($b['title'])) . '</h3>' : '') . (!empty($b['q']) ? '<h3>' . aok_e(aok_text($b['q'])) . '</h3>' : '') . aok_paras($b['text'] ?? ($b['a'] ?? ''));
         elseif ($t === 'quote') $o .= '<blockquote>' . aok_paras($b['text'] ?? '') . '</blockquote>';
         elseif ($t === 'cta') $o .= '<h2>' . aok_e(aok_text($b['title'] ?? '')) . '</h2><p>' . aok_rich($b['sub'] ?? '') . '</p>';
