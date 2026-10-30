@@ -1,30 +1,180 @@
-ANALYSIS OF KARMA — Update (editable FAQs, meditation practices, mobile fixes)
-==============================================================================
+ANALYSIS OF KARMA — Update (SEO, local SEO, AI search & security)
+===================================================================
 
-WHAT'S NEW IN THIS UPDATE
-  • FAQs are now fully editable. Open Admin -> Visual Editor -> "Edit
-    About Us" (or "Edit Contact Us"), scroll to the FAQ section, and you
-    can:  + Add FAQ,  reorder with the up/down arrows, and remove any FAQ
-    with the X button. Click the question/answer text to edit it.
-  • Meditation -> "What we practise": you can now add, reorder and remove
-    the practice cards. Open Admin -> Visual Editor -> "Edit Meditation",
-    scroll to that section, and use  + Add practice  / the up-down arrows /
-    X Remove. Click a card's title or text to edit it.
-  • Cross-device compatibility checked and tightened on phones, tablets
-    (iPad portrait & landscape) and desktop. Fixed a small horizontal-
-    scroll issue on very narrow phones (360px) on the Contact page; all
-    pages now fit cleanly with no sideways scrolling.
+NEW IN THIS VERSION: PHONES, TABLETS AND LARGE SCREENS
+  • Checked on every page at 11 screen widths, from small phones (320px)
+    to large monitors (1920px): nothing is wider than the screen any more,
+    so pages never slide sideways on a phone.
+  • Blog posts now use the service-page layout: the article beside a
+    sticky "Book a consultation" card with an "In this article" menu, then
+    the About the Astrologer card and related consultations below.
+  • The menu bar and the booking card stay in view while you scroll on
+    computers again (an old style rule had switched this off).
+  • On tablets the booking card becomes a compact strip above the text;
+    on phones it is shorter, so the article starts sooner.
+  • Every link and button is at least 44px tall, easy to tap with a thumb.
+    Form fields use 16px text, so iPhones no longer zoom in when tapped.
+  • The WhatsApp / Call buttons keep clear of the iPhone home bar, and the
+    footer leaves room so its last lines are never hidden behind them.
+  • Headlines scale smoothly with the screen size.
+  • Nothing to set up. Search-engine data (schema) is unchanged.
 
-(Also includes the previous update: menu-bar editor, custom pages, and
- expanded social links — Facebook, Instagram, YouTube, Google Maps + add
- your own.)
+EARLIER: SERVICE PAGE LAYOUT
+  • The 16 service pages have a new, balanced layout: the methodology and
+    chart-factor sections sit beside the sticky "Consultation fee" card;
+    from "How Your Consultation Works" on, the page runs in one centred
+    full-width column (4 connected step cards, a centred FAQ with +/-
+    bars, related articles, and a two-column About the Astrologer card),
+    so there is no empty space on the right any more.
+  • Tablets: the fee card sits under the top banner as a compact strip.
+    Phones: everything is one column with even 16px margins.
+  • The main menu switches to the menu button below 1140px wide, so the
+    logo never overlaps the links on tablets and small laptops.
+  • Nothing to set up: all service pages, including new ones, use it.
 
-HOW TO APPLY (1 file, nothing else changes)
-  1. cPanel -> File Manager -> public_html (your web root).
-  2. Upload the included index.html and choose "Overwrite".
-     Only index.html changed. Do NOT touch api/, config.php, uploads/,
-     or anything else. Your database content is untouched.
-  3. Open your site and hard-refresh:  Ctrl+Shift+R  (Cmd+Shift+R on Mac).
-  4. Go to /#admin, log in, then Visual Editor to use the new options.
+ALSO IN THIS UPDATE (if not uploaded yet): SECURITY
+  • After uploading, log in once: you will be asked to choose a new admin
+    password (10+ characters). The old website made its password readable,
+    so it can no longer be trusted. Saving it signs every other device out.
+  • You get an email when the admin is opened from a new device, and when
+    many wrong passwords are tried. Admin sessions end after 8 hours idle.
+  • The contact form is now protected on the server (spam bots can no
+    longer skip the question), and enquiries are kept only on the server.
+    Older enquiries you deleted may show once more, marked FROM BACKUP;
+    delete them again if you don't need them.
+  • Pages are protected against injected code (Content-Security-Policy),
+    the 3D library is served from your own site, uploads must be real
+    pictures, and private files (error logs, backups, settings) are blocked.
+  • New files: api/leads.php, the folder assets/vendor/ and the hidden file
+    uploads/.htaccess (turn on "Show Hidden Files"). Also replace your
+    .htaccess with the new one, keeping your cPanel PHP lines (DEPLOY.md A3).
+  • Fresh installs: there is no default password any more. Use "Forgot
+    password?" on the login page to set the first one.
 
-All your existing content, photos and settings stay exactly as they are.
+EARLIER: SERVICES MANAGER AND ON-PAGE EDITING
+  • Admin -> Services is now a Services Manager. "+ Add new service" opens
+    a form (title, page address, summary, direct answer, methodology, life
+    questions, the 4 consultation steps, 3 FAQs, image); the $100 CAD rate,
+    Zoom/WhatsApp session and pay-after-satisfaction steps are pre-filled.
+  • Every service has: Edit in Admin (all text, sections, FAQs, SEO title,
+    description, focus keyword, Google preview), Open in Visual Editor,
+    View live page, Unpublish / Publish, Delete and move up/down.
+  • Unpublish keeps the text; Delete removes it. Either way you choose
+    where the old address forwards (the Services page, another service or
+    any address), so no service link ever shows "page not found".
+  • Open a service page with the editor on and click any text to change
+    it: title, the line above it, summary, booking button, rate, the
+    direct-answer box (with a live 45-55 word counter), every heading,
+    card, step and FAQ. Add or remove points, steps, questions and whole
+    sections, and replace the banner image. Changes save by themselves.
+  • Every save updates the sitemap (with the change date), llms.txt,
+    llms-full.txt, the structured data (Service, Offer, FAQPage) and the
+    page Google sees, and tells Bing/IndexNow about the changed pages.
+  • New files: api/sync.php and api/discovery-lib.php (upload the whole
+    zip as usual).
+
+EARLIER: CONTENT VERSION 5
+  • Every service now opens its own full page, for example
+    /services/kundli-birth-chart-reading, with a 3D Pearl & Gold banner,
+    your original description, a direct-answer box, the classical
+    methodology, the chart factors, the 4 consultation steps, FAQs, the
+    About the Astrologer card and a booking form for that service, plus
+    WhatsApp and call buttons. The text comes from your Services document.
+  • 11 services have new page addresses from that document; the old
+    addresses forward to the new ones automatically (301 redirects).
+  • Clicking a service card, "Read more" or "Book this" opens the page
+    ("Book this" jumps straight to its booking form).
+  • Bookings from a service page arrive marked with the service name.
+  • Edit any service page in Admin -> Services or right on the page.
+
+EARLIER: CONTENT VERSION 3
+  • Your phone & WhatsApp +1 (236) 660-2000 is in the header, footer,
+    contact page and Google's structured data, with WhatsApp and Call
+    buttons (a small floating bar on every page) and Google Maps and
+    Trustpilot review buttons on the contact page and in the footer.
+  • Hours Mon-Sun 10:00-20:00 (Pacific), the 17 service areas, your
+    Google Business categories, English/Hindi/Punjabi, the "pay after your
+    reading" policy and your 9 social profiles are filled in for you.
+  • All 16 services (650-1,200+ words) and 16 blog posts (950-2,200 words)
+    now have in-depth classical sections: a short direct answer, the
+    classical texts and methods, the chart factors, how a consultation
+    works, FAQs (services) and remedies. Your existing text stays first.
+  • Every service and post has its own branded Pearl & Gold image for
+    Google and social media, in the three shapes Google asks for.
+  • New uploads: api/upgrade-content.php and the folders api/content/ and
+    assets/img/ (see DEPLOY.md, Part A2). Everything is applied by itself
+    on the first page view. Pages you had edited are left alone: click
+    Admin -> SEO Health -> "Apply Full 32-Page Classical Content Upgrade"
+    to add the sections after your text there too.
+  • Admin -> AI & GEO has fields for the Google and Bing verification codes.
+  • "Forgot password?" on the admin login emails a one-time reset link
+    (valid 30 minutes) to the owner's private recovery address.
+  • Email addresses are no longer shown anywhere on the website (spam).
+    Contact-form messages go to analysisofkarma@gmail.com (Admin ->
+    Settings can change the inbox; it stays private).
+
+EARLIER IN THIS UPDATE
+  • Google and AI assistants now see your real pages. Every page is built on
+    the server with its own title, description, structured data and content,
+    so ChatGPT, Claude, Perplexity and Google can read and cite it.
+  • Every service has its own page:  /services/kundli-birth-chart-reading  etc.
+    A new FAQ page lives at /faq. All your existing text is unchanged.
+  • "Surrey, BC" is added to page titles in Google (not to your page text).
+    You can switch this off in Admin -> Local & Business.
+  • New admin tabs:
+      Local & Business  - service area, hours, phone, Google Business links
+      Practitioner      - your bio, training and expertise
+      AI & GEO          - choose which AI assistants may read your site,
+                          llms.txt, IndexNow
+      Redirects         - the 3 duplicate services and 2 duplicate blog posts
+                          are merged into their main page (301 redirect, text
+                          kept); Undo restores any of them; custom redirects
+      SEO Health        - one score with a to-do list
+  • Each service now has "Page address, SEO & redirect" settings; each blog
+    post has Canonical URL and 301 redirect fields.
+  • Every blog post links to its most relevant service pages (and back),
+    every service page and post ends with an "About the Astrologer" card
+    showing your training, and service and contact pages show "Service
+    Areas & Online Consultations" (Surrey and its neighbourhoods, the
+    Lower Mainland & Fraser Valley, and clients abroad via Zoom & WhatsApp).
+  • Seven short FAQ answers are expanded to 50-55 words, the length AI
+    answer engines quote, and three SEO titles/descriptions are shortened.
+    This happens by itself on the first page view after upload (answers
+    you edited yourself are left alone).
+  • Faster: the logo is 13 KB instead of 2.4 MB, the website code is cached
+    by browsers, and the 3D scene loads after the page (and is skipped on
+    data-saver connections and low-memory phones).
+  • Security: the admin password is now checked on the server and stored
+    only as a secure hash. Your password and client leads are no longer
+    readable in the public site data.
+
+IMPORTANT: THIS UPDATE HAS MORE THAN ONE FILE
+  Full step-by-step checklist: DEPLOY.md, "Part A - Upgrade the live site"
+  and "Part C - Verify the upload". In short:
+
+  1. Back up: download your current .htaccess and api/config.php, and use
+     Admin -> Settings -> Backup -> Export content.
+  2. Upload the files listed in DEPLOY.md (Part A2) into public_html/,
+     public_html/assets/ and public_html/api/, with "Overwrite" ticked.
+     This update contains no api/config.php, so your live database
+     settings cannot be overwritten. Delete install.php if you still have it.
+  3. Upload .htaccess LAST. If your old .htaccess had cPanel "php handler"
+     lines, paste them into the marked block at the top of the new one first.
+     (File Manager -> Settings -> "Show Hidden Files" to see .htaccess.)
+  4. Log in at  https://www.analysisofkarma.com/admin  with your CURRENT
+     password. It keeps working; the server secures it on that first login.
+  5. Change your password: Admin -> Settings -> Security.
+     (Recommended, because the old one was publicly readable before.)
+  6. Check the Local & Business and Practitioner tabs, click Save changes.
+  7. Open Admin -> SEO Health. The first group, "Server setup (after
+     upload)", should be all green; each red item says how to fix it.
+     If it lists pages without the classical sections, click "Apply Full
+     32-Page Classical Content Upgrade". The score should then be 100.
+  8. Hard-refresh: Ctrl+Shift+R (Cmd+Shift+R on Mac).
+
+IF SOMETHING GOES WRONG
+  Put your old .htaccess back (or rename the new one to .htaccess-off).
+  The site keeps working as before (admin at /#admin) while you check the
+  steps above.
+
+All your existing content, photos, leads and settings stay exactly as they are.

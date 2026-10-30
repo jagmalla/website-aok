@@ -1,14 +1,108 @@
+# robots.txt for Analysis of Karma — generated from Admin > AI & GEO
+
 User-agent: *
 Allow: /
+Allow: /api/data.php
+Disallow: /api/
+Disallow: /admin
 
-# AI crawlers
+# Search engines
+User-agent: Googlebot
+Allow: /
+Allow: /api/data.php
+Disallow: /api/
+Disallow: /admin
+
+User-agent: Bingbot
+Allow: /
+Allow: /api/data.php
+Disallow: /api/
+Disallow: /admin
+
+# AI search & assistant crawlers (Admin > AI & GEO)
 User-agent: GPTBot
 Allow: /
+Allow: /api/data.php
+Disallow: /api/
+Disallow: /admin
+
+User-agent: OAI-SearchBot
+Allow: /
+Allow: /api/data.php
+Disallow: /api/
+Disallow: /admin
+
+User-agent: ChatGPT-User
+Allow: /
+Allow: /api/data.php
+Disallow: /api/
+Disallow: /admin
+
 User-agent: ClaudeBot
 Allow: /
+Allow: /api/data.php
+Disallow: /api/
+Disallow: /admin
+
+User-agent: Claude-SearchBot
+Allow: /
+Allow: /api/data.php
+Disallow: /api/
+Disallow: /admin
+
+User-agent: Claude-User
+Allow: /
+Allow: /api/data.php
+Disallow: /api/
+Disallow: /admin
+
 User-agent: PerplexityBot
 Allow: /
+Allow: /api/data.php
+Disallow: /api/
+Disallow: /admin
+
+User-agent: Perplexity-User
+Allow: /
+Allow: /api/data.php
+Disallow: /api/
+Disallow: /admin
+
 User-agent: Google-Extended
 Allow: /
+Allow: /api/data.php
+Disallow: /api/
+Disallow: /admin
 
+User-agent: Applebot-Extended
+Allow: /
+Allow: /api/data.php
+Disallow: /api/
+Disallow: /admin
+
+User-agent: Amazonbot
+Allow: /
+Allow: /api/data.php
+Disallow: /api/
+Disallow: /admin
+
+User-agent: meta-externalagent
+Allow: /
+Allow: /api/data.php
+Disallow: /api/
+Disallow: /admin
+
+User-agent: CCBot
+Allow: /
+Allow: /api/data.php
+Disallow: /api/
+Disallow: /admin
+
+User-agent: Bytespider
+Allow: /
+Allow: /api/data.php
+Disallow: /api/
+Disallow: /admin
+
+# Plain-language summary of this business for AI assistants: https://www.analysisofkarma.com/llms.txt
 Sitemap: https://www.analysisofkarma.com/sitemap.xml
