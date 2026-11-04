@@ -1941,7 +1941,7 @@ class Component extends DCLogic {
         this.btn('Save new password',null,{variant:'solid',style:{width:'100%',justifyContent:'center'}}),
         h('div',{style:{textAlign:'center',marginTop:14}}, h('button',{type:'button',onClick:()=>this.logout(),style:{background:'none',border:0,cursor:'pointer',font:'600 13px Plus Jakarta Sans',color:P.muted}},'Log out'))), this.renderToast()); }
   renderAdminShell(){ const h=React.createElement,P=this.P; if(this._mustChange) return this.renderMustChange();
-    const tabs=[['dashboard','\u25C8 Dashboard'],['pages','\u270e Visual Editor'],['services','\u2609 Services'],['blog','\u270d Blog'],['leads','\u2709 Leads'],['seo','\u2191 SEO'],['schema','{ } Schema'],['submit','\u2691 Search Engines'],['local','\u2316 Local & Business'],['person','\u2726 Practitioner'],['ai','\u25ce AI & GEO'],['redirects','\u21aa Redirects'],['health','\u271a SEO Health'],['settings','\u2699 Settings']];
+    const tabs=[['dashboard','\u25C8 Dashboard'],['pages','\u270e Visual Editor'],['services','\u2609 Services'],['blog','\u270d Blog'],['leads','\u2709 Leads'],['seo','\u2191 SEO'],['schema','{ } Schema'],['submit','\u2691 Search Engines'],['local','\u2316 Local & Business'],['person','\u2726 Practitioner'],['ai','\u25ce AI & GEO'],['rewrite','\u270D AI Content'],['redirects','\u21aa Redirects'],['health','\u271a SEO Health'],['settings','\u2699 Settings']];
     const unread=this.leadsList().filter(l=>!l.read).length;
     return h('div',{style:{minHeight:'100vh',display:'grid',gridTemplateColumns:'260px 1fr',background:P.bg}},
       h('aside',{style:{background:P.maroonD,color:P.cream,padding:'24px 16px',position:'sticky',top:0,height:'100vh',overflowY:'auto'}},
@@ -1959,7 +1959,7 @@ class Component extends DCLogic {
     let ctrl; if(opts.options) ctrl=h('select',{...common},...opts.options.map(o=>h('option',{key:o.value??o,value:o.value??o},o.label??o))); else if(opts.multiline) ctrl=h('textarea',{...common,rows:opts.rows||4}); else ctrl=h('input',{...common,type:opts.type||'text'});
     return h('label',{key:path,style:{display:'block',marginBottom:opts.mb??16}}, opts.label?h('span',{style:{display:'block',font:'600 12.5px '+this.HEAD,color:P.maroon,marginBottom:6,letterSpacing:'.02em'}},opts.label, opts.hint?h('span',{style:{fontWeight:400,color:P.muted}},'  \u2014 '+opts.hint):null):null, ctrl); }
 
-  renderAdminTab(){ switch(this.state.adminTab){ case 'pages':return this.tabPages(); case 'services':return this.tabServices(); case 'blog':return this.tabBlog(); case 'leads':return this.tabLeads(); case 'seo':return this.tabSeo(); case 'schema':return this.tabSchema(); case 'submit':return this.tabSubmit(); case 'local':return this.tabLocal(); case 'person':return this.tabPerson(); case 'ai':return this.tabAi(); case 'redirects':return this.tabRedirects(); case 'health':return this.tabHealth(); case 'settings':return this.tabSettings(); default:return this.tabDashboard(); } }
+  renderAdminTab(){ switch(this.state.adminTab){ case 'pages':return this.tabPages(); case 'services':return this.tabServices(); case 'blog':return this.tabBlog(); case 'leads':return this.tabLeads(); case 'seo':return this.tabSeo(); case 'schema':return this.tabSchema(); case 'submit':return this.tabSubmit(); case 'local':return this.tabLocal(); case 'person':return this.tabPerson(); case 'ai':return this.tabAi(); case 'rewrite':return this.tabRewrite(); case 'redirects':return this.tabRedirects(); case 'health':return this.tabHealth(); case 'settings':return this.tabSettings(); default:return this.tabDashboard(); } }
 
   // ----- dashboard -----
   tabDashboard(){ const h=React.createElement,P=this.P,d=this.state.data; const unread=this.leadsList().filter(l=>!l.read).length;
@@ -2481,6 +2481,91 @@ class Component extends DCLogic {
             h('div',{style:{font:'400 12.5px/1.6 Plus Jakarta Sans',color:P.muted,marginBottom:12}}, 'Host a file named ', key?h('a',{href:'/'+key+'.txt',target:'_blank',style:{font:'500 12px ui-monospace,monospace',color:P.red}},key+'.txt'):h('span',null,'<key>.txt'),' at your site root, containing only the key. Bing Webmaster Tools can give you a key for your verified site.'),
             inx?this.note(inx.skipped?'Last run: skipped — notifications are only sent from the live domain.':inx.ok?'✓ Last run: '+inx.count+' URLs accepted ('+new Date(inx.at).toLocaleString()+').':'⚠ Last run failed'+(inx.status?' (HTTP '+inx.status+')':'')+(inx.error?': '+inx.error:'')+(inx.body?' — '+inx.body:'')+'.',inx.ok||inx.skipped?'ok':'bad'):null,
             this.btn('⚑ Notify search engines now',()=>this.indexNow(false),{variant:'solid',pad:'10px 18px',style:{fontSize:13.5}})))))); }
+
+  // ================= AI CONTENT: audit every page, rewrite the formulaic copy =================
+  // The audit and the rewrite run on the server (api/ai-audit.php, api/ai-humanize.php). Applying a
+  // rewrite is done HERE, through the normal commit/save path, never by the server: the admin's browser
+  // holds the live copy of the site with unsaved edits, so a server-side write would overwrite them (AR-22).
+  aiRun(){ this._ai=this._ai||{}; this._ai.busy=true; this.forceUpdate();
+    fetch('/api/ai-audit.php',{method:'POST',headers:this.apiHeaders(),body:'{}'}).then(r=>r.json().catch(()=>null)).then(j=>{
+      this._ai.busy=false;
+      if(j&&j.ok&&j.audit){ this._ai.audit=j.audit; this.flash('✓ Checked '+(j.audit.summary||{}).assessed+' pages'); }
+      else this.flash('⚠ Could not run the check'+(j&&j.error?': '+j.error:''));
+      this.forceUpdate(); }).catch(()=>{ this._ai.busy=false; this.flash('⚠ Could not reach the server'); this.forceUpdate(); }); }
+
+  // Where a page's long-form text lives, so a rewrite can be put back. Only services and blog posts have
+  // one field that holds the whole page; the built-in pages are many small fields, so they are read-only here.
+  aiTarget(key){ const d=this.state.data;
+    if(key.indexOf('service:')===0){ const i=(d.services||[]).findIndex(s=>s.id===key.slice(8)); return i<0?null:{path:'services.'+i+'.detail',label:(d.services[i].title||'service')}; }
+    if(key.indexOf('post:')===0){ const i=(d.blog||[]).findIndex(p=>p.id===key.slice(5)); return i<0?null:{path:'blog.'+i+'.body',label:(d.blog[i].title||'post')}; }
+    return null; }
+
+  aiLoad(key){ const t=this.aiTarget(key); if(!t){ this.flash('ℹ This page is built from many small fields — edit it in the Visual Editor'); return; }
+    this._ai=this._ai||{}; this._ai.target=t; this._ai.text=String(this.getIn(this.state.data,t.path)||''); this._ai.result=null; this.forceUpdate(); }
+
+  aiPreview(){ const a=this._ai||{}; const text=String(a.text||'').trim();
+    if(text.length<40){ this.flash('ℹ Paste at least a paragraph to check'); return; }
+    a.busy=true; this.forceUpdate();
+    fetch('/api/ai-humanize.php',{method:'POST',headers:this.apiHeaders(),body:JSON.stringify({action:'preview',text:text,tone:a.tone||'plain',strength:a.strength||'standard'})})
+      .then(r=>r.json().catch(()=>null)).then(j=>{ a.busy=false;
+        if(j&&j.ok&&j.result) a.result=j.result; else this.flash('⚠ Rewrite failed'+(j&&j.error?': '+j.error:''));
+        this.forceUpdate(); }).catch(()=>{ a.busy=false; this.flash('⚠ Could not reach the server'); this.forceUpdate(); }); }
+
+  aiApply(){ const a=this._ai||{}; if(!a.result||!a.target){ this.flash('ℹ Nothing to apply'); return; }
+    if(!confirm('Replace the text on "'+a.target.label+'" with the rewrite?\n\nYour original is kept in the page history and the editor’s undo.')) return;
+    this.commit(a.target.path, a.result.humanized);
+    a.text=a.result.humanized; a.result=null; this.flash('✓ Applied — saved'); this.forceUpdate(); }
+
+  tabRewrite(){ const h=React.createElement,P=this.P; const a=this._ai||{}; const au=a.audit; const sum=(au&&au.summary)||null;
+    const band=b=>({green:{bg:'#e4f3e8',fg:'#2f6b3f'},amber:{bg:'#fbf1dc',fg:'#8a6508'},red:{bg:'#fbe9e3',fg:'#b4452f'}})[b]||{bg:P.bgAlt,fg:P.muted};
+    const chip=(t,b)=>{ const c=band(b); return h('span',{style:{display:'inline-block',padding:'2px 9px',borderRadius:999,background:c.bg,color:c.fg,font:'700 11.5px '+this.HEAD}},t); };
+    const sel=(val,opts,fn)=>h('select',{value:val,onChange:e=>{fn(e.target.value);this.forceUpdate();},style:{padding:'9px 11px',borderRadius:9,border:'1px solid '+P.line,background:P.white,font:'500 14px Plus Jakarta Sans',color:P.ink}},
+      ...opts.map(o=>h('option',{key:o[0],value:o[0]},o[1])));
+    const pages=au?au.pages.slice().sort((x,y)=>y.ai-x.ai):[];
+    return h('div',null,
+      this.adminHead('AI Content','Find the pages that read like a machine wrote them, and rewrite those passages in plainer language.'),
+      this.card(h('div',null, this.cardTitle('Check every page','Scores how formulaic each page reads, from its wording, sentence rhythm and stock phrases. It is a readability signal, not a verdict from any detector.'),
+        h('div',{style:{display:'flex',gap:10,alignItems:'center',flexWrap:'wrap'}},
+          this.btn(a.busy?'Checking…':'◎ Check all pages',()=>this.aiRun(),{variant:'solid',pad:'10px 18px',style:{fontSize:13.5}}),
+          sum?h('span',{style:{font:'500 13.5px Plus Jakarta Sans',color:P.muted}},
+            'Average '+sum.avgAi+'% · '+sum.assessed+' pages checked'):null),
+        sum?h('div',{style:{display:'flex',gap:8,marginTop:14,flexWrap:'wrap'}},
+          chip(sum.green+' reads naturally','green'), chip(sum.amber+' worth a look','amber'), chip(sum.red+' needs rewriting','red')):null),{marginBottom:18}),
+      au?this.card(h('div',null, this.cardTitle('Pages, most formulaic first',''),
+        h('div',{style:{display:'grid',gap:2}}, ...pages.map(p=>{ const t=this.aiTarget(p.key); const c=band(p.band);
+          return h('div',{key:p.key,style:{display:'grid',gridTemplateColumns:'1fr auto auto auto',gap:12,alignItems:'center',padding:'9px 10px',borderRadius:8,background:p.band==='red'?'#fdf6f4':'transparent'}},
+            h('div',{style:{minWidth:0}}, h('div',{style:{font:'600 14px Plus Jakarta Sans',color:P.ink,whiteSpace:'nowrap',overflow:'hidden',textOverflow:'ellipsis'}},p.label||p.route),
+              h('div',{style:{font:'400 12px Plus Jakarta Sans',color:P.muted}},p.route+' · '+p.words+' words')),
+            h('span',{style:{font:'700 14px '+this.HEAD,color:c.fg}},p.ai+'%'),
+            chip(p.band==='green'?'natural':p.band==='amber'?'mixed':'formulaic',p.band),
+            t?this.btn('Rewrite',()=>this.aiLoad(p.key),{variant:'outline',pad:'6px 13px',style:{fontSize:12.5}})
+             :h('span',{style:{font:'400 12px Plus Jakarta Sans',color:P.muted}},'editor')); }))),{marginBottom:18}):null,
+      this.card(h('div',null,
+        this.cardTitle('Rewrite'+(a.target?' — '+a.target.label:''),'Rebuilds the sentences in plainer words. Read it before you apply it: it changes wording, so check it still says what you mean.'),
+        h('div',{style:{display:'flex',gap:10,marginBottom:12,flexWrap:'wrap'}},
+          sel(a.tone||'plain',[['plain','Plain'],['direct','Direct'],['editorial','Editorial']],v=>{this._ai.tone=v;}),
+          sel(a.strength||'standard',[['light','Light touch'],['standard','Standard'],['strong','Strong']],v=>{this._ai.strength=v;}),
+          this.btn(a.busy?'Working…':'Preview rewrite',()=>this.aiPreview(),{variant:'solid',pad:'9px 17px',style:{fontSize:13.5}}),
+          a.target?this.btn('Clear',()=>{this._ai.target=null;this._ai.text='';this._ai.result=null;this.forceUpdate();},{variant:'outline',pad:'9px 15px',style:{fontSize:13.5}}):null),
+        (String(a.text||'').length>1500)?this.note('This is a whole page. The rewriter works best on one paragraph at a time \u2014 on a long page it barely moves the score, and it can make a good paragraph read worse. Cut a paragraph in, check it, then the next.','warn'):null,
+        h('textarea',{value:a.text||'',onChange:e=>{this._ai=this._ai||{};this._ai.text=e.target.value;this.forceUpdate();},rows:8,
+          placeholder:'Paste any text here, or press Rewrite on a page above.',
+          style:{width:'100%',padding:'12px 13px',borderRadius:10,border:'1px solid '+P.line,background:P.white,font:'400 14px/1.6 Plus Jakarta Sans',color:P.ink,resize:'vertical'}}),
+        a.result?h('div',{style:{marginTop:16}},
+          this.note(['Reads formulaic: ',h('b',{key:'b'},a.result.before.ai+'%'),' → ',h('b',{key:'a'},a.result.after.ai+'%'),
+            '  ·  '+(a.result.changes||[]).length+' change'+((a.result.changes||[]).length===1?'':'s')+'  ·  '+a.result.tone+' / '+a.result.strength],
+            a.result.after.ai<a.result.before.ai?'ok':'bad'),
+          (a.result.after.ai>=a.result.before.ai)?this.note('This rewrite did not improve the score. Keep your original \u2014 do not apply it.','bad'):null,
+          (a.result.changes||[]).length?h('div',{style:{margin:'12px 0',display:'grid',gap:4}}, ...a.result.changes.slice(0,8).map((c,i)=>
+            h('div',{key:i,style:{font:'400 12.5px Plus Jakarta Sans',color:P.muted}},
+              h('s',null,String(c.from||'').slice(0,60)),' → ',h('b',{style:{color:P.ink}},String(c.to||'').slice(0,60))))):null,
+          h('textarea',{value:a.result.humanized,readOnly:true,rows:8,
+            style:{width:'100%',padding:'12px 13px',borderRadius:10,border:'1px solid '+P.line,background:P.bgAlt,font:'400 14px/1.6 Plus Jakarta Sans',color:P.ink,resize:'vertical'}}),
+          h('div',{style:{display:'flex',gap:10,marginTop:12,flexWrap:'wrap'}},
+            a.target?this.btn('✓ Apply to '+a.target.label,()=>this.aiApply(),{variant:'solid',pad:'10px 18px',style:{fontSize:13.5}}):null,
+            this.btn('Copy',()=>{ try{ navigator.clipboard.writeText(a.result.humanized); this.flash('✓ Copied'); }catch(e){} },{variant:'outline',pad:'10px 16px',style:{fontSize:13.5}}))):null)));
+  }
+
 
   // ----- Redirects & duplicate review (nothing is ever merged or deleted automatically) -----
   dupTokens(t){ const stop={the:1,and:1,for:1,your:1,with:1,what:1,how:1,its:1,does:1,doesn:1,really:1,means:1,each:1,best:1,you:1,are:1,why:1,from:1,into:1,service:1,services:1,report:1,reports:1,vedic:1,astrology:1,astrological:1,astrologer:1,based:1};

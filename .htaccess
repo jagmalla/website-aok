@@ -31,7 +31,7 @@ RewriteRule ^ https://www.analysisofkarma.com%{REQUEST_URI} [R=301,L,NE]
 RewriteRule (^|/)\.(?!well-known(/|$)) - [F,L]
 RewriteRule ^tools(/|$) - [F,L]
 # the PHP libraries and settings (also as /api/db.php/anything)
-RewriteRule ^api/(config|config\.sample|db|seo-lib|upgrades|sync|discovery-lib)\.php(/|$) - [F,L]
+RewriteRule ^api/(config|config\.sample|db|seo-lib|upgrades|sync|discovery-lib|app-compat|ai-audit-lib|ai-humanize-lib|seo-scan-lib|text-history-lib|theme-presets)\.php(/|$) - [F,L]
 RewriteRule ^api/(defaults\.json|content/) - [F,L]
 RewriteRule ^(DEPLOY\.md|HOW-TO-UPDATE\.txt)$ - [F,L]
 # server error logs, PHP settings, backups and archives left in the web folders
@@ -75,7 +75,7 @@ RewriteRule ^ render.php [L,QSA]
 </IfModule>
 
 # ---- 8. Second lock on the private files (works even without the rewrite rules above)
-<FilesMatch "^(config|config\.sample|db|seo-lib|upgrades|sync|discovery-lib)\.php$|^(defaults\.json|error_log|php_errorlog|php\.ini)$">
+<FilesMatch "^(config|config\.sample|db|seo-lib|upgrades|sync|discovery-lib|app-compat|ai-audit-lib|ai-humanize-lib|seo-scan-lib|text-history-lib|theme-presets)\.php$|^(defaults\.json|error_log|php_errorlog|php\.ini)$">
   <IfModule mod_authz_core.c>
     Require all denied
   </IfModule>
