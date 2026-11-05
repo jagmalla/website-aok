@@ -154,6 +154,16 @@ function aok_md_blocks(string $text): array {
             continue;
         }
         $all = function ($re) use ($lines) { foreach ($lines as $l) if (!preg_match($re, trim($l))) return false; return true; };
+        // a pipe table: header row, a |---|---| rule, then the body. Answer engines quote a table row,
+        // so this is a real <table>, not a list pretending to be one.
+        if (count($lines) >= 3 && $all('/^\|.*\|$/') && preg_match('/^\|[\s:|-]+\|$/', trim($lines[1]))) {
+            $cell = function ($row) { return array_map('trim', explode('|', trim(trim($row), '|'))); };
+            $head = $cell($lines[0]);
+            $rows = [];
+            foreach (array_slice($lines, 2) as $l) $rows[] = $cell($l);
+            $out[] = ['table', ['head' => $head, 'rows' => $rows]];
+            continue;
+        }
         if ($all('/^>\s?/')) $out[] = ['answer', trim(implode("\n", array_map(function ($l) { return preg_replace('/^>\s?/', '', trim($l)); }, $lines)))];
         elseif ($all('/^[-*]\s+/')) $out[] = ['ul', array_map(function ($l) { return preg_replace('/^[-*]\s+/', '', trim($l)); }, $lines)];
         elseif ($all('/^\d+[.)]\s+/')) $out[] = ['ol', array_map(function ($l) { return preg_replace('/^\d+[.)]\s+/', '', trim($l)); }, $lines)];
@@ -180,6 +190,18 @@ function aok_md_html(array $blocks, int $h2Ids = 0): string {
         elseif ($t === 'h2' || $t === 'h3') $out .= '<' . $t . '>' . aok_md_inline($v) . '</' . $t . '>';
         elseif ($t === 'answer') $out .= '<aside class="aok-answer"><p>' . nl2br(aok_md_inline($v), false) . '</p></aside>';
         elseif ($t === 'ul' || $t === 'ol') { $out .= '<' . $t . '>'; foreach ($v as $li) $out .= '<li>' . aok_md_inline($li) . '</li>'; $out .= '</' . $t . '>'; }
+        elseif ($t === 'table') {
+            // the first column is the row's subject, so it is a <th scope="row">
+            $out .= '<div class="aok-cmp-wrap"><table class="aok-cmp"><thead><tr>';
+            foreach ((array)($v['head'] ?? []) as $c) $out .= '<th scope="col">' . aok_md_inline($c) . '</th>';
+            $out .= '</tr></thead><tbody>';
+            foreach ((array)($v['rows'] ?? []) as $row) {
+                $out .= '<tr>';
+                foreach ((array)$row as $i => $c) $out .= $i === 0 ? '<th scope="row">' . aok_md_inline($c) . '</th>' : '<td>' . aok_md_inline($c) . '</td>';
+                $out .= '</tr>';
+            }
+            $out .= '</tbody></table></div>';
+        }
         else $out .= '<p>' . nl2br(aok_md_inline($v), false) . '</p>';
     }
     return $out;
@@ -777,24 +799,36 @@ function aok_graph(array $d, array $r, array $meta): array {
         $l = $r['item'];
         $areas = [];
         foreach ((array)($l['areas'] ?? []) as $a) {
-            $type = (string)($a[0] ?? ''); $name = aok_text($a[1] ?? '');
-            if (in_array($type, ['City', 'AdministrativeArea', 'Country', 'State', 'Place'], true) && $name !== '') $areas[] = ['@type' => $type, 'name' => $name];
+            $type = (string)($a[0] ?? ''); $name = aok_text($a[1] ?? ''); $in = aok_text($a[2] ?? '');
+            if (!in_array($type, ['City', 'AdministrativeArea', 'Country', 'State', 'Place'], true) || $name === '') continue;
+            $node = ['@type' => $type, 'name' => $name];
+            if ($in !== '') $node['containedInPlace'] = ['@type' => 'AdministrativeArea', 'name' => $in];
+            $areas[] = $node;
         }
         [$price, $cur] = aok_price((string)aok_get($d, 'about.pricing.fee', '$100 CAD'));
         $node = ['@type' => 'Service', '@id' => $url . '#service', 'name' => aok_text($l['title'] ?? ''),
             'serviceType' => 'Vedic astrology consultation', 'description' => aok_text($l['answer'] ?? ''),
             'url' => $url, 'provider' => [['@id' => $ORG], ['@id' => $PERSON]], 'availableLanguage' => $lang];
         if ($areas) $node['areaServed'] = $areas;
-        if ($price !== '') $node['offers'] = ['@type' => 'Offer', 'price' => $price, 'priceCurrency' => $cur, 'url' => $base . '/contact',
-            'availability' => 'https://schema.org/InStock', 'seller' => ['@id' => $ORG]];
+        if ($price !== '') $node['offers'] = ['@type' => 'Offer', 'price' => number_format((float)$price, 2, '.', ''), 'priceCurrency' => $cur,
+            'url' => $base . '/contact', 'availability' => 'https://schema.org/InStock', 'seller' => ['@id' => $ORG],
+            'description' => aok_text(aok_get($d, 'local.sessionLength', '60 minutes')) . ' live 1-on-1 consultation'
+                . (trim(aok_text($l['scope'] ?? '')) !== '' ? ' in ' . aok_text($l['scope']) : '')
+                . (trim((string)aok_get($d, 'local.paymentPolicy', '')) !== '' ? '. New clients pay after the session, only if satisfied.' : '.')];
         $chan = ['@type' => 'ServiceChannel', 'serviceUrl' => $base . '/contact', 'availableLanguage' => $lang];
         if ($tel !== '') $chan['servicePhone'] = ['@type' => 'ContactPoint', 'telephone' => $tel, 'contactType' => 'customer service'];
         $node['availableChannel'] = $chan;
         $graph[] = $node;
         $page['mainEntity'] = ['@id' => $node['@id']];
-        $q = aok_text($l['question'] ?? ''); $a = aok_text($l['answer'] ?? '');
-        if ($q !== '' && $a !== '') $graph[] = ['@type' => 'FAQPage', '@id' => $url . '#faq', 'url' => $url, 'isPartOf' => ['@id' => $SITE],
-            'about' => ['@id' => $node['@id']], 'mainEntity' => [['@type' => 'Question', 'name' => $q, 'acceptedAnswer' => ['@type' => 'Answer', 'text' => $a]]]];
+        // the page's own FAQ when it has one, else the single question it opens with
+        $qs = [];
+        foreach (aok_md_faq((string)($l['detail'] ?? '')) as $x) $qs[] = ['@type' => 'Question', 'name' => $x[0], 'acceptedAnswer' => ['@type' => 'Answer', 'text' => $x[1]]];
+        if (!$qs) {
+            $q = aok_text($l['question'] ?? ''); $a = aok_text($l['answer'] ?? '');
+            if ($q !== '' && $a !== '') $qs[] = ['@type' => 'Question', 'name' => $q, 'acceptedAnswer' => ['@type' => 'Answer', 'text' => $a]];
+        }
+        if ($qs) $graph[] = ['@type' => 'FAQPage', '@id' => $url . '#faq', 'url' => $url, 'isPartOf' => ['@id' => $SITE],
+            'about' => ['@id' => $node['@id']], 'mainEntity' => $qs];
     }
     if ($r['type'] === 'locations') {
         $items = [];
@@ -990,13 +1024,20 @@ function aok_location_facts(array $d, array $l): array {
 }
 
 function aok_location_page_html(array $d, array $l): string {
-    $o = '<section aria-labelledby="loc-answer"><h2 id="loc-answer">' . aok_e(aok_text($l['question'] ?? '')) . '</h2>'
-       . '<p>' . aok_e(aok_text($l['answer'] ?? '')) . '</p></section>';
-
-    if ($facts = aok_location_facts($d, $l)) {
-        $o .= '<section aria-labelledby="loc-facts"><h2 id="loc-facts">At a glance</h2><dl>';
-        foreach ($facts as $k => $v) $o .= '<dt>' . aok_e($k) . '</dt><dd>' . aok_e($v) . '</dd>';
-        $o .= '</dl></section>';
+    // A hub with its own page text (api/content/locations/<slug>.md) is that text: the direct-answer
+    // box, the question headings, the comparison table and the FAQ are all in it. A hub without one
+    // falls back to the question, its answer and the facts list.
+    $md = trim((string)($l['detail'] ?? ''));
+    if ($md !== '') {
+        $o = aok_md_html(aok_md_blocks($md), 1);
+    } else {
+        $o = '<section aria-labelledby="loc-answer"><h2 id="loc-answer">' . aok_e(aok_text($l['question'] ?? '')) . '</h2>'
+           . '<p>' . aok_e(aok_text($l['answer'] ?? '')) . '</p></section>';
+        if ($facts = aok_location_facts($d, $l)) {
+            $o .= '<section aria-labelledby="loc-facts"><h2 id="loc-facts">At a glance</h2><dl>';
+            foreach ($facts as $k => $v) $o .= '<dt>' . aok_e($k) . '</dt><dd>' . aok_e($v) . '</dd>';
+            $o .= '</dl></section>';
+        }
     }
 
     $cities = array_values(array_filter(array_map('aok_text', (array)($l['cities'] ?? []))));
@@ -1011,8 +1052,6 @@ function aok_location_page_html(array $d, array $l): string {
         $o .= aok_location_html_address($d);
         if (($t = trim(aok_text($l['travel'] ?? ''))) !== '') $o .= '<p>' . aok_e($t) . '</p>';
     }
-
-    if (($md = trim((string)($l['detail'] ?? ''))) !== '') $o .= aok_md_html(aok_md_blocks($md), 1);
 
     // every hub links on to the consultations themselves, so a crawler never lands in a dead end
     if ($svc = array_slice(aok_live_services($d), 0, 7)) {
@@ -1030,7 +1069,8 @@ function aok_locations_nav_html(array $d, string $except = ''): string {
     $o = '<nav aria-label="Locations and online consultations worldwide"><h3>In-person &amp; online consultations worldwide</h3><ul>';
     foreach ($locs as $l) {
         if ($except !== '' && strcasecmp((string)$l['slug'], $except) === 0) continue;
-        $o .= '<li><a href="/locations/' . aok_e((string)$l['slug']) . '">' . aok_e(aok_text($l['navLabel'] ?? ($l['title'] ?? ''))) . '</a></li>';
+        $label = trim(aok_text($l['navLabel'] ?? '')) ?: aok_text($l['title'] ?? '');
+        $o .= '<li><a href="/locations/' . aok_e((string)$l['slug']) . '">' . aok_e($label) . '</a></li>';
     }
     return $o . '</ul></nav>';
 }

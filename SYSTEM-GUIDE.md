@@ -192,11 +192,13 @@ Three rules learned the hard way:
 
 ### Geo hubs (`/locations/…`)
 Seven pages, one per place people actually search from: Surrey, the Lower Mainland, British
-Columbia, Canada, the United States, the United Kingdom and India. Each opens with the
-question someone types there and answers it in 40–60 words, then states the consultation
-format, session length, time zones, languages and fee as a labelled list, and names the
-cities it covers. Only the Surrey hub carries the street address and the map, because it is
-the only one with a place to visit.
+Columbia, Canada, the United States, the United Kingdom and India. Five of them (Surrey,
+Canada, the USA, the UK, India) carry full written pages, shipped as light Markdown in
+`api/content/locations/<slug>.md`: a direct-answer box, question headings, a comparison
+table and a three-question FAQ. The other two fall back to the question, its 40–60 word
+answer and a labelled list of format, session length, time zones, languages and fee. Only
+the Surrey hub carries the street address and the map, because it is the only one with a
+place to visit.
 
 They live in `locations` in the site data, so they are ordinary content: an owner can edit
 any of them, and `deletedLocations` keeps a deleted one deleted through later upgrades.
@@ -244,6 +246,20 @@ Assistants lift *passages*, not pages. So every important page has:
    Admin → Services to put a consultation in it; leave the chart factors empty to keep it out.
    The fee column is the service's own rate, so the price is never typed twice.
 5. **Plain language**, short sentences, jargon defined on first use.
+
+### Tables in page text
+The light Markdown understands a pipe table:
+
+```
+| Service | Fee |
+|---|---|
+| Kundli reading | $100 |
+```
+
+It renders as a real `<table>` with the first column as each row's `<th scope="row">`, in
+the same styling as the `/services` comparison table, and it scrolls inside its own card on
+a narrow screen rather than making the page scroll. Both renderers parse it identically and
+the editor round-trips it, so a table survives being edited on the page.
 
 ### `llms.txt` and `llms-full.txt`
 Two plain-text files at the root of the site, generated from the same data as the sitemap

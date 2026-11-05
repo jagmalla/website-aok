@@ -260,9 +260,12 @@ class Component extends DCLogic {
 
   // ---------- defaults ----------
   defaults(){
-    const loc=(slug,title,question,answer,o)=>({id:this.uid(),slug,title,question,answer,
+    // navLabel: the short name used in the footer and the links between hubs, where the full H1
+    // would be unreadable. detail: filled from api/content/locations/<slug>.md by the upgrade.
+    const loc=(slug,title,navLabel,question,answer,o)=>({id:this.uid(),slug,title,navLabel,question,answer,
       scope:o.scope||'',cityLabel:o.cityLabel||'Areas served',cities:o.cities||[],format:o.format||'',
-      timezones:o.timezones||'',areas:o.areas||[],...(o.inPerson?{inPerson:true}:{}),...(o.travel?{travel:o.travel}:{}),detail:''});
+      timezones:o.timezones||'',areas:o.areas||[],...(o.inPerson?{inPerson:true}:{}),...(o.travel?{travel:o.travel}:{}),
+      ...(o.seoTitle?{seoTitle:o.seoTitle}:{}),...(o.seoDescription?{seoDescription:o.seoDescription}:{}),detail:''});
     const svc=(icon,title,price,desc,detail)=>{ const sl=this.serviceRoute(title); return {id:this.uid(),icon,title,...(sl?{slug:sl}:{}),price,desc,...(detail?{detail}:{}),image:null,...this.serviceTableFields(sl)}; };
     return {
       brand:{ name:'Analysis of Karma', astrologer:'Jag Mallah', tagline:'Vedic astrology guidance for love, career, health & life\u2019s bigger questions.', logo:null },
@@ -401,57 +404,41 @@ class Component extends DCLogic {
       locationsPage:{ hero:{ title:'Vedic astrology consultations, where you are',
         sub:'In person in Surrey, British Columbia, and live one-to-one on Zoom, WhatsApp or the phone across Canada, the United States, the United Kingdom and India — in English, Hindi or Punjabi.' } },
       locations:[
-        loc('vedic-astrologer-surrey-bc','Vedic Astrologer in Surrey, BC',
-          'Where Can I Book an Authentic Vedic Astrologer in Surrey, BC?',
-          'Independent Vedic Astrologer Jag Mallah provides 60-minute 1-on-1 Kundli readings, marriage matching (Kundli Milan), Dosha analysis, and Vedic meditation guidance in Surrey, BC from 15450 92a Ave (Fleetwood) and online via Zoom or WhatsApp. Consultations are offered in English, Hindi, and Punjabi for $100 CAD/hr, with payment after satisfaction.',
-          { areas:[['City','Surrey, BC, Canada']], inPerson:true, scope:'Surrey, British Columbia',
-            cityLabel:'Neighbourhoods served from the Fleetwood office',
-            cities:['Fleetwood','Newton','Guildford','Cloverdale','Panorama Ridge','Whalley','City Centre','South Surrey'],
-            format:'In person by appointment, or live on Zoom, WhatsApp or the phone',
-            timezones:'Pacific Time (PST / PDT)',
-            travel:'The office is on 92a Avenue in Fleetwood, a short drive from Newton along 152 Street, from Guildford down 152 Street or 104 Avenue, and from Cloverdale along the Fraser Highway.' }),
-        loc('vedic-astrologer-vancouver-lower-mainland','Vedic Astrologer for Vancouver & the Lower Mainland',
-          'How Do Clients in Vancouver, Burnaby, Langley, and Abbotsford Consult With Jag Mallah?',
-          'Clients across Metro Vancouver and the Fraser Valley—including Vancouver, Burnaby, Richmond, Delta, Langley, Abbotsford, and Chilliwack—can book live 60-minute Zoom or WhatsApp screen-share consultations or schedule an appointment at our Surrey office. Every session ($100 CAD/hr, pay after satisfaction) examines your Sidereal Lagna, Navamsha, and Vimshottari Dasha.',
-          { areas:[['City','Vancouver, BC, Canada'],['City','Burnaby, BC, Canada'],['City','Richmond, BC, Canada'],['City','Delta, BC, Canada'],['City','New Westminster, BC, Canada'],['City','Coquitlam, BC, Canada'],['City','Langley, BC, Canada'],['City','Abbotsford, BC, Canada'],['City','Chilliwack, BC, Canada'],['City','Maple Ridge, BC, Canada']], scope:'Metro Vancouver & the Fraser Valley', cityLabel:'Cities served',
-            cities:['Vancouver','Burnaby','Richmond','Delta','North Delta','Ladner','Tsawwassen','New Westminster','Coquitlam','Langley','Abbotsford','Chilliwack','Maple Ridge'],
-            format:'Live 1-on-1 on Zoom, WhatsApp or the phone, or in person at the Surrey office by appointment',
-            timezones:'Pacific Time (PST / PDT)' }),
-        loc('vedic-astrologer-british-columbia','Vedic Astrologer for British Columbia',
-          'Are Live 1-on-1 Vedic Astrology Consultations Available Throughout British Columbia?',
-          'Yes. Analysis of Karma serves clients throughout British Columbia—including Victoria, Nanaimo, Kelowna, Kamloops, and Prince George—through live 60-minute Zoom, WhatsApp, and phone sessions on Pacific Time. Jag Mallah delivers classical Parashari birth chart readings, career timing, and unbiased gemstone guidance ($100 CAD/hr) with zero travel required.',
-          { areas:[['AdministrativeArea','British Columbia, Canada'],['City','Victoria, BC, Canada'],['City','Nanaimo, BC, Canada'],['City','Kelowna, BC, Canada'],['City','Kamloops, BC, Canada'],['City','Prince George, BC, Canada']], scope:'British Columbia', cityLabel:'Communities served across the province',
-            cities:['Victoria','Saanich','Nanaimo','Kelowna','Vernon','Penticton','Kamloops','Prince George','Vancouver Island','the Okanagan','the BC Interior','the BC coast'],
-            format:'Live 1-on-1 on Zoom, WhatsApp or the phone — no travel required',
-            timezones:'Pacific Time (PST / PDT), and Mountain Time in the Kootenays' }),
-        loc('online-vedic-astrologer-canada','Online Vedic Astrologer for Canada',
-          'How Do Online Vedic Astrology Consultations Work Across Canada?',
-          'Clients across Canada—including Brampton, Toronto, Mississauga, Calgary, Edmonton, Winnipeg, Ottawa, and Montreal—connect live with Surrey-based Vedic Astrologer Jag Mallah via Zoom or WhatsApp. Sessions last 60 minutes ($100 CAD/hr via Interac e-Transfer after you are satisfied) and accommodate Mountain, Central, Eastern, and Atlantic time zones.',
-          { areas:[['Country','Canada']], scope:'Canada', cityLabel:'Cities served coast to coast',
-            cities:['Brampton','Mississauga','Toronto','Markham','Ottawa','Hamilton','Kitchener–Waterloo','Calgary','Edmonton','Red Deer','Winnipeg','Saskatoon','Regina','Montreal','Halifax'],
-            format:'Live 1-on-1 on Zoom, WhatsApp or the phone',
-            timezones:'Pacific, Mountain, Central, Eastern and Atlantic Time' }),
-        loc('online-vedic-astrologer-usa','Online Vedic Astrologer for the United States',
-          'Can Clients in the United States Book Online Vedic Astrology Readings With Jag Mallah?',
-          'Yes. Clients across the United States—from Seattle and California to New York, New Jersey, Texas, and Chicago—book live 60-minute 1-on-1 consultations via Zoom or WhatsApp. Operating on Pacific Time, Jag Mallah provides convenient daytime and evening slots for US time zones ($100 CAD/hr, paid only after satisfaction).',
-          { areas:[['Country','United States']], scope:'the United States', cityLabel:'States and metro areas served',
-            cities:['Seattle','Bellevue','Bellingham','Tacoma','Kent','San Francisco Bay Area','San Jose','Fremont','Sacramento','Fresno','Los Angeles','San Diego','New York','New Jersey (Edison, Jersey City)','Dallas','Houston','Austin','Chicago','Atlanta','Virginia','Michigan'],
-            format:'Live 1-on-1 on Zoom, WhatsApp or the phone',
-            timezones:'Pacific, Mountain, Central and Eastern Time' }),
-        loc('online-vedic-astrologer-uk','Online Vedic Astrologer for the United Kingdom',
-          'How Do Clients in the United Kingdom Schedule Live Vedic Astrology Sessions?',
-          'Clients throughout the United Kingdom—including London, Southall, Wembley, Birmingham, Leicester, Manchester, and Glasgow—consult live with Jag Mallah via WhatsApp or Zoom. Morning appointments in British Columbia align seamlessly with UK late-afternoon and evening hours (5:00 PM to 11:00 PM GMT/BST), conducted in English, Hindi, or Punjabi.',
-          { areas:[['Country','United Kingdom']], scope:'the United Kingdom', cityLabel:'Cities and communities served',
-            cities:['London','Southall','Wembley','Hounslow','Harrow','Ilford','Croydon','Birmingham','Wolverhampton','Coventry','Leicester','Manchester','Leeds','Bradford','Glasgow','Edinburgh'],
-            format:'Live 1-on-1 on WhatsApp or Zoom',
-            timezones:'GMT / BST — late-afternoon and evening slots, 5:00 PM to 11:00 PM UK time' }),
-        loc('online-vedic-astrologer-india','Online Vedic Astrologer for India',
-          'How Can Clients in Punjab, Delhi NCR, and Across India Consult With Jag Mallah?',
-          'Clients across India—including Chandigarh, Ludhiana, Amritsar, Jalandhar, Delhi NCR, Haryana, and Mumbai—can book 1-on-1 WhatsApp or Zoom consultations directly in Punjabi, Hindi, or English. Early-morning and evening IST time slots allow seamless live Kundli readings, NRI marriage matching, and career consultations with Jag Mallah.',
-          { areas:[['Country','India']], scope:'India', cityLabel:'States and cities served',
-            cities:['Chandigarh','Mohali','Ludhiana','Amritsar','Jalandhar','Patiala','Bathinda','New Delhi','Gurugram','Noida','Faridabad','Karnal','Ambala','Panipat','Panchkula','Himachal Pradesh','Uttar Pradesh','Rajasthan','Mumbai','Pune','Ahmedabad','Vadodara','Bengaluru','Hyderabad'],
-            format:'Live 1-on-1 on WhatsApp or Zoom',
-            timezones:'IST — early-morning and evening slots' })
+        loc("vedic-astrologer-surrey-bc","Authentic Vedic Astrologer in Surrey, BC — Jag Mallah",
+          "Vedic Astrologer in Surrey, BC (In-Person & Online)",
+          "Where Can I Book an Authentic Vedic Astrologer in Surrey, BC?",
+          "Analysis of Karma provides classical Parashari Vedic astrology (Jyotish) and meditation consultations in Surrey, BC from our Fleetwood office at 15450 92a Ave and online via Zoom or WhatsApp. Led by Independent Vedic Astrologer Jag Mallah, 60-minute 1-on-1 readings cost $100 CAD/hr — and new clients pay after the session only if satisfied.",
+          { scope:"Surrey, British Columbia", cityLabel:"Neighbourhoods served from the Fleetwood office", cities:["Fleetwood", "Newton", "Guildford", "Cloverdale", "Panorama Ridge", "Whalley", "City Centre", "South Surrey"], format:"In person by appointment, or live on Zoom, WhatsApp or the phone", timezones:"Pacific Time (PST / PDT)", areas:[["City", "Surrey, BC, Canada", "British Columbia, Canada"]], inPerson:true, travel:"The office is on 92a Avenue in Fleetwood, a short drive from Newton along 152 Street, from Guildford down 152 Street or 104 Avenue, and from Cloverdale along the Fraser Highway.", seoTitle:"Vedic Astrologer in Surrey, BC | Kundli & Marriage Matching | Jag Mallah", seoDescription:"Book a 1-on-1 Kundli birth chart reading, Kundli Milan marriage matching, or Dosha consultation in Surrey, BC (15450 92a Ave, Fleetwood) or via Zoom. $100 CAD/hr, pay after satisfaction." }),
+        loc("vedic-astrologer-vancouver-lower-mainland","Vedic Astrologer for Vancouver & the Lower Mainland",
+          "Vancouver, Burnaby, Langley & Lower Mainland",
+          "How Do Clients in Vancouver, Burnaby, Langley, and Abbotsford Consult With Jag Mallah?",
+          "Clients across Metro Vancouver and the Fraser Valley—including Vancouver, Burnaby, Richmond, Delta, Langley, Abbotsford, and Chilliwack—can book live 60-minute Zoom or WhatsApp screen-share consultations or schedule an appointment at our Surrey office. Every session ($100 CAD/hr, pay after satisfaction) examines your Sidereal Lagna, Navamsha, and Vimshottari Dasha.",
+          { scope:"Metro Vancouver & the Fraser Valley", cityLabel:"Cities served", cities:["Vancouver", "Burnaby", "Richmond", "Delta", "North Delta", "Ladner", "Tsawwassen", "New Westminster", "Coquitlam", "Langley", "Abbotsford", "Chilliwack", "Maple Ridge"], format:"Live 1-on-1 on Zoom, WhatsApp or the phone, or in person at the Surrey office by appointment", timezones:"Pacific Time (PST / PDT)", areas:[["City", "Vancouver, BC, Canada"], ["City", "Burnaby, BC, Canada"], ["City", "Richmond, BC, Canada"], ["City", "Delta, BC, Canada"], ["City", "New Westminster, BC, Canada"], ["City", "Coquitlam, BC, Canada"], ["City", "Langley, BC, Canada"], ["City", "Abbotsford, BC, Canada"], ["City", "Chilliwack, BC, Canada"], ["City", "Maple Ridge, BC, Canada"]] }),
+        loc("vedic-astrologer-british-columbia","Vedic Astrologer for British Columbia",
+          "British Columbia Online Consultations (Victoria, Kelowna, Kamloops)",
+          "Are Live 1-on-1 Vedic Astrology Consultations Available Throughout British Columbia?",
+          "Yes. Analysis of Karma serves clients throughout British Columbia—including Victoria, Nanaimo, Kelowna, Kamloops, and Prince George—through live 60-minute Zoom, WhatsApp, and phone sessions on Pacific Time. Jag Mallah delivers classical Parashari birth chart readings, career timing, and unbiased gemstone guidance ($100 CAD/hr) with zero travel required.",
+          { scope:"British Columbia", cityLabel:"Communities served across the province", cities:["Victoria", "Saanich", "Nanaimo", "Kelowna", "Vernon", "Penticton", "Kamloops", "Prince George", "Vancouver Island", "the Okanagan", "the BC Interior", "the BC coast"], format:"Live 1-on-1 on Zoom, WhatsApp or the phone — no travel required", timezones:"Pacific Time (PST / PDT), and Mountain Time in the Kootenays", areas:[["AdministrativeArea", "British Columbia, Canada"], ["City", "Victoria, BC, Canada"], ["City", "Nanaimo, BC, Canada"], ["City", "Kelowna, BC, Canada"], ["City", "Kamloops, BC, Canada"], ["City", "Prince George, BC, Canada"]] }),
+        loc("online-vedic-astrologer-canada","Online Vedic Astrologer in Canada — Live 1-on-1 Consultations",
+          "Canada-Wide Online (Toronto, Brampton, Calgary, Edmonton, Winnipeg)",
+          "How Do Online Vedic Astrology Consultations Work Across Canada?",
+          "Clients across Canada — including Brampton, Toronto, Mississauga, Calgary, Edmonton, Winnipeg, Ottawa, and Montreal — consult live with Canadian Vedic Astrologer Jag Mallah via Zoom, WhatsApp, or phone. Each 60-minute 1-on-1 reading costs $100 CAD (paid via Interac e-Transfer only after you are satisfied) and is available in English, Hindi, and Punjabi.",
+          { scope:"Canada", cityLabel:"Cities served coast to coast", cities:["Brampton", "Mississauga", "Toronto", "Markham", "Ottawa", "Hamilton", "Kitchener–Waterloo", "Calgary", "Edmonton", "Red Deer", "Lethbridge", "Winnipeg", "Saskatoon", "Regina", "Brandon", "Montreal", "Laval", "Halifax", "Moncton", "St. John's"], format:"Live 1-on-1 on Zoom, WhatsApp or the phone", timezones:"Pacific, Mountain, Central, Eastern and Atlantic Time", areas:[["Country", "Canada"]], seoTitle:"Online Vedic Astrologer in Canada | Zoom & WhatsApp Kundli Reading", seoDescription:"Consult live with Canadian Vedic Astrologer Jag Mallah across Toronto, Brampton, Calgary, Edmonton, Winnipeg, Ottawa & Montreal via Zoom or WhatsApp. $100 CAD/hr, pay after satisfaction." }),
+        loc("online-vedic-astrologer-usa","Online Vedic Astrologer for the United States — Live 1-on-1 Jyotish Readings",
+          "United States Online (Washington, California, New York, Texas)",
+          "Can Clients in the United States Book Online Vedic Astrology Readings With Jag Mallah?",
+          "Clients throughout the United States — from Washington State and California to New York, New Jersey, Texas, and Illinois — book live 60-minute 1-on-1 consultations with Vedic Astrologer Jag Mallah via Zoom or WhatsApp. Operating on North American Pacific Time, we offer convenient daytime and evening US appointments ($100 CAD/hr, paid after satisfaction).",
+          { scope:"the United States", cityLabel:"States and metro areas served", cities:["Seattle", "Bellevue", "Bellingham", "Tacoma", "Kent", "San Francisco Bay Area", "San Jose", "Fremont", "Sacramento", "Fresno", "Los Angeles", "San Diego", "New York", "New Jersey (Edison, Jersey City)", "Dallas–Fort Worth", "Houston", "Austin", "Chicago", "Atlanta", "Virginia", "Michigan"], format:"Live 1-on-1 on Zoom, WhatsApp or the phone", timezones:"Pacific, Mountain, Central and Eastern Time", areas:[["Country", "United States"]], seoTitle:"Online Vedic Astrologer in the USA | Live Zoom Kundli Consultations", seoDescription:"Book a 60-minute 1-on-1 online Vedic astrology reading from Seattle, California, New York, New Jersey, Texas, or Chicago with Jag Mallah. $100 CAD/hr, pay after satisfaction." }),
+        loc("online-vedic-astrologer-uk","Online Vedic Astrologer for the United Kingdom — Live WhatsApp & Zoom Sessions",
+          "United Kingdom Online (London, Birmingham, Leicester, Manchester)",
+          "How Do Clients in the United Kingdom Schedule Live Vedic Astrology Sessions?",
+          "Clients across the United Kingdom — including London (Southall, Wembley, Hounslow, Harrow, Ilford), Birmingham, Wolverhampton, Leicester, Manchester, and Glasgow — consult live with Vedic Astrologer Jag Mallah via WhatsApp or Zoom. Our morning hours align directly with UK evening hours (5:00 PM to 11:00 PM GMT/BST) for convenient after-work consultations.",
+          { scope:"the United Kingdom", cityLabel:"Cities and communities served", cities:["London", "Southall", "Wembley", "Hounslow", "Harrow", "Ilford", "Croydon", "Birmingham", "Wolverhampton", "Coventry", "Smethwick", "Leicester", "Nottingham", "Manchester", "Leeds", "Bradford", "Glasgow", "Edinburgh"], format:"Live 1-on-1 on WhatsApp or Zoom", timezones:"GMT / BST — late-afternoon and evening slots, 5:00 PM to 11:00 PM UK time", areas:[["Country", "United Kingdom"]], seoTitle:"Online Vedic Astrologer in the UK | London, Birmingham & Leicester", seoDescription:"Consult live via WhatsApp or Zoom with Vedic Astrologer Jag Mallah from London, Southall, Wembley, Birmingham, Leicester, or Manchester. UK evening appointments available." }),
+        loc("online-vedic-astrologer-india","Online Vedic Astrologer for India — Punjab, Delhi NCR, Haryana & Mumbai",
+          "India Online (Punjab, Chandigarh, Delhi NCR, Haryana, Mumbai)",
+          "How Can Clients in Punjab, Delhi NCR, and Across India Consult With Jag Mallah?",
+          "Clients across India — including Chandigarh, Ludhiana, Amritsar, Jalandhar, Patiala, Delhi NCR, Haryana, and Mumbai — consult live with Canada-based Vedic Astrologer Jag Mallah via WhatsApp or Zoom in Punjabi, Hindi, or English. We specialize in classical Parashari Kundli analysis, NRI marriage matching (Kundli Milan), foreign settlement timing, and career consultations.",
+          { scope:"India", cityLabel:"States and cities served", cities:["Chandigarh", "Mohali", "Ludhiana", "Amritsar", "Jalandhar", "Patiala", "Bathinda", "New Delhi", "Gurugram", "Noida", "Faridabad", "Karnal", "Ambala", "Panipat", "Panchkula", "Himachal Pradesh", "Uttar Pradesh", "Rajasthan", "Mumbai", "Pune", "Ahmedabad", "Vadodara", "Bengaluru", "Hyderabad"], format:"Live 1-on-1 on WhatsApp or Zoom", timezones:"IST — early-morning and evening slots", areas:[["Country", "India"]], seoTitle:"Online Vedic Astrologer for India & NRI Families | Punjab, Delhi & Mumbai", seoDescription:"Book a 1-on-1 WhatsApp or Zoom Kundli consultation in Punjabi, Hindi, or English from Punjab, Chandigarh, Delhi NCR, Haryana, or Mumbai with Jag Mallah." })
       ],
       blogPage:{ hero:{ title:'Vedic astrology blog \u2014 Jyotish notes & remedies', sub:'Plain-language writing on Vedic astrology, doshas, nakshatras, remedies and meditation from Jag Mallah.' } },
       blog:[
@@ -888,6 +875,10 @@ class Component extends DCLogic {
   mdBlocks(text){ const out=[]; String(text||'').replace(/\r/g,'').trim().split(/\n\s*\n/).forEach(b=>{ b=b.trim(); if(!b) return; const lines=b.split('\n'); const m=lines[0].match(/^(#{2,3})\s+(.+)$/);
       if(m){ out.push(['h'+m[1].length,m[2].trim()]); const rest=lines.slice(1).join('\n').trim(); if(rest) this.mdBlocks(rest).forEach(x=>out.push(x)); return; }
       const all=re=>lines.every(l=>re.test(l.trim()));
+      // a pipe table: header row, a |---|---| rule, then the body (mirrors aok_md_blocks in PHP)
+      if(lines.length>=3&&all(/^\|.*\|$/)&&/^\|[\s:|-]+\|$/.test(lines[1].trim())){
+        const cell=r=>r.trim().replace(/^\||\|$/g,'').split('|').map(x=>x.trim());
+        out.push(['table',{head:cell(lines[0]),rows:lines.slice(2).map(cell)}]); return; }
       if(all(/^>\s?/)) out.push(['answer',lines.map(l=>l.trim().replace(/^>\s?/,'')).join('\n').trim()]);
       else if(all(/^[-*]\s+/)) out.push(['ul',lines.map(l=>l.trim().replace(/^[-*]\s+/,''))]);
       else if(all(/^\d+[.)]\s+/)) out.push(['ol',lines.map(l=>l.trim().replace(/^\d+[.)]\s+/,''))]);
@@ -900,6 +891,11 @@ class Component extends DCLogic {
       if(t==='h3') return h('h3',{key:k,style:{font:'600 21px/1.3 '+this.SERIF,color:P.maroon,margin:'26px 0 8px'}},this.mdInline(v,k));
       if(t==='answer') return h('aside',{key:k,className:'aok-answer'},h('p',{style:{margin:0}},this.mdInline(v,k)));
       if(t==='ul'||t==='ol') return h(t,{key:k,className:'aok-mdlist',style:{font:'400 '+fs+'px/1.75 Plus Jakarta Sans',color:P.ink,margin:'0 0 18px',paddingLeft:24}},...v.map((li,j)=>h('li',{key:k+'l'+j,style:{marginBottom:6}},this.mdInline(li,k+'l'+j))));
+      if(t==='table') return h('div',{key:k,className:'aok-cmp-wrap',style:{margin:'0 0 22px'}},
+        h('table',{className:'aok-cmp'},
+          h('thead',null,h('tr',null,...(v.head||[]).map((c,j)=>h('th',{key:j,scope:'col'},this.mdInline(c,k+'h'+j))))),
+          h('tbody',null,...(v.rows||[]).map((row,ri)=>h('tr',{key:ri},
+            ...row.map((c,ci)=>h(ci===0?'th':'td',{key:ci,...(ci===0?{scope:'row'}:{})},this.mdInline(c,k+'r'+ri+'c'+ci))))))));
       return h('p',{key:k,style:{font:'400 '+fs+'px/1.8 Plus Jakarta Sans',color:P.ink,margin:'0 0 18px'}},this.mdInline(v,k)); }); }
 
   // ---------- SERVICE PAGE (/services/{slug}) ----------
@@ -913,6 +909,8 @@ class Component extends DCLogic {
   goServiceBook(s){ this.go('service',{serviceId:s.id}); setTimeout(()=>this.scrollToBook(),450); }
   // light Markdown back from blocks (the inverse of mdBlocks), so page edits are saved as the same text format
   mdSerialize(blocks){ return blocks.map(b=>{ const t=b[0],v=b[1]; if(t==='h2') return '## '+v; if(t==='h3') return '### '+v;
+    if(t==='table'){ const head=(v.head||[]), rows=(v.rows||[]);
+      return ['| '+head.join(' | ')+' |','|'+head.map(()=>'---').join('|')+'|'].concat(rows.map(r=>'| '+r.join(' | ')+' |')).join('\n'); }
     if(t==='answer') return String(v).split('\n').map(l=>'> '+l).join('\n'); if(t==='ul') return v.map(x=>'- '+x).join('\n'); if(t==='ol') return v.map((x,i)=>(i+1)+'. '+x).join('\n'); return String(v); }).filter(x=>String(x).trim()!=='').join('\n\n'); }
   mdLabel(li){ const m=String(li||'').match(/^\*\*([^*]+?):\*\*\s*(.+)$/); return m?[m[1],m[2]]:null; }
   // the page text grouped by ## heading; every block keeps its index (b[2]) so the page editor can write it back
@@ -1270,7 +1268,7 @@ class Component extends DCLogic {
           const open=()=>this.goLocation(l);
           return h('div',{key:l.id,className:'aok-card aok-reveal',onClick:e=>{ if(e.target.closest&&e.target.closest('a,button')) return; open(); },style:{padding:'26px 28px',cursor:'pointer',display:'flex',flexDirection:'column',gap:10}},
             h('h2',{style:{font:'700 20px '+this.HEAD,color:P.maroon,margin:0}},
-              h('a',this.linkTo(this.locationHref(l),open,{className:'aok-tap',style:{color:'inherit'}}),l.title)),
+              h('a',this.linkTo(this.locationHref(l),open,{className:'aok-tap',style:{color:'inherit'}}),String(l.navLabel||'').trim()||l.title)),
             h('p',{style:{font:'400 15px/1.7 Plus Jakarta Sans',color:P.muted,margin:0}},this.cut(l.answer,180)),
             h('div',{style:{marginTop:'auto',paddingTop:6,font:'700 14px '+this.HEAD,color:'#8A6A2E'}},
               h('a',this.linkTo(this.locationHref(l),open,{className:'aok-tap',style:{color:'inherit'}}),'Read more →'))); })))),
@@ -1280,18 +1278,21 @@ class Component extends DCLogic {
     const l=(d.locations||[]).find(x=>x.id===this.state.locationId);
     if(!l) return this.renderNotFound();
     const crumb=(t,href,fn)=>h('a',this.linkTo(href,fn,{className:'aok-tap',style:{color:'inherit',textDecoration:'none'}}),t);
-    const cities=(l.cities||[]).filter(Boolean);
+    const cities=(l.cities||[]).filter(Boolean); const md=String(l.detail||'').trim();
     return h('main',{style:{animation:'aokfade .4s'}},
       h('section',{style:{padding:'40px 0 0'}}, this.wrap([
         h('nav',{key:'b','aria-label':'Breadcrumb',style:{font:'500 13px '+this.HEAD,color:P.muted,marginBottom:18}},
           crumb('Home','/',()=>this.go('home')),' › ',crumb('Locations','/locations',()=>this.go('locations')),' › ',h('span',null,l.title)),
         h('h1',{key:'h',style:{font:'600 clamp(30px,4.4vw,48px)/1.1 '+this.SERIF,color:P.maroon,margin:'0 0 18px'}},l.title)])),
 
-      h('section',{style:{padding:'26px 0 0'}}, this.wrap([
-        h('h2',{key:'q',style:{font:'600 clamp(22px,2.7vw,30px)/1.2 '+this.SERIF,color:P.maroon,margin:'0 0 12px'}},l.question),
-        h('aside',{key:'a',className:'aok-answer'},h('p',{style:{margin:0}},l.answer))])),
+      // A hub with its own page text is that text: the direct-answer box, the question headings,
+      // the comparison table and the FAQ all live in it (mirrors aok_location_page_html in PHP).
+      md? h('section',{style:{padding:'26px 0 0'}}, this.wrap(h('div',{className:'aok-loc-body'},...this.mdRender(md))))
+        : h('section',{style:{padding:'26px 0 0'}}, this.wrap([
+            h('h2',{key:'q',style:{font:'600 clamp(22px,2.7vw,30px)/1.2 '+this.SERIF,color:P.maroon,margin:'0 0 12px'}},l.question),
+            h('aside',{key:'a',className:'aok-answer'},h('p',{style:{margin:0}},l.answer))])),
 
-      h('section',{style:{padding:'34px 0 0'}}, this.wrap(
+      md? null : h('section',{style:{padding:'34px 0 0'}}, this.wrap(
         h('div',{className:'aok-feats'}, ...this.locationFacts(l).map(([k,v],i)=>
           h('div',{key:i,className:'aok-feat'}, h('h3',null,k), h('p',{style:{font:'400 15px/1.6 Plus Jakarta Sans',color:P.ink,margin:0}},v)))))),
 
@@ -1303,9 +1304,6 @@ class Component extends DCLogic {
         h('div',{key:'l'}, this.locationBlock()),
         (l.travel||'').trim()? h('p',{key:'t',style:{font:'400 15.5px/1.75 Plus Jakarta Sans',color:P.ink,margin:'14px 0 18px'}},l.travel):null,
         h('div',{key:'m'}, this.mapCard('21/9'))])):null,
-
-      (l.detail||'').trim()? h('section',{style:{padding:'40px 0 0'}}, this.wrap(
-        h('div',null,...this.mdRender(l.detail)))):null,
 
       h('section',{style:{padding:'54px 0 0'}}, this.wrap(this.locationServicesBlock(l))),
 
@@ -1328,7 +1326,8 @@ class Component extends DCLogic {
     return h('nav',{'aria-label':'Locations and online consultations worldwide'},
       h('h3',{style:{font:'700 12px '+this.HEAD,letterSpacing:'.14em',textTransform:'uppercase',color:'var(--aok-gold-label)',margin:'0 0 12px'}},'In-person & online consultations worldwide'),
       h('ul',{className:'aok-chips'}, ...ls.map(l=>h('li',{key:l.id},
-        h('a',this.linkTo(this.locationHref(l),()=>this.goLocation(l),{className:'aok-tap',style:{color:'inherit',textDecoration:'none'}}),l.title))))); }
+        h('a',this.linkTo(this.locationHref(l),()=>this.goLocation(l),{className:'aok-tap',style:{color:'inherit',textDecoration:'none'}}),
+          String(l.navLabel||'').trim()||l.title))))); }
 
   // ---------- MEDITATION ----------
   renderMeditation(){ const h=React.createElement,P=this.P,d=this.state.data; const m=d.meditation||{hero:{},intro:{},offerings:[]}; const em=this.state.editMode;

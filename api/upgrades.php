@@ -50,9 +50,14 @@ if (realpath((string)($_SERVER['SCRIPT_FILENAME'] ?? '')) === __FILE__) { http_r
 // Version 10:
 //   The seven geo hubs (/locations/...), their index page, and the cities they name added to the
 //   service areas. Hubs the owner has edited or deleted are left alone.
+// Version 11:
+//   The five written geo hubs (Surrey, Canada, the USA, the UK, India) get their full page text
+//   from api/content/locations/<slug>.md: the direct-answer box, the question headings, the
+//   comparison table and the FAQ. Also their Google titles and descriptions, and the short labels
+//   used in the footer. A hub whose text the owner has edited keeps it.
 // Only text that is still exactly as first shipped is replaced. Text you have edited is kept. Nothing is deleted.
 
-const AOK_CONTENT_VERSION = 10;
+const AOK_CONTENT_VERSION = 11;
 
 // fingerprints (md5 of the normalised text) of the originally shipped FAQ answers, by question
 const AOK_OLD_FAQ = [
@@ -138,6 +143,7 @@ function aok_upgrade_payload(array $d): array {
     if ($v < 8) $d = aok_upgrade_v8($d, $def);
     if ($v < 9) $d = aok_upgrade_v9($d, $def);
     if ($v < 10) $d = aok_upgrade_v10($d, $def);
+    $d = aok_upgrade_v11($d, $def);
     $d['contentVersion'] = AOK_CONTENT_VERSION;
     return $d;
 }
@@ -614,3 +620,73 @@ function aok_upgrade_v10(array $d, array $def): array {
     }
     return $d;
 }
+
+// v11: the geo hubs' page text, and the fields that go with it. Runs on every load like v5, because
+// a fresh install starts with the text empty: the pages ship in api/content/locations/, not in the
+// data. Only an untouched page is filled, so an owner's own wording is never replaced.
+function aok_upgrade_v11(array $d, array $def): array {
+    if (!isset($d['locations']) || !is_array($d['locations'])) return $d;
+    require_once __DIR__ . '/seo-lib.php';
+    $defBySlug = [];
+    foreach ((array)aok_get($def, 'locations', []) as $l) if (!empty($l['slug'])) $defBySlug[strtolower((string)$l['slug'])] = $l;
+
+    foreach ($d['locations'] as $i => $l) {
+        if (!is_array($l)) continue;
+        $slug = strtolower(trim((string)($l['slug'] ?? '')));
+        if ($slug === '') continue;
+        $o = $defBySlug[$slug] ?? null;
+
+        // the page text: only when it is empty, or still exactly the version shipped before this one
+        $md = aok_content_md('locations', $slug);
+        if ($md !== '') {
+            $cur = trim((string)($l['detail'] ?? ''));
+            if ($cur === '' || aok_norm($cur) === aok_norm($md)) $d['locations'][$i]['detail'] = $md;
+        }
+        // the short label, the Google title and the description, where the owner has set none
+        foreach (['navLabel', 'seoTitle', 'seoDescription'] as $f) {
+            if ($o !== null && trim((string)($o[$f] ?? '')) !== '' && trim((string)($l[$f] ?? '')) === '') $d['locations'][$i][$f] = $o[$f];
+        }
+        // the heading, its answer and the typed places, while they are still as shipped
+        foreach (['title', 'question', 'answer', 'areas', 'cities', 'cityLabel', 'format', 'timezones', 'scope'] as $f) {
+            if ($o === null || !isset($o[$f])) continue;
+            $cur = $l[$f] ?? null;
+            if ($cur === null || $cur === '' || $cur === []) { $d['locations'][$i][$f] = $o[$f]; continue; }
+            // a value still equal to what version 10 shipped takes the new one. Lists are compared
+            // as JSON, because areas is a list of lists and would not implode.
+            $was = AOK_V10_LOCATIONS[$slug][$f] ?? null;
+            if ($was === null) continue;
+            $same = is_array($cur) ? json_encode($cur) === json_encode($was) : aok_norm($cur) === aok_norm((string)$was);
+            if ($same) $d['locations'][$i][$f] = $o[$f];
+        }
+    }
+    return $d;
+}
+
+// The hub headings and answers as version 10 shipped them, so version 11 can tell an untouched one
+// from an owner's rewrite. Only the two fields that version 11 actually rewrites are listed.
+const AOK_V10_LOCATIONS = [
+    'vedic-astrologer-surrey-bc' => [
+        'areas' => [['City', 'Surrey, BC, Canada']],
+        'title' => 'Vedic Astrologer in Surrey, BC',
+        'answer' => 'Independent Vedic Astrologer Jag Mallah provides 60-minute 1-on-1 Kundli readings, marriage matching (Kundli Milan), Dosha analysis, and Vedic meditation guidance in Surrey, BC from 15450 92a Ave (Fleetwood) and online via Zoom or WhatsApp. Consultations are offered in English, Hindi, and Punjabi for $100 CAD/hr, with payment after satisfaction.',
+    ],
+    'online-vedic-astrologer-canada' => [
+        'cities' => ['Brampton', 'Mississauga', 'Toronto', 'Markham', 'Ottawa', 'Hamilton', 'Kitchener–Waterloo', 'Calgary', 'Edmonton', 'Red Deer', 'Winnipeg', 'Saskatoon', 'Regina', 'Montreal', 'Halifax'],
+        'title' => 'Online Vedic Astrologer for Canada',
+        'answer' => "Clients across Canada\u{2014}including Brampton, Toronto, Mississauga, Calgary, Edmonton, Winnipeg, Ottawa, and Montreal\u{2014}connect live with Surrey-based Vedic Astrologer Jag Mallah via Zoom or WhatsApp. Sessions last 60 minutes (\$100 CAD/hr via Interac e-Transfer after you are satisfied) and accommodate Mountain, Central, Eastern, and Atlantic time zones.",
+    ],
+    'online-vedic-astrologer-usa' => [
+        'cities' => ['Seattle', 'Bellevue', 'Bellingham', 'Tacoma', 'Kent', 'San Francisco Bay Area', 'San Jose', 'Fremont', 'Sacramento', 'Fresno', 'Los Angeles', 'San Diego', 'New York', 'New Jersey (Edison, Jersey City)', 'Dallas', 'Houston', 'Austin', 'Chicago', 'Atlanta', 'Virginia', 'Michigan'],
+        'title' => 'Online Vedic Astrologer for the United States',
+        'answer' => "Yes. Clients across the United States\u{2014}from Seattle and California to New York, New Jersey, Texas, and Chicago\u{2014}book live 60-minute 1-on-1 consultations via Zoom or WhatsApp. Operating on Pacific Time, Jag Mallah provides convenient daytime and evening slots for US time zones (\$100 CAD/hr, paid only after satisfaction).",
+    ],
+    'online-vedic-astrologer-uk' => [
+        'cities' => ['London', 'Southall', 'Wembley', 'Hounslow', 'Harrow', 'Ilford', 'Croydon', 'Birmingham', 'Wolverhampton', 'Coventry', 'Leicester', 'Manchester', 'Leeds', 'Bradford', 'Glasgow', 'Edinburgh'],
+        'title' => 'Online Vedic Astrologer for the United Kingdom',
+        'answer' => "Clients throughout the United Kingdom\u{2014}including London, Southall, Wembley, Birmingham, Leicester, Manchester, and Glasgow\u{2014}consult live with Jag Mallah via WhatsApp or Zoom. Morning appointments in British Columbia align seamlessly with UK late-afternoon and evening hours (5:00 PM to 11:00 PM GMT/BST), conducted in English, Hindi, or Punjabi.",
+    ],
+    'online-vedic-astrologer-india' => [
+        'title' => 'Online Vedic Astrologer for India',
+        'answer' => "Clients across India\u{2014}including Chandigarh, Ludhiana, Amritsar, Jalandhar, Delhi NCR, Haryana, and Mumbai\u{2014}can book 1-on-1 WhatsApp or Zoom consultations directly in Punjabi, Hindi, or English. Early-morning and evening IST time slots allow seamless live Kundli readings, NRI marriage matching, and career consultations with Jag Mallah.",
+    ],
+];

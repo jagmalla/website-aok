@@ -1,7 +1,32 @@
 ANALYSIS OF KARMA — Update (SEO, local SEO, AI search & security)
 ===================================================================
 
-NEW IN THIS VERSION: SEVEN NEW PAGES, ONE PER PLACE YOU WORK
+NEW IN THIS VERSION: FULL WRITTEN PAGES FOR FIVE OF THE SEVEN LOCATIONS
+  • Surrey, Canada, the USA, the UK and India now have complete pages: a
+    highlighted direct answer at the top, the question people ask as the
+    heading, a comparison table, and two or three frequently asked questions
+    with full answers.
+  • Each table is different and fits its page: the Surrey one lists the six
+    services with their chart factors and fee; Canada lists provinces, cities
+    and the best calling window for each time zone; the USA lists the three
+    time zones; the UK lists regions with UK evening slots; India lists
+    regions with the topics each one asks about most.
+  • Google titles and descriptions are set for all five.
+  • Tables now work anywhere you write page text. Type them like this:
+        | Service | Fee |
+        |---|---|
+        | Kundli reading | $100 |
+    and they become a proper table on the page. On a phone the table scrolls
+    sideways inside its own box, so the page itself never slides.
+  • Vancouver/Lower Mainland and British Columbia keep their shorter Phase 5
+    pages, because no new copy was written for those two.
+  • Two notes on the supplied text, which I left exactly as written: two of
+    the Google titles are 72-73 characters and four of the descriptions are
+    171-186 characters, so Google will cut the ends off in search results;
+    and the "~£56 GBP" and "$72-$75 USD" figures will drift as exchange
+    rates move. Say the word and I will shorten or remove them.
+
+EARLIER: SEVEN NEW PAGES, ONE PER PLACE YOU WORK
   • Seven new pages under /locations/ : Surrey BC, Vancouver & the Lower
     Mainland, British Columbia, Canada, the United States, the United Kingdom
     and India. Plus an index at /locations listing all seven.
