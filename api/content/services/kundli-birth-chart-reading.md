@@ -18,7 +18,7 @@ A 1-on-1 Kundli consultation answers specific questions regarding career traject
 - **Planetary Yogas:** Assessment of auspicious Raja Yogas, Dhana Yogas, and challenging planetary alignments to guide life strategy.
 
 ## How Your 1-on-1 Consultation Works
-1. **Intake & Exact Data:** Provide your birth date, exact birth time (hour and minute), and birth city through our booking form or WhatsApp (+1-236-660-2000).
+1. **Intake & Exact Data:** Provide your birth date, exact birth time (hour and minute), and birth city through our booking form or WhatsApp (+1 (236) 660-2000).
 2. **Chart Synthesis:** Prior to the call, Jag Mallah mathematically calculates divisional charts, dasha timelines, and planetary strengths (Shadbala).
 3. **60-Minute Live Consultation:** Connect directly via Zoom or WhatsApp in English, Hindi, or Punjabi to review your chart interactively, ask specific questions, and receive actionable insights.
 4. **Post-Session Settlement:** Payment of $100 CAD is settled after the consultation only if you are completely satisfied with the reading.

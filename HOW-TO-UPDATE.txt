@@ -69,8 +69,9 @@ EARLIER: SEVEN NEW PAGES, ONE PER PLACE YOU WORK
   • Service areas in your search-engine data grew from 18 to 27: Burnaby,
     Richmond, New Westminster, Coquitlam, Victoria, Nanaimo, Kelowna, Kamloops
     and Prince George are now named explicitly.
-  • You can edit any of these pages: they are ordinary content in your site
-    data. Delete one and it stays deleted.
+  • These pages cannot yet be edited from the admin — there is no Locations
+    tab. Changing one means editing the site data directly, so ask for help.
+    (Earlier notes said otherwise; that was wrong.)
   • Your sitemap went from 39 pages to 47.
 
 EARLIER: ONE BUSINESS, NOT THREE, IN THE SEARCH-ENGINE DATA

@@ -58,9 +58,13 @@ if (realpath((string)($_SERVER['SCRIPT_FILENAME'] ?? '')) === __FILE__) { http_r
 // Version 12:
 //   The last two geo hubs \u2014 Vancouver and the Lower Mainland, and British Columbia \u2014 get their
 //   written pages, Google titles and descriptions, like the other five did in version 11.
+// Version 13:
+//   The phone number written as +1-236-660-2000 inside page text becomes +1 (236) 660-2000, the
+//   form used everywhere else on the site. This one is applied to edited pages too: it changes
+//   only how the owner's own number is punctuated, never any of their words.
 // Only text that is still exactly as first shipped is replaced. Text you have edited is kept. Nothing is deleted.
 
-const AOK_CONTENT_VERSION = 12;
+const AOK_CONTENT_VERSION = 13;
 
 // fingerprints (md5 of the normalised text) of the originally shipped FAQ answers, by question
 const AOK_OLD_FAQ = [
@@ -147,6 +151,7 @@ function aok_upgrade_payload(array $d): array {
     if ($v < 9) $d = aok_upgrade_v9($d, $def);
     if ($v < 10) $d = aok_upgrade_v10($d, $def);
     $d = aok_upgrade_v11($d, $def);
+    if ($v < 13) $d = aok_upgrade_v13($d);
     $d['contentVersion'] = AOK_CONTENT_VERSION;
     return $d;
 }
@@ -752,3 +757,20 @@ const AOK_PAST_LOCATIONS = [
         ],
     ],
 ];
+
+// v13: one written form of the phone number. Search engines read digits and do not mind the
+// punctuation, but a site that writes its own number two ways is a site that has stopped checking.
+function aok_upgrade_v13(array $d): array {
+    $phone = trim((string)($d['contact']['phone'] ?? ''));
+    $digits = preg_replace('/\D/', '', $phone);
+    if ($phone === '' || strlen($digits) < 10) return $d;
+    $n = substr($digits, -10);
+    // +1-236-660-2000, 1-236-660-2000, 236-660-2000 and 236.660.2000, but not the canonical form itself
+    $rx = '/(?<![\d(])(?:\+?1[-.\s])?' . substr($n, 0, 3) . '[-.]' . substr($n, 3, 3) . '[-.]' . substr($n, 6) . '(?!\d)/';
+    foreach (['services', 'locations'] as $k) {
+        foreach ((array)($d[$k] ?? []) as $i => $x) {
+            if (is_array($x) && isset($x['detail']) && is_string($x['detail'])) $d[$k][$i]['detail'] = preg_replace($rx, $phone, $x['detail']);
+        }
+    }
+    return $d;
+}

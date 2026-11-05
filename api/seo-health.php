@@ -65,11 +65,19 @@ foreach ($pages as $path => $m) {
 $dupT = array_filter($byTitle, function ($p) { return count($p) > 1; });
 $dupD = array_filter($byDesc, function ($p) { return count($p) > 1; });
 $n = count($pages);
-$add($G, $longT ? 'warn' : 'ok', $longT ? count($longT) . " of $n titles are longer than 70 characters" : "All $n page titles fit in Google results", $longT ? "Google shows about 60–65 characters and cuts off the rest (the full title still counts for ranking). Shorten them in the SEO tab if you like.\n" . $list($longT) : '', 'seo');
+// Location pages keep their Google title and description with the page itself, not in the SEO
+// tab, so the advice has to say where each one actually lives.
+$whereFix = function (array $paths) {
+    $loc = count(array_filter($paths, function ($p) { return strpos($p, '/locations/') === 0; }));
+    if ($loc === 0) return 'Shorten them in the SEO tab if you like.';
+    if ($loc === count($paths)) return 'These are location pages: their Google title and description are stored with each location page, not in the SEO tab.';
+    return 'Shorten the others in the SEO tab; the location pages store their Google title and description with each location page.';
+};
+$add($G, $longT ? 'warn' : 'ok', $longT ? count($longT) . " of $n titles are longer than 70 characters" : "All $n page titles fit in Google results", $longT ? "Google shows about 60\u{2013}65 characters and cuts off the rest (the full title still counts for ranking). " . $whereFix($longT) . "\n" . $list($longT) : '', 'seo');
 if ($shortT) $add($G, 'warn', count($shortT) . ' titles are very short', $list($shortT), 'seo');
 $add($G, $dupT ? 'fail' : 'ok', $dupT ? count($dupT) . ' titles are used on more than one page' : 'Every page has its own title', $dupT ? $list(array_map(function ($p) { return implode(', ', $p); }, array_values($dupT))) : '', 'seo');
 $add($G, $noD ? 'fail' : 'ok', $noD ? count($noD) . ' pages have no meta description' : 'Every page has a meta description', $noD ? $list($noD) : '', 'seo');
-if ($longD || $shortD) $add($G, 'warn', (count($longD) + count($shortD)) . ' descriptions are outside the ideal 70–160 characters', $list(array_merge($longD, $shortD)), 'seo');
+if ($longD || $shortD) $add($G, 'warn', (count($longD) + count($shortD)) . " descriptions are outside the ideal 70\u{2013}160 characters", $whereFix(array_merge($longD, $shortD)) . "\n" . $list(array_merge($longD, $shortD)), 'seo');
 $add($G, $dupD ? 'warn' : 'ok', $dupD ? count($dupD) . ' descriptions are repeated on several pages' : 'Descriptions are unique', $dupD ? $list(array_map(function ($p) { return implode(', ', $p); }, array_values($dupD))) : '', 'seo');
 $add($G, 'ok', 'Every page has one canonical URL (' . $n . ' pages in the sitemap)');
 

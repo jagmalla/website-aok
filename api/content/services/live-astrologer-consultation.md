@@ -13,7 +13,7 @@
 - **Open Question-and-Answer:** Freedom to explore any life dimension in complete privacy and confidence.
 
 ## How Your 1-on-1 Consultation Works
-1. **Schedule Your Session:** Book via our website contact form or directly message on WhatsApp (+1-236-660-2000).
+1. **Schedule Your Session:** Book via our website contact form or directly message on WhatsApp (+1 (236) 660-2000).
 2. **Preparation:** Jag Mallah calculates your chart and notes key dasha transitions prior to entering the call.
 3. **60-Minute Live Dialogue:** Engage in an open, respectful, and insightful live conversation via your preferred platform (Zoom, WhatsApp, or Phone).
 4. **Settle Upon Satisfaction:** $100 CAD settled after the consultation only if you are completely satisfied with the clarity received.

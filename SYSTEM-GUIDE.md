@@ -201,8 +201,8 @@ address and the map, because it is the only one with a place to visit.
 Each hub also has its own `seoTitle` and `seoDescription`, and a `navLabel` — the short name
 used in the footer and between hubs, where the full heading would be unreadable.
 
-They live in `locations` in the site data, so they are ordinary content: an owner can edit
-any of them, and `deletedLocations` keeps a deleted one deleted through later upgrades.
+They live in `locations` in the site data. **There is no admin tab for them yet**: changing one
+means editing the data (or the shipped `api/content/locations/*.md`, for a fresh install), and `deletedLocations` keeps a deleted one deleted through later upgrades.
 Each hub emits a `Service` node whose `areaServed` is that hub's own places, plus a
 `FAQPage` holding its one visible question — so the geography is machine-readable, not just
 prose. Every hub links to the seven consultations and to the other six hubs, and the footer
