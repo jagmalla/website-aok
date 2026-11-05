@@ -1422,10 +1422,17 @@ class Component extends DCLogic {
   // because search engines match a business on that string being identical everywhere.
   addressLine(){ const L=(this.state.data||{}).local||{};
     if(L.serviceAreaBusiness) return '';
-    const street=String(L.streetAddress||'').trim(); if(!street) return '';
+    const street=String(L.streetAddress||'').trim();
+    return street?street+', '+this.localityLine():''; }
+
+  // Everything after the street: "Surrey, BC V3R 9B1, Canada". The footer prints it on its own
+  // line, under the street. The province is the two-letter code, which is what the Business
+  // Profile, Canada Post and the structured data's addressRegion all use.
+  localityLine(){ const L=(this.state.data||{}).local||{};
     const city=String(L.locality||'Surrey').trim(), reg=String(L.regionCode||L.region||'BC').trim();
-    const pc=String(L.postalCode||'').trim(), country=(L.country||'CA')==='CA'?'Canada':String(L.country||'').trim();
-    return [street,city,(reg+' '+pc).trim(),country].filter(Boolean).join(', '); }
+    const pc=L.serviceAreaBusiness?'':String(L.postalCode||'').trim();
+    const country=(L.country||'CA')==='CA'?'Canada':String(L.country||'').trim();
+    return [city,(reg+' '+pc).trim(),country].filter(Boolean).join(', '); }
 
   locationBlock(){ const h=React.createElement,P=this.P,d=this.state.data,L=d.local||{},c=d.contact||{},pr=(d.about&&d.about.pricing)||{};
     const city=L.locality||'Surrey', reg=L.regionCode||L.region||'BC';
@@ -1452,8 +1459,7 @@ class Component extends DCLogic {
     const listed=(L.listingName||'').trim()||this.brandName();
     const parts=[h('strong',{key:'n',style:{color:P.maroon,fontWeight:600}},listed),br('b0'),(pe.jobTitle||'Vedic Astrologer')+' '+(pe.name||d.brand.astrologer)];
     if(!L.serviceAreaBusiness&&L.streetAddress) parts.push(br('b1'),L.streetAddress);
-    const region=(L.region||'British Columbia')+((!L.serviceAreaBusiness&&L.postalCode)?' '+L.postalCode:'');
-    parts.push(br('b2'),[L.locality||'Surrey',region,(L.country||'CA')==='CA'?'Canada':L.country].join(', '));
+    parts.push(br('b2'),this.localityLine());
     if(c.phone) parts.push(br('b3'),'Phone & WhatsApp: ',h('a',{key:'tel',href:this.telHref(),className:'aok-footlink'},c.phone));
     const areas=this.areaShortNames(); if(areas.length) parts.push(br('b5'),'Serving: '+areas.join(', ')+(L.onlineWorldwide!==false?' \u00b7 Worldwide online ('+(L.onlineChannels||['Zoom','WhatsApp']).filter(Boolean).join(' & ')+')':''));
     const days=[['Mo','Mon'],['Tu','Tue'],['We','Wed'],['Th','Thu'],['Fr','Fri'],['Sa','Sat'],['Su','Sun']].filter(x=>L.hours&&L.hours[x[0]]&&L.hours[x[0]].o&&L.hours[x[0]].c).map(x=>x[1]+' '+L.hours[x[0]].o+'\u2013'+L.hours[x[0]].c);

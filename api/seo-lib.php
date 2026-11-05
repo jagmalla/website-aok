@@ -855,12 +855,19 @@ function aok_address_line(array $d): string {
     $L = (array)aok_get($d, 'local', []);
     if (!empty($L['serviceAreaBusiness'])) return '';
     $street = trim((string)($L['streetAddress'] ?? ''));
-    if ($street === '') return '';
+    return $street === '' ? '' : $street . ', ' . aok_locality_line($d);
+}
+
+// Everything after the street: "Surrey, BC V3R 9B1, Canada". The footer prints it on its own line,
+// under the street. The province is the two-letter code because that is what the Business Profile,
+// Canada Post and the structured data's addressRegion all use.
+function aok_locality_line(array $d): string {
+    $L = (array)aok_get($d, 'local', []);
     $city = trim((string)($L['locality'] ?? 'Surrey'));
     $reg  = trim((string)($L['regionCode'] ?? ($L['region'] ?? 'BC')));
-    $pc   = trim((string)($L['postalCode'] ?? ''));
+    $pc   = empty($L['serviceAreaBusiness']) ? trim((string)($L['postalCode'] ?? '')) : '';
     $country = ((string)($L['country'] ?? 'CA')) === 'CA' ? 'Canada' : trim((string)($L['country'] ?? ''));
-    return implode(', ', array_filter([$street, $city, trim($reg . ' ' . $pc), $country]));
+    return implode(', ', array_filter([$city, trim($reg . ' ' . $pc), $country]));
 }
 
 function aok_location_html(array $d): string {
@@ -892,9 +899,7 @@ function aok_nap_html(array $d): string {
     $o = '<address><strong>' . aok_e($listed) . '</strong><br>' . aok_e(aok_get($d, 'person.jobTitle', 'Vedic Astrologer')) . ' ' . aok_e(aok_get($d, 'person.name', 'Jag Mallah'));
     $street = trim((string)aok_get($d, 'local.streetAddress', ''));
     if (!aok_get($d, 'local.serviceAreaBusiness', true) && $street !== '') $o .= '<br>' . aok_e($street);
-    $pc = (!aok_get($d, 'local.serviceAreaBusiness', true) && trim((string)aok_get($d, 'local.postalCode', '')) !== '')
-        ? ' ' . aok_get($d, 'local.postalCode', '') : '';
-    $o .= '<br>' . aok_e(aok_get($d, 'local.locality', 'Surrey')) . ', ' . aok_e(aok_get($d, 'local.region', 'British Columbia') . $pc) . ', ' . aok_e(aok_get($d, 'local.country', 'CA') === 'CA' ? 'Canada' : aok_get($d, 'local.country'));
+    $o .= '<br>' . aok_e(aok_locality_line($d));
     if ($ph = trim((string)aok_get($d, 'contact.phone', ''))) $o .= '<br>Phone &amp; WhatsApp: <a href="tel:' . aok_e(aok_e164($ph)) . '">' . aok_e($ph) . '</a>';
     $areas = aok_area_short_names($d);
     if ($areas) $o .= '<br>Serving: ' . aok_e(implode(', ', $areas)) . (aok_get($d, 'local.onlineWorldwide', true) ? ' · Worldwide online (' . aok_e(implode(' & ', array_filter((array)aok_get($d, 'local.onlineChannels', ['Zoom', 'WhatsApp'])))) . ')' : '');

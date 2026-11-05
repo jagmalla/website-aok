@@ -13,8 +13,11 @@ NEW IN THIS VERSION: CRAWLER FILES AND ONE ADDRESS FOR THE SITE
   • New box in Admin -> Local & Business -> Pricing & languages: "Ethical
     policy". It is pre-filled with "100% confidential; zero sales of gemstones,
     talismans, or commercial rituals." Change it and llms.txt follows.
-  • The address now reads the same everywhere: "15450 92a Ave, Surrey, BC V3R
-    9B1, Canada". The contact page used to drop the comma after Surrey.
+  • The address now reads the same everywhere, exactly as your Google Business
+    Profile writes it: "15450 92a Ave, Surrey, BC V3R 9B1, Canada". The contact
+    page used to drop the comma after Surrey, and the footer spelled out
+    "British Columbia" where Google, Canada Post and your search-engine data
+    all use "BC". One line of text now feeds all three.
   • Admin -> SEO Health now tests all three wrong ways into your site
     (http, https without www, and http with www) and insists each one answers
     with a single 301 to https://www.analysisofkarma.com. If any of them does
