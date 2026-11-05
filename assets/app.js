@@ -274,18 +274,21 @@ class Component extends DCLogic {
         gbpPrimaryCategory:'Astrologer', gbpAdditionalCategories:['Spiritual Consultant','Psychic','Vedic Astrology & Karmic Consultation Service'],
         serviceAreaBusiness:false, streetAddress:'15450 92a Ave', locality:'Surrey', region:'British Columbia', regionCode:'BC', postalCode:'V3R 9B1',
         listingName:'Analysis of Karma - Vedic astrology & Meditation | Vedic Astrologer Jag Mallah', hoursNote:'Online consultations available 7 days a week by appointment', country:'CA',
-        lat:'49.1913', lng:'-122.8490', areasServed:['Surrey, BC, Canada','Vancouver, BC, Canada','Delta, BC, Canada','Langley, BC, Canada','Abbotsford, BC, Canada','Chilliwack, BC, Canada','Maple Ridge, BC, Canada','British Columbia, Canada','Canada','Washington, USA','United States','United Kingdom','Punjab, India','Delhi, India','Haryana, India','Mumbai, Maharashtra, India','India'],
+        lat:'49.1712', lng:'-122.7939',   // the Business Profile pin at 92 Ave & 154 St, not the centre of Surrey areasServed:['Surrey, BC, Canada','Vancouver, BC, Canada','Delta, BC, Canada','Langley, BC, Canada','Abbotsford, BC, Canada','Chilliwack, BC, Canada','Maple Ridge, BC, Canada','British Columbia, Canada','Canada','Washington, USA','United States','United Kingdom','Punjab, India','Delhi, India','Haryana, India','Mumbai, Maharashtra, India','India'],
         neighbourhoods:['Newton','Fleetwood','Cloverdale','Guildford','Panorama Ridge','South Surrey'],
         nearbyLabel:'Lower Mainland & Fraser Valley', nearbyCities:['Vancouver','Delta','Langley','Abbotsford','Chilliwack','Maple Ridge'],
         abroad:['the United States (Washington State)','the United Kingdom','India (Punjab, Delhi, Haryana and Mumbai)'],
         onlineWorldwide:true, onlineChannels:['Zoom','WhatsApp'],
         hours:{Mo:{o:'10:00',c:'17:00'},Tu:{o:'10:00',c:'17:00'},We:{o:'10:00',c:'17:00'},Th:{o:'10:00',c:'17:00'},Fr:{o:'10:00',c:'17:00'}},
         timezone:'America/Vancouver',
-        mapsCidUrl:'https://maps.app.goo.gl/XrwSpDBGaVsFQ5dV8', reviewUrl:'https://maps.app.goo.gl/XrwSpDBGaVsFQ5dV8', priceRange:'$100 CAD per hour', currency:'CAD', languages:['English','Hindi','Punjabi'],
+        mapsCidUrl:'https://maps.app.goo.gl/XrwSpDBGaVsFQ5dV8', reviewUrl:'https://maps.app.goo.gl/XrwSpDBGaVsFQ5dV8', priceRange:'$100 CAD per hour', currency:'CAD, USD', languages:['English','Hindi','Punjabi'],
         sessionLength:'60 minutes', paymentMethods:['Interac e-Transfer','PayPal','Credit card','Debit card','International bank transfer'],
         paymentPolicy:'Pay after your reading: new clients pay only if they are completely satisfied with their consultation.',
         ethicsPolicy:'100% confidential; zero sales of gemstones, talismans, or commercial rituals.',
-        directories:[], locationInTitles:true },
+        // extra places this exact business is listed, added to sameAs so the website, Maps and the
+        // Business Profile are read as one entity rather than three
+        directories:['https://www.google.com/maps/place/?q=place_id:ChIJcW354x7XhVQRcq2RBKbVNkY','https://share.google/qMDfkFkxgAA3NY9Nk'],
+        locationInTitles:true },
       // Practitioner (E-E-A-T) — used in structured data and llms.txt
       person:{ name:'Jag Mallah', jobTitle:'Independent Vedic Astrologer', additionalRoles:['Meditation Guide'],
         shortBio:'Jag Mallah is an independent Vedic astrologer and professional meditation guide based in Surrey, British Columbia, consulting worldwide over Zoom and WhatsApp in English, Hindi and Punjabi. He completed formal studies in Advanced Astrology, Tajika (Varshaphala and Prashna Shastra), Muhurta and Medical Astrology under his mentor Sh. Sharawan Jha, and researches the classical texts Brihat Parashara Hora Shastra, Phaladeepika, Tajika Neelakanthi, Bhrigu Nandi Nadi, the Jaimini Upadesa Sutras and Swarodaya Shastra, grounded in the six classical Darshanas and Pancha Mahabhuta elemental balance.',
@@ -294,7 +297,7 @@ class Component extends DCLogic {
         studies:['Advanced Astrology','Tajika (Varshaphala and Prashna Shastra)','Muhurta','Medical Astrology'],
         classicalTexts:['Brihat Parashara Hora Shastra (BPHS)','Phaladeepika','Tajika Neelakanthi','Bhrigu Nandi Nadi (BNN)','Jaimini Upadesa Sutras','Swarodaya Shastra (Shiva Swarodaya)'],
         knowsAbout:['Vedic astrology','Jyotish','Kundli (birth chart) reading','Kundli Milan (marriage matching)','Dasha and transit analysis','Mangal Dosha and other doshas','Muhurta (auspicious timing)','Tajika / Varshaphala (annual charts)','Prashna Shastra (horary astrology)','Jaimini astrology','Bhrigu Nandi Nadi','Swarodaya Shastra (breath science)','Pancha Mahabhuta (five elements)','Medical astrology','Gemstone recommendation','Meditation','Pranayama (breathwork)','Mantra practice'],
-        sameAs:['https://www.youtube.com/channel/UCIHA2ZtOmAYP91GbK5RYkCQ','https://www.youtube.com/@analysisofkarma','https://www.instagram.com/analysisofkarma','https://www.linkedin.com/in/analysisofkarma/','https://x.com/analysisofkarma','https://www.pinterest.com/analysisofkarma','https://ca.trustpilot.com/review/analysisofkarma.com','https://maps.app.goo.gl/XrwSpDBGaVsFQ5dV8','https://share.google/r37d5nGpSJCeEXhvt'], image:'' },
+        sameAs:['https://www.youtube.com/channel/UCIHA2ZtOmAYP91GbK5RYkCQ','https://www.youtube.com/@analysisofkarma','https://www.instagram.com/analysisofkarma','https://www.linkedin.com/in/analysisofkarma/','https://x.com/analysisofkarma','https://www.pinterest.com/analysisofkarma','https://ca.trustpilot.com/review/analysisofkarma.com','https://maps.app.goo.gl/XrwSpDBGaVsFQ5dV8','https://share.google/r37d5nGpSJCeEXhvt','https://share.google/qMDfkFkxgAA3NY9Nk','https://www.google.com/maps/place/?q=place_id:ChIJcW354x7XhVQRcq2RBKbVNkY'], image:'' },
       // AI & GEO control centre
       ai:{ bots:{'GPTBot':true,'OAI-SearchBot':true,'ChatGPT-User':true,'ClaudeBot':true,'Claude-SearchBot':true,'Claude-User':true,'Claude-Web':true,'PerplexityBot':true,'Perplexity-User':true,'Google-Extended':true,'Applebot-Extended':true,'Amazonbot':true,'meta-externalagent':true,'CCBot':true,'Bytespider':true},
         llmsOverride:'', llmsFullOverride:'', indexNowKey:'', indexNowAuto:true, googleVerification:'', bingVerification:'' },

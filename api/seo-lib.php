@@ -631,12 +631,20 @@ function aok_graph(array $d, array $r, array $meta): array {
     if (!aok_get($d, 'local.serviceAreaBusiness', true) && trim((string)aok_get($d, 'local.streetAddress', '')) !== '') $address['streetAddress'] = aok_get($d, 'local.streetAddress');
     if (trim((string)aok_get($d, 'local.postalCode', '')) !== '' && !aok_get($d, 'local.serviceAreaBusiness', true)) $address['postalCode'] = aok_get($d, 'local.postalCode');
 
-    $org = ['@type' => aok_get($d, 'local.businessType', 'ProfessionalService') ?: 'ProfessionalService', '@id' => $ORG,
-        'name' => $brand, 'url' => $base . '/', 'logo' => ['@type' => 'ImageObject', 'url' => $logo], 'image' => $logo,
+    // ProfessionalService is already a kind of LocalBusiness, but naming both spares anything that
+    // matches on the string rather than walking the schema.org hierarchy.
+    $bType = aok_get($d, 'local.businessType', 'ProfessionalService') ?: 'ProfessionalService';
+    $types = $bType === 'LocalBusiness' ? 'LocalBusiness' : ['LocalBusiness', $bType];
+    // The name Google Business Profile lists, with the short brand as the alternate: the two have to
+    // be the same entity, and the long one is what a crawler compares against Maps.
+    $listed = trim((string)aok_get($d, 'local.listingName', '')) ?: $brand;
+    $org = ['@type' => $types, '@id' => $ORG,
+        'name' => $listed, 'url' => $base . '/', 'logo' => ['@type' => 'ImageObject', 'url' => $logo], 'image' => $logo,
         'description' => aok_text(aok_get($d, 'seo.home.metaDescription', '') ?: aok_get($d, 'brand.tagline', '')),
         'slogan' => aok_text(aok_get($d, 'brand.tagline', '')), 'address' => $address, 'areaServed' => aok_area_served($d),
-        'founder' => ['@id' => $PERSON], 'employee' => ['@id' => $PERSON], 'knowsLanguage' => $langCodes, 'hasOfferCatalog' => ['@id' => $CATALOG],
+        'founder' => ['@id' => $PERSON], 'employee' => ['@id' => $PERSON], 'knowsLanguage' => $langCodes,
         'priceRange' => aok_get($d, 'local.priceRange', ''), 'currenciesAccepted' => aok_get($d, 'local.currency', 'CAD')];
+    if ($listed !== $brand) $org['alternateName'] = $brand;
     if ($v = aok_get($d, 'local.legalName')) $org['legalName'] = $v;
     $tel = aok_e164((string)aok_get($d, 'contact.phone', ''));
     if ($tel !== '') $org['telephone'] = $tel;
@@ -657,8 +665,10 @@ function aok_graph(array $d, array $r, array $meta): array {
     $cats = array_values(array_filter(array_merge([aok_get($d, 'local.gbpPrimaryCategory', '')], (array)aok_get($d, 'local.gbpAdditionalCategories', []))));
     if ($cats) $org['keywords'] = implode(', ', $cats);
 
+    // "Independent Vedic Astrologer" and "Meditation Guide" are both roles, so both are the job title.
+    $roles = array_values(array_filter(array_merge([aok_get($d, 'person.jobTitle', 'Vedic Astrologer')], (array)aok_get($d, 'person.additionalRoles', []))));
     $person = ['@type' => 'Person', '@id' => $PERSON, 'name' => aok_get($d, 'person.name', aok_get($d, 'brand.astrologer', 'Jag Mallah')),
-        'jobTitle' => aok_get($d, 'person.jobTitle', 'Vedic Astrologer'), 'url' => $base . '/about', 'worksFor' => ['@id' => $ORG],
+        'jobTitle' => count($roles) > 1 ? $roles : (string)reset($roles), 'url' => $base . '/about', 'worksFor' => ['@id' => $ORG],
         'knowsLanguage' => $langCodes];
     if ($v = aok_text(aok_get($d, 'person.shortBio', ''))) $person['description'] = $v;
     $person['image'] = $logo;   // the Analysis of Karma emblem until a portrait is uploaded (below)
@@ -672,8 +682,11 @@ function aok_graph(array $d, array $r, array $meta): array {
     $ps = array_values(array_unique(array_filter((array)aok_get($d, 'person.sameAs', []), function ($u) { return preg_match('#^https?://#i', (string)$u); })));
     if ($ps) $person['sameAs'] = $ps;
 
+    // en-CA first (the pages are written in English), then the other languages consultations run in.
+    $siteLangs = array_values(array_unique(array_merge(['en-CA'], array_diff($langCodes, ['en']))));
     $website = ['@type' => 'WebSite', '@id' => $SITE, 'url' => $base . '/', 'name' => $brand,
-        'description' => aok_text(aok_get($d, 'brand.tagline', '')), 'publisher' => ['@id' => $ORG], 'inLanguage' => 'en-CA'];
+        'description' => aok_text(aok_get($d, 'brand.tagline', '')), 'publisher' => ['@id' => $ORG],
+        'inLanguage' => count($siteLangs) > 1 ? $siteLangs : 'en-CA'];
 
     $graph = [$website, $org, $person];
 
@@ -697,10 +710,14 @@ function aok_graph(array $d, array $r, array $meta): array {
         return $n;
     };
     $visibleServices = aok_live_services($d);
+    // The catalogue is listed on the home and services pages only, so hasOfferCatalog is set there
+    // too: a page that points at a node it does not carry leaves a reference resolving to nothing
+    // for anything reading that page on its own.
     if (in_array($r['type'], ['home', 'services'], true)) {
         $items = [];
         foreach ($visibleServices as $s) { $node = $serviceNode($s); $graph[] = $node; $items[] = ['@id' => $node['@id']]; }
         $graph[] = ['@type' => 'OfferCatalog', '@id' => $CATALOG, 'name' => 'Vedic astrology services', 'itemListElement' => $items];
+        foreach ($graph as $i => $n) if (($n['@id'] ?? '') === $ORG) $graph[$i]['hasOfferCatalog'] = ['@id' => $CATALOG];
     }
 
     // the page itself

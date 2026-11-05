@@ -44,9 +44,12 @@ if (realpath((string)($_SERVER['SCRIPT_FILENAME'] ?? '')) === __FILE__) { http_r
 //      older Anthropic crawler name that some tools still send; the newer ones were already there.
 //   2. The ethical policy line (confidentiality, and that nothing is sold) is added where it is
 //      empty, so llms.txt states it outright rather than leaving it to be inferred.
+// Version 9:
+//   The map pin, the currencies and two more Google links for the entity graph. The shipped
+//   coordinates were the middle of Surrey, not the Business Profile's pin at 92 Ave and 154 St.
 // Only text that is still exactly as first shipped is replaced. Text you have edited is kept. Nothing is deleted.
 
-const AOK_CONTENT_VERSION = 8;
+const AOK_CONTENT_VERSION = 9;
 
 // fingerprints (md5 of the normalised text) of the originally shipped FAQ answers, by question
 const AOK_OLD_FAQ = [
@@ -130,6 +133,7 @@ function aok_upgrade_payload(array $d): array {
     if ($v < 6) $d = aok_upgrade_v6($d);
     if ($v < 7) $d = aok_upgrade_v7($d, $def);
     if ($v < 8) $d = aok_upgrade_v8($d, $def);
+    if ($v < 9) $d = aok_upgrade_v9($d, $def);
     $d['contentVersion'] = AOK_CONTENT_VERSION;
     return $d;
 }
@@ -540,5 +544,40 @@ function aok_upgrade_v8(array $d, array $def): array {
     if (trim((string)($d['local']['ethicsPolicy'] ?? '')) === '')
         $d['local']['ethicsPolicy'] = (string)aok_get($def, 'local.ethicsPolicy', '');
 
+    return $d;
+}
+
+// The coordinates this project first shipped: the middle of Surrey, picked before the street
+// address was known. Replaced only where they are still exactly these.
+const AOK_V8_GEO = ['lat' => '49.1913', 'lng' => '-122.8490'];
+
+// v9: the structured data's map pin, currencies and Google profile links.
+function aok_upgrade_v9(array $d, array $def): array {
+    if (!isset($d['local']) || !is_array($d['local'])) $d['local'] = [];
+    $L = &$d['local'];
+
+    // the pin: only when it is still the shipped placeholder, or has never been set
+    $isShipped = true;
+    foreach (AOK_V8_GEO as $k => $old) {
+        $cur = trim((string)($L[$k] ?? ''));
+        if ($cur !== '' && $cur !== $old) { $isShipped = false; break; }
+    }
+    if ($isShipped) foreach (['lat', 'lng'] as $k) $L[$k] = (string)aok_get($def, 'local.' . $k, '');
+
+    if (trim((string)($L['currency'] ?? '')) === 'CAD') $L['currency'] = (string)aok_get($def, 'local.currency', 'CAD');
+
+    // more places this same business is listed: added to what is there, never replacing it
+    foreach ([['local.directories', 'directories'], ['person.sameAs', null]] as [$path, $key]) {
+        $add = array_values(array_filter((array)aok_get($def, $path, [])));
+        if (!$add) continue;
+        if ($key === null) { $cur = (array)aok_get($d, 'person.sameAs', []); }
+        else { $cur = (array)($L[$key] ?? []); }
+        $seen = [];
+        foreach ($cur as $u) $seen[aok_url_key((string)$u)] = 1;
+        foreach ($add as $u) if (empty($seen[aok_url_key($u)])) { $cur[] = $u; $seen[aok_url_key($u)] = 1; }
+        if ($key === null) { if (!isset($d['person']) || !is_array($d['person'])) $d['person'] = []; $d['person']['sameAs'] = array_values($cur); }
+        else $L[$key] = array_values($cur);
+    }
+    unset($L);
     return $d;
 }

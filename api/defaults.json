@@ -44,27 +44,8 @@
   "listingName": "Analysis of Karma - Vedic astrology & Meditation | Vedic Astrologer Jag Mallah",
   "hoursNote": "Online consultations available 7 days a week by appointment",
   "country": "CA",
-  "lat": "49.1913",
-  "lng": "-122.8490",
-  "areasServed": [
-   "Surrey, BC, Canada",
-   "Vancouver, BC, Canada",
-   "Delta, BC, Canada",
-   "Langley, BC, Canada",
-   "Abbotsford, BC, Canada",
-   "Chilliwack, BC, Canada",
-   "Maple Ridge, BC, Canada",
-   "British Columbia, Canada",
-   "Canada",
-   "Washington, USA",
-   "United States",
-   "United Kingdom",
-   "Punjab, India",
-   "Delhi, India",
-   "Haryana, India",
-   "Mumbai, Maharashtra, India",
-   "India"
-  ],
+  "lat": "49.1712",
+  "lng": "-122.7939",
   "neighbourhoods": [
    "Newton",
    "Fleetwood",
@@ -118,7 +99,7 @@
   "mapsCidUrl": "https://maps.app.goo.gl/XrwSpDBGaVsFQ5dV8",
   "reviewUrl": "https://maps.app.goo.gl/XrwSpDBGaVsFQ5dV8",
   "priceRange": "$100 CAD per hour",
-  "currency": "CAD",
+  "currency": "CAD, USD",
   "languages": [
    "English",
    "Hindi",
@@ -134,7 +115,10 @@
   ],
   "paymentPolicy": "Pay after your reading: new clients pay only if they are completely satisfied with their consultation.",
   "ethicsPolicy": "100% confidential; zero sales of gemstones, talismans, or commercial rituals.",
-  "directories": [],
+  "directories": [
+   "https://www.google.com/maps/place/?q=place_id:ChIJcW354x7XhVQRcq2RBKbVNkY",
+   "https://share.google/qMDfkFkxgAA3NY9Nk"
+  ],
   "locationInTitles": true
  },
  "person": {
@@ -193,7 +177,9 @@
    "https://www.pinterest.com/analysisofkarma",
    "https://ca.trustpilot.com/review/analysisofkarma.com",
    "https://maps.app.goo.gl/XrwSpDBGaVsFQ5dV8",
-   "https://share.google/r37d5nGpSJCeEXhvt"
+   "https://share.google/r37d5nGpSJCeEXhvt",
+   "https://share.google/qMDfkFkxgAA3NY9Nk",
+   "https://www.google.com/maps/place/?q=place_id:ChIJcW354x7XhVQRcq2RBKbVNkY"
   ],
   "image": ""
  },

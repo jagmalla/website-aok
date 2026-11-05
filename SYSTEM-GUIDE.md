@@ -171,15 +171,24 @@ matters because a lossy conversion would silently eat your words.
 One linked graph per page, **20 different schema types**, cross-referenced so search
 engines read one business rather than five disconnected fragments:
 
-`Organization`/`ProfessionalService` · `Person` · `WebSite` · `WebPage` · `BreadcrumbList` ·
+`LocalBusiness`+`ProfessionalService` · `Person` · `WebSite` · `WebPage` · `BreadcrumbList` ·
 `Service` · `Offer` · `UnitPriceSpecification` · `OfferCatalog` · `FAQPage` · `Question` ·
 `Answer` · `BlogPosting` · `ImageObject` · `PostalAddress` · `GeoCoordinates` · `Place` ·
 `City` · `ContactPoint` · `OpeningHoursSpecification`
 
-Two rules learned the hard way:
+The business node carries the Business Profile's full name, with the short brand as
+`alternateName`, and `hasMap`, `geo` and `sameAs` all pointing at the same Google listing.
+That is what lets a crawler decide the website and the Maps entry are one business.
+
+Three rules learned the hard way:
 - **Never publish a rating you wrote yourself.** Ratings must come from Google or another
-  platform. Self-declared ones risk a manual penalty.
+  platform, and Google ignores (or penalises) a `LocalBusiness` rating a site declares about
+  itself with no visible reviews on the page. Real reviews, shown on the page with their
+  author and date, are the only version of this worth having.
 - **Only list social profiles that genuinely exist** and link back to you.
+- **Never point an `@id` at a node the page does not carry.** `hasOfferCatalog` is written
+  only on the two pages that list the catalogue, because a reference resolving to nothing is
+  worse than no reference for anything reading a single page on its own.
 
 ### Sitemap and robots
 Both generated live from your admin settings, with static copies in the web root as a

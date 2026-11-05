@@ -1,7 +1,26 @@
 ANALYSIS OF KARMA — Update (SEO, local SEO, AI search & security)
 ===================================================================
 
-NEW IN THIS VERSION: CRAWLER FILES AND ONE ADDRESS FOR THE SITE
+NEW IN THIS VERSION: ONE BUSINESS, NOT THREE, IN THE SEARCH-ENGINE DATA
+  • The structured data now gives your business its Google Business Profile
+    name, with "Analysis of Karma" as the short alternative, and declares it
+    as a LocalBusiness as well as a ProfessionalService.
+  • The map pin was the middle of Surrey; it is now your actual location at
+    92 Ave and 154 St (49.1712, -122.7939).
+  • Your Google place link and place-ID link are now listed alongside the
+    Maps link, so Google can see the website, the Profile and the map pin are
+    all the same business.
+  • Jag Mallah's job title now says both roles: Independent Vedic Astrologer
+    and Meditation Guide.
+  • The site is declared as being in English, Hindi and Punjabi, not English
+    only, and payment in CAD and USD.
+  • One thing NOT added, on purpose: a 5.0 star rating in the code. Google
+    ignores a rating a business publishes about itself, and can penalise it.
+    Your 4 real Google reviews already show in Maps. If you want stars in the
+    search results, the way to get them is to show the real reviews on the
+    website with each reviewer's name and date — ask and I will build it.
+
+EARLIER: CRAWLER FILES AND ONE ADDRESS FOR THE SITE
   • llms.txt — the summary AI assistants read — now opens with a "Core Entity
     Facts" block: your business name exactly as Google Business Profile lists
     it, the street address, fee, session length, payment and ethical policy,
