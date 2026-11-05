@@ -11,8 +11,8 @@
   "phone": "+1 (236) 660-2000",
   "whatsapp": "+1 (236) 660-2000",
   "whatsappText": "Hello Jag Mallah, I would like to book a Vedic astrology consultation.",
-  "address": "",
-  "mapQuery": "",
+  "address": "15450 92a Ave, Surrey, BC V3R 9B1, Canada",
+  "mapQuery": "Analysis of Karma - Vedic astrology & Meditation | Vedic Astrologer Jag Mallah, 15450 92a Ave, Surrey, BC V3R 9B1, Canada",
   "mapUrl": "",
   "mapEmbed": "",
   "instagram": "https://www.instagram.com/analysisofkarma",
@@ -35,12 +35,12 @@
    "Psychic",
    "Vedic Astrology & Karmic Consultation Service"
   ],
-  "serviceAreaBusiness": true,
-  "streetAddress": "",
+  "serviceAreaBusiness": false,
+  "streetAddress": "15450 92a Ave",
   "locality": "Surrey",
   "region": "British Columbia",
   "regionCode": "BC",
-  "postalCode": "",
+  "postalCode": "V3R 9B1",
   "country": "CA",
   "lat": "49.1913",
   "lng": "-122.8490",
@@ -93,35 +93,27 @@
   "hours": {
    "Mo": {
     "o": "10:00",
-    "c": "20:00"
+    "c": "17:00"
    },
    "Tu": {
     "o": "10:00",
-    "c": "20:00"
+    "c": "17:00"
    },
    "We": {
     "o": "10:00",
-    "c": "20:00"
+    "c": "17:00"
    },
    "Th": {
     "o": "10:00",
-    "c": "20:00"
+    "c": "17:00"
    },
    "Fr": {
     "o": "10:00",
-    "c": "20:00"
-   },
-   "Sa": {
-    "o": "10:00",
-    "c": "20:00"
-   },
-   "Su": {
-    "o": "10:00",
-    "c": "20:00"
+    "c": "17:00"
    }
   },
   "timezone": "America/Vancouver",
-  "hoursNote": "Pacific Time, by appointment — early-morning and evening slots available for clients in India, the UK and across North America.",
+  "hoursNote": "Online consultations available 7 days a week by appointment",
   "mapsCidUrl": "https://maps.app.goo.gl/XrwSpDBGaVsFQ5dV8",
   "reviewUrl": "https://maps.app.goo.gl/XrwSpDBGaVsFQ5dV8",
   "priceRange": "$100 CAD per hour",
@@ -141,7 +133,8 @@
   ],
   "paymentPolicy": "Pay after your reading: new clients pay only if they are completely satisfied with their consultation.",
   "directories": [],
-  "locationInTitles": true
+  "locationInTitles": true,
+  "listingName": "Analysis of Karma - Vedic astrology & Meditation | Vedic Astrologer Jag Mallah"
  },
  "person": {
   "name": "Jag Mallah",
@@ -325,7 +318,7 @@
     "10,000+ birth charts read",
     "Classical Jyotish & Nakshatra method",
     "Meditation & spiritual remedies",
-    "Consultations in English & Hindi"
+    "Consultations in English, Hindi & Punjabi"
    ],
    "image": null
   },

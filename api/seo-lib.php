@@ -844,11 +844,45 @@ function aok_html_header(array $d): string {
     return $h;
 }
 
+// "Where is <business> located in <city>?" with the full address underneath. A question-shaped
+// heading answered immediately is what an AI assistant quotes, and it puts the address on the
+// page in text for Google to match against the Business Profile. Mirrors locationBlock() in app.js.
+function aok_location_html(array $d): string {
+    $L = (array)aok_get($d, 'local', []);
+    if (aok_get($d, 'local.serviceAreaBusiness', true)) return '';
+    $street = trim((string)($L['streetAddress'] ?? ''));
+    if ($street === '') return '';
+    $city = (string)($L['locality'] ?? 'Surrey');
+    $reg  = (string)($L['regionCode'] ?? ($L['region'] ?? 'BC'));
+    $pc   = trim((string)($L['postalCode'] ?? ''));
+    $country = ((string)($L['country'] ?? 'CA')) === 'CA' ? 'Canada' : (string)($L['country'] ?? '');
+    $full = $street . ', ' . trim($city . ' ' . $reg . ' ' . $pc) . ', ' . $country;
+    $listed = trim((string)($L['listingName'] ?? '')) ?: aok_brand($d);
+    $langs = array_values(array_filter((array)($L['languages'] ?? [])));
+    $fee = trim((string)aok_get($d, 'about.pricing.fee', ''));
+    $unit = trim((string)aok_get($d, 'about.pricing.unit', ''));
+    $phone = trim((string)aok_get($d, 'contact.phone', ''));
+    $id = 'where-is-' . aok_slugify(aok_brand($d) . ' ' . $city);
+
+    $o = '<section aria-labelledby="' . aok_e($id) . '"><h2 id="' . aok_e($id) . '">'
+       . aok_e('Where is ' . aok_brand($d) . ' located in ' . $city . ', ' . $reg . '?') . '</h2><p><strong>'
+       . aok_e($listed) . '</strong> is based at <strong>' . aok_e($full) . '</strong>. Consultations run '
+       . ($langs ? aok_e('in ' . aok_join_list($langs) . ' ') : '')
+       . ($fee !== '' ? aok_e('for ' . $fee . ' ' . $unit . ' ') : '')
+       . 'over Zoom, WhatsApp or phone, or in person by appointment.';
+    if ($phone !== '') $o .= ' Call or WhatsApp <a href="tel:' . aok_e(aok_e164($phone)) . '">' . aok_e($phone) . '</a>.';
+    return $o . '</p></section>';
+}
+
 function aok_nap_html(array $d): string {
-    $o = '<address><strong>' . aok_e(aok_brand($d)) . '</strong><br>' . aok_e(aok_get($d, 'person.jobTitle', 'Vedic Astrologer')) . ' ' . aok_e(aok_get($d, 'person.name', 'Jag Mallah'));
+    // the business's name exactly as Google Business Profile lists it (see napBlock in app.js)
+    $listed = trim((string)aok_get($d, 'local.listingName', '')) ?: aok_brand($d);
+    $o = '<address><strong>' . aok_e($listed) . '</strong><br>' . aok_e(aok_get($d, 'person.jobTitle', 'Vedic Astrologer')) . ' ' . aok_e(aok_get($d, 'person.name', 'Jag Mallah'));
     $street = trim((string)aok_get($d, 'local.streetAddress', ''));
     if (!aok_get($d, 'local.serviceAreaBusiness', true) && $street !== '') $o .= '<br>' . aok_e($street);
-    $o .= '<br>' . aok_e(aok_get($d, 'local.locality', 'Surrey')) . ', ' . aok_e(aok_get($d, 'local.region', 'British Columbia')) . ', ' . aok_e(aok_get($d, 'local.country', 'CA') === 'CA' ? 'Canada' : aok_get($d, 'local.country'));
+    $pc = (!aok_get($d, 'local.serviceAreaBusiness', true) && trim((string)aok_get($d, 'local.postalCode', '')) !== '')
+        ? ' ' . aok_get($d, 'local.postalCode', '') : '';
+    $o .= '<br>' . aok_e(aok_get($d, 'local.locality', 'Surrey')) . ', ' . aok_e(aok_get($d, 'local.region', 'British Columbia') . $pc) . ', ' . aok_e(aok_get($d, 'local.country', 'CA') === 'CA' ? 'Canada' : aok_get($d, 'local.country'));
     if ($ph = trim((string)aok_get($d, 'contact.phone', ''))) $o .= '<br>Phone &amp; WhatsApp: <a href="tel:' . aok_e(aok_e164($ph)) . '">' . aok_e($ph) . '</a>';
     $areas = aok_area_short_names($d);
     if ($areas) $o .= '<br>Serving: ' . aok_e(implode(', ', $areas)) . (aok_get($d, 'local.onlineWorldwide', true) ? ' · Worldwide online (' . aok_e(implode(' & ', array_filter((array)aok_get($d, 'local.onlineChannels', ['Zoom', 'WhatsApp'])))) . ')' : '');
@@ -857,6 +891,7 @@ function aok_nap_html(array $d): string {
         $o .= '<br>Hours: ' . aok_e(count($hrs) === 7 && count(array_unique($hrs)) === 1 ? 'Mon–Sun ' . reset($hrs) : implode(' · ', $p))
             . (aok_get($d, 'local.timezone', '') === 'America/Vancouver' ? ' (Pacific Time)' : '');
     }
+    if ($note = trim((string)aok_get($d, 'local.hoursNote', ''))) $o .= '<br>' . aok_e($note);
     return $o . '</address>';
 }
 
@@ -971,6 +1006,13 @@ function aok_services_list(array $d, array $services, bool $withDesc = true): st
 }
 
 // Text inside editor-built blocks (headings, text, quotes, lists, FAQs …), in order.
+// A text block the owner added but never typed into. Skipped by both renderers so it never
+// reaches a visitor; see TEXT_PLACEHOLDER in assets/app.js.
+const AOK_TEXT_PLACEHOLDER = "Write your text here. Click to edit \u{2014} use the toolbar above for bold, colour, size, lists and links.";
+function aok_block_unfilled($t): bool {
+    $t = trim(preg_replace('/\s+/u', ' ', strip_tags((string)$t)));
+    return $t === '' || $t === trim(preg_replace('/\s+/u', ' ', AOK_TEXT_PLACEHOLDER));
+}
 function aok_blocks_html(array $blocks): string {
     $o = '';
     foreach ($blocks as $b) {
@@ -978,6 +1020,7 @@ function aok_blocks_html(array $blocks): string {
         $t = $b['type'] ?? '';
         // a two-tone heading is two parts shown side by side, so they need the space the app puts between them
         if ($t === 'heading' || $t === 'dualheading') $o .= '<h2>' . aok_e(aok_text(implode(' ', array_filter([$b['text'] ?? '', $b['a'] ?? '', $b['accent'] ?? ''], function ($x) { return trim((string)$x) !== ''; })))) . '</h2>';
+        elseif ($t === 'text' && aok_block_unfilled($b['text'] ?? '') && empty($b['title'])) { /* never typed into: skip */ }
         elseif (in_array($t, ['text', 'toggle', 'alert'], true)) $o .= (!empty($b['title']) ? '<h3>' . aok_e(aok_text($b['title'])) . '</h3>' : '') . (!empty($b['q']) ? '<h3>' . aok_e(aok_text($b['q'])) . '</h3>' : '') . aok_paras($b['text'] ?? ($b['a'] ?? ''));
         elseif ($t === 'quote') $o .= '<blockquote>' . aok_paras($b['text'] ?? '') . '</blockquote>';
         elseif ($t === 'cta') $o .= '<h2>' . aok_e(aok_text($b['title'] ?? '')) . '</h2><p>' . aok_rich($b['sub'] ?? '') . '</p>';
@@ -1107,7 +1150,7 @@ function aok_main_html(array $d, array $r): string {
         $o .= '<section><h2>Send your details</h2><p>' . aok_rich($g('contactPage.note')) . '</p><p>Consultation fee: <strong>' . aok_e(aok_text($g('about.pricing.fee', '$100 CAD'))) . '</strong> ' . aok_e(aok_text($g('about.pricing.unit', 'per hour'))) . '</p>' . aok_contact_links_html($d)
             . (($rt = trim((string)$g('contact.replyTime', ''))) !== '' ? '<p>Jag Mallah replies personally, usually ' . aok_e($rt) . '. Consultations in English, Hindi and Punjabi.</p>' : '')
             . (($bk = trim((string)$g('contact.bookingUrl', ''))) !== '' && preg_match('#^https?://#i', $bk) ? '<p><a href="' . aok_e($bk) . '" rel="noopener">Book online</a></p>' : '')
-            . aok_nap_html($d) . aok_review_links_html($d) . '</section>';
+            . '</section>' . aok_location_html($d) . '<section>' . aok_nap_html($d) . aok_review_links_html($d) . '</section>';
         $o .= aok_areas_html($d);
         $o .= '<section><h2>' . aok_e(aok_text($g('faqPage.hero.title', 'FAQ'))) . '</h2>' . aok_faq_html($d) . '</section>';
     } elseif ($t === 'faq') {

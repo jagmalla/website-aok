@@ -20,6 +20,11 @@ function aokPalette(base){ try{ const cs=getComputedStyle(document.documentEleme
 class Component extends DCLogic {
   P = aokPalette({ bg:'#FAF8F5', bgAlt:'#F3EFE6', card:'#FFFCF7', ink:'#3A3D42', maroon:'#1E2022', maroonD:'#141517', red:'#8C6D33', redD:'#6E5426', gold:'#A68446', goldL:'#DFC286', cream:'#FFFDF8', muted:'#6B6E73', line:'rgba(166,132,70,.22)', white:'#FFFFFF', ok:'#3f7d4e', bad:'#b4452f' });
   HEAD = "'Plus Jakarta Sans',sans-serif";
+  // A text block the owner added but never typed into still holds this. It must never reach a
+  // visitor: an empty block is invisible, but the untouched placeholder reads as a mistake on
+  // the live site. Both renderers skip it, so it disappears without anyone editing the page.
+  TEXT_PLACEHOLDER = 'Write your text here. Click to edit \u2014 use the toolbar above for bold, colour, size, lists and links.';
+  isUnfilled(t){ return !String(t||'').trim() || String(t).trim() === this.TEXT_PLACEHOLDER; }
   SVC_BANNER_FALLBACK = 'vedic-astrology-jyotish-deep-dives';   // the 3D banner shown for a service that has none of its own
   SERIF = "'Cormorant Garamond',Georgia,serif";
   _hist=[]; _fut=[]; _baseline=null; _drag=null;
@@ -251,7 +256,8 @@ class Component extends DCLogic {
       // Local SEO / Google Business Profile — a service-area business (no street address shown)
       local:{ businessName:'Analysis of Karma', legalName:'', businessType:'ProfessionalService',
         gbpPrimaryCategory:'Astrologer', gbpAdditionalCategories:['Spiritual Consultant','Psychic','Vedic Astrology & Karmic Consultation Service'],
-        serviceAreaBusiness:true, streetAddress:'', locality:'Surrey', region:'British Columbia', regionCode:'BC', postalCode:'', country:'CA',
+        serviceAreaBusiness:false, streetAddress:'15450 92a Ave', locality:'Surrey', region:'British Columbia', regionCode:'BC', postalCode:'V3R 9B1',
+        listingName:'Analysis of Karma - Vedic astrology & Meditation | Vedic Astrologer Jag Mallah', hoursNote:'Online consultations available 7 days a week by appointment', country:'CA',
         lat:'49.1913', lng:'-122.8490', areasServed:['Surrey, BC, Canada','Vancouver, BC, Canada','Delta, BC, Canada','Langley, BC, Canada','Abbotsford, BC, Canada','Chilliwack, BC, Canada','Maple Ridge, BC, Canada','British Columbia, Canada','Canada','Washington, USA','United States','United Kingdom','Punjab, India','Delhi, India','Haryana, India','Mumbai, Maharashtra, India','India'],
         neighbourhoods:['Newton','Fleetwood','Cloverdale','Guildford','Panorama Ridge','South Surrey'],
         nearbyLabel:'Lower Mainland & Fraser Valley', nearbyCities:['Vancouver','Delta','Langley','Abbotsford','Chilliwack','Maple Ridge'],
@@ -301,7 +307,7 @@ class Component extends DCLogic {
         servicesIntro:{ kicker:'What I offer', title:'Vedic astrology services', sub:'Personal, one-to-one readings grounded in your birth chart \u2014 not generic sun-sign horoscopes.' },
         about:{ kicker:'About the astrologer', title:'Guidance with honesty, depth & care',
           body:'I\u2019m Jag Mallah, the astrologer behind Analysis of Karma. For years I\u2019ve studied classical Vedic astrology (Jyotish) and meditation \u2014 reading thousands of charts for people navigating marriage, career changes, health worries and questions of purpose. My approach is calm and practical: I read your Kundli carefully, explain what the planets actually indicate, and give remedies you can realistically follow. No fear, no pressure \u2014 just clarity.',
-          credentials:['10,000+ birth charts read','Classical Jyotish & Nakshatra method','Meditation & spiritual remedies','Consultations in English & Hindi'], image:null },
+          credentials:['10,000+ birth charts read','Classical Jyotish & Nakshatra method','Meditation & spiritual remedies','Consultations in English, Hindi & Punjabi'], image:null },
         cta:{ title:'Ready to understand your chart?', sub:'Book a one-to-one Vedic astrology consultation with Jag Mallah and get clear, personalised guidance.', button:'Book a Consultation' }
       },
       about:{
@@ -1217,6 +1223,7 @@ class Component extends DCLogic {
             (this.waUrl()||this.telHref())?h('div',{style:{display:'flex',gap:10,marginTop:16,flexWrap:'wrap'}}, this.waUrl()?h('a',{href:this.waUrl(),target:'_blank',rel:'noopener',className:'aok-btn aok-fx-lift',style:{display:'inline-flex',font:'600 14px '+this.HEAD,padding:'11px 18px',borderRadius:999,textDecoration:'none',...this.btnVariants().solid}},'\u2706 WhatsApp'):null, this.telHref()?h('a',{href:this.telHref(),className:'aok-btn aok-fx-lift',style:{display:'inline-flex',font:'600 14px '+this.HEAD,padding:'11px 18px',borderRadius:999,textDecoration:'none',...this.btnVariants().outline}},'\u260e Call'):null):null,
             h('div',{style:{display:'flex',gap:10,marginTop:20,flexWrap:'wrap'}}, ...this.socialLinks().map((s,i)=>h('a',{key:i,href:s[1],target:'_blank',rel:'noopener',title:s[0],'aria-label':s[0],className:'aok-badge3d is-sm',style:{textTransform:'capitalize',font:'600 17px/1 Plus Jakarta Sans'}},h('span',null,s[2])))),
             this.reviewLinks().length?h('div',{style:{display:'flex',gap:10,marginTop:16,flexWrap:'wrap'}}, ...this.reviewLinks().map((r,i)=>h('a',{key:i,href:r[1],target:'_blank',rel:'noopener',className:'aok-btn',style:{display:'inline-flex',font:'600 13px '+this.HEAD,padding:'9px 16px',borderRadius:999,textDecoration:'none',...this.btnVariants().outline}},'\u2605 '+r[0]))):null),
+          this.locationBlock(),
           h('div',{className:'aok-card',style:{padding:8}}, h('div',{style:{position:'relative',borderRadius:14,overflow:'hidden',aspectRatio:'1/1',background:P.bgAlt}}, this.state.editMode? h('div',{onClick:()=>this.setState({mapEdit:true}),style:{position:'absolute',inset:0,zIndex:20,cursor:'pointer',background:'rgba(30,32,34,.08)',display:'flex',alignItems:'flex-start',justifyContent:'flex-end',padding:10}}, h('span',{style:{padding:'8px 14px',borderRadius:999,background:P.maroon,color:P.cream,font:'600 13px '+this.HEAD,boxShadow:'0 4px 14px rgba(0,0,0,.25)'}},'✎ Edit map')):null, mapEmbed? h('div',{className:'aok-mapembed',style:{width:'100%',height:'100%'},dangerouslySetInnerHTML:{__html:this.cleanHtml(mapEmbed,{frames:true})}}) : mapSrc? h('iframe',{src:mapSrc,style:{width:'100%',height:'100%',border:0},loading:'lazy',title:'Business location map'}) : (mapLink? h('a',{href:mapLink,target:'_blank',rel:'noopener',style:{height:'100%',display:'flex',flexDirection:'column',alignItems:'center',justifyContent:'center',textAlign:'center',padding:28,gap:14,cursor:'pointer',textDecoration:'none',background:pearl,position:'relative',overflow:'hidden'}}, h('div',{style:{position:'absolute',inset:0,background:'var(--starmap) center/420px 420px no-repeat',opacity:.9}}), h('div',{className:'aok-badge3d is-lg is-round',style:{position:'relative'}},h('span',null,'⚑')), h('div',{style:{font:'600 24px/1.2 '+this.SERIF,color:P.maroon,position:'relative'}},'Find us on Google Maps'), h('div',{style:{font:'400 14px/1.6 Plus Jakarta Sans',color:P.ink,maxWidth:260,position:'relative'}},'Serving Surrey & the Greater Vancouver area, and worldwide online. Tap to view our business profile and directions.'), h('div',{style:{marginTop:4,padding:'10px 20px',borderRadius:999,background:'#FFFCF7',border:'1px solid #C5A869',font:'600 13px '+this.HEAD,color:P.maroon,position:'relative'}},'Open in Google Maps →')) : h('div',{style:{height:'100%',display:'flex',flexDirection:'column',alignItems:'center',justifyContent:'center',color:P.muted,textAlign:'center',padding:24,gap:8,background:pearl}}, h('div',{style:{fontSize:34,color:P.gold}},'⚑'), h('div',{style:{font:'600 15px '+this.HEAD,color:P.maroon}},'Add your Google Map'), h('div',{style:{font:'400 13px Plus Jakarta Sans',maxWidth:240}},'Set your business address or map query in Admin → Settings to show a live Google Map here.'))))))))),
       this.areasBlock(), this.faqSection({hideAsk:true}), this.renderMapEditor()); }
 
@@ -1355,14 +1362,42 @@ class Component extends DCLogic {
   // Name / area / phone, identical to the server-rendered copy and the structured data (local SEO consistency)
   // "Surrey, BC, Canada" -> "Surrey" (+ nearby cities not already listed); mirrors aok_area_short_names
   areaShortNames(){ const L=this.state.data.local||{}; const out=[]; ((L.areasServed||[]).concat(L.nearbyCities||[])).forEach(a=>{ const n=String(a||'').split(',')[0].trim(); if(n&&out.indexOf(n)<0) out.push(n); }); return out; }
+  // "Where is <business> located in <city>?" above the map on the contact page. A question-shaped
+  // heading with the answer right under it is what an AI assistant lifts when someone asks where
+  // the business is, and it puts the full address on the page for Google to match against Maps.
+  locationBlock(){ const h=React.createElement,P=this.P,d=this.state.data,L=d.local||{},c=d.contact||{},pr=(d.about&&d.about.pricing)||{};
+    const street=(!L.serviceAreaBusiness&&L.streetAddress)?L.streetAddress:'';
+    const city=L.locality||'Surrey', reg=L.regionCode||L.region||'BC';
+    const full=[street,[city,reg,(!L.serviceAreaBusiness&&L.postalCode)?L.postalCode:''].filter(Boolean).join(' '),(L.country||'CA')==='CA'?'Canada':L.country].filter(Boolean).join(', ');
+    if(!street) return null;
+    const langs=(L.languages||[]).filter(Boolean);
+    const id='where-is-'+this.slugify(this.brandName()+' '+city);
+    return h('section',{'aria-labelledby':id,style:{marginBottom:18}},
+      h('h2',{id:id,style:{font:'600 clamp(22px,2.6vw,30px)/1.2 '+this.SERIF,color:P.maroon,margin:'0 0 10px'}},
+        'Where is '+this.brandName()+' located in '+city+', '+reg+'?'),
+      h('p',{style:{font:'400 15.5px/1.75 Plus Jakarta Sans',color:P.ink,margin:0}},
+        h('strong',null,(L.listingName||this.brandName())),' is based at ', h('strong',null,full),'. ',
+        (langs.length?('Consultations run '+(pr.unit==='per hour'?'60 minutes':'')+' in '+this.joinList(langs)+' '):'Consultations run '),
+        (pr.fee?('for '+pr.fee+' '+(pr.unit||'per hour')+' '):''),
+        'over Zoom, WhatsApp or phone, or in person by appointment.',
+        c.phone?h('span',null,' Call or WhatsApp ',h('a',{href:this.telHref(),className:'aok-footlink'},c.phone),'.'):null));
+  }
+
   napBlock(){ const h=React.createElement,P=this.P,d=this.state.data,L=d.local||{},pe=d.person||{},c=d.contact||{};
-    const br=k=>h('br',{key:k}); const parts=[h('strong',{key:'n',style:{color:P.maroon,fontWeight:600}},this.brandName()),br('b0'),(pe.jobTitle||'Vedic Astrologer')+' '+(pe.name||d.brand.astrologer)];
+    const br=k=>h('br',{key:k});
+    // The listing name is the business's name exactly as Google Business Profile shows it. Search
+    // engines match a business on name + address + phone being identical everywhere, so the address
+    // block uses it even though the header keeps the short brand name.
+    const listed=(L.listingName||'').trim()||this.brandName();
+    const parts=[h('strong',{key:'n',style:{color:P.maroon,fontWeight:600}},listed),br('b0'),(pe.jobTitle||'Vedic Astrologer')+' '+(pe.name||d.brand.astrologer)];
     if(!L.serviceAreaBusiness&&L.streetAddress) parts.push(br('b1'),L.streetAddress);
-    parts.push(br('b2'),[L.locality||'Surrey',L.region||'British Columbia',(L.country||'CA')==='CA'?'Canada':L.country].join(', '));
+    const region=(L.region||'British Columbia')+((!L.serviceAreaBusiness&&L.postalCode)?' '+L.postalCode:'');
+    parts.push(br('b2'),[L.locality||'Surrey',region,(L.country||'CA')==='CA'?'Canada':L.country].join(', '));
     if(c.phone) parts.push(br('b3'),'Phone & WhatsApp: ',h('a',{key:'tel',href:this.telHref(),className:'aok-footlink'},c.phone));
     const areas=this.areaShortNames(); if(areas.length) parts.push(br('b5'),'Serving: '+areas.join(', ')+(L.onlineWorldwide!==false?' \u00b7 Worldwide online ('+(L.onlineChannels||['Zoom','WhatsApp']).filter(Boolean).join(' & ')+')':''));
     const days=[['Mo','Mon'],['Tu','Tue'],['We','Wed'],['Th','Thu'],['Fr','Fri'],['Sa','Sat'],['Su','Sun']].filter(x=>L.hours&&L.hours[x[0]]&&L.hours[x[0]].o&&L.hours[x[0]].c).map(x=>x[1]+' '+L.hours[x[0]].o+'\u2013'+L.hours[x[0]].c);
     if(days.length) parts.push(br('b6'),'Hours: '+(days.length===7&&new Set(days.map(x=>x.slice(4))).size===1?'Mon\u2013Sun '+days[0].slice(4):days.join(' \u00b7 '))+(L.timezone==='America/Vancouver'?' (Pacific Time)':''));
+    if((L.hoursNote||'').trim()) parts.push(br('b7'),L.hoursNote.trim());
     return h('address',{style:{fontStyle:'normal',font:'400 13.5px/1.75 Plus Jakarta Sans',color:P.ink,marginTop:18,maxWidth:360}},...parts); }
   renderFooter(){ const h=React.createElement,P=this.P,d=this.state.data;
     const links=[['home',this.t('home')],['about',this.t('about')],['services',this.t('services')],['meditation',this.t('meditation')],['blog',this.t('blog')],['faq',this.t('faq')],['contact',this.t('contact')]];
@@ -1596,6 +1631,7 @@ class Component extends DCLogic {
     const W=s.maxW||720; const wrap=ch=>h('div',{style:{maxWidth:W,margin:'0 auto',padding:'0 24px'}},ch);
     switch(b.type){
       case 'heading': return h('section',{style:sec}, wrap(this.etext(base+'.text',{tag:'h2',style:{font:'800 clamp(26px,3.4vw,40px) '+this.HEAD,color:s.color||P.maroon,margin:0,letterSpacing:'-.02em'}})));
+      case 'text': if(!this.state.editMode && this.isUnfilled(b.text)) return null;
       case 'text': return h('section',{style:sec}, wrap(this.etext(base+'.text',{tag:'div',className:'aok-link',style:{font:'400 17px/1.75 Plus Jakarta Sans',color:s.color||P.ink,whiteSpace:'pre-line'}})));
       case 'image': { const wpct=Math.max(10,Math.min(100,b.w||100)); const al=b.align||'center'; const mar=al==='left'?'0 auto 0 0':al==='right'?'0 0 0 auto':'0 auto'; const ar=b.ar||'16/9';
         const selI=this.state.selBlock&&this.state.selBlock.route===route&&this.state.selBlock.i===i;
@@ -1751,6 +1787,7 @@ class Component extends DCLogic {
   renderChildInner(path,b){ const h=React.createElement,P=this.P; const s=b._s||{}; const al=s.align||'left';
     switch(b.type){
       case 'heading': return this.etext(path+'.text',{tag:'h3',style:{font:'800 clamp(20px,2.6vw,28px) '+this.HEAD,color:s.color||P.maroon,margin:'0 0 6px',letterSpacing:'-.01em',textAlign:al}});
+      case 'text': if(!this.state.editMode && this.isUnfilled(b.text)) return null;
       case 'text': return this.etext(path+'.text',{tag:'div',className:'aok-link',style:{font:'400 16px/1.7 Plus Jakarta Sans',color:s.color||P.ink,whiteSpace:'pre-line',textAlign:al}});
       case 'button': return h('div',{style:{textAlign:al}}, this.btn(b.label||'Button',()=>{ if(!this.state.editMode) this.go(b.route||'contact'); },{variant:s.btnVariant||'solid'}));
       case 'iconbox': return h('div',{style:{textAlign:al==='left'?'center':al}}, h('div',{style:{font:'400 40px '+this.HEAD,color:P.gold,marginBottom:10,lineHeight:1}}, b.icon||'✨'), this.etext(path+'.title',{tag:'h3',style:{font:'800 19px '+this.HEAD,color:s.color||P.maroon,margin:'0 0 6px'}}), this.etext(path+'.text',{tag:'p',style:{font:'400 14.5px/1.65 Plus Jakarta Sans',color:P.muted,margin:0}}));

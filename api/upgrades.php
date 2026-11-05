@@ -30,7 +30,7 @@ if (realpath((string)($_SERVER['SCRIPT_FILENAME'] ?? '')) === __FILE__) { http_r
 //   sections after it.
 // Only text that is still exactly as first shipped is replaced. Text you have edited is kept. Nothing is deleted.
 
-const AOK_CONTENT_VERSION = 5;
+const AOK_CONTENT_VERSION = 6;
 
 // fingerprints (md5 of the normalised text) of the originally shipped FAQ answers, by question
 const AOK_OLD_FAQ = [
@@ -111,6 +111,7 @@ function aok_upgrade_payload(array $d): array {
     if ($v < 3) $d = aok_upgrade_v3($d, $def);
     if ($v < 4) $d = aok_upgrade_v4($d);
     $d = aok_upgrade_v5($d, $def);
+    if ($v < 6) $d = aok_upgrade_v6($d);
     $d['contentVersion'] = AOK_CONTENT_VERSION;
     return $d;
 }
@@ -367,5 +368,73 @@ function aok_upgrade_v5(array $d, array $def): array {
     }
     // 3. the specification's page text
     aok_apply_service_content($d, $def, false);
+    return $d;
+}
+
+// v6: the business's real street address, opening hours and spoken languages, from the owner's
+// Google Business Profile. Search engines match a business on its name, address and phone being
+// byte-identical everywhere, and this site was still set up as a service-area business with the
+// street hidden, so Maps and the website disagreed.
+//
+// Only values still exactly as this project shipped them are replaced; anything the owner has
+// since edited is left alone.
+function aok_upgrade_v6(array $d): array {
+    $L = isset($d['local']) && is_array($d['local']) ? $d['local'] : [];
+
+    // the street address was never set, so there is nothing of the owner's to overwrite
+    if (trim((string)($L['streetAddress'] ?? '')) === '') {
+        $L['streetAddress'] = '15450 92a Ave';
+        $L['postalCode'] = 'V3R 9B1';
+        $L['serviceAreaBusiness'] = false;   // show it: it is public on Google Business Profile
+    }
+    if (trim((string)($L['listingName'] ?? '')) === '') {
+        $L['listingName'] = 'Analysis of Karma - Vedic astrology & Meditation | Vedic Astrologer Jag Mallah';
+    }
+    if (trim((string)($L['hoursNote'] ?? '')) === '') {
+        $L['hoursNote'] = 'Online consultations available 7 days a week by appointment';
+    }
+    // opening hours: replace only the shipped Mon-Sun 10:00-20:00
+    $shipped = true;
+    foreach (['Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa', 'Su'] as $day) {
+        $h = $L['hours'][$day] ?? null;
+        if (!is_array($h) || ($h['o'] ?? '') !== '10:00' || ($h['c'] ?? '') !== '20:00') { $shipped = false; break; }
+    }
+    if ($shipped) {
+        $hours = [];
+        foreach (['Mo', 'Tu', 'We', 'Th', 'Fr'] as $day) $hours[$day] = ['o' => '10:00', 'c' => '17:00'];
+        $L['hours'] = $hours;
+    }
+    $d['local'] = $L;
+
+    // the contact page's address line and map pin
+    $full = '15450 92a Ave, Surrey, BC V3R 9B1, Canada';
+    if (!isset($d['contact']) || !is_array($d['contact'])) $d['contact'] = [];
+    if (trim((string)($d['contact']['address'] ?? '')) === '') $d['contact']['address'] = $full;
+    if (trim((string)($d['contact']['mapQuery'] ?? '')) === '') {
+        $d['contact']['mapQuery'] = ($L['listingName'] ?? '') . ', ' . $full;
+    }
+
+    // "Consultations in English & Hindi" predates Punjabi being offered on every service page
+    if (isset($d['home']['about']['credentials']) && is_array($d['home']['about']['credentials'])) {
+        foreach ($d['home']['about']['credentials'] as $i => $c) {
+            if (aok_norm($c) === aok_norm('Consultations in English & Hindi')) {
+                $d['home']['about']['credentials'][$i] = 'Consultations in English, Hindi & Punjabi';
+            }
+        }
+    }
+
+    // a text block the owner added in the editor but never typed into: drop it rather than
+    // publish the placeholder. The renderers skip it as well, so this only tidies the data.
+    $ph = aok_norm("Write your text here. Click to edit \u{2014} use the toolbar above for bold, colour, size, lists and links.");
+    foreach ((array)($d['blocks'] ?? []) as $route => $blocks) {
+        if (!is_array($blocks)) continue;
+        $keep = [];
+        foreach ($blocks as $b) {
+            $isEmpty = is_array($b) && ($b['type'] ?? '') === 'text'
+                && trim((string)($b['title'] ?? '')) === '' && aok_norm($b['text'] ?? '') === $ph;
+            if (!$isEmpty) $keep[] = $b;
+        }
+        $d['blocks'][$route] = array_values($keep);
+    }
     return $d;
 }
