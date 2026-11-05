@@ -40,26 +40,13 @@ if (!function_exists('app_sitemap_urls')) { function app_sitemap_urls(array $d):
 if (!function_exists('app_md_blocks'))    { function app_md_blocks(string $text): array { return aok_md_blocks($text); } }
 if (!function_exists('app_llms_md'))      { function app_llms_md(string $md): string { return aok_llms_md($md); } }
 if (!function_exists('app_save_sync'))    { function app_save_sync(array $d, array $prev = []) { return aok_save_sync($d, $prev); } }
+if (!function_exists('app_rss_xml'))      { function app_rss_xml(array $d): string { return aok_rss_xml($d); } }
 
 // ---------- the few with no twin here, ported from the kit ----------
 
 // A blog post's description: its own SEO line, else the excerpt, else the first real
 // paragraph. Used by the RSS feed and the discovery files.
-if (!function_exists('app_post_description')) {
-    function app_post_description(array $p): string {
-        $own = trim(aok_text((string)($p['seoDescription'] ?? ($p['seo']['description'] ?? ''))));
-        if ($own !== '') return aok_cut($own, 158);
-        $ex = trim(aok_text((string)($p['excerpt'] ?? '')));
-        if ($ex !== '') return aok_cut($ex, 158);
-        foreach (aok_md_blocks((string)($p['body'] ?? '')) as $b) {
-            if (($b[0] === 'p' || $b[0] === 'answer') && is_string($b[1])) {
-                $t = trim(aok_text($b[1]));
-                if ($t !== '') return aok_cut($t, 158);
-            }
-        }
-        return '';
-    }
-}
+if (!function_exists('app_post_description')) { function app_post_description(array $p): string { return aok_post_description($p); } }
 
 // The heading for a "<service> in <city>" GEO page.
 if (!function_exists('app_matrix_title')) {

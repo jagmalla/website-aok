@@ -60,6 +60,7 @@ RewriteRule ^robots\.txt$ api/robots.php [L]
 RewriteRule ^sitemap\.xml$ api/sitemap.php [L]
 RewriteRule ^llms\.txt$ api/llms.php [L]
 RewriteRule ^llms-full\.txt$ api/llms.php?full=1 [L,QSA]
+RewriteRule ^rss\.xml$ api/rss.php [L]
 RewriteRule ^([a-f0-9]{32})\.txt$ api/indexnow.php?key=$1 [L]
 
 # ---- 6. Real files and folders are served as they are

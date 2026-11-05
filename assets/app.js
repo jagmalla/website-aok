@@ -9,9 +9,16 @@ class DCLogic extends React.Component {
 }
 const StreamableLogic = DCLogic;
 
+/* The server renders the active colour preset as --aok-p-* variables (Admin -> Settings -> Theme).
+   Folding it into the palette here keeps the browser app's inline styles in step with the
+   stylesheet, so switching theme can never leave half the page on the previous colours. */
+function aokPalette(base){ try{ const cs=getComputedStyle(document.documentElement);
+    for(const k in base){ const v=cs.getPropertyValue('--aok-p-'+k.replace(/([A-Z])/g,'-$1').toLowerCase()).trim(); if(v) base[k]=v; } }catch(e){}
+  return base; }
+
 /* ================= Analysis of Karma — site component ================= */
 class Component extends DCLogic {
-  P = { bg:'#FAF8F5', bgAlt:'#F3EFE6', card:'#FFFCF7', ink:'#3A3D42', maroon:'#1E2022', maroonD:'#141517', red:'#8C6D33', redD:'#6E5426', gold:'#A68446', goldL:'#DFC286', cream:'#FFFDF8', muted:'#6B6E73', line:'rgba(166,132,70,.22)', white:'#FFFFFF', ok:'#3f7d4e', bad:'#b4452f' };
+  P = aokPalette({ bg:'#FAF8F5', bgAlt:'#F3EFE6', card:'#FFFCF7', ink:'#3A3D42', maroon:'#1E2022', maroonD:'#141517', red:'#8C6D33', redD:'#6E5426', gold:'#A68446', goldL:'#DFC286', cream:'#FFFDF8', muted:'#6B6E73', line:'rgba(166,132,70,.22)', white:'#FFFFFF', ok:'#3f7d4e', bad:'#b4452f' });
   HEAD = "'Plus Jakarta Sans',sans-serif";
   SVC_BANNER_FALLBACK = 'vedic-astrology-jyotish-deep-dives';   // the 3D banner shown for a service that has none of its own
   SERIF = "'Cormorant Garamond',Georgia,serif";
@@ -2516,6 +2523,31 @@ class Component extends DCLogic {
     this.commit(a.target.path, a.result.humanized);
     a.text=a.result.humanized; a.result=null; this.flash('✓ Applied — saved'); this.forceUpdate(); }
 
+
+  // ---- Bulk rewrite, with a quality gate (api/ai-bulk.php) ----
+  // Measured on this site's own writing, the rewriter improves most paragraphs but makes some read
+  // worse, so the server only returns the ones that clearly improve. Nothing is written until the
+  // owner confirms, and the write happens here through commit/save, never on the server (AR-22).
+  aiBulkScan(){ this._ai=this._ai||{}; this._ai.bulkBusy=true; this._ai.bulk=null; this.forceUpdate();
+    fetch('/api/ai-bulk.php',{method:'POST',headers:this.apiHeaders(),body:JSON.stringify({dryRun:true})})
+      .then(r=>r.json().catch(()=>null)).then(j=>{ this._ai.bulkBusy=false;
+        if(j&&j.ok){ this._ai.bulk=j; if(!j.summary.paragraphsChanged) this.flash('ℹ Nothing clearly improves — your text is already fine'); }
+        else this.flash('⚠ Could not check'+(j&&j.error?': '+j.error:''));
+        this.forceUpdate(); }).catch(()=>{ this._ai.bulkBusy=false; this.flash('⚠ Could not reach the server'); this.forceUpdate(); }); }
+
+  aiBulkApply(){ const b=(this._ai||{}).bulk; if(!b||!b.summary.paragraphsChanged) return;
+    if(!confirm('Rewrite '+b.summary.paragraphsChanged+' paragraph'+(b.summary.paragraphsChanged===1?'':'s')+' across '+b.summary.pages+' page'+(b.summary.pages===1?'':'s')+'?\n\nOnly paragraphs that clearly read better are changed. Your originals stay in the editor’s undo and in the page history.')) return;
+    this._ai.bulkBusy=true; this.forceUpdate();
+    fetch('/api/ai-bulk.php',{method:'POST',headers:this.apiHeaders(),body:'{}'})
+      .then(r=>r.json().catch(()=>null)).then(j=>{ this._ai.bulkBusy=false;
+        if(!(j&&j.ok)){ this.flash('⚠ Rewrite failed'+(j&&j.error?': '+j.error:'')); this.forceUpdate(); return; }
+        let nd=this.state.data, n=0;
+        (j.pages||[]).forEach(p=>{ if(typeof p.body==='string'&&p.body){ nd=this.setIn(nd,p.path,p.body); n++; } });
+        this.pushHist(); this.save(nd);
+        this._ai.bulk=null; this._ai.audit=null;
+        this.flash('✓ Rewrote '+j.summary.paragraphsChanged+' paragraphs on '+n+' pages — saved');
+        this.forceUpdate(); }).catch(()=>{ this._ai.bulkBusy=false; this.flash('⚠ Could not reach the server'); this.forceUpdate(); }); }
+
   tabRewrite(){ const h=React.createElement,P=this.P; const a=this._ai||{}; const au=a.audit; const sum=(au&&au.summary)||null;
     const band=b=>({green:{bg:'#e4f3e8',fg:'#2f6b3f'},amber:{bg:'#fbf1dc',fg:'#8a6508'},red:{bg:'#fbe9e3',fg:'#b4452f'}})[b]||{bg:P.bgAlt,fg:P.muted};
     const chip=(t,b)=>{ const c=band(b); return h('span',{style:{display:'inline-block',padding:'2px 9px',borderRadius:999,background:c.bg,color:c.fg,font:'700 11.5px '+this.HEAD}},t); };
@@ -2540,6 +2572,20 @@ class Component extends DCLogic {
             chip(p.band==='green'?'natural':p.band==='amber'?'mixed':'formulaic',p.band),
             t?this.btn('Rewrite',()=>this.aiLoad(p.key),{variant:'outline',pad:'6px 13px',style:{fontSize:12.5}})
              :h('span',{style:{font:'400 12px Plus Jakarta Sans',color:P.muted}},'editor')); }))),{marginBottom:18}):null,
+      this.card(h('div',null, this.cardTitle('Rewrite what clearly improves','Goes through every service and blog page and rewrites only the paragraphs that measurably read better afterwards. Headings, answer boxes and lists are never touched.'),
+        h('div',{style:{display:'flex',gap:10,alignItems:'center',flexWrap:'wrap'}},
+          this.btn(a.bulkBusy?'Working…':'◎ See what would change',()=>this.aiBulkScan(),{variant:'outline',pad:'10px 18px',style:{fontSize:13.5}}),
+          (a.bulk&&a.bulk.summary.paragraphsChanged)?this.btn('✓ Rewrite those '+a.bulk.summary.paragraphsChanged+' paragraphs',()=>this.aiBulkApply(),{variant:'solid',pad:'10px 18px',style:{fontSize:13.5}}):null),
+        a.bulk?h('div',{style:{marginTop:14}},
+          this.note(a.bulk.summary.paragraphsChanged
+            ? [h('b',{key:'n'},String(a.bulk.summary.paragraphsChanged)),' of '+a.bulk.summary.paragraphsChecked+' paragraphs would be rewritten, across '+a.bulk.summary.pages+' pages. The rest are left alone because rewriting them did not make them read better.']
+            : ['Nothing clearly improves. Your writing already reads naturally enough that the rewriter would not help.'],
+            a.bulk.summary.paragraphsChanged?'ok':'ok'),
+          a.bulk.summary.paragraphsChanged?h('div',{style:{display:'grid',gap:3,marginTop:12}}, ...a.bulk.pages.slice(0,12).map((p,i)=>
+            h('div',{key:i,style:{display:'grid',gridTemplateColumns:'1fr auto auto',gap:10,alignItems:'center',font:'400 12.5px Plus Jakarta Sans',color:P.ink,padding:'3px 0'}},
+              h('span',{style:{whiteSpace:'nowrap',overflow:'hidden',textOverflow:'ellipsis'}},p.title||p.path),
+              h('span',{style:{color:P.muted}},p.paragraphs+'/'+p.of+' paras'),
+              h('span',{style:{font:'700 12.5px '+this.HEAD,color:'#2f6b3f'}},p.before+'% → '+p.after+'%')))):null):null),{marginBottom:18}),
       this.card(h('div',null,
         this.cardTitle('Rewrite'+(a.target?' — '+a.target.label:''),'Rebuilds the sentences in plainer words. Read it before you apply it: it changes wording, so check it still says what you mean.'),
         h('div',{style:{display:'flex',gap:10,marginBottom:12,flexWrap:'wrap'}},
@@ -2639,6 +2685,41 @@ class Component extends DCLogic {
           c.fix&&c.status!=='ok'?h('button',{onClick:()=>this.setState({adminTab:c.fix}),style:{...this.iconBtn(),width:'auto',height:30,padding:'0 12px',font:'600 12px '+this.HEAD,flex:'0 0 auto'}},'Fix →'):null))),{marginBottom:16}))); }
 
   // ----- settings -----
+
+  // ---- Theme presets (api/theme-presets.php sends the active one; this list drives the picker) ----
+  themeList(){ return [
+    {id:'modern-minimal',   label:'Modern Minimal',  hint:'Slate & charcoal',        primary:'#18181B',secondary:'#52525B',accent:'#2563EB',accentLight:'#93C5FD',bg:'#FAFAFA'},
+    {id:'corporate-trust',  label:'Corporate Trust', hint:'Navy & cobalt',           primary:'#0F2E5C',secondary:'#1E4E8C',accent:'#2563EB',accentLight:'#93C5FD',bg:'#F8FAFC'},
+    {id:'tech-vibrant',     label:'Tech Vibrant',    hint:'Indigo & violet',         primary:'#312E81',secondary:'#4F46E5',accent:'#7C3AED',accentLight:'#C4B5FD',bg:'#FAFAFF'},
+    {id:'clean-healthcare', label:'Clean Healthcare',hint:'Teal & cyan',             primary:'#115E59',secondary:'#0D9488',accent:'#06B6D4',accentLight:'#99F6E4',bg:'#F7FEFC'},
+    {id:'warm-artisan',     label:'Warm Artisan',    hint:'Terracotta & sand',       primary:'#4A2E22',secondary:'#9A5B3D',accent:'#C2703D',accentLight:'#F0C8A0',bg:'#FDF9F4'},
+    {id:'luxury-editorial', label:'Luxury Editorial',hint:'Champagne & obsidian',    primary:'#1E2022',secondary:'#8C6D33',accent:'#A68446',accentLight:'#DFC286',bg:'#FAF8F5'},
+    {id:'high-energy',      label:'High-Energy',     hint:'Crimson & slate',         primary:'#1F2937',secondary:'#DC2626',accent:'#EF4444',accentLight:'#FCA5A5',bg:'#FAFAFA'}]; }
+
+  // ---- Social share card: drawn in the browser from the live theme, 1200x630 ----
+  drawOgCard(cv){ try{ const d=this.state.data,P=this.P,x=cv.getContext('2d'); const W=1200,H=630;
+    const g=x.createLinearGradient(0,0,W,H); g.addColorStop(0,P.bg); g.addColorStop(1,P.bgAlt); x.fillStyle=g; x.fillRect(0,0,W,H);
+    x.strokeStyle=P.gold; x.globalAlpha=.30; x.lineWidth=2;
+    for(let r=120;r<760;r+=70){ x.beginPath(); x.arc(W-150,H/2,r,0,Math.PI*2); x.stroke(); }
+    x.globalAlpha=1; x.fillStyle=P.gold; x.fillRect(84,96,70,5);
+    const name=this.txt(d.brand&&d.brand.name)||'', tag=this.txt(d.brand&&d.brand.tagline)||'';
+    x.fillStyle=P.maroon; x.font="600 74px Georgia,serif";
+    const wrap=(t,max,limit)=>{ const w=String(t).split(' '),out=[]; let ln='';
+      for(const word of w){ const tryLn=ln?ln+' '+word:word; if(x.measureText(tryLn).width>max&&ln){ out.push(ln); ln=word; if(out.length>=limit) break; } else ln=tryLn; }
+      if(out.length<limit&&ln) out.push(ln); return out; };
+    wrap(name,660,2).forEach((l,i)=>x.fillText(l,84,250+i*86));
+    x.fillStyle=P.muted; x.font="400 31px 'Plus Jakarta Sans',system-ui,sans-serif";
+    wrap(tag,640,2).forEach((l,i)=>x.fillText(l,84,430+i*44));
+    const c=(d.contact&&d.contact.phone)||''; const place=this.txt((d.local&&d.local.locality)||'');
+    x.fillStyle=P.gold; x.font="600 25px 'Plus Jakarta Sans',system-ui,sans-serif";
+    x.fillText([place,c].filter(Boolean).join('   ·   '),84,560);
+  }catch(e){} }
+  downloadOgCard(){ const cv=this._ogCanvas; if(!cv){ this.flash('⚠ Nothing to download yet'); return; }
+    try{ cv.toBlob(b=>{ if(!b){ this.flash('⚠ Could not create the image'); return; }
+      const a=document.createElement('a'); a.href=URL.createObjectURL(b); a.download='og-image.jpg'; a.click();
+      setTimeout(()=>URL.revokeObjectURL(a.href),4000); this.flash('✓ Downloaded — upload it as assets/og-image.jpg'); },'image/jpeg',0.9);
+    }catch(e){ this.flash('⚠ Could not create the image'); } }
+
   tabSettings(){ const h=React.createElement,P=this.P,d=this.state.data;
     const exportData=()=>{ try{ const blob=new Blob([JSON.stringify(d,null,2)],{type:'application/json'}); const a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download='analysis-of-karma-content.json'; a.click(); }catch(e){} };
     const importData=()=>{ const inp=document.createElement('input'); inp.type='file'; inp.accept='application/json'; inp.onchange=e=>{ const f=e.target.files[0]; if(!f)return; const r=new FileReader(); r.onload=()=>{ try{ this.save(JSON.parse(r.result)); this.flash('Content imported'); }catch(err){ this.flash('Invalid file'); } }; r.readAsText(f); }; inp.click(); };
@@ -2682,6 +2763,28 @@ class Component extends DCLogic {
                 h('p',{style:{font:'400 13px/1.55 Plus Jakarta Sans',color:P.muted,margin:'0 0 14px'}},'Your password is stored securely on the server (hashed) and is never part of the website data.'),
                 box('current','Current password'), box('next','New password (10+ characters)'), box('confirm','Repeat new password'),
                 this.btn('Change password',()=>this.changePassword(),{variant:'solid',pad:'10px 20px',style:{fontSize:13.5}})); })())),
+          this.card(h('div',null, h('div',{style:{font:'700 16px '+this.HEAD,color:P.maroon,marginBottom:6}},'Theme'),
+            h('p',{style:{font:'400 13px Plus Jakarta Sans',color:P.muted,margin:'0 0 14px'}},'Seven palettes, each checked for readable contrast. Changing one restyles the whole site — your text, images and layout stay exactly as they are.'),
+            h('div',{style:{display:'grid',gridTemplateColumns:'repeat(auto-fit,minmax(215px,1fr))',gap:10}},
+              ...this.themeList().map(t=>{ const on=(this.getIn(d,'theme.preset')||'luxury-editorial')===t.id;
+                return h('button',{key:t.id,onClick:()=>{ this.commit('theme.preset',t.id); this.flash('✓ Theme set to '+t.label+' — reload to see it everywhere'); },
+                  style:{textAlign:'left',cursor:'pointer',padding:'12px 13px',borderRadius:12,background:P.white,
+                    border:'2px solid '+(on?t.accent:P.line),boxShadow:on?'0 0 0 3px '+t.accent+'22':'none'}},
+                  h('div',{style:{display:'flex',gap:5,marginBottom:9}}, ...[t.primary,t.secondary,t.accent,t.accentLight,t.bg].map((c,i)=>
+                    h('span',{key:i,style:{width:22,height:22,borderRadius:6,background:c,border:'1px solid rgba(0,0,0,.08)'}}))),
+                  h('div',{style:{font:'700 13.5px '+this.HEAD,color:P.maroon}},t.label+(on?'  ✓':'')),
+                  h('div',{style:{font:'400 11.5px/1.45 Plus Jakarta Sans',color:P.muted,marginTop:2}},t.hint)); })),
+            this.note('A theme changes colours only. Reload the page after choosing one.','ok')),{marginBottom:18}),
+          this.card(h('div',null, h('div',{style:{font:'700 16px '+this.HEAD,color:P.maroon,marginBottom:6}},'Social share image'),
+            h('p',{style:{font:'400 13px Plus Jakarta Sans',color:P.muted,margin:'0 0 14px'}},'The picture shown when someone shares your site on WhatsApp, Facebook or LinkedIn. Without one, every share is a blank box. This draws a 1200×630 card from your theme and business name.'),
+            h('div',{style:{display:'flex',gap:12,alignItems:'flex-start',flexWrap:'wrap'}},
+              h('canvas',{ref:el=>{ this._ogCanvas=el; if(el&&!el._drawn){ el._drawn=1; this.drawOgCard(el); } },width:1200,height:630,
+                style:{width:340,height:178,borderRadius:10,border:'1px solid '+P.line,background:P.white}}),
+              h('div',{style:{display:'grid',gap:8}},
+                this.btn('↻ Redraw',()=>{ if(this._ogCanvas){ this._ogCanvas._drawn=0; this.drawOgCard(this._ogCanvas); this._ogCanvas._drawn=1; } },{variant:'outline',pad:'8px 15px',style:{fontSize:13}}),
+                this.btn('↓ Download og-image.jpg',()=>this.downloadOgCard(),{variant:'solid',pad:'9px 16px',style:{fontSize:13}}),
+                h('div',{style:{font:'400 12px/1.5 Plus Jakarta Sans',color:P.muted,maxWidth:230}},'Download it, then upload it to your site as ',h('code',null,'assets/og-image.jpg'),'.'))),
+            ),{marginBottom:18}),
           this.card(h('div',null, h('div',{style:{font:'700 16px '+this.HEAD,color:P.maroon,marginBottom:6}},'Backup'),
             h('p',{style:{font:'400 13px Plus Jakarta Sans',color:P.muted,margin:'0 0 14px'}},'Export all your content as a file, or restore from one.'),
             h('div',{style:{display:'flex',gap:10,flexWrap:'wrap'}}, this.btn('\u2193 Export content',exportData,{variant:'outline',pad:'10px 18px',style:{fontSize:13.5}}), this.btn('\u2191 Import',importData,{variant:'outline',pad:'10px 18px',style:{fontSize:13.5}}), this.btn('Reset site',()=>{ if(confirm('Reset ALL content to defaults? This cannot be undone.')) this.save(this.defaults()); },{variant:'outline',pad:'10px 18px',style:{fontSize:13.5,color:P.bad,borderColor:P.bad}})))))) ); }

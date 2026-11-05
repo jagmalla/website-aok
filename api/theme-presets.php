@@ -126,3 +126,24 @@ function app_theme_css(array $d, string $tpl = ''): string {
         $css .= '--starmap:' . str_replace('rgba(197,160,89,.18)', app_theme_rgba($p['accent'], '.18'), $m[1]) . ';';
     return ':root{' . $css . '}';
 }
+
+// This site's stylesheet names two variables --aok-*, where the kit emits --app-*.
+// Same values; only the names differ, so the preset CSS drops straight in.
+function aok_theme_css(array $d): string {
+    $css = str_replace(['--app-line:', '--app-gold-label:'], ['--aok-line:', '--aok-gold-label:'], app_theme_css($d));
+    // The same colours again as --aok-p-*, so the browser app can read its inline-style palette
+    // straight from the stylesheet. Keeping it in CSS avoids a second <script> in the page, which
+    // the Content-Security-Policy would then have to carry a hash for.
+    $vars = '';
+    foreach (aok_theme_palette($d) as $k => $v) $vars .= '--aok-p-' . strtolower(preg_replace('/([A-Z])/', '-$1', $k)) . ':' . $v . ';';
+    return $css . ':root{' . $vars . '}';
+}
+// The colours the browser app paints with inline styles, taken from the active preset so the
+// JS palette and the stylesheet can never drift apart (the re-skin trap in CLAUDE.md).
+function aok_theme_palette(array $d): array {
+    $t = app_theme_active($d);
+    return ['bg' => $t['bg'], 'bgAlt' => $t['surface'], 'card' => $t['card'], 'ink' => $t['textMain'],
+        'maroon' => $t['primary'], 'maroonD' => $t['primaryHover'], 'red' => $t['secondary'], 'redD' => $t['secondaryDeep'],
+        'gold' => $t['accent'], 'goldL' => $t['accentLight'], 'cream' => $t['onPrimary'], 'muted' => $t['textMuted'],
+        'line' => $t['border']];
+}

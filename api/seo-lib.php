@@ -63,6 +63,20 @@ function aok_get(array $a, string $path, $fallback = null) {
     return $a === null ? $fallback : $a;
 }
 
+// A post's description: its own SEO line, else the excerpt, else its first real paragraph.
+function aok_post_description(array $p): string {
+    $own = trim(aok_text((string)($p['seoDescription'] ?? ($p['seo']['description'] ?? ''))));
+    if ($own !== '') return aok_cut($own, 158);
+    $ex = trim(aok_text((string)($p['excerpt'] ?? '')));
+    if ($ex !== '') return aok_cut($ex, 158);
+    foreach (aok_md_blocks((string)($p['body'] ?? '')) as $b) {
+        if (($b[0] === 'p' || $b[0] === 'answer') && is_string($b[1])) {
+            $x = trim(aok_text($b[1])); if ($x !== '') return aok_cut($x, 158);
+        }
+    }
+    return '';
+}
+
 function aok_base(array $d): string {
     $b = rtrim((string)($d['siteUrl'] ?? ''), '/');
     if ($b === '') $b = 'https://www.analysisofkarma.com';

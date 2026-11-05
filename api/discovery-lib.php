@@ -127,9 +127,38 @@ function aok_llms_text(array $d, bool $full): string {
 
 // After a save: refresh the static copies in the web root, so servers that still serve the files directly
 // (an older .htaccess) stay in sync too. Silently skipped when the files can't be written.
+// RSS 2.0 of the most recent published posts, for feed readers and news aggregators.
+function aok_rss_xml(array $d): string {
+    $base = aok_base($d); $brand = aok_brand($d);
+    $desc = aok_llms_md(aok_text(aok_get($d, 'seo.home.metaDescription', '') ?: aok_get($d, 'brand.tagline', '')));
+    $posts = [];
+    foreach ($d['blog'] ?? [] as $p) {
+        if (empty($p['published']) || empty($p['slug']) || !empty($p['redirectTo'])) continue;
+        if (stripos((string)($p['robots'] ?? ''), 'noindex') !== false) continue;
+        $posts[] = $p;
+    }
+    usort($posts, function ($a, $b) { return strcmp((string)($b['date'] ?? ''), (string)($a['date'] ?? '')); });
+    $esc = function ($t) { return htmlspecialchars((string)$t, ENT_XML1 | ENT_COMPAT, 'UTF-8'); };
+    $items = '';
+    foreach (array_slice($posts, 0, 30) as $p) {
+        $url = $base . '/blog/' . rawurlencode((string)$p['slug']);
+        $ts = !empty($p['date']) ? strtotime(substr((string)$p['date'], 0, 10) . ' 09:00:00 UTC') : 0;
+        $items .= "  <item>\n    <title>" . $esc(aok_text($p['title'] ?? '')) . "</title>\n"
+            . "    <link>$url</link>\n    <guid isPermaLink=\"true\">$url</guid>\n"
+            . ($ts ? "    <pubDate>" . gmdate('D, d M Y H:i:s', $ts) . " +0000</pubDate>\n" : '')
+            . "    <description>" . $esc(aok_post_description($p)) . "</description>\n  </item>\n";
+    }
+    return '<?xml version="1.0" encoding="UTF-8"?>' . "\n"
+        . '<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel>' . "\n"
+        . "  <title>" . $esc($brand) . "</title>\n  <link>$base/</link>\n"
+        . "  <description>" . $esc($desc) . "</description>\n  <language>en</language>\n"
+        . "  <atom:link href=\"$base/rss.xml\" rel=\"self\" type=\"application/rss+xml\"/>\n"
+        . $items . "</channel></rss>\n";
+}
+
 function aok_write_static_files(array $d): array {
     $root = dirname(__DIR__); $done = [];
-    $files = ['sitemap.xml' => aok_sitemap_xml($d), 'llms.txt' => aok_llms_text($d, false), 'llms-full.txt' => aok_llms_text($d, true), 'robots.txt' => aok_robots_text($d)];
+    $files = ['sitemap.xml' => aok_sitemap_xml($d), 'llms.txt' => aok_llms_text($d, false), 'llms-full.txt' => aok_llms_text($d, true), 'robots.txt' => aok_robots_text($d), 'rss.xml' => aok_rss_xml($d)];
     foreach ($files as $name => $text) {
         $f = $root . '/' . $name;
         if (strlen($text) < 100 || (is_file($f) && !is_writable($f)) || (!is_file($f) && !is_writable($root))) continue;

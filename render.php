@@ -107,6 +107,7 @@ try {
     }
     if (is_numeric($lat) && is_numeric($lng)) $head .= '<meta name="geo.position" content="' . $e($lat . ';' . $lng) . '">' . "\n" . '<meta name="ICBM" content="' . $e($lat . ', ' . $lng) . '">' . "\n";
     $head .= '<link rel="alternate" type="text/plain" href="/llms.txt" title="llms.txt">' . "\n"
+        . '<link rel="alternate" type="application/rss+xml" href="/rss.xml" title="' . $e(aok_brand($d)) . ' \u2014 blog">' . "\n"
         . '<script type="application/ld+json" id="aok-graph">' . json_encode($graph, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE | JSON_HEX_TAG) . "</script>\n"
         // The server-rendered copy is the page until the interactive one takes over: React replaces it
         // the moment it mounts. It is deliberately NOT hidden in the meantime — hiding it left a moment
@@ -122,6 +123,12 @@ try {
         . '.aok-ssr #about-the-astrologer{max-width:960px;margin:60px auto 40px;padding:28px;border:1px solid rgba(212,175,55,.3);border-radius:20px}'
         . '@media (max-width:1023px){.aok-ssr-top{grid-template-columns:minmax(0,1fr)}.aok-ssr-side{position:static;order:-1}.aok-ssr-wide ol{grid-template-columns:repeat(2,minmax(0,1fr))}}'
         . '@media (max-width:767px){.aok-ssr{padding:16px}.aok-ssr-wide ol{grid-template-columns:minmax(0,1fr)}}</style>' . "\n";
+
+    // Active colour preset (Admin -> Settings -> Theme). Emitted after the stylesheet so it
+    // overrides :root. It also carries the palette as --aok-p-* variables, which the browser app
+    // reads for its inline styles, so both stay on the same colours.
+    require_once __DIR__ . '/api/theme-presets.php';
+    $head .= '<style id="aok-theme">' . aok_theme_css($d) . '</style>' . "\n";
 
     // one title + description: replace the template's static ones
     $html = preg_replace('#<title>.*?</title>\s*#s', '', $tpl, 1);
