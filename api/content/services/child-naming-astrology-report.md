@@ -1,12 +1,16 @@
 > **Direct answer:** Our Child Naming and Astrology Consultation helps parents welcome their newborn with auspicious beginnings. In a 60-minute session ($100 CAD/hr, pay after satisfaction), we provide favorable first-syllable name recommendations (Nama Nakshatra) and an uplifting, supportive overview of the child's strengths and learning temperament.
 
-## Classical Vedic Methodology & Texts Used
+## How Does Vedic Astrology Choose an Auspicious Name for a Baby?
+Vedic astrology chooses a baby's name from the child's birth star (Nama Nakshatra) and its quarter (Pada), which give the classical starting syllables (Aksharas). Jag Mallah checks that the name's sound harmonises with the child's Moon and Lagna. The reading is always encouraging: no lifespan, medical or fear-based predictions are ever made for children.
+
 - **Nama Nakshatra & Pada Calculation:** Identifying the child's exact birth star and quarter (Pada) to derive the classical, phonetically auspicious starting syllables (Aksharas).
 - **Sound Vibration (Nada Yoga):** Ensuring the chosen name creates harmonious phonetic resonance with the child's Moon and Lagna.
 - **Nurturing Temperament Assessment:** Evaluating the Moon, Mercury, and 5th house to help parents understand the child's emotional processing, creative instincts, and learning styles.
 - **Strict Ethical Rule:** We do not perform lifespan predictions, medical diagnostics, or fear-inducing readings for children. The entire reading focuses on encouragement, balance, and supportive parenting.
 
-## Key Life Questions & Chart Factors Analyzed
+## What Will Parents Learn From a Child Astrology Report?
+Parents receive a list of verified auspicious name letters and a gentle picture of their child's temperament: emotional needs, comfort patterns, and natural learning strengths in science, arts, analysis or sport. The report also offers practical nursery guidance on light, colour and elemental balance to support restful sleep and a peaceful home.
+
 - **Auspicious Name Letters:** Providing parents with a list of verified classical syllables aligned with the child's lunar energy.
 - **Emotional Needs & Comfort Patterns:** Understanding whether the child thrives in vibrant social environments or quiet, creative spaces.
 - **Learning & Intellectual Strengths:** Identifying natural affinities for science, arts, analytical thinking, or athletic expression.

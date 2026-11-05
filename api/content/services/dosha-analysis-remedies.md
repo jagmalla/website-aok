@@ -8,7 +8,9 @@ Many online software reports trigger false Dosha alarms without checking classic
 - **Pitra Dosha Deconstruction:** Analyzing afflictions to the 9th house, 9th lord, and Sun to understand ancestral karmic duties and unresolved familial patterns.
 - **Sade Sati & Shani Afflictions:** Objective examination of Saturn's 7.5-year transit through the 12th, 1st, and 2nd houses from the natal Moon.
 
-## Key Life Questions & Chart Factors Analyzed
+## How Do You Know If a Dosha Is Really Affecting Your Life?
+A dosha only matters when it creates a functional obstacle, not just a nominal placement. Jag Mallah checks which life area it actually touches (marriage, career, health or peace of mind), which dasha and transit periods activate it and when relief arrives, and the discipline and wisdom the combination can build when handled consciously.
+
 - **Real vs. Imagined Affliction:** Differentiating between a nominal planetary placement and a functional obstacle.
 - **Specific Life Areas Impacted:** Pinpointing whether challenges manifest in marriage, career, health, or peace of mind.
 - **Timing of Karmic Unfolding:** Understanding which dasha and transit periods activate the dosha and when relief arrives.

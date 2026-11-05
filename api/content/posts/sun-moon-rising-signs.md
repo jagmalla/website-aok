@@ -1,6 +1,6 @@
 > **Key takeaway:** In Vedic astrology the "big three" are read in a different order of importance: the ascendant (Lagna) first, then the Moon sign (Rashi) and its Nakshatra, then the Sun. All three use the sidereal zodiac, so they often fall one sign earlier than in Western astrology, and need an accurate birth time.
 
-## Classical Foundations in Jyotish
+## Why Does Vedic Astrology Put the Rising Sign and Moon First?
 
 ### Why Jyotish puts the ascendant and Moon first
 Western astrology is famous for Sun signs, but classical Jyotish gives the **Lagna (ascendant)** and the **Moon** the leading roles. **Brihat Parashara Hora Shastra** builds the whole house system from the Lagna, which represents the body, the self and the overall direction of life. The Moon represents the **mind (Manas)**, and the chart drawn from the Moon sign, the **Chandra Lagna**, is the second reference point for every judgement. The Sun is the **Atma**, the soul and vitality, deeply important but read as one of three pillars rather than the whole story.
@@ -16,7 +16,7 @@ Within each sign lie the 27 **Nakshatras**, lunar mansions of 13°20′ each. Yo
 - **Moon (Rashi):** the mind, emotions, mother, comfort and how you experience events.
 - **Sun:** the soul, father, authority, confidence and life purpose.
 
-## House, Planetary & Dasha Dynamics
+## How Do the Sun, Moon and Lagna Work Together in Your Chart?
 
 ### The lords matter as much as the signs
 Knowing your ascendant sign is a start; knowing where its **lord** sits is where real reading begins. A Libra ascendant with Venus in the 10th house describes someone whose identity is closely tied to career and public life. The same ascendant with Venus in the 12th suggests a more private, spiritual or foreign-oriented path. The same principle applies to the Moon's sign lord, the dispositor of the mind.
@@ -40,7 +40,7 @@ Because the Vimshottari dasha starts from the Moon's Nakshatra, the Moon quietly
 ### Insights from Jaimini and Nadi
 The **Jaimini Upadesa Sutras** add the **Atmakaraka**, the planet with the highest degree, as a second "soul planet". It sometimes tells more about your deepest motivation than the Sun itself. **Bhrigu Nandi Nadi** reads the Sun as the father and authority and the Moon as the mother and mind, following how planets in trine to them shape those relationships.
 
-## Conscious Karma & Practical Vedic Remedies
+## How Can You Keep Your Sun, Moon and Rising Sign in Balance?
 
 The big three describe your instrument, mind and soul. Remedies keep all three in good tune.
 

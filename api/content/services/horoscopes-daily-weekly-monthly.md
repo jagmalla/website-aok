@@ -1,12 +1,16 @@
 > **Direct answer:** Unlike mass-market sun sign horoscopes, our personalized transit guidance is rooted in your real Vedic Moon sign (Chandra Rashi) and Nakshatra. Through dedicated consultations ($100 CAD/hr, pay after satisfaction), we examine how active planetary transits affect your emotional and financial landscape.
 
-## Classical Vedic Methodology & Texts Used
+## How Are Personalised Vedic Horoscopes Different From Sun-Sign Horoscopes?
+Personalised Vedic horoscopes are read from your Moon sign (Chandra Rashi) and birth star, not a generic Sun sign. Jag Mallah measures real-time transits of Saturn, Jupiter and Rahu-Ketu against your natal Moon, scores them with Ashtakavarga bindus and checks daily Tara Bala, so each forecast reflects your own chart rather than a twelfth of the population.
+
 - **Chandra Rashi (Vedic Moon Sign):** Analyzing real-time planetary transits relative to the natal Moon position for psychological and circumstantial accuracy.
 - **Ashtakavarga Transit Evaluation:** Calculating bindu scores across relevant houses to gauge whether upcoming transits carry high support (above 28 bindus) or require caution.
 - **Tara Bala & Nakshatra Transits:** Evaluating the relationship between daily transiting Moon nakshatras and your birth star (Janma Nakshatra).
 - **Major Planetary Shifts:** Assessing movements of Saturn (Shani), Jupiter (Guru), and Rahu/Ketu across key life houses.
 
-## Key Life Questions & Chart Factors Analyzed
+## What Can a Daily, Weekly or Monthly Horoscope Help You Plan?
+A personalised horoscope helps you plan peak days for meetings, pitches and creative work, favourable windows for investments and expected spending spikes, calmer times for important conversations, and rest during challenging 6th or 8th house lunar transits. It turns planetary movements into a practical calendar for your week or month.
+
 - **Weekly Productivity & Peak Days:** Identifying days governed by favorable Moon transits for important meetings, pitches, or creative projects.
 - **Monthly Financial Planning:** Pinpointing favorable transit windows for investments and anticipating temporary expenditure spikes.
 - **Relationship Communication Timing:** Recognizing periods of lunar affliction to avoid unnecessary arguments.

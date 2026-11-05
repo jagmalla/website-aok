@@ -1,6 +1,6 @@
 > **Key takeaway:** In Jyotish every remedy works through the mind, which the Moon represents. Meditation (Dhyana) steadies that mind, so mantra, charity, fasting and gemstones are applied with attention and intention. Matched to your chart and dasha, a short daily practice turns remedies from mechanical ritual into conscious karma that changes how you respond to planetary periods.
 
-## Classical Foundations in Jyotish
+## What Do the Classical Texts Say About the Mind, Karma and Remedies?
 
 ### The Moon, the mind and the remedies
 **Brihat Parashara Hora Shastra** calls the Moon the mind (**Manas**) and devotes chapters to remedial measures for difficult planetary periods: mantra, charity, worship and specific offerings. The texts assume something that is easy to forget: a remedy is performed by a person, with a mind, and the quality of that mind affects the result. A mantra repeated while thinking about something else is not the same as a mantra repeated with attention.
@@ -17,7 +17,7 @@ Remedies, and above all meditation, belong to **Kriyamana karma**. They cannot r
 ### Breath, elements and timing
 **Shiva Swarodaya** teaches that the breath alternates between the left nostril (**Ida**, lunar, calm) and the right nostril (**Pingala**, solar, active), with **Sushumna** when both flow equally, a time considered ideal for meditation. Swarodaya also links the breath to the **Pancha Mahabhuta**, the five elements. Awareness of the breath is therefore both a meditation and a timing tool that connects naturally with astrology.
 
-## House, Planetary & Dasha Dynamics
+## How Does Your Chart Guide the Right Meditation?
 
 ### Matching meditation to the chart
 In my consultations I suggest practices that suit the planets involved:
@@ -38,7 +38,7 @@ The **5th house** is the house of mantra and devotion, the **9th** of dharma and
 ### The dasha and the right moment
 A meditation practice is particularly valuable when a challenging **Mahadasha or Antardasha** begins, during **Sade Sati**, or when a strong transit falls on the natal Moon. Beginning a practice in a supportive period, on a **Shukla Paksha** day or on the weekday of the planet in question, helps it take root.
 
-## Conscious Karma & Practical Vedic Remedies
+## How Do You Build a Daily Meditation and Remedy Practice?
 
 ### A simple daily structure
 1. **Sit** for ten to fifteen minutes at the same time each day, ideally early morning.

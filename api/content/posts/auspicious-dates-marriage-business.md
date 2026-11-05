@@ -1,6 +1,6 @@
 > **Key takeaway:** Muhurta, Vedic electional astrology, chooses a time when the five limbs of the Panchang (Tithi, Vara, Nakshatra, Yoga and Karana), the rising sign and the condition of Jupiter, Venus and the Moon support your goal. A personal Muhurta also checks Tara Bala, Chandra Bala and both partners' charts, giving important beginnings the best possible start.
 
-## Classical Foundations in Jyotish
+## What Is Muhurta, and Which Periods Should You Avoid?
 
 ### The idea of Muhurta
 Classical Jyotish has three main branches: **Siddhanta** (astronomy and mathematics), **Samhita** (mundane astrology and omens) and **Hora** (individual charts). Muhurta draws on all three. Works such as **Muhurta Chintamani** and **Muhurta Martanda**, and the electional chapters of earlier texts, set out rules for choosing times for marriage, travel, construction, education, business and spiritual ceremonies. The underlying idea is that the chart of a beginning shapes what follows, just as a birth chart shapes a life.
@@ -19,7 +19,7 @@ Classical Jyotish has three main branches: **Siddhanta** (astronomy and mathemat
 - **Kharmas or Malmas:** when the Sun transits Sagittarius or Pisces, and in an intercalary lunar month.
 - **Rahu Kalam, Yamaganda and Gulika Kalam:** daily periods considered inauspicious for new starts.
 
-## House, Planetary & Dasha Dynamics
+## How Is a Muhurta Chosen for Marriage, Business or Property?
 
 ### The rising sign of the Muhurta
 A Muhurta is ultimately a chart. Its **ascendant** should be strong, ideally with benefics in the Kendras and Trikonas and malefics in the 3rd, 6th and 11th houses. The **8th house** should be free of planets, and for a marriage Muhurta the **7th house** should be clean and its lord well placed. Fixed signs (Taurus, Leo, Scorpio and Aquarius) are often chosen for matters intended to last, such as a home or a business foundation.
@@ -46,7 +46,7 @@ Entering a new home traditionally uses fixed or dual ascendants, a strong 4th ho
 ### Prashna when the birth time is unknown
 When one partner's birth time is uncertain, the **Tajika Prashna** method can supplement Muhurta: a chart cast for the moment a sincere question is asked can confirm whether a proposed date is supportive.
 
-## Conscious Karma & Practical Vedic Remedies
+## How Do You Make the Most of an Auspicious Date?
 
 A good Muhurta is a favourable wind, not a guarantee. The intention, preparation and conduct of the people involved remain the decisive factors, which is the essence of **Kriyamana karma**.
 

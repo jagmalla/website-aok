@@ -8,7 +8,9 @@ Authentic Kundli Milan goes beyond automated 36-point Ashtakoota Guna scores by 
 - **Mangal Dosha (Kuja Dosha) Evaluation:** Analyzing Mars in the 1st, 2nd, 4th, 7th, 8th, or 12th houses with special attention to classical cancellation rules (Parihara) based on sign, house placement, and benefic aspects.
 - **Longevity & Mental Harmony (Ayur & Mano-Bala):** Evaluating 8th and 1st houses to ensure longevity and shared emotional endurance.
 
-## Key Life Questions & Chart Factors Analyzed
+## What Does Kundli Milan Reveal About Married Life?
+Kundli Milan reveals emotional bonding through Moon-to-Moon factors (Graha Maitri and Bhakoot), physical and family harmony through Yoni and Nadi, and the couple's financial growth through the 2nd and 11th houses across both charts. It also checks the 4th and 9th houses for how smoothly each partner settles in with in-laws and extended family.
+
 - **Emotional & Psychological Bonding:** Moon-to-Moon alignment (Graha Maitri and Bhakoot) determining everyday empathy and mutual communication.
 - **Physical & Genetic Harmony:** Yoni and Nadi compatibility assessing physiological resonance and future family vitality.
 - **Financial Growth as a Couple:** 2nd and 11th house inter-chart influences to verify mutual prosperity after marriage.

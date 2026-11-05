@@ -1,12 +1,16 @@
 > **Direct answer:** Vedic Meditation Guidance connects ancient contemplative practices with your personal birth chart. In a 60-minute 1-on-1 session ($100 CAD/hr, pay after satisfaction), we design a customized breathwork (Pranayama), mantra, and meditation routine matched to your Moon sign and planetary needs to calm the mind and accelerate karmic balance.
 
-## Classical Vedic Methodology & Texts Used
+## How Is Meditation Personalised Using Your Vedic Chart?
+Meditation is personalised by reading your Moon (emotional mind) and Mercury (intellect) to choose a style that suits your temperament. Jag Mallah draws on Shiva Swarodaya breath science (Ida, Pingala and Sushumna), selects a seed (Beej) mantra linked to your Ishta Devata, and balances the five elements (Pancha Mahabhuta) through grounding or calming practice.
+
 - **Shiva Swarodaya & Swara Shastra:** Integrating classical breath divination and nostril breath cycle awareness (Ida, Pingala, and Sushumna nadis) to optimize mental clarity and spiritual balance.
 - **Moon & Mercury Psychology:** Analyzing the Moon (Manas - emotional mind) and Mercury (Buddhi - intellect) to tailor meditation styles that suit your natural temperament.
 - **Beej Mantra Selection:** Prescribing personalized seed mantras aligned with your Ishta Devata (personal spiritual guide) identified through the 12th house from the Karakamsha.
 - **Pancha Mahabhuta Balancing:** Regulating internal elemental imbalances (Earth, Water, Fire, Air, Space) through grounding or calming meditation practices.
 
-## Key Life Questions & Chart Factors Analyzed
+## What Can Personalised Vedic Meditation Help With?
+Personalised meditation can ease a restless mind and anxiety patterns linked to Moon-Rahu or Moon-Saturn signatures, strengthen intuition through contemplative silence, and build a realistic 15–20 minute daily routine that fits your work. It also deepens your other astrological remedies, such as charity and personal contemplation, through steady focus.
+
 - **Restless Mind & Anxiety Patterns:** Mitigating Moon-Rahu or Moon-Saturn stress signatures through focused breath cultivation.
 - **Awakening Spiritual Intuition:** Strengthening Jupiter and Ketu influences through contemplative silence and dhyana.
 - **Establishing Daily Discipline:** Creating a realistic 15–20 minute morning or evening routine tailored to your work schedule.

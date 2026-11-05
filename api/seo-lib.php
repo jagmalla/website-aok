@@ -102,6 +102,16 @@ function aok_canonical_redirect(array $d): void {
     exit;
 }
 
+// The day an item was last changed: its updatedAt (set on save by api/sync.php), never earlier than its
+// own publication date; $fallback when it has neither.
+function aok_item_modified(array $x, string $fallback = ''): string {
+    $pub = preg_match('/^\d{4}-\d{2}-\d{2}/', (string)($x['date'] ?? '')) ? substr((string)$x['date'], 0, 10) : '';
+    $up = preg_match('/^\d{4}-\d{2}-\d{2}/', (string)($x['updatedAt'] ?? '')) ? substr((string)$x['updatedAt'], 0, 10) : '';
+    $best = max($pub, $up);
+    return $best !== '' ? $best : $fallback;
+}
+function aok_norm_text(string $s): string { return trim(preg_replace('/\s+/u', ' ', str_replace("\r\n", "\n", $s))); }
+
 function aok_last_modified(): string {
     static $t = null;
     if ($t === null) {
@@ -403,7 +413,7 @@ function aok_related_services(array $d, array $post, int $n = 3): array {
 }
 
 function aok_related_posts(array $d, array $svc, int $n = 3): array {
-    return aok_cluster_pick(aok_live_posts($d), function ($p) use ($svc) { return aok_cluster_score($p, $svc); }, $n);
+    return aok_cluster_pick(aok_live_posts($d), function ($p) use ($svc) { return aok_cluster_score($p, $svc); }, $n, $n);   // always a full set of articles: the closest matches, then the next closest
 }
 
 // ------------------------------------------------------------------ titles & meta ----
@@ -627,6 +637,19 @@ function aok_area_served(array $d): array {
         $seen[strtolower($parts[0])] = 1;
     }
     $rc = trim((string)aok_get($d, 'local.regionCode', 'BC'));
+    // the city's own neighbourhoods (Fleetwood, Newton ...), placed right after the city itself
+    $city = trim((string)aok_get($d, 'local.locality', ''));
+    $hoods = [];
+    foreach ((array)aok_get($d, 'local.neighbourhoods', []) as $n) {
+        $n = trim((string)$n); if ($n === '' || $city === '' || isset($seen[strtolower($n)])) continue;
+        $hoods[] = ['@type' => 'Place', 'name' => $n . ', ' . $city . ($rc !== '' ? ', ' . $rc : ''), 'containedInPlace' => ['@type' => 'City', 'name' => $city . ($rc !== '' ? ', ' . $rc : '')]];
+        $seen[strtolower($n)] = 1;
+    }
+    if ($hoods) {
+        $at = 0;
+        foreach ($out as $i => $o) if (stripos((string)$o['name'], $city . ',') === 0 || strcasecmp((string)$o['name'], $city) === 0) { $at = $i + 1; break; }
+        array_splice($out, $at, 0, $hoods);
+    }
     foreach ((array)aok_get($d, 'local.nearbyCities', []) as $c) {   // cities named on the page but not in the list above
         $c = trim((string)$c); if ($c === '' || isset($seen[strtolower($c)])) continue;
         $out[] = ['@type' => 'City', 'name' => $c . ($rc !== '' && strpos($c, ',') === false ? ', ' . $rc : '')];
@@ -667,7 +690,7 @@ function aok_hours_text(array $d): array {   // ['Monday' => '10:00â€“18:00', â€
 
 function aok_graph(array $d, array $r, array $meta): array {
     $base = aok_base($d); $brand = aok_brand($d);
-    $ORG = $base . '/#organization'; $PERSON = $base . '/#person'; $SITE = $base . '/#website'; $CATALOG = $base . '/#services';
+    $ORG = $base . '/#business'; $PERSON = $base . '/#jag-mallah'; $SITE = $base . '/#website'; $CATALOG = $base . '/#services';
     $url = $meta['canonical'] ?: $base . ($r['path'] ?? '/');
     $slugs = aok_service_slugs($d['services'] ?? []);
     $logo = $base . (is_file(__DIR__ . '/../assets/logo-512.png') ? '/assets/logo-512.png' : '/assets/logo.png');
@@ -772,7 +795,8 @@ function aok_graph(array $d, array $r, array $meta): array {
     // the page itself
     $types = ['about' => 'AboutPage', 'contact' => 'ContactPage', 'blog' => 'CollectionPage', 'services' => 'CollectionPage', 'faq' => 'FAQPage', 'locations' => 'CollectionPage'];
     $page = ['@type' => $types[$r['type']] ?? 'WebPage', '@id' => $url . '#webpage', 'url' => $url, 'name' => $meta['title'],
-        'description' => $meta['description'], 'isPartOf' => ['@id' => $SITE], 'inLanguage' => 'en-CA', 'dateModified' => aok_last_modified()];
+        'description' => $meta['description'], 'isPartOf' => ['@id' => $SITE], 'inLanguage' => 'en-CA',
+        'dateModified' => (in_array($r['type'], ['service', 'post', 'location', 'page'], true) && is_array($r['item'] ?? null)) ? aok_item_modified($r['item'], aok_last_modified()) : aok_last_modified()];
     if ($r['type'] === 'home') $page['about'] = ['@id' => $ORG];
     if ($r['type'] === 'about') { $page['about'] = ['@id' => $PERSON]; $page['mainEntity'] = ['@id' => $PERSON]; }
     if ($r['type'] === 'contact') $page['mainEntity'] = ['@id' => $ORG];
@@ -855,7 +879,8 @@ function aok_graph(array $d, array $r, array $meta): array {
             'description' => $meta['description'], 'url' => $url, 'mainEntityOfPage' => ['@id' => $url . '#webpage'],
             'author' => ['@id' => $PERSON], 'publisher' => ['@id' => $ORG], 'image' => (empty($p['image']) && ($img = aok_post_images($d, $p))) ? $img : $meta['image'], 'inLanguage' => 'en-CA',
             'wordCount' => str_word_count(aok_text($p['body'] ?? ''))];
-        if (!empty($p['date'])) { $post['datePublished'] = substr($p['date'], 0, 10); $post['dateModified'] = substr($p['date'], 0, 10); }
+        if (!empty($p['date'])) $post['datePublished'] = substr($p['date'], 0, 10);
+        if ($dm = aok_item_modified($p)) $post['dateModified'] = $dm;
         if (!empty($p['focusKeyword'])) $post['keywords'] = $p['focusKeyword'];
         $graph[] = $post;
         $qs = [];
@@ -1487,17 +1512,17 @@ function aok_sitemap_urls(array $d): array {
     $slugs = aok_service_slugs($d['services'] ?? []);
     foreach ($d['services'] ?? [] as $s) {
         if (!aok_service_is_live($s) || !empty($s['canonical']) || !empty($s['noindex'])) continue;
-        $lm = preg_match('/^\d{4}-\d{2}-\d{2}/', (string)($s['updatedAt'] ?? '')) ? substr($s['updatedAt'], 0, 10) : $mod;   // set on every save that changes it
+        $lm = aok_item_modified($s, $mod);   // set on every save that changes it
         $out[] = [$base . '/services/' . $slugs[(string)($s['id'] ?? '')], $lm, 'monthly'];
     }
     foreach ($d['blog'] ?? [] as $p) {
         if (empty($p['published']) || empty($p['slug']) || !empty($p['redirectTo']) || !empty($p['canonical']) || !$indexable($p['robots'] ?? '')) continue;
-        $out[] = [$base . '/blog/' . rawurlencode($p['slug']), preg_match('/^\d{4}-\d{2}-\d{2}/', (string)($p['date'] ?? '')) ? substr($p['date'], 0, 10) : $mod, 'monthly'];
+        $out[] = [$base . '/blog/' . rawurlencode($p['slug']), aok_item_modified($p, $mod), 'monthly'];
     }
     if (aok_locations($d)) {
         $out[] = [$base . '/locations', $mod, 'monthly'];
-        foreach (aok_locations($d) as $l) if (empty($l['noindex'])) $out[] = [$base . '/locations/' . rawurlencode((string)$l['slug']), $mod, 'monthly'];
+        foreach (aok_locations($d) as $l) if (empty($l['noindex'])) $out[] = [$base . '/locations/' . rawurlencode((string)$l['slug']), aok_item_modified($l, $mod), 'monthly'];
     }
-    foreach ($d['pages'] ?? [] as $pg) if (!empty($pg['slug']) && empty($pg['noindex'])) $out[] = [$base . '/' . rawurlencode($pg['slug']), $mod, 'monthly'];
+    foreach ($d['pages'] ?? [] as $pg) if (!empty($pg['slug']) && empty($pg['noindex'])) $out[] = [$base . '/' . rawurlencode($pg['slug']), aok_item_modified($pg, $mod), 'monthly'];
     return $out;
 }

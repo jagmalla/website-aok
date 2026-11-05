@@ -1,6 +1,6 @@
 > **Key takeaway:** In Vedic astrology the twelve houses (Bhavas) are counted sign by sign from the ascendant. Each governs an area of life and is read through its lord, the planets in it, aspects and its significator. Houses group into Kendras, Trikonas, Dusthanas and Upachayas, and dashas show when each house's promise unfolds.
 
-## Classical Foundations in Jyotish
+## What Do the Classical Texts Say About the 12 Houses?
 
 ### Bhavas in Brihat Parashara Hora Shastra
 Jyotish calls the houses **Bhavas**, literally "states of being". **Brihat Parashara Hora Shastra** devotes a full chapter to the significations of each house and further chapters to the results of each house lord in each house. Most Vedic astrologers use **whole-sign houses**: the entire rising sign is the 1st house, the following sign the 2nd, and so on. This keeps the chart clear and is the system assumed by the classical texts.
@@ -29,7 +29,7 @@ The houses also fall into four trines that describe the **Purusharthas**, the fo
 
 A chart with many planets in the Artha houses tends to focus on work and resources; one emphasising the Moksha houses tends toward inner life and spiritual search.
 
-## House, Planetary & Dasha Dynamics
+## How Are the Houses Judged and Timed in a Vedic Chart?
 
 ### Kendras, Trikonas, Dusthanas and Upachayas
 - **Kendras (1, 4, 7, 10):** the pillars of the chart, giving stability and action. Planets here are strong and visible.
@@ -56,7 +56,7 @@ An empty house simply means its results depend mainly on its lord and on the pla
 ### Timing house results
 A house delivers its results when the **dasha** of its lord, of the planets in it, or of the planets aspecting it is running, and when transits of Saturn and Jupiter activate it. A promising 4th house, for example, often brings property during the Antardasha of the 4th lord with Jupiter transiting the 4th or aspecting it. **Jaimini** astrology adds the **Arudha Padas**, which show how each house manifests in the world, and **Bhrigu Nandi Nadi** reads the houses through the signs and the planets in trine to one another.
 
-## Conscious Karma & Practical Vedic Remedies
+## How Can You Work With the Karma Each House Shows?
 
 The houses show where karma is concentrated in your life, and where your effort makes the greatest difference.
 

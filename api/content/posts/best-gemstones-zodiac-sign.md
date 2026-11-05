@@ -1,6 +1,6 @@
 > **Key takeaway:** In Jyotish a gemstone strengthens one planet, so it is chosen from your ascendant and the planet's functional role, not from your Sun sign alone. It helps only when that planet is a well-placed benefic for you. Gemstones support right action, Mantra and Dana; they never replace them, and the wrong stone can aggravate problems.
 
-## Classical Foundations in Jyotish
+## Why Does Your Ascendant Matter More Than Your Sun Sign for Gemstones?
 
 ### The Navaratna: nine stones for nine planets
 Classical tradition, followed in texts such as the **Garuda Purana** and in later Jyotish practice, assigns one primary gemstone to each of the nine grahas:
@@ -22,7 +22,7 @@ A gemstone is understood to **amplify** the planet it represents. That is why th
 
 So the same stone can help one person and harm another. Blue sapphire strengthens Saturn, which is a Yogakaraka for Taurus and Libra ascendants, but rules the 8th house for Cancer and Leo ascendants. Red coral can support an Aries or Scorpio ascendant, where Mars rules the 1st, but may not suit a Gemini ascendant, for whom Mars rules the 6th and 11th.
 
-## House, Planetary & Dasha Dynamics
+## Which Gemstone Suits Your Ascendant, and When Should You Avoid One?
 
 ### Life stones by ascendant: a starting point
 Traditional practice often begins with three stones linked to the 1st, 5th and 9th lords:
@@ -57,7 +57,7 @@ Gemstones are most effective when the planet is running its **Mahadasha or Antar
 ### Traditional practice
 Classical guidance covers weight, metal and the finger: yellow sapphire on the index finger in gold, blue sapphire on the middle finger often in silver or panchdhatu, ruby on the ring finger in gold or copper, emerald on the little finger. A stone is traditionally first worn on the planet's weekday during a favourable time. Good-quality, natural, untreated stones are preferred, and many people choose a **substitute (Uparatna)** such as amethyst for Saturn or citrine for Jupiter.
 
-## Conscious Karma & Practical Vedic Remedies
+## Do You Need a Gemstone at All, or Is Another Remedy Better?
 
 At Analysis of Karma I evaluate gemstones honestly and do not sell them, so the recommendation is never tied to a sale. In many charts I recommend no stone at all, because other remedies are safer and more effective.
 

@@ -63,7 +63,7 @@ C. RIGHT AFTER UPLOAD
 D. OFF-SITE (after the website is live)
 ---------------------------------------
 Use exactly these, character for character, on every listing:
-   Name:     Analysis of Karma | Vedic astrologer
+   Name:     Analysis of Karma - Vedic astrologer
    Address:  15450 92a Ave, Surrey, BC V3R 9B1, Canada
    Phone:    +1 (236) 660-2000
    Website:  https://www.analysisofkarma.com/
@@ -82,7 +82,7 @@ Use exactly these, character for character, on every listing:
 
 [ ] 12. Bing Places for Business: use "Import from Google". Bing copies the
          name Google shows TODAY, so if Google still shows the long name,
-         correct it to "Analysis of Karma | Vedic astrologer" in Bing after the import.
+         correct it to "Analysis of Karma - Vedic astrologer" in Bing after the import.
 
 [ ] 13. Apple Business Connect, Yelp Canada, YellowPages.ca: claim or create,
          using the block above exactly.
@@ -90,7 +90,7 @@ Use exactly these, character for character, on every listing:
 
 E. DECISIONS ONLY YOU CAN MAKE
 ------------------------------
-E1. (Decided: the business name is "Analysis of Karma | Vedic astrologer". See section F.)
+E1. (Decided: the business name is "Analysis of Karma - Vedic astrologer". See section F.)
 
 E2. Consultation times. The location pages promise slots outside your
     published hours (Mon-Fri 10:00-17:00 Pacific):
@@ -112,9 +112,7 @@ E4. Currency figures: "~£56 GBP" (UK page) and "$72-$75 USD" (US page) will
 E5. "Payment in CAD and USD" is in your search-engine data. Confirm you
     accept US dollars, or tell me to set it back to CAD only.
 
-E6. Four service pages still have the generic heading "Key Life Questions &
-    Chart Factors Analyzed" (Kundli Milan, Career & Finance, Dosha, Gemstone).
-    Send question-style wording and I will add it.
+E6. (Done: every service page and blog article now uses question headings.)
 
 E7. (Done: Admin -> Locations edits the seven location pages.)
 
@@ -123,8 +121,8 @@ F. THE GOOGLE BUSINESS NAME
 ---------------------------
 You set the name to "Analysis of Karma" and Google changed it back to the
 long name by itself. The name you have chosen is now
-"Analysis of Karma | Vedic astrologer". Google does this when its other sources disagree with
-you. The website update now says "Analysis of Karma | Vedic astrologer"
+"Analysis of Karma - Vedic astrologer". Google does this when its other sources disagree with
+you. The website update now says "Analysis of Karma - Vedic astrologer"
 everywhere it names the business, so the website stops disagreeing. Work through these in order:
 
 [ ] F1. Upload the website first (sections B and C). Until then the live
@@ -140,7 +138,7 @@ everywhere it names the business, so the website stops disagreeing. Work through
 
 [ ] F4. In your Business Profile, look for a notice that Google updated your
          profile, and reject or edit the name update. If there is no notice,
-         edit the name to "Analysis of Karma | Vedic astrologer" once more.
+         edit the name to "Analysis of Karma - Vedic astrologer" once more.
 
 [ ] F5. If Google changes it back again, do NOT keep editing it: repeated
          name edits can put the listing under review. Instead contact
@@ -152,7 +150,7 @@ The words that were in the long name still belong on Google, just not in
 the name: put "Vedic astrology", "meditation" and "Jag Mallah" in the
 business description, the categories and the services list.
 
-Note: Google may still trim "| Vedic astrologer", because its rules want the
+Note: Google may still trim "- Vedic astrologer", because its rules want the
 name without descriptive words. If it does, accept "Analysis of Karma" rather
 than editing it back, and tell me so the website can match.
 

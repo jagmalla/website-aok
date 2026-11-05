@@ -8,7 +8,9 @@ Vedic career and finance consultations evaluate the 10th house (Karma Bhava), 2n
 - **Jaimini Amatyakaraka (AmK):** Identifying the planet representing career karma and vocation to determine whether corporate service, entrepreneurship, or independent practice suits your nature.
 - **Transit Timing (Gochar of Saturn & Jupiter):** Tracking Saturn's discipline and Jupiter's expansion across career-defining sectors.
 
-## Key Life Questions & Chart Factors Analyzed
+## What Career and Money Decisions Can Your Chart Clarify?
+Your chart can clarify whether employment (6th house) or an independent business (7th and 10th houses) suits you, when dasha shifts favour resigning or changing roles, and when 12th-house activations call for investment caution. It also assesses whether a business partner or co-founder is likely to bring growth or dispute, before you commit.
+
 - **Corporate Employment vs. Independent Business:** Examining 6th house (service) versus 7th and 10th houses (business/commerce).
 - **Ideal Timing for Job Resignations & Career Transitions:** Identifying favorable dasha shifts to prevent impulsive departures.
 - **Investment Caution & Wealth Preservation Cycles:** Detecting Dhana-loss combinations (12th house activations) to safeguard capital.

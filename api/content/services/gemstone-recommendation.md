@@ -8,7 +8,9 @@ Gemstones act as planetary amplifiers and must only be prescribed for functional
 - **The Anukul vs. Pratikul System:** Ensuring gemstones align favorably with your natal Lagna rather than arbitrarily choosing a gem based solely on your birth star or zodiac sign.
 - **Strict Anti-Commercial Stance:** We do not sell gemstones. Our advice is 100% impartial and independent, protecting you from overpriced sales pitches.
 
-## Key Life Questions & Chart Factors Analyzed
+## Which Gemstones Suit Your Chart, and How Should They Be Worn?
+The right gemstones depend on your functional benefic lords: the Lagna lord's stone (Jeevan Ratna) for health and confidence, and the 9th and 10th lords' stones for fortune and career. Stones that could amplify health, legal or emotional troubles are flagged to avoid, and you receive exact guidance on metal, finger, day, hora and consecration mantra.
+
 - **Primary Life Gemstone (Jeevan Ratna):** Identifying the gemstone of your Lagna lord for overall health, longevity, and self-confidence.
 - **Career & Luck Gemstones (Karya & Bhagya Ratna):** Evaluating gemstones for the 10th and 9th lords to enhance vocational stability and fortune.
 - **Toxic Gemstones to Avoid:** Identifying stones that could inadvertently amplify chronic health issues, litigation, or emotional turbulence.

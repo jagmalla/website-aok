@@ -1,7 +1,35 @@
 ANALYSIS OF KARMA — Update (SEO, local SEO, AI search & security)
 ===================================================================
 
-NEW IN THIS VERSION: A "PAGE & SEO" PANEL ON EVERY PAGE YOU EDIT
+NEW IN THIS VERSION: ONE SET OF FACTS, QUESTION HEADINGS, TRUE DATES
+  • The business name is "Analysis of Karma - Vedic astrologer" everywhere
+    the site names the business (footer, contact page, search-engine data,
+    llms.txt), matching your Google Business Profile.
+  • The Google Maps link the site uses (the map button, "Review us on
+    Google" and the search-engine data) is https://share.google/qMDfkFkxgAA3NY9Nk.
+    The other Google links stay listed as your profiles.
+  • Training now reads: Advanced Parashari Jyotish, Tajika Varshaphala,
+    Prashna Shastra, Muhurta and Medical Astrology, under Sh. Sharawan Jha.
+    (Your own first-person story on the About page is unchanged.)
+  • Every service page: the generic headings "Classical Vedic Methodology &
+    Texts Used" and "Key Life Questions & Chart Factors Analyzed" are now
+    the question a client would ask, each with a 40-60 word direct answer
+    under it. The bullet points are unchanged. A new service added from
+    Admin -> Services gets question headings automatically.
+  • Every blog article: the three generic headings ("Classical Foundations
+    in Jyotish" and so on) are now questions specific to the article.
+  • Each blog post, page and location page now remembers when you last
+    changed it. Google sees that date in the sitemap and in the article's
+    "last updated" data, instead of the publish date.
+  • Every service page now links to three related articles (two pages had
+    only one).
+  • The search-engine data now lists the Surrey neighbourhoods you serve
+    (Fleetwood, Newton, Guildford, Cloverdale, Panorama Ridge, South Surrey)
+    and names the business and practitioner with stable ids (#business,
+    #jag-mallah).
+  • Headings or text you have already edited yourself are never replaced.
+
+EARLIER: A "PAGE & SEO" PANEL ON EVERY PAGE YOU EDIT
   • Blog posts, services, custom pages and location pages now all open with
     the same "Page & SEO" panel at the top. Type into its boxes and the site
     builds the page from them:
@@ -68,7 +96,7 @@ EARLIER: YOUR JUPITER-KETU ARTICLE, AND A FIXED BLOG EDITOR
 
 EARLIER: ONE BUSINESS NAME
   • The footer, the contact page, the search-engine data and llms.txt now
-    all name the business "Analysis of Karma | Vedic astrologer" (the header
+    all name the business "Analysis of Karma - Vedic astrologer" (the header
     logo stays "Analysis of Karma"). They had copied the long
     Google listing name, which worked against setting the listing back to
     the short name. GO-LIVE.txt section F has the steps for Google.

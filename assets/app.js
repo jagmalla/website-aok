@@ -183,12 +183,13 @@ class Component extends DCLogic {
     clearTimeout(this._srvTimer);
     this._srvTimer=setTimeout(()=>{ try{ fetch('/api/data.php',{ method:'POST', headers:this.apiHeaders(), body:JSON.stringify(this.state.data) }).then(r=>r.json()).then(j=>this._applySync(j)).catch(()=>{}); }catch(e){} },800); }
   // What the server added on save (api/sync.php): 301s for moved/deleted services, deleted shipped services and the
-  // services' updatedAt. Merged into the editor's copy without another save, so the next autosave keeps them.
+  // updatedAt of services, posts, pages and locations. Merged into the editor's copy without another save, so the next autosave keeps them.
   _applySync(j){ const sy=j&&j.ok&&j.sync; if(!sy) return; const d=this.state.data; if(!d) return; let changed=false; const nd={...d};
     const key=p=>('/'+String(p||'').replace(/^\/+|\/+$/g,'')).toLowerCase(); const have={}; (d.redirects||[]).forEach(r=>{ have[key(r.from)]=1; });
     const add=(sy.redirects||[]).filter(r=>r&&r.from&&!have[key(r.from)]); if(add.length){ nd.redirects=[...(d.redirects||[]),...add]; changed=true; }
     const ds=Array.from(new Set([...(d.deletedSeeds||[]),...(sy.deletedSeeds||[])])); if(ds.length!==(d.deletedSeeds||[]).length){ nd.deletedSeeds=ds; changed=true; }
     const up=sy.updatedAt||{}; if((d.services||[]).some(x=>up[x.id]&&up[x.id]!==x.updatedAt)){ nd.services=d.services.map(x=>up[x.id]&&up[x.id]!==x.updatedAt?{...x,updatedAt:up[x.id]}:x); changed=true; }
+    const md=sy.modified||{}; ['blog','pages','locations'].forEach(k=>{ const m=md[k]||{}; if(Array.isArray(nd[k])&&nd[k].some(x=>x&&m[x.id]&&m[x.id]!==x.updatedAt)){ nd[k]=nd[k].map(x=>x&&m[x.id]&&m[x.id]!==x.updatedAt?{...x,updatedAt:m[x.id]}:x); changed=true; } });
     const bn=sy.banner||{}; if((nd.services||[]).some(x=>bn[x.id]&&!x.banner)){ nd.services=(nd.services||[]).map(x=>bn[x.id]&&!x.banner?{...x,banner:bn[x.id]}:x); changed=true; }
     if(changed){ try{ localStorage.setItem('aok_site_v1', this._cacheJson(nd)); }catch(e){} this.setState({data:nd}); } }
   saveNow(){ try{ localStorage.setItem('aok_site_v1', this._cacheJson(this.state.data)); }catch(e){}
@@ -282,7 +283,7 @@ class Component extends DCLogic {
       local:{ businessName:'Analysis of Karma', legalName:'', businessType:'ProfessionalService',
         gbpPrimaryCategory:'Astrologer', gbpAdditionalCategories:['Spiritual Consultant','Psychic','Vedic Astrology & Karmic Consultation Service'],
         serviceAreaBusiness:false, streetAddress:'15450 92a Ave', locality:'Surrey', region:'British Columbia', regionCode:'BC', postalCode:'V3R 9B1',
-        listingName:'Analysis of Karma | Vedic astrologer', hoursNote:'Online consultations available 7 days a week by appointment', country:'CA',
+        listingName:'Analysis of Karma - Vedic astrologer', hoursNote:'Online consultations available 7 days a week by appointment', country:'CA',
         // the Business Profile pin at 92 Ave and 154 St, not the centre of Surrey
         lat:'49.1712', lng:'-122.7939',
         areasServed:['Surrey, BC, Canada','Vancouver, BC, Canada','Burnaby, BC, Canada','Richmond, BC, Canada','Delta, BC, Canada','New Westminster, BC, Canada','Coquitlam, BC, Canada','Langley, BC, Canada','Abbotsford, BC, Canada','Chilliwack, BC, Canada','Maple Ridge, BC, Canada','Victoria, BC, Canada','Nanaimo, BC, Canada','Kelowna, BC, Canada','Kamloops, BC, Canada','Prince George, BC, Canada','British Columbia, Canada','Canada','Washington, USA','United States','United Kingdom','Punjab, India','Delhi, India','Haryana, India','Mumbai, Maharashtra, India','India'],
@@ -292,7 +293,7 @@ class Component extends DCLogic {
         onlineWorldwide:true, onlineChannels:['Zoom','WhatsApp'],
         hours:{Mo:{o:'10:00',c:'17:00'},Tu:{o:'10:00',c:'17:00'},We:{o:'10:00',c:'17:00'},Th:{o:'10:00',c:'17:00'},Fr:{o:'10:00',c:'17:00'}},
         timezone:'America/Vancouver',
-        mapsCidUrl:'https://maps.app.goo.gl/XrwSpDBGaVsFQ5dV8', reviewUrl:'https://maps.app.goo.gl/XrwSpDBGaVsFQ5dV8', priceRange:'$100 CAD per hour', currency:'CAD, USD', languages:['English','Hindi','Punjabi'],
+        mapsCidUrl:'https://share.google/qMDfkFkxgAA3NY9Nk', reviewUrl:'https://share.google/qMDfkFkxgAA3NY9Nk', priceRange:'$100 CAD per hour', currency:'CAD, USD', languages:['English','Hindi','Punjabi'],
         sessionLength:'60 minutes', paymentMethods:['Interac e-Transfer','PayPal','Credit card','Debit card','International bank transfer'],
         paymentPolicy:'Pay after your reading: new clients pay only if they are completely satisfied with their consultation.',
         ethicsPolicy:'100% confidential; zero sales of gemstones, talismans, or commercial rituals.',
@@ -302,10 +303,10 @@ class Component extends DCLogic {
         locationInTitles:true },
       // Practitioner (E-E-A-T) — used in structured data and llms.txt
       person:{ name:'Jag Mallah', jobTitle:'Independent Vedic Astrologer', additionalRoles:['Meditation Guide'],
-        shortBio:'Jag Mallah is an independent Vedic astrologer and professional meditation guide based in Surrey, British Columbia, consulting worldwide over Zoom and WhatsApp in English, Hindi and Punjabi. He completed formal studies in Advanced Astrology, Tajika (Varshaphala and Prashna Shastra), Muhurta and Medical Astrology under his mentor Sh. Sharawan Jha, and researches the classical texts Brihat Parashara Hora Shastra, Phaladeepika, Tajika Neelakanthi, Bhrigu Nandi Nadi, the Jaimini Upadesa Sutras and Swarodaya Shastra, grounded in the six classical Darshanas and Pancha Mahabhuta elemental balance.',
+        shortBio:'Jag Mallah is an independent Vedic astrologer and professional meditation guide based in Surrey, British Columbia, consulting worldwide over Zoom and WhatsApp in English, Hindi and Punjabi. He trained in Advanced Parashari Jyotish, Tajika Varshaphala, Prashna Shastra, Muhurta and Medical Astrology under his mentor Sh. Sharawan Jha, and researches the classical texts Brihat Parashara Hora Shastra, Phaladeepika, Tajika Neelakanthi, Bhrigu Nandi Nadi, the Jaimini Upadesa Sutras and Swarodaya Shastra, grounded in the six classical Darshanas and Pancha Mahabhuta elemental balance.',
         mentor:'Sh. Sharawan Jha', traditions:'Parashari, Jaimini, Tajika and Bhrigu Nandi Nadi astrology',
         philosophy:['The six classical Darshanas (Shaddarshana)','Pancha Mahabhuta elemental balance'],
-        studies:['Advanced Astrology','Tajika (Varshaphala and Prashna Shastra)','Muhurta','Medical Astrology'],
+        studies:['Advanced Parashari Jyotish','Tajika Varshaphala','Prashna Shastra','Muhurta','Medical Astrology'],
         classicalTexts:['Brihat Parashara Hora Shastra (BPHS)','Phaladeepika','Tajika Neelakanthi','Bhrigu Nandi Nadi (BNN)','Jaimini Upadesa Sutras','Swarodaya Shastra (Shiva Swarodaya)'],
         knowsAbout:['Vedic astrology','Jyotish','Kundli (birth chart) reading','Kundli Milan (marriage matching)','Dasha and transit analysis','Mangal Dosha and other doshas','Muhurta (auspicious timing)','Tajika / Varshaphala (annual charts)','Prashna Shastra (horary astrology)','Jaimini astrology','Bhrigu Nandi Nadi','Swarodaya Shastra (breath science)','Pancha Mahabhuta (five elements)','Medical astrology','Gemstone recommendation','Meditation','Pranayama (breathwork)','Mantra practice'],
         sameAs:['https://www.youtube.com/channel/UCIHA2ZtOmAYP91GbK5RYkCQ','https://www.youtube.com/@analysisofkarma','https://www.instagram.com/analysisofkarma','https://www.linkedin.com/in/analysisofkarma/','https://x.com/analysisofkarma','https://www.pinterest.com/analysisofkarma','https://ca.trustpilot.com/review/analysisofkarma.com','https://maps.app.goo.gl/XrwSpDBGaVsFQ5dV8','https://share.google/r37d5nGpSJCeEXhvt','https://share.google/qMDfkFkxgAA3NY9Nk','https://www.google.com/maps/place/?q=place_id:ChIJcW354x7XhVQRcq2RBKbVNkY'], image:'' },
@@ -792,7 +793,7 @@ class Component extends DCLogic {
     return out.map(e=>e[2]); }
   livePosts(){ return ((this.state.data&&this.state.data.blog)||[]).filter(p=>p.published&&p.slug&&!p.redirectTo); }
   relatedServices(post){ return this.clusterPick(this.liveServices(),s=>this.clusterScore(post,s),3,2); }
-  relatedPosts(svc){ return this.clusterPick(this.livePosts(),p=>this.clusterScore(p,svc),3,0); }
+  relatedPosts(svc){ return this.clusterPick(this.livePosts(),p=>this.clusterScore(p,svc),3,3); }
   // contact helpers — mirror aok_whatsapp_url / aok_e164 in api/seo-lib.php
   waUrl(text){ const c=(this.state.data&&this.state.data.contact)||{}; let n=String(c.whatsapp||c.phone||'').replace(/\D/g,''); if(!n) return ''; if(n.length===10) n='1'+n; const t=(typeof text==='string'?text:(c.whatsappText||'')).trim(); return 'https://wa.me/'+n+(t?'?text='+encodeURIComponent(t):''); }
   telHref(){ const p=String(((this.state.data&&this.state.data.contact)||{}).phone||''); const dg=p.replace(/\D/g,''); if(!dg) return ''; return 'tel:'+(p.trim().charAt(0)==='+'?'+'+dg:(dg.length===10?'+1'+dg:'+'+dg)); }
@@ -2390,8 +2391,10 @@ class Component extends DCLogic {
   svcComposeMd(f){ const lines=t=>String(t||'').split('\n').map(x=>x.trim().replace(/^[-*\d.]+\s+/,'')).filter(Boolean);
     const item=x=>{ const m=x.match(/^([^:]{2,80}):\s+(.+)$/); return m?'**'+m[1].trim()+':** '+m[2].trim():x; };
     const out=[]; if((f.answer||'').trim()) out.push(['answer','**Direct answer:** '+f.answer.trim().replace(/\s*\n\s*/g,' ')]);
-    if(lines(f.method).length) out.push(['h2','Classical Vedic Methodology & Texts Used'],['ul',lines(f.method).map(item)]);
-    if(lines(f.questions).length) out.push(['h2','Key Life Questions & Chart Factors Analyzed'],['ul',lines(f.questions).map(item)]);
+    // question headings, as on the shipped service pages: they are what people type and what AI answers quote
+    const nm=String(f.title||'').trim()||'This Consultation';
+    if(lines(f.method).length) out.push(['h2','How Does Jag Mallah Approach '+nm+'?'],['ul',lines(f.method).map(item)]);
+    if(lines(f.questions).length) out.push(['h2','What Questions Can '+nm+' Answer?'],['ul',lines(f.questions).map(item)]);
     const st=(f.steps||[]).filter(x=>x&&(x.t||'').trim()).map(x=>'**'+x.t.trim()+':** '+(x.d||'').trim().replace(/\s*\n\s*/g,' ')); if(st.length) out.push(['h2','How Your 1-on-1 Consultation Works'],['ol',st]);
     const fq=(f.faqs||[]).filter(x=>x&&(x.q||'').trim()&&(x.a||'').trim()); if(fq.length){ out.push(['h2','Frequently Asked Questions']); fq.forEach(x=>out.push(['h3',x.q.trim()],['p',x.a.trim()])); }
     return this.mdSerialize(out); }

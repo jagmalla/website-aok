@@ -1,6 +1,6 @@
 > **Key takeaway:** Rahu (North Node) and Ketu (South Node) are the Moon's nodes, always opposite each other. In Vedic astrology Rahu shows desire and new growth, Ketu shows mastery, detachment and past-life karma. Their house axis, sign lords, conjunctions and the 18-year Rahu and 7-year Ketu dashas reveal how this karmic story unfolds.
 
-## Classical Foundations in Jyotish
+## What Do the Classical Texts Say About Rahu and Ketu?
 
 ### The Chhaya Grahas
 Rahu and Ketu are called **Chhaya Grahas**, shadow planets. They have no physical body; they are the two points where the Moon's orbit crosses the ecliptic, the Sun's apparent path. Eclipses happen only when a full or new moon falls near them, which is why tradition links them with the swallowing of the Sun and Moon.
@@ -18,7 +18,7 @@ Many traditions consider Rahu strong in Taurus and Gemini and Ketu strong in Sco
 ### The karmic axis
 Because the nodes are always exactly opposite, they create an **axis** through two houses. Ketu's house shows where you arrive already knowing, sometimes so well that it feels empty. Rahu's house shows what you hunger for and must learn in this life. **Bhrigu Nandi Nadi** treats Ketu as a strong indicator of past-life karma and the direction the soul is moving away from, and Rahu as the direction it is moving toward.
 
-## House, Planetary & Dasha Dynamics
+## How Do Rahu and Ketu Work Through Houses and Dashas?
 
 ### The six axes
 - **1st–7th:** self versus partnership. Rahu in the 1st seeks identity and recognition; Rahu in the 7th seeks relationship and partnership, often unconventional.
@@ -45,7 +45,7 @@ The **Rahu Mahadasha** lasts 18 years and often brings major ambition, travel, m
 ### The Jaimini view
 The **Jaimini Upadesa Sutras** use Ketu in the 12th house from the **Karakamsha** (the Atmakaraka's Navamsha sign) as a classic indication of spiritual liberation. Jaimini also reads the nodes' sign aspects, adding another layer to their influence.
 
-## Conscious Karma & Practical Vedic Remedies
+## How Can You Direct the Energy of Rahu and Ketu?
 
 The nodes are among the clearest illustrations of **Kriyamana karma**: you cannot remove Rahu's hunger or Ketu's detachment, but you can direct them.
 

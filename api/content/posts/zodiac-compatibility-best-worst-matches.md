@@ -1,6 +1,6 @@
 > **Key takeaway:** Vedic compatibility is judged from both partners' Moon signs and Nakshatras through the 36-point Ashtakoota Guna Milan, then confirmed by each person's 7th house, Venus, Navamsha and dashas. Element and sign pairings are a helpful first impression, but no pair of signs is "doomed". Whole charts, not single signs, decide compatibility.
 
-## Classical Foundations in Jyotish
+## Why Does Vedic Compatibility Start From the Moon Sign?
 
 ### From Sun signs to Moon signs
 Popular compatibility lists compare Sun signs. Jyotish compares the **Moon signs (Rashis)** and **Moon Nakshatras**, because the Moon is the mind and emotional nature, the part of us that has to live with another person every day. Since Jyotish uses the sidereal zodiac, your Vedic Moon sign may differ from your Western one, which changes every compatibility table you have read.
@@ -22,7 +22,7 @@ Eighteen points is the commonly accepted minimum, but every Koota has classical 
 ### Elements still matter
 The elemental logic in popular astrology is shared by Jyotish. Fire (Aries, Leo, Sagittarius), earth (Taurus, Virgo, Capricorn), air (Gemini, Libra, Aquarius) and water (Cancer, Scorpio, Pisces) correspond to the Pancha Mahabhuta. Same-element pairs understand each other easily; fire with air and earth with water support one another. But Jyotish adds planetary friendship. Two Moon signs whose lords are natural friends, such as signs ruled by the Sun and Jupiter, tend to form a strong mental bond even when their elements differ.
 
-## House, Planetary & Dasha Dynamics
+## Which Sign Pairs Match Best, and What Else Matters?
 
 ### Bhakoot: the sign relationship
 Bhakoot looks at how many signs apart the two Moons are. Positions 2–12 (adjacent signs), 6–8 and 5–9 from each other are traditionally flagged as Bhakoot doshas, associated respectively with finances, health and conflict, and children. Classical exceptions apply when both Moon signs have the same lord, or their lords are friends. **1–7 relationships** (opposite signs, such as Aries–Libra) and **3–11 or 4–10** relationships are generally considered workable, and same-sign matches are often harmonious.
@@ -38,7 +38,7 @@ After Guna Milan, Vedic practice studies each partner's **7th house and lord**, 
 ### Timing: the forgotten factor
 Two compatible charts can still meet difficult chapters together. Comparing both **Vimshottari dasha** timelines, and watching for both partners entering Saturn's Sade Sati at the same time, helps a couple understand when patience and support will be most needed. **Bhrigu Nandi Nadi** adds a further layer: Venus or Jupiter linked by trine to the partner's Moon often shows a natural, lasting attraction.
 
-## Conscious Karma & Practical Vedic Remedies
+## What Practical Remedies Help a Relationship Thrive?
 
 Compatibility in Jyotish is a map of how two people's energies meet, not a verdict on whether love is possible. The remedies are about awareness and practice.
 

@@ -1,6 +1,6 @@
 > **Key takeaway:** In Vedic astrology, career is read from the 10th house and its lord, the D-10 Dasamsha, the Jaimini Amatyakaraka and the Sun, Saturn and Mercury. The Midheaven is one point within this picture. Timing comes from the Vimshottari dasha and Saturn's and Jupiter's transits, which show when a calling is ready to unfold.
 
-## Classical Foundations in Jyotish
+## What Do the Classical Texts Say About Career in a Birth Chart?
 
 ### The Midheaven and the 10th house
 Western astrology often centres a career reading on the Midheaven (MC), the point where the ecliptic crosses the meridian overhead at birth. Jyotish knows this point as the **cusp (madhya) of the 10th Bhava** and does use it, especially in Bhava Chalit charts. But the main framework is the **10th house counted sign by sign from the ascendant**, which **Brihat Parashara Hora Shastra** calls the house of **Karma**: action, profession, status and one's work in the world. Because houses are whole signs, the Vedic 10th house and the sign of the MC are not always the same, and the difference can change the reading.
@@ -31,7 +31,7 @@ The 10th, 6th and 11th are **Upachaya** houses, which grow stronger with time an
 ### The Jaimini view: Amatyakaraka and Rajya Pada
 The **Jaimini Upadesa Sutras** rank the planets by degree. The **Atmakaraka** (highest degree) is the soul; the **Amatyakaraka** (second highest) is its minister and describes the kind of work that serves the soul's purpose. Jaimini also uses the **Arudha of the 10th house (Rajya Pada)**, which shows how your career is seen by others, your public image, as distinct from the work itself.
 
-## House, Planetary & Dasha Dynamics
+## How Do the 10th House, D-10 Chart and Dashas Shape Your Career?
 
 ### Reading the 10th lord
 The single most informative factor is the **lord of the 10th house**: its sign, its house placement and its dignity.
@@ -66,7 +66,7 @@ For families in Surrey, Vancouver and across the diaspora, the question of forei
 4. Check the D-10 ascendant and where your 10th lord lands in it.
 5. Look at your current and next Antardasha, and where Saturn and Jupiter will transit over the next three years.
 
-## Conscious Karma & Practical Vedic Remedies
+## Which Practical Remedies Support Career Growth?
 
 The 10th house is literally the house of **Karma**, action. That makes career the area of life where **Kriyamana karma**, conscious present action, has the most visible effect. Remedies here are less about ritual and more about aligning your work with the planets that support you.
 

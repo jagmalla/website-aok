@@ -1,6 +1,6 @@
 > **Key takeaway:** A Saturn return happens when transiting Saturn reaches its natal sign, around ages 29–30 and 58–60. Vedic astrology reads it alongside Sade Sati, Saturn's seven-and-a-half-year transit around the Moon, and your running dasha. It is a period of maturity and restructuring, not punishment, and disciplined effort gives it lasting results.
 
-## Classical Foundations in Jyotish
+## What Do the Classical Texts Say About Saturn and the Saturn Return?
 
 ### Shani in the classical texts
 Saturn, **Shani**, is the slowest of the classical planets, taking about 29.5 years to circle the zodiac and spending roughly two and a half years in each sign. **Brihat Parashara Hora Shastra** calls Saturn the significator of longevity, service, labour, discipline, detachment and sorrow, and describes him as a servant in the planetary cabinet. **Phaladeepika** links him with patience, endurance, old age, the common people and hard-won achievement. Saturn is also the planet of **karma made visible**: he gives results in proportion to effort and integrity, often after a delay.
@@ -11,7 +11,7 @@ In Western astrology the Saturn return is a well-known milestone. Jyotish descri
 ### Saturn's dignity
 How the return feels depends heavily on Saturn's condition in your chart. Saturn is **exalted in Libra**, **debilitated in Aries**, and owns Capricorn and Aquarius, with Aquarius his Moolatrikona sign. For Taurus and Libra ascendants Saturn is a **Yogakaraka**, ruling both a Kendra and a Trikona, and his return can mark one of the most productive periods of life. For other ascendants, his houses decide what is restructured.
 
-## House, Planetary & Dasha Dynamics
+## How Do Your Natal Saturn, Sade Sati and Dasha Shape a Saturn Return?
 
 ### The house of your natal Saturn
 The return reactivates the house where Saturn sits in your birth chart:
@@ -48,7 +48,7 @@ The **Ashtakavarga** system in BPHS gives each sign a score for each planet. Whe
 4. Identify the Mahadasha and Antardasha you will be running.
 5. Look at Saturn's Ashtakavarga score for that sign.
 
-## Conscious Karma & Practical Vedic Remedies
+## How Can You Work Consciously With Your Saturn Return?
 
 Saturn is not malicious; he is a teacher of responsibility. The most powerful remedies are therefore changes in conduct, which is the very definition of **Kriyamana karma**.
 

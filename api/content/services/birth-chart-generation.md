@@ -1,12 +1,16 @@
 > **Direct answer:** Our Birth Chart Generation service provides an astronomically accurate, high-precision calculation of your Vedic horoscope. Prepared using the Lahiri Ayanamsha and Swiss Ephemeris data, this consultation ($100 CAD/hr, pay after satisfaction) delivers both the comprehensive mathematical chart documentation and an interactive walkthrough.
 
-## Classical Vedic Methodology & Texts Used
+## How Is an Accurate Vedic Birth Chart Calculated?
+An accurate Vedic birth chart is calculated from your exact birth date, time and place using Swiss Ephemeris astronomy, the Lahiri (Chitrapaksha) Ayanamsha, and the correct latitude, longitude and Daylight Saving adjustments. Jag Mallah then generates all 16 divisional charts (Shodashvarga) and the Shadbala planetary strengths, so every later reading rests on precise mathematics.
+
 - **Astronomical Precision:** Built on genuine Swiss Ephemeris astronomical calculations accounting for exact geographic latitude, longitude, and Daylight Saving Time adjustments.
 - **Ayanamsha Accuracy:** Utilizing the standardized Chitrapaksha (Lahiri) Ayanamsha to bridge celestial mechanics with Vedic sidereal interpretation.
 - **Complete Varga Chakra Suite:** Generation of all 16 divisional charts (Shodashvarga), from the physical Rashi (D-1) and Navamsha (D-9) to the subtle D-60 (Shashtiamsha).
 - **Planetary Strengths (Shadbala & Bhava Bala):** Complete mathematical breakdown of positional, directional, motional, and temporal strengths.
 
-## Key Life Questions & Chart Factors Analyzed
+## What Does Your Vedic Birth Chart Report Include?
+Your birth chart report verifies the exact rising sign (Lagna), including births near a sign boundary, and records each planet's degree and Nakshatra Pada. It sets out the full 120-year Vimshottari Dasha calendar and the special ascendants (Arudha, Ghati and Hora Lagna), giving you a reliable reference chart for every future consultation.
+
 - **Rising Sign (Lagna) Verification:** Establishing the exact ascending degree and verifying border/cusp Lagnas.
 - **Nakshatra Padas & Planetary Degrees:** Calculating the exact quarter (Pada) of each planet's star placement for refined predictive capability.
 - **Vimshottari Dasha Calendar:** Generating full 120-year chronological dasha, bhukti, and pratyantara timelines from your birth date.

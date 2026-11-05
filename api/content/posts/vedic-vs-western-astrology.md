@@ -1,6 +1,6 @@
 > **Key takeaway:** Vedic astrology (Jyotish) uses the sidereal zodiac, Nakshatras, divisional charts and the Vimshottari dasha to time life events, while Western astrology uses the tropical zodiac and focuses on psychology. Your Vedic signs are often one sign earlier. Choose Western for self-reflection, and Vedic for timing, karmic patterns and practical remedies.
 
-## Classical Foundations in Jyotish
+## What Classical Texts and Tools Set Vedic Astrology Apart?
 
 ### A tradition with its own texts
 Jyotish is one of the six Vedangas, the limbs of Vedic knowledge, and its name means "the science of light". Its core is preserved in classical texts that are still studied line by line today. **Brihat Parashara Hora Shastra (BPHS)** sets out houses, planetary dignities, divisional charts, yogas and the dasha systems. **Phaladeepika** by Mantreshwara summarises the results of planets and yogas. The **Jaimini Upadesa Sutras** offer a complementary system based on sign aspects and Chara Karakas, and **Tajika Neelakanthi** covers annual charts and horary questions. Western astrology also has a long history, from Hellenistic texts to modern psychological astrology, but its sources and emphasis are different.
@@ -17,7 +17,7 @@ The practical result is that around two-thirds of people find their Sun sign mov
 - **Yogas:** named planetary combinations, such as Raja yogas for status, Dhana yogas for wealth and Gaja Kesari yoga for wisdom and support.
 - **Rahu and Ketu:** the lunar nodes, treated as full karmic indicators.
 
-## House, Planetary & Dasha Dynamics
+## How Do Vedic Houses, Aspects and Timing Differ From Western Astrology?
 
 ### Whole-sign houses and the ascendant
 Most Vedic astrologers use **whole-sign houses**: the sign rising at birth becomes the entire 1st house, the next sign the 2nd, and so on. Western astrologers often use quadrant systems such as Placidus, where house sizes vary. This means a planet can sit in a different house in each system. Jyotish also reads the chart from the **Moon (Chandra Lagna)** as a second ascendant, which Western astrology rarely does.
@@ -34,7 +34,7 @@ This is where Vedic astrology is most distinctive. The **Vimshottari dasha** div
 ### The same question, two approaches
 Suppose someone asks when they will change careers. A Western astrologer may look at transits to the Midheaven and progressed planets. A Vedic astrologer will examine the 10th house and its lord, the D-10 chart and the Amatyakaraka, then identify which upcoming Antardasha activates those factors and when Saturn and Jupiter support them. Both can be meaningful, but the Vedic method produces a more specific timeline.
 
-## Conscious Karma & Practical Vedic Remedies
+## How Does Vedic Astrology Turn Insight Into Practical Remedies?
 
 The greatest practical difference is that Jyotish is joined to a full system of **remedies (Upayas)**. A chart is read as a picture of past karma. Through **Kriyamana karma**, the choices made now, you can work with it rather than simply accept it.
 

@@ -1,12 +1,16 @@
 > **Direct answer:** Karmic and Past Life Astrology investigates the profound spiritual forces shaping your current existence. Through a 60-minute 1-on-1 reading ($100 CAD/hr, pay after satisfaction), we decode the karmic axis of Rahu and Ketu, the Shashtiamsha (D-60) chart, and retrograde planets to resolve past burdens and embrace present evolution.
 
-## Classical Vedic Methodology & Texts Used
+## How Does Vedic Astrology Read Past-Life Karma?
+Vedic astrology reads past-life karma mainly through the Rahu-Ketu axis: Ketu shows accumulated mastery and old attachments, while Rahu shows the desires your soul is growing toward. Jag Mallah adds the Shashtiamsha (D-60) chart, retrograde planets, and the 5th and 9th houses of Poorva Punya, as described in Brihat Parashara Hora Shastra.
+
 - **The Rahu-Ketu Axis:** Deep exploration of the lunar nodes. Ketu reveals accumulated mastery, past-life attachments, and subconscious habits; Rahu indicates unfulfilled desires, evolution, and future destiny.
 - **Shashtiamsha (D-60) Chart:** Analyzing the highest classical harmonic chart, reserved in Brihat Parashara Hora Shastra specifically for past-life karma (Prarabdha Karma).
 - **Retrograde Planets (Vakri Grahas):** Retrograde planets, strong in motional strength (Cheshta Bala), carry deep karmic debt indicating unfinished business from previous incarnations requiring resolution.
 - **5th and 9th House Karmic Ledger:** Evaluating Poorva Punya (merits accrued from past good deeds) and foundational spiritual karma.
 
-## Key Life Questions & Chart Factors Analyzed
+## Which Life Patterns Can a Karmic Astrology Reading Explain?
+A karmic reading can explain unexplained fears, phobias and compulsions, sudden and intense soul connections, and repeating cycles that keep pulling you back to old comfort zones (Ketu). It then shows how to step into your present life mission (Rahu) with confidence, using practical, ethical remedies rather than fear.
+
 - **Unexplained Fears, Phobias, & Compulsions:** Identifying their roots in nodal placements or past-life astrological imprints.
 - **Instant Karmic Connections:** Understanding sudden, intense soul bonds with individuals in your current life.
 - **Breaking Repetitive Lifelong Cycles:** Moving out of self-sabotaging patterns rooted in past comfort zones (Ketu).

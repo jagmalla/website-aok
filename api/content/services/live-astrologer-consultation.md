@@ -1,12 +1,16 @@
 > **Direct answer:** Our Live Astrologer Consultation offers direct, interactive 1-on-1 sessions with Jag Mallah via Zoom video, phone, or WhatsApp audio/video. In this focused 60-minute reading ($100 CAD/hr, pay after satisfaction), you can discuss multiple life questions across career, family, health, and spiritual growth in real time.
 
-## Classical Vedic Methodology & Texts Used
+## What Happens in a Live Vedic Astrology Consultation?
+In a live consultation you speak directly with Jag Mallah, with no intermediaries, scripts or junior readers. He combines your birth chart (Kundli), dasha periods and Prashna Shastra (horary astrology for the moment you ask) in real time, checking details as you share them, so career, health, money and relationships are read together.
+
 - **Dynamic Multi-Dimensional Reading:** Combining your birth chart (Kundli), Prashna Shastra (horary astrology at the exact moment of inquiry), and dasha analysis during the live conversation.
 - **Comprehensive Life Synthesis:** Rather than isolating one question, we assess how career, health, finances, and relationships interlock across your planetary timeline.
 - **Real-Time Question Exploration:** Immediate chart verification as you share details, family background, and current challenges.
 - **Direct Practitioner Access:** You speak directly with Jag Mallah—no intermediaries, automated scripts, or junior readers.
 
-## Key Life Questions & Chart Factors Analyzed
+## What Questions Can You Ask in a Live Astrologer Session?
+You can ask about any area of life in complete privacy: pressing decisions on relocation, investments, partnerships or career changes, and quick comparisons with a spouse's or child's chart where relevant. Every 60-minute session ($100 CAD per hour) ends with a practical lifestyle and remedy plan, and new clients pay only if satisfied.
+
 - **Clarifying Pressing Crossroads:** Making major decisions regarding relocation, investments, partnerships, or career shifts.
 - **Cross-Examining Family Charts:** Quick comparative looks at children's or spouse's charts during the consultation if relevant.
 - **Actionable Karmic Remedial Plan:** Formulating a practical, realistic lifestyle and remedial roadmap before the call concludes.

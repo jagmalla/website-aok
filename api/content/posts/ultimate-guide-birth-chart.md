@@ -1,6 +1,6 @@
 > **Key takeaway:** A Vedic birth chart (Janam Kundli) maps the nine planets across twelve houses and 27 Nakshatras in the sidereal zodiac at your exact birth moment. Read it through the ascendant, the Moon, planetary dignity and aspects, then time it with the Vimshottari dasha and transits. The chart shows tendencies and timing, never a fixed fate.
 
-## Classical Foundations in Jyotish
+## What Are the Building Blocks of a Vedic Birth Chart?
 
 ### The sidereal zodiac
 Jyotish measures the zodiac against the fixed stars, not the seasons. Because of the slow precession of the equinoxes, the sidereal and tropical zodiacs now differ by about 24 degrees, a value called the **ayanamsha**. Most Indian astrologers use the **Lahiri (Chitrapaksha)** ayanamsha. In practice, most planets in your Vedic chart sit one sign earlier than in a Western chart, which is why many people discover a "new" Sun or Moon sign when they first see their Kundli.
@@ -34,7 +34,7 @@ The four aims of life (Purusharthas) are spread across the chart: **Dharma** (1,
 ### Divisional charts (Vargas)
 BPHS describes sixteen divisional charts, each a magnified view of one area of life. The **D-9 Navamsha** is the most important after the birth chart. It shows the true strength of each planet, the quality of marriage and the inner self that matures with age. A planet strong in both the D-1 and the D-9 (Vargottama, in the same sign in both) delivers its promise reliably. Others include the **D-10** for career, **D-7** for children, **D-12** for parents and the **D-60** for deeper karma.
 
-## House, Planetary & Dasha Dynamics
+## How Do Dignity, Lordship, Yogas and Dashas Work Together?
 
 ### Dignity: how comfortable is each planet?
 A planet's sign shows how freely it can express itself. Each planet has a sign of exaltation where it is strongest: Sun in Aries, Moon in Taurus, Mars in Capricorn, Mercury in Virgo, Jupiter in Cancer, Venus in Pisces and Saturn in Libra. It is debilitated in the opposite sign. Own signs and friendly signs also give strength. **Phaladeepika** notes that a debilitated planet can be redeemed through **Neecha Bhanga**, the cancellation of debilitation, for example when the lord of its sign is in a Kendra. So no placement should be judged in isolation.
@@ -72,7 +72,7 @@ The **Jaimini Upadesa Sutras** add the Chara Karakas, significators set by plane
 5. Look up your **current Mahadasha and Antardasha** and what those planets rule.
 6. Note where **Saturn and Jupiter are transiting** from your Moon.
 
-## Conscious Karma & Practical Vedic Remedies
+## How Do You Turn Your Birth Chart Into Practical Action?
 
 The birth chart reflects **Prarabdha karma**, the portion of past karma ripening in this life. It does not take away your freedom. **Kriyamana karma**, what you do now, is always yours, and Vedic remedies are tools for using that freedom wisely rather than ways of buying a different fate.
 

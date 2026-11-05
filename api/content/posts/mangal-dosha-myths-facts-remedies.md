@@ -1,6 +1,6 @@
 > **Key takeaway:** Mangal Dosha (Kuja Dosha) arises when Mars occupies the 1st, 2nd, 4th, 7th, 8th or 12th house from the ascendant, Moon or Venus. It is common, often cancelled by classical exceptions, and never a curse. Judge it within the whole chart and both partners' Kundlis, and work with Mars through disciplined, constructive remedies.
 
-## Classical Foundations in Jyotish
+## What Do the Classical Texts Actually Say About Mangal Dosha?
 
 ### What Mars represents
 In Jyotish, Mars (Mangal, also called Kuja or Bhauma, "son of the Earth") is the commander among the planets. **Brihat Parashara Hora Shastra** associates it with courage, energy, decisiveness, siblings, land and property, blood and physical strength. Mars is the fire that gets things done. In a balanced chart it gives drive, protection and leadership; in an afflicted position it can show impatience, anger, conflict or haste.
@@ -22,7 +22,7 @@ Mangal Dosha developed mainly through later works on marriage compatibility and 
 
 The same idea travels under different names: **Manglik** in North India and Punjab, **Kuja Dosha** in Kerala and Karnataka, and **Chevvai Dosham** in Tamil Nadu. The houses counted and the exceptions accepted vary slightly between these traditions. That is one more reason two astrologers can label the same chart differently, and why the reasoning behind a verdict matters more than the label.
 
-## House, Planetary & Dasha Dynamics
+## When Does Mars Really Cause Mangal Dosha, and When Is It Cancelled?
 
 ### The cancellations (Parihara)
 Traditional texts and long practice list many conditions that reduce or cancel Mangal Dosha. Among the most widely applied:
@@ -63,7 +63,7 @@ Mars is not the enemy of love. Well-directed, it gives a partner who protects th
 ### Reading it in Kundli Milan
 In marriage matching, Mangal Dosha is weighed alongside the 36-point **Ashtakoota Guna Milan**, both partners' 7th houses, Venus, Jupiter and the Navamsha, and the dashas both will run in the early years of marriage. **Bhrigu Nandi Nadi** adds a further view: Mars linked by sign to Venus or Saturn describes the dynamics of desire and duty in a relationship, which helps explain how the energy will show up and how to channel it.
 
-## Conscious Karma & Practical Vedic Remedies
+## Which Remedies Genuinely Help With Mangal Dosha?
 
 Mars is energy, and energy needs a purpose. The best remedies give Mars disciplined, constructive work while calming the mind, which is exactly what conscious **Kriyamana karma** means.
 

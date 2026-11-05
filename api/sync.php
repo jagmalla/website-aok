@@ -1,7 +1,8 @@
 <?php
 if (realpath((string)($_SERVER['SCRIPT_FILENAME'] ?? '')) === __FILE__) { http_response_code(403); exit; }   // a library: never run on its own
 // Runs on every admin save (api/data.php). Keeps services, addresses and search engines in step with the edit:
-//   - each changed service gets a fresh updatedAt (the sitemap's <lastmod>);
+//   - each changed service, blog post, custom page and location page gets a fresh updatedAt (the
+//     sitemap's <lastmod> and the structured data's dateModified);
 //   - a service whose address changed, or that was deleted, leaves a 301 behind, so no URL ever 404s;
 //   - a deleted shipped service stays deleted (deletedSeeds), instead of being added back as a default;
 //   - a published blog post that moves to a new address, or is deleted or unpublished, leaves a 301
@@ -23,7 +24,10 @@ function aok_save_sync(?array $old, array &$new): array {
     foreach ($new['services'] as $i => $s) {
         $id = $s['id'] ?? ''; $o = $oldS[$id] ?? null;
         if ($o !== null && !empty($o['banner']) && empty($s['banner'])) $s = $new['services'][$i] = ['banner' => $o['banner']] + $s;   // set by the server: an editor copy that hasn't caught up keeps it
-        if ($o !== null && $sig($o) === $sig($s)) continue;
+        if ($o !== null && $sig($o) === $sig($s)) {
+            if (!empty($o['updatedAt']) && empty($s['updatedAt'])) $new['services'][$i]['updatedAt'] = $o['updatedAt'];   // an editor copy that hasn't caught up keeps it
+            continue;
+        }
         $new['services'][$i]['updatedAt'] = $now;
         $changed[] = '/services/' . $newSlug[$id];
         if ($o !== null && $oldSlug[$id] !== $newSlug[$id]) {
@@ -32,6 +36,25 @@ function aok_save_sync(?array $old, array &$new): array {
             if (empty($s['banner']) && is_file(dirname(__DIR__) . '/assets/img/services/' . $oldSlug[$id] . '-16x9.jpg')) $new['services'][$i]['banner'] = $oldSlug[$id];
         }
     }
+    // blog posts, custom pages and location pages: a fresh updatedAt when what a reader sees changed (the
+    // sitemap's <lastmod> and the structured data's dateModified). Posts compare only their visible text,
+    // so publishing tools that tidy other fields never make an old article look newly revised.
+    $postSig = function ($p) { $o = []; foreach (['title', 'subtitle', 'body', 'excerpt', 'seoTitle', 'metaDescription', 'slug', 'image'] as $f) $o[$f] = is_string($p[$f] ?? null) ? aok_norm_text((string)$p[$f]) : ($p[$f] ?? null); return json_encode($o); };
+    $itemSig = function ($x) { unset($x['updatedAt'], $x['slugAuto']); return json_encode($x); };
+    foreach (['blog' => $postSig, 'pages' => $itemSig, 'locations' => $itemSig] as $kind => $sg) {
+        if (!isset($new[$kind]) || !is_array($new[$kind])) continue;
+        $was = []; foreach ((array)($old[$kind] ?? []) as $x) if (is_array($x) && !empty($x['id'])) $was[$x['id']] = $x;
+        foreach ($new[$kind] as $i => $x) {
+            if (!is_array($x) || empty($x['id'])) continue;
+            $o = $was[$x['id']] ?? null;
+            if ($o !== null && $sg($o) === $sg($x)) {
+                if (!empty($o['updatedAt']) && ($x['updatedAt'] ?? '') !== $o['updatedAt']) $new[$kind][$i]['updatedAt'] = $o['updatedAt'];
+                continue;
+            }
+            $new[$kind][$i]['updatedAt'] = $now;
+        }
+    }
+
     $reds = (isset($new['redirects']) && is_array($new['redirects'])) ? array_values($new['redirects']) : [];
     $key = function ($p) { return strtolower('/' . trim((string)$p, '/')); };
     $add = function ($from, $to) use (&$reds, $key) {
@@ -106,7 +129,9 @@ function aok_save_sync(?array $old, array &$new): array {
 function aok_sync_patch(array $d): array {
     $up = []; $bn = [];
     foreach ($d['services'] ?? [] as $s) { if (!empty($s['id']) && !empty($s['updatedAt'])) $up[$s['id']] = $s['updatedAt']; if (!empty($s['id']) && !empty($s['banner'])) $bn[$s['id']] = $s['banner']; }
-    return ['redirects' => array_values((array)($d['redirects'] ?? [])), 'deletedSeeds' => array_values((array)($d['deletedSeeds'] ?? [])), 'updatedAt' => (object)$up, 'banner' => (object)$bn];
+    $mod = [];
+    foreach (['blog', 'pages', 'locations'] as $k) { $m = []; foreach ((array)($d[$k] ?? []) as $x) if (is_array($x) && !empty($x['id']) && !empty($x['updatedAt'])) $m[$x['id']] = $x['updatedAt']; $mod[$k] = (object)$m; }
+    return ['redirects' => array_values((array)($d['redirects'] ?? [])), 'deletedSeeds' => array_values((array)($d['deletedSeeds'] ?? [])), 'updatedAt' => (object)$up, 'banner' => (object)$bn, 'modified' => $mod];
 }
 
 // ---------------------------------------------------------------- IndexNow queue ----

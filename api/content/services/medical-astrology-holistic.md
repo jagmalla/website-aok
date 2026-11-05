@@ -1,13 +1,17 @@
 > **Direct answer:** Our Holistic Medical Astrology consultation offers an educational, preventive overview of the physical vulnerabilities indicated in your birth chart. In a 60-minute session ($100 CAD/hr, pay after satisfaction), we examine planetary elemental balance (Pancha Mahabhuta) to support healthy lifestyle and stress-reduction habits.
 
-## Classical Vedic Methodology & Texts Used
+## How Does Vedic Medical Astrology Assess Health Tendencies?
+Vedic medical astrology assesses your elemental constitution (Vata, Pitta, Kapha) from the Lagna, Moon and planets, maps the body through the 12 signs of the Kaal Purusha, and reads the Sun and Moon for vitality and mental balance. Insights are complementary and preventive only: this consultation never diagnoses illness or replaces professional healthcare.
+
 - **Textual Grounding:** Based on classical Ayurvedic-astrological correlations from Brihat Parashara Hora Shastra, Phaladeepika, and classical medical astrology teachings under mentor Sh. Sharawan Jha.
 - **Tridosha Balance (Vata, Pitta, Kapha):** Assessing the dominant elemental constitution through the Lagna, Moon sign, and planetary placements.
 - **Anatomical House Mapping (Kaal Purusha):** Evaluating the 12 signs representing the cosmic body, paying mindful attention to the 6th house (daily health) and 8th house (vitality and longevity).
 - **Sun and Moon Vitality:** Analyzing the luminaries as indicators of physical constitution (Sun - bones, vitality) and mental/fluid balance (Moon - mind, lymphatic flow).
 - **Strict Ethical Disclaimer:** Astrological insights are strictly complementary and for preventive awareness. This consultation never diagnoses illness, prescribes medical remedies, or replaces professional healthcare advice.
 
-## Key Life Questions & Chart Factors Analyzed
+## What Health Questions Can Medical Astrology Help With?
+Medical astrology can point to stress-prone body systems, such as digestion, nerves or inflammation, and to dasha periods of lower vitality linked to the 6th house, when rest and nutrition matter most. It suggests gentle balancing through diet, daily routine, meditation and Swarodaya breath practice, always alongside your doctor's advice.
+
 - **Identifying Stress-Prone Body Systems:** Recognizing susceptibility to digestive sluggishness, nervous exhaustion, or inflammatory tension.
 - **Timing Periods of Lower Vitality:** Mapping dasha cycles connected to the 6th house to prioritize preventive rest and nutrition.
 - **Elemental Harmonization:** Utilizing diet, herbal tea habits, meditation, and daily routines that balance Fire, Water, Air, or Earth excesses.

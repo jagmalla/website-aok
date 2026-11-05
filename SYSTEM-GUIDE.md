@@ -180,6 +180,14 @@ The business node carries the Business Profile's full name, with the short brand
 `alternateName`, and `hasMap`, `geo` and `sameAs` all pointing at the same Google listing.
 That is what lets a crawler decide the website and the Maps entry are one business.
 
+The two nodes everything else points at have fixed ids: the business is
+`https://www.analysisofkarma.com/#business` and the practitioner `…/#jag-mallah`. Every
+`BlogPosting` names them as `publisher` and `author`. Its `dateModified` (and the sitemap's
+`<lastmod>` for posts, pages and location pages) is the item's `updatedAt`, which
+`api/sync.php` sets only when the reader-visible text changes, never earlier than the
+publication date. `areaServed` lists the Surrey neighbourhoods (`local.neighbourhoods`) as
+`Place`s inside the city, right after the city itself.
+
 Three rules learned the hard way:
 - **Never publish a rating you wrote yourself.** Ratings must come from Google or another
   platform, and Google ignores (or penalises) a `LocalBusiness` rating a site declares about
@@ -239,6 +247,9 @@ Assistants lift *passages*, not pages. So every important page has:
 1. **A direct answer box at the top** — 45–55 words that answer the page's question
    outright, before any preamble. This is the highest-value element on the page for AI.
 2. **Headings shaped like real questions** — "How long does it take?", not "Timings".
+   Every shipped service page and article follows this (content versions 7, 18 and 19), and
+   a service added from Admin → Services gets question headings built from its name. Under a
+   service page's question heading sits a 40–60 word answer before the bullet points.
 3. **An FAQ with proper `FAQPage` markup** — 3+ questions, answers of 40–60 words, each
    understandable on its own without the surrounding page.
 4. **Tables** for prices, specifications and turnaround — trivially liftable. `/services`

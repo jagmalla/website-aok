@@ -1,6 +1,6 @@
 > **Key takeaway:** Vedic medical astrology (Ayur Jyotish) maps the body through the Kalapurusha, the cosmic person whose head is Aries and feet are Pisces, and links planets with organs, doshas and the five elements. It highlights constitutional tendencies and timing for preventive care. It is never a diagnosis and never replaces a qualified medical professional.
 
-## Classical Foundations in Jyotish
+## What Do the Classical Texts Say About Astrology and the Body?
 
 ### The Kalapurusha
 **Brihat Parashara Hora Shastra** describes the **Kalapurusha**, the "person of time", whose body is the zodiac. The signs follow the body from head to foot in the same order popular astrology uses:
@@ -35,7 +35,7 @@ The classical texts also link each planet with bodily systems and the three Ayur
 ### The five elements
 The **Pancha Mahabhuta**, earth, water, fire, air and space, underlie both Ayurveda and Jyotish. Fire signs and planets relate to the fire element and Pitta, water signs to water and Kapha, air signs to air and Vata. A chart emphasising one element suggests where balance in diet and routine may help most.
 
-## House, Planetary & Dasha Dynamics
+## How Do Houses, Dashas and Transits Point to Health Tendencies?
 
 ### The houses of health
 - **1st house and its lord:** overall constitution, vitality and resilience. A strong ascendant lord is a major protective factor.
@@ -66,7 +66,7 @@ In my consultations I never diagnose, and I always encourage clients to follow t
 ### Classical illustration
 A chart with the Sun weak in Libra and placed in the 6th house might suggest paying attention to vitality and stress, especially in the Sun's dasha. The practical response is daily morning sunlight, regular exercise, sleep and routine medical check-ups. It is a reminder to look after oneself, not a prediction.
 
-## Conscious Karma & Practical Vedic Remedies
+## Which Practical Remedies Support Health Alongside Medical Care?
 
 Health is where **Kriyamana karma**, present action, matters most. Most of these practices are also recommended by modern health guidance.
 

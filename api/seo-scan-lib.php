@@ -152,7 +152,7 @@ function app_scan_schema(array $d, array $routes, array &$checks, array &$stats)
             $need = [];
             foreach ($types as $t) if (isset(app_scan_schema_required()[$t])) $need = array_merge($need, app_scan_schema_required()[$t]);
             // the business: whatever local.businessType says it is (ProfessionalService, Dentist, LocalBusiness …)
-            if (substr($id, -13) === '#organization') $need = array_merge($need, ['name', 'url', 'telephone', 'address']);
+            if (substr($id, -9) === '#business') $need = array_merge($need, ['name', 'url', 'telephone', 'address']);
             foreach (array_unique($need) as $f) {
                 $v = $node[$f] ?? null;
                 if ($v === null || $v === '' || $v === [] || (is_string($v) && trim($v) === '')) $missing[implode('+', $types) . '|' . $f] = $types;

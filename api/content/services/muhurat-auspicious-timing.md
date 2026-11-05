@@ -1,12 +1,16 @@
 > **Direct answer:** Muhurat is the ancient Vedic science of electional astrology, identifying the most favorable celestial window to initiate significant life endeavors. Through a 60-minute session ($100 CAD/hr, pay after satisfaction), we calculate personalized, auspicious dates and times for weddings, corporate launches, property purchases, and major investments.
 
-## Classical Vedic Methodology & Texts Used
+## How Is an Auspicious Muhurat Selected in Vedic Astrology?
+An auspicious Muhurat is selected by checking the five limbs of the Panchanga (Tithi, Vara, Nakshatra, Yoga and Karana), then matching the time to your own birth chart: a favourable Janma Tara, no Chandra Ashtama and a protective rising sign. Rahu Kaal, Gulika, Bhadra, eclipses and Gandanta are excluded, and activity-specific classical rules are applied.
+
 - **The Five Limbs of Time (Panchanga):** Rigorous mathematical evaluation of Tithi (lunar day), Vara (day of week), Nakshatra (lunar mansion), Yoga, and Karana.
 - **Individual Chart Synchronization:** True classical Muhurat must harmonize with your personal birth chart. We verify Janma Tara, avoid your natal Moon's 8th house transit (Chandra Ashtama), and ensure the rising sign protects the initiative.
 - **Avoiding Destructive Inauspicious Flaws:** Ensuring chosen times are strictly free from Rahu Kaal, Gulika, Bhadra/Vishti Karana, Eclipse shadows, and Gandanta cusps.
 - **Activity-Specific Rules:** Applying specialized classical rules for Griha Pravesh (housewarming), Vivaha (marriage), and Vyapar Arambha (business launch).
 
-## Key Life Questions & Chart Factors Analyzed
+## Which Events Benefit Most From a Muhurat?
+A Muhurat is most valuable for weddings and engagements, where both partners' charts are harmonised, and for business or website launches, property registrations, housewarmings (Griha Pravesh), contract signings and major purchases. Each time is chosen to strengthen the houses that matter for that event, such as the 4th for property or the 10th and 11th for business.
+
 - **Wedding & Engagement Timing:** Harmonizing two charts to select a marital Muhurat supporting mutual affection and longevity.
 - **Business & Commercial Entity Launches:** Aligning company incorporation or website launches with powerful 10th and 11th house ascendants.
 - **Property & Real Estate Registrations:** Selecting timings that fortify the 4th house and Mars to secure stability.

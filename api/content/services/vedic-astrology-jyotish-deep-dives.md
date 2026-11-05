@@ -1,12 +1,16 @@
 > **Direct answer:** Our Jyotish Deep Dive is an exhaustive, master-level consultation synthesizing classical Parashari, Jaimini, and Bhrigu Nandi Nadi frameworks. In a thorough 60-minute session ($100 CAD/hr, pay after satisfaction), we dissect your overarching soul journey, strengths, hidden karmic patterns, and long-range life trajectory.
 
-## Classical Vedic Methodology & Texts Used
+## What Makes a Jyotish Deep-Dive Different From a Standard Reading?
+A Jyotish deep-dive combines three classical systems in one reading: Parashari principles from Brihat Parashara Hora Shastra, Jaimini Chara Karakas such as the Atmakaraka (soul planet), and Bhrigu Nandi Nadi linkages. It examines the D-1, D-9, D-10, D-12 and D-60 charts and Argala influences, so hidden supports and karmic blocks become visible.
+
 - **Integrated Shastra Mastery:** Synthesizing Brihat Parashara Hora Shastra with the symbolic brevity of Jaimini Upadesa Sutras and Bhrigu Nandi Nadi linkages.
 - **Jaimini Chara Karakas:** Evaluating the Atmakaraka (soul planet), Amatyakaraka (career indicator), and Darakaraka (spouse indicator) to uncover inner drives.
 - **Complete Divisional Analysis:** Thorough investigation of the D-1 (Physical life), D-9 (Dharma & Relationships), D-10 (Profession), D-12 (Ancestral roots), and D-60 (Past life karmic seed).
 - **Argala & Planetary Obstructions:** Evaluating supportive interventions (Shubha Argala) and karmic blocks (Virodha Argala) influencing life progress.
 
-## Key Life Questions & Chart Factors Analyzed
+## What Life Questions Does a Deep-Dive Reading Explore?
+A deep-dive explores your soul's purpose and dharma, the recurring themes in your relationships, finances and family, and a long-range dasha roadmap for the next decade. It also shows how to balance the four purusharthas, Dharma (duty), Artha (wealth), Kama (desire) and Moksha (liberation), across your material and spiritual life.
+
 - **Ultimate Life Purpose & Soul Dharma:** What did your soul incarnate to master, balance, and overcome in this lifetime?
 - **Deciphering Lifelong Themes:** Understanding recurring patterns in relationships, finances, or family dynamics.
 - **Long-Range Dasha Roadmap:** Projecting multi-year planetary transitions across the next decade to aid major life planning.

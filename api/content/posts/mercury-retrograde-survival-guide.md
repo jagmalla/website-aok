@@ -1,6 +1,6 @@
 > **Key takeaway:** Mercury retrograde (Vakri Budha) is an apparent backward motion that happens about three times a year for roughly three weeks. In Vedic astrology a retrograde planet gains strength (Chesta Bala) and turns inward, so its themes resurface. Its personal impact depends on Mercury's role in your birth chart and your current dasha.
 
-## Classical Foundations in Jyotish
+## What Do the Classical Texts Say About Mercury Retrograde?
 
 ### What retrogression is
 Every planet except the Sun and Moon periodically appears to move backward against the stars, as seen from Earth. Mercury does this most often. Jyotish calls a retrograde planet **Vakri**. The movement is an optical effect, but classical astrology treats it as a meaningful change in how the planet expresses itself.
@@ -11,7 +11,7 @@ Here Vedic and popular astrology differ. **Brihat Parashara Hora Shastra** inclu
 ### Mercury's significations
 **Phaladeepika** associates Mercury (Budha) with intellect, speech, writing, learning, trade, accounts, communication, short travel, friends and the nervous system. Mercury is also the "prince" among the planets: youthful, adaptable and easily influenced by the planets it joins. During its retrograde these areas are emphasised in a reflective way: communication goes back over old ground, deals are renegotiated, and the mind reviews rather than initiates.
 
-## House, Planetary & Dasha Dynamics
+## Whose Chart Feels Mercury Retrograde Most, and Where?
 
 ### Transit retrograde and natal retrograde
 Two different things are often confused:
@@ -46,7 +46,7 @@ Mercury frequently travels close to the Sun and becomes **combust (Asta)**, whic
 3. Schedule signatures, launches and major purchases outside the retrograde where you can. When you cannot, read documents twice.
 4. Use the period for editing, follow-ups, reconnecting and finishing.
 
-## Conscious Karma & Practical Vedic Remedies
+## What Should You Do During Mercury Retrograde?
 
 Mercury is the planet of the intelligent, adaptable mind. Its remedies sharpen and steady that mind.
 

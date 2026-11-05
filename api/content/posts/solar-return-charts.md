@@ -1,6 +1,6 @@
 > **Key takeaway:** The Vedic version of the solar return is Varshaphala, the Tajika annual chart cast when the Sun returns to its exact sidereal birth position. It is read with Muntha, the year lord, Tajika aspects, Sahams and Mudda dasha, always alongside your natal chart and running Vimshottari dasha, to forecast the twelve months ahead.
 
-## Classical Foundations in Jyotish
+## How Did the Solar Return Become the Tajika Varshaphala?
 
 ### From solar return to Varshaphala
 The idea of a birthday chart is shared by Western and Vedic astrology, but Jyotish has its own complete system for it: **Tajika**, whose best-known classical text is **Tajika Neelakanthi**, written by Neelakantha in the 16th century. Tajika divides into **Samjna Tantra** (its principles), **Varsha Tantra** (annual charts) and **Prashna Tantra** (horary questions). The annual chart it produces is called the **Varsha Pravesha**, the "entry of the year", and its interpretation is **Varshaphala**, the fruits of the year.
@@ -17,7 +17,7 @@ Two technical points set Varshaphala apart from a Western solar return:
 - **Varsheshwara (lord of the year):** chosen from the Panchadhikaris by strength and aspect to the annual ascendant. A strong year lord is like a capable minister running the year well.
 - **Sahams:** sensitive points calculated from planetary longitudes, such as Punya (fortune), Vidya (education), Vivaha (marriage), Karma (work) and Putra (children), used for specific questions.
 
-## House, Planetary & Dasha Dynamics
+## How Is a Varshaphala Annual Chart Read?
 
 ### Tajika aspects and yogas
 Tajika uses its own aspects, measured by degree with orbs (Deeptamsha), and a set of **sixteen Tajika yogas** describing how planets interact. Among the most important:
@@ -51,7 +51,7 @@ Tajika also includes **Prashna**, horary astrology. Where Varshaphala answers "W
 ### When to read your annual chart
 The ideal time is a few weeks before your birthday, when the new Varsha Pravesha is about to begin, so you enter the year prepared. Because the chart depends on location, tell your astrologer where you expect to be on the birthday itself. A trip at that time can change the annual ascendant, and with it the houses of the whole year. Reviewing it again at the halfway point, or when a new Mudda period starts, keeps the forecast practical.
 
-## Conscious Karma & Practical Vedic Remedies
+## How Can You Use Your Annual Chart in Practice?
 
 An annual forecast is most valuable when it shapes how you act. Within the framework of **Kriyamana karma**, the forecast becomes a plan.
 

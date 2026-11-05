@@ -78,9 +78,25 @@ if (realpath((string)($_SERVER['SCRIPT_FILENAME'] ?? '')) === __FILE__) { http_r
 //   appointment". Version 6 only filled an empty note, but live sites already carried the note this
 //   project shipped earlier ("Pacific Time, by appointment ..."), so the request never reached them.
 //   Replaced only while it is still exactly that shipped text.
+// Version 17:
+//   The owner's single source of truth. The business name becomes "Analysis of Karma - Vedic
+//   astrologer", matching the Google Business Profile; the Google Maps link everywhere becomes
+//   https://share.google/qMDfkFkxgAA3NY9Nk; the formal training reads "Advanced Parashari Jyotish,
+//   Tajika Varshaphala, Prashna Shastra, Muhurta and Medical Astrology". Each one only replaces the
+//   exact value this project shipped earlier.
+// Version 18:
+//   The service pages' last two generic headings, "Classical Vedic Methodology & Texts Used" and "Key
+//   Life Questions & Chart Factors Analyzed", become the question a visitor would ask, each with a
+//   40-60 word direct answer under it, as version 7 did for the first heading on five pages. Only a
+//   heading still exactly as shipped is replaced; the bullet points under it are kept as they are.
+// Version 19:
+//   The blog articles' three generic section headings ("Classical Foundations in Jyotish", "House,
+//   Planetary & Dasha Dynamics", "Conscious Karma & Practical Vedic Remedies") become the question each
+//   section answers, specific to the article. Only the heading line changes, and only while it is still
+//   exactly as shipped; the text under it is untouched.
 // Only text that is still exactly as first shipped is replaced. Text you have edited is kept. Nothing is deleted.
 
-const AOK_CONTENT_VERSION = 16;
+const AOK_CONTENT_VERSION = 19;
 
 // fingerprints (md5 of the normalised text) of the originally shipped FAQ answers, by question
 const AOK_OLD_FAQ = [
@@ -171,6 +187,9 @@ function aok_upgrade_payload(array $d): array {
     if ($v < 14) $d = aok_upgrade_v14($d);
     if ($v < 15) $d = aok_upgrade_v15($d);
     if ($v < 16) $d = aok_upgrade_v16($d);
+    if ($v < 17) $d = aok_upgrade_v17($d);
+    if ($v < 18) $d = aok_upgrade_v18($d, $def);
+    if ($v < 19) $d = aok_upgrade_v19($d);
     $d['contentVersion'] = AOK_CONTENT_VERSION;
     return $d;
 }
@@ -314,6 +333,8 @@ function aok_content_md(string $kind, string $key): string {
 // true if $text already contains the added sections (or their first line)
 function aok_has_content(string $text, string $md): bool {
     foreach (AOK_CONTENT_MARKERS as $m) if (strpos($text, $m) !== false) return true;
+    // the content file's first section heading (since version 19 a question, so the old marker is gone)
+    if (preg_match('/^## .+$/m', $md, $h) && strpos($text, trim($h[0])) !== false) return true;
     $first = trim(strtok($md, "\n"));
     return $first !== '' && strpos(aok_norm($text), aok_norm($first)) !== false;
 }
@@ -864,5 +885,202 @@ function aok_upgrade_v16(array $d): array {
     $shipped = "Pacific Time, by appointment \u{2014} early-morning and evening slots available for clients in India, the UK and across North America.";
     if (isset($d['local']) && is_array($d['local']) && aok_norm($d['local']['hoursNote'] ?? '') === aok_norm($shipped))
         $d['local']['hoursNote'] = 'Online consultations available 7 days a week by appointment';
+    return $d;
+}
+
+// v17: the owner's single source of truth for the name, the Maps link and the training.
+function aok_upgrade_v17(array $d): array {
+    $oldMap = 'https://maps.app.goo.gl/XrwSpDBGaVsFQ5dV8';
+    $newMap = 'https://share.google/qMDfkFkxgAA3NY9Nk';
+    if (isset($d['local']) && is_array($d['local'])) {
+        if (aok_norm($d['local']['listingName'] ?? '') === 'Analysis of Karma | Vedic astrologer')
+            $d['local']['listingName'] = 'Analysis of Karma - Vedic astrologer';
+        foreach (['mapsCidUrl', 'reviewUrl'] as $k)
+            if (trim((string)($d['local'][$k] ?? '')) === $oldMap) $d['local'][$k] = $newMap;
+    }
+    if (isset($d['person']) && is_array($d['person'])) {
+        $p = $d['person'];
+        if (isset($p['studies']) && is_array($p['studies'])
+            && array_map('aok_norm', $p['studies']) === ['Advanced Astrology', 'Tajika (Varshaphala and Prashna Shastra)', 'Muhurta', 'Medical Astrology'])
+            $p['studies'] = ['Advanced Parashari Jyotish', 'Tajika Varshaphala', 'Prashna Shastra', 'Muhurta', 'Medical Astrology'];
+        if (isset($p['shortBio']) && is_string($p['shortBio']))
+            $p['shortBio'] = str_replace('He completed formal studies in Advanced Astrology, Tajika (Varshaphala and Prashna Shastra), Muhurta and Medical Astrology under his mentor',
+                'He trained in Advanced Parashari Jyotish, Tajika Varshaphala, Prashna Shastra, Muhurta and Medical Astrology under his mentor', $p['shortBio']);
+        $d['person'] = $p;
+    }
+    return $d;
+}
+
+// v18: question headings with a direct answer under each, replacing the two generic headings on the
+// service pages that still had them (heading line => [question heading, 40-60 word answer])
+const AOK_V18_HEADINGS = [
+    'birth-chart-generation' => [
+        ['## Classical Vedic Methodology & Texts Used',
+         '## How Is an Accurate Vedic Birth Chart Calculated?',
+         'An accurate Vedic birth chart is calculated from your exact birth date, time and place using Swiss Ephemeris astronomy, the Lahiri (Chitrapaksha) Ayanamsha, and the correct latitude, longitude and Daylight Saving adjustments. Jag Mallah then generates all 16 divisional charts (Shodashvarga) and the Shadbala planetary strengths, so every later reading rests on precise mathematics.'],
+        ['## Key Life Questions & Chart Factors Analyzed',
+         '## What Does Your Vedic Birth Chart Report Include?',
+         'Your birth chart report verifies the exact rising sign (Lagna), including births near a sign boundary, and records each planet\'s degree and Nakshatra Pada. It sets out the full 120-year Vimshottari Dasha calendar and the special ascendants (Arudha, Ghati and Hora Lagna), giving you a reliable reference chart for every future consultation.'],
+    ],
+    'child-naming-astrology-report' => [
+        ['## Classical Vedic Methodology & Texts Used',
+         '## How Does Vedic Astrology Choose an Auspicious Name for a Baby?',
+         'Vedic astrology chooses a baby\'s name from the child\'s birth star (Nama Nakshatra) and its quarter (Pada), which give the classical starting syllables (Aksharas). Jag Mallah checks that the name\'s sound harmonises with the child\'s Moon and Lagna. The reading is always encouraging: no lifespan, medical or fear-based predictions are ever made for children.'],
+        ['## Key Life Questions & Chart Factors Analyzed',
+         '## What Will Parents Learn From a Child Astrology Report?',
+         'Parents receive a list of verified auspicious name letters and a gentle picture of their child\'s temperament: emotional needs, comfort patterns, and natural learning strengths in science, arts, analysis or sport. The report also offers practical nursery guidance on light, colour and elemental balance to support restful sleep and a peaceful home.'],
+    ],
+    'horoscopes-daily-weekly-monthly' => [
+        ['## Classical Vedic Methodology & Texts Used',
+         '## How Are Personalised Vedic Horoscopes Different From Sun-Sign Horoscopes?',
+         'Personalised Vedic horoscopes are read from your Moon sign (Chandra Rashi) and birth star, not a generic Sun sign. Jag Mallah measures real-time transits of Saturn, Jupiter and Rahu-Ketu against your natal Moon, scores them with Ashtakavarga bindus and checks daily Tara Bala, so each forecast reflects your own chart rather than a twelfth of the population.'],
+        ['## Key Life Questions & Chart Factors Analyzed',
+         '## What Can a Daily, Weekly or Monthly Horoscope Help You Plan?',
+         'A personalised horoscope helps you plan peak days for meetings, pitches and creative work, favourable windows for investments and expected spending spikes, calmer times for important conversations, and rest during challenging 6th or 8th house lunar transits. It turns planetary movements into a practical calendar for your week or month.'],
+    ],
+    'karmic-past-life-astrology' => [
+        ['## Classical Vedic Methodology & Texts Used',
+         '## How Does Vedic Astrology Read Past-Life Karma?',
+         'Vedic astrology reads past-life karma mainly through the Rahu-Ketu axis: Ketu shows accumulated mastery and old attachments, while Rahu shows the desires your soul is growing toward. Jag Mallah adds the Shashtiamsha (D-60) chart, retrograde planets, and the 5th and 9th houses of Poorva Punya, as described in Brihat Parashara Hora Shastra.'],
+        ['## Key Life Questions & Chart Factors Analyzed',
+         '## Which Life Patterns Can a Karmic Astrology Reading Explain?',
+         'A karmic reading can explain unexplained fears, phobias and compulsions, sudden and intense soul connections, and repeating cycles that keep pulling you back to old comfort zones (Ketu). It then shows how to step into your present life mission (Rahu) with confidence, using practical, ethical remedies rather than fear.'],
+    ],
+    'live-astrologer-consultation' => [
+        ['## Classical Vedic Methodology & Texts Used',
+         '## What Happens in a Live Vedic Astrology Consultation?',
+         'In a live consultation you speak directly with Jag Mallah, with no intermediaries, scripts or junior readers. He combines your birth chart (Kundli), dasha periods and Prashna Shastra (horary astrology for the moment you ask) in real time, checking details as you share them, so career, health, money and relationships are read together.'],
+        ['## Key Life Questions & Chart Factors Analyzed',
+         '## What Questions Can You Ask in a Live Astrologer Session?',
+         'You can ask about any area of life in complete privacy: pressing decisions on relocation, investments, partnerships or career changes, and quick comparisons with a spouse\'s or child\'s chart where relevant. Every 60-minute session ($100 CAD per hour) ends with a practical lifestyle and remedy plan, and new clients pay only if satisfied.'],
+    ],
+    'love-or-arranged-marriage-astrology' => [
+        ['## Classical Vedic Methodology & Texts Used',
+         '## How Does Vedic Astrology Show a Love or Arranged Marriage?',
+         'Vedic astrology shows a love marriage when the 5th lord of romance and the 7th lord of commitment connect by aspect, conjunction or sign exchange (Parivartana). Involvement of the 9th and 2nd lords points to a family-supported arranged match, while Rahu or Venus on the 7th house suggests an unconventional union. The Navamsha (D-9) confirms long-term sustainability.'],
+        ['## Key Life Questions & Chart Factors Analyzed',
+         '## What Marriage Questions Does This Reading Answer?',
+         'This reading answers whether a love or arranged marriage is likely to bring you greater fulfilment, when favourable dasha windows activate marriage, and the probable nature, temperament and background of your partner. Where Saturn or Ketu delay marriage through the 7th house, Jag Mallah explains the timing and suggests classical remedies.'],
+    ],
+    'medical-astrology-holistic' => [
+        ['## Classical Vedic Methodology & Texts Used',
+         '## How Does Vedic Medical Astrology Assess Health Tendencies?',
+         'Vedic medical astrology assesses your elemental constitution (Vata, Pitta, Kapha) from the Lagna, Moon and planets, maps the body through the 12 signs of the Kaal Purusha, and reads the Sun and Moon for vitality and mental balance. Insights are complementary and preventive only: this consultation never diagnoses illness or replaces professional healthcare.'],
+        ['## Key Life Questions & Chart Factors Analyzed',
+         '## What Health Questions Can Medical Astrology Help With?',
+         'Medical astrology can point to stress-prone body systems, such as digestion, nerves or inflammation, and to dasha periods of lower vitality linked to the 6th house, when rest and nutrition matter most. It suggests gentle balancing through diet, daily routine, meditation and Swarodaya breath practice, always alongside your doctor\'s advice.'],
+    ],
+    'muhurat-auspicious-timing' => [
+        ['## Classical Vedic Methodology & Texts Used',
+         '## How Is an Auspicious Muhurat Selected in Vedic Astrology?',
+         'An auspicious Muhurat is selected by checking the five limbs of the Panchanga (Tithi, Vara, Nakshatra, Yoga and Karana), then matching the time to your own birth chart: a favourable Janma Tara, no Chandra Ashtama and a protective rising sign. Rahu Kaal, Gulika, Bhadra, eclipses and Gandanta are excluded, and activity-specific classical rules are applied.'],
+        ['## Key Life Questions & Chart Factors Analyzed',
+         '## Which Events Benefit Most From a Muhurat?',
+         'A Muhurat is most valuable for weddings and engagements, where both partners\' charts are harmonised, and for business or website launches, property registrations, housewarmings (Griha Pravesh), contract signings and major purchases. Each time is chosen to strengthen the houses that matter for that event, such as the 4th for property or the 10th and 11th for business.'],
+    ],
+    'personalized-year-ahead-forecast' => [
+        ['## Classical Vedic Methodology & Texts Used',
+         '## How Does a Tajika Solar Return Chart Forecast Your Year?',
+         'A Tajika solar return (Varshaphala) chart is cast for the exact moment the Sun returns to its natal degree each year. Following Tajika Neelakanthi, Jag Mallah finds the Muntha, the year\'s focal house, crowns the Year Lord (Varsheshwara) from the five office-bearers, and times events with Ithasala, Ishrafa and Muthashila yogas.'],
+        ['## Key Life Questions & Chart Factors Analyzed',
+         '## What Does a Year-Ahead Forecast Cover?',
+         'A year-ahead forecast shows the year\'s main theme, whether expansion, relationships or introspection, then breaks it into quarters so you know when to push forward and when to be patient. It tracks your energy and vitality, and cross-checks every annual promise against your Vimshottari Dasha, so the forecast fits your longer life cycle.'],
+    ],
+    'vedic-astrology-jyotish-deep-dives' => [
+        ['## Classical Vedic Methodology & Texts Used',
+         '## What Makes a Jyotish Deep-Dive Different From a Standard Reading?',
+         'A Jyotish deep-dive combines three classical systems in one reading: Parashari principles from Brihat Parashara Hora Shastra, Jaimini Chara Karakas such as the Atmakaraka (soul planet), and Bhrigu Nandi Nadi linkages. It examines the D-1, D-9, D-10, D-12 and D-60 charts and Argala influences, so hidden supports and karmic blocks become visible.'],
+        ['## Key Life Questions & Chart Factors Analyzed',
+         '## What Life Questions Does a Deep-Dive Reading Explore?',
+         'A deep-dive explores your soul\'s purpose and dharma, the recurring themes in your relationships, finances and family, and a long-range dasha roadmap for the next decade. It also shows how to balance the four purusharthas, Dharma (duty), Artha (wealth), Kama (desire) and Moksha (liberation), across your material and spiritual life.'],
+    ],
+    'vedic-meditation-guidance' => [
+        ['## Classical Vedic Methodology & Texts Used',
+         '## How Is Meditation Personalised Using Your Vedic Chart?',
+         'Meditation is personalised by reading your Moon (emotional mind) and Mercury (intellect) to choose a style that suits your temperament. Jag Mallah draws on Shiva Swarodaya breath science (Ida, Pingala and Sushumna), selects a seed (Beej) mantra linked to your Ishta Devata, and balances the five elements (Pancha Mahabhuta) through grounding or calming practice.'],
+        ['## Key Life Questions & Chart Factors Analyzed',
+         '## What Can Personalised Vedic Meditation Help With?',
+         'Personalised meditation can ease a restless mind and anxiety patterns linked to Moon-Rahu or Moon-Saturn signatures, strengthen intuition through contemplative silence, and build a realistic 15–20 minute daily routine that fits your work. It also deepens your other astrological remedies, such as charity and personal contemplation, through steady focus.'],
+    ],
+    'kundli-milan-marriage-matching' => [
+        ['## Key Life Questions & Chart Factors Analyzed',
+         '## What Does Kundli Milan Reveal About Married Life?',
+         'Kundli Milan reveals emotional bonding through Moon-to-Moon factors (Graha Maitri and Bhakoot), physical and family harmony through Yoni and Nadi, and the couple\'s financial growth through the 2nd and 11th houses across both charts. It also checks the 4th and 9th houses for how smoothly each partner settles in with in-laws and extended family.'],
+    ],
+    'dosha-analysis-remedies' => [
+        ['## Key Life Questions & Chart Factors Analyzed',
+         '## How Do You Know If a Dosha Is Really Affecting Your Life?',
+         'A dosha only matters when it creates a functional obstacle, not just a nominal placement. Jag Mallah checks which life area it actually touches (marriage, career, health or peace of mind), which dasha and transit periods activate it and when relief arrives, and the discipline and wisdom the combination can build when handled consciously.'],
+    ],
+    'gemstone-recommendation' => [
+        ['## Key Life Questions & Chart Factors Analyzed',
+         '## Which Gemstones Suit Your Chart, and How Should They Be Worn?',
+         'The right gemstones depend on your functional benefic lords: the Lagna lord\'s stone (Jeevan Ratna) for health and confidence, and the 9th and 10th lords\' stones for fortune and career. Stones that could amplify health, legal or emotional troubles are flagged to avoid, and you receive exact guidance on metal, finger, day, hora and consecration mantra.'],
+    ],
+    'career-finance-consultation' => [
+        ['## Key Life Questions & Chart Factors Analyzed',
+         '## What Career and Money Decisions Can Your Chart Clarify?',
+         'Your chart can clarify whether employment (6th house) or an independent business (7th and 10th houses) suits you, when dasha shifts favour resigning or changing roles, and when 12th-house activations call for investment caution. It also assesses whether a business partner or co-founder is likely to bring growth or dispute, before you commit.'],
+    ],
+];
+
+function aok_upgrade_v18(array $d, array $def): array {
+    if (!isset($d['services']) || !is_array($d['services'])) return $d;
+    require_once __DIR__ . '/seo-lib.php';
+    foreach ($d['services'] as $i => $s) {
+        if (!is_array($s)) continue;
+        $detail = (string)($s['detail'] ?? '');
+        if ($detail === '') continue;
+        foreach (AOK_V18_HEADINGS[aok_service_content_key($s, $def)] ?? [] as [$from, $to, $answer]) {
+            if (strpos($detail, $to) !== false) continue;   // already done
+            $lines = explode("\n", str_replace("\r\n", "\n", $detail));
+            foreach ($lines as $k => $line) {
+                if (trim($line) !== $from) continue;   // a heading the owner renamed is kept
+                array_splice($lines, $k, 1, [$to, $answer, '']);
+                $detail = implode("\n", $lines);
+                break;
+            }
+        }
+        if ($detail !== (string)($s['detail'] ?? '')) { $d['services'][$i]['detail'] = $detail; $d['services'][$i]['updatedAt'] = gmdate('c'); }
+    }
+    return $d;
+}
+
+// v19: the blog articles' three generic section headings become the question the section answers
+const AOK_V19_POST_HEADINGS = [
+    '12-astrological-houses-explained' => ['## What Do the Classical Texts Say About the 12 Houses?', '## How Are the Houses Judged and Timed in a Vedic Chart?', '## How Can You Work With the Karma Each House Shows?'],
+    'auspicious-dates-marriage-business' => ['## What Is Muhurta, and Which Periods Should You Avoid?', '## How Is a Muhurta Chosen for Marriage, Business or Property?', '## How Do You Make the Most of an Auspicious Date?'],
+    'best-gemstones-zodiac-sign' => ['## Why Does Your Ascendant Matter More Than Your Sun Sign for Gemstones?', '## Which Gemstone Suits Your Ascendant, and When Should You Avoid One?', '## Do You Need a Gemstone at All, or Is Another Remedy Better?'],
+    'career-astrology-midheaven' => ['## What Do the Classical Texts Say About Career in a Birth Chart?', '## How Do the 10th House, D-10 Chart and Dashas Shape Your Career?', '## Which Practical Remedies Support Career Growth?'],
+    'full-moon-new-moon-vedic-astrology' => ['## What Do the Classical Texts Say About the Full Moon and New Moon?', '## How Do Lunar Phases Work Through Your Own Birth Chart?', '## How Can You Work With Full and New Moons in Daily Life?'],
+    'mangal-dosha-myths-facts-remedies' => ['## What Do the Classical Texts Actually Say About Mangal Dosha?', '## When Does Mars Really Cause Mangal Dosha, and When Is It Cancelled?', '## Which Remedies Genuinely Help With Mangal Dosha?'],
+    'medical-astrology-body' => ['## What Do the Classical Texts Say About Astrology and the Body?', '## How Do Houses, Dashas and Transits Point to Health Tendencies?', '## Which Practical Remedies Support Health Alongside Medical Care?'],
+    'meditation-and-remedies' => ['## What Do the Classical Texts Say About the Mind, Karma and Remedies?', '## How Does Your Chart Guide the Right Meditation?', '## How Do You Build a Daily Meditation and Remedy Practice?'],
+    'mercury-retrograde-survival-guide' => ['## What Do the Classical Texts Say About Mercury Retrograde?', '## Whose Chart Feels Mercury Retrograde Most, and Where?', '## What Should You Do During Mercury Retrograde?'],
+    'north-and-south-nodes-karmic-path' => ['## What Do the Classical Texts Say About Rahu and Ketu?', '## How Do Rahu and Ketu Work Through Houses and Dashas?', '## How Can You Direct the Energy of Rahu and Ketu?'],
+    'saturn-return-explained' => ['## What Do the Classical Texts Say About Saturn and the Saturn Return?', '## How Do Your Natal Saturn, Sade Sati and Dasha Shape a Saturn Return?', '## How Can You Work Consciously With Your Saturn Return?'],
+    'solar-return-charts' => ['## How Did the Solar Return Become the Tajika Varshaphala?', '## How Is a Varshaphala Annual Chart Read?', '## How Can You Use Your Annual Chart in Practice?'],
+    'sun-moon-rising-signs' => ['## Why Does Vedic Astrology Put the Rising Sign and Moon First?', '## How Do the Sun, Moon and Lagna Work Together in Your Chart?', '## How Can You Keep Your Sun, Moon and Rising Sign in Balance?'],
+    'ultimate-guide-birth-chart' => ['## What Are the Building Blocks of a Vedic Birth Chart?', '## How Do Dignity, Lordship, Yogas and Dashas Work Together?', '## How Do You Turn Your Birth Chart Into Practical Action?'],
+    'vedic-vs-western-astrology' => ['## What Classical Texts and Tools Set Vedic Astrology Apart?', '## How Do Vedic Houses, Aspects and Timing Differ From Western Astrology?', '## How Does Vedic Astrology Turn Insight Into Practical Remedies?'],
+    'zodiac-compatibility-best-worst-matches' => ['## Why Does Vedic Compatibility Start From the Moon Sign?', '## Which Sign Pairs Match Best, and What Else Matters?', '## What Practical Remedies Help a Relationship Thrive?'],
+];
+
+function aok_upgrade_v19(array $d): array {
+    if (!isset($d['blog']) || !is_array($d['blog'])) return $d;
+    $from = ['## Classical Foundations in Jyotish', '## House, Planetary & Dasha Dynamics', '## Conscious Karma & Practical Vedic Remedies'];
+    foreach ($d['blog'] as $i => $p) {
+        if (!is_array($p) || !isset(AOK_V19_POST_HEADINGS[(string)($p['slug'] ?? '')])) continue;
+        $body = (string)($p['body'] ?? '');
+        if ($body === '') continue;
+        $to = AOK_V19_POST_HEADINGS[(string)$p['slug']];
+        $lines = explode("\n", str_replace("\r\n", "\n", $body));
+        foreach ($lines as $k => $line) {
+            $at = array_search(trim($line), $from, true);   // a heading the owner renamed is kept
+            if ($at !== false) $lines[$k] = $to[$at];
+        }
+        $new = implode("\n", $lines);
+        if ($new !== str_replace("\r\n", "\n", $body)) { $d['blog'][$i]['body'] = $new; $d['blog'][$i]['updatedAt'] = gmdate('c'); }
+    }
     return $d;
 }

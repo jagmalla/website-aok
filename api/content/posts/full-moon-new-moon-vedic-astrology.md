@@ -1,6 +1,6 @@
 > **Key takeaway:** In Jyotish the lunar month runs from Amavasya (new moon) through Shukla Paksha to Purnima (full moon), then through Krishna Paksha back to darkness. Its thirty Tithis, together with the Nakshatra and the Moon's position in your chart, guide meditation, fasting, charity and the choice of auspicious times for new beginnings.
 
-## Classical Foundations in Jyotish
+## What Do the Classical Texts Say About the Full Moon and New Moon?
 
 ### The Moon as the mind
 **Brihat Parashara Hora Shastra** names the Moon (**Chandra**) the significator of the mind (**Manas**), emotions, the mother and nourishment. A strong, bright Moon is considered one of the greatest supports a chart can have, because every experience passes through the mind. The Moon's monthly cycle is therefore not just an astronomical event in Jyotish; it is a rhythm of the mind.
@@ -20,7 +20,7 @@ Tithis are grouped into five types that repeat through each half: **Nanda** (joy
 ### Eclipses
 When a full moon or new moon falls near Rahu and Ketu, the lunar nodes, an eclipse can occur: a lunar eclipse at Purnima, a solar eclipse at Amavasya. Jyotish treats eclipse periods as times for prayer, mantra and quiet rather than for starting new ventures, and they are avoided in Muhurta.
 
-## House, Planetary & Dasha Dynamics
+## How Do Lunar Phases Work Through Your Own Birth Chart?
 
 ### Your birth Tithi and Paksha Bala
 The phase of the Moon at your birth is recorded in your chart. **Paksha Bala**, one component of Shadbala, rates the Moon's strength by its distance from the Sun. A Moon born close to full is strong in Paksha Bala; one born near Amavasya is weaker in this respect, although other factors can compensate. People born near Amavasya often benefit particularly from practices that steady the mind.
@@ -40,7 +40,7 @@ The Moon passes through all 27 Nakshatras in about 27.3 days. **Tara Bala**, the
 ### Muhurta and the lunar cycle
 Classical Muhurta favours the **Shukla Paksha** for beginnings such as marriages, launches and moving home, and generally prefers a strong, waxing Moon. Amavasya is usually avoided for new ventures but is excellent for spiritual practice. Both Purnima and the Ekadashi Tithis are widely used for fasting and devotion.
 
-## Conscious Karma & Practical Vedic Remedies
+## How Can You Work With Full and New Moons in Daily Life?
 
 Working with the Moon's cycle is one of the simplest ways to live Jyotish day by day.
 
