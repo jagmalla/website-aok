@@ -1,7 +1,23 @@
 ANALYSIS OF KARMA — Update (SEO, local SEO, AI search & security)
 ===================================================================
 
-NEW IN THIS VERSION: ONE SET OF FACTS, QUESTION HEADINGS, TRUE DATES
+NEW IN THIS VERSION: SEO HEALTH 100 (EVERY TITLE AND DESCRIPTION FITS GOOGLE)
+  • The seven location pages have shorter Google titles (60 characters or
+    fewer) and descriptions (152-157), each keeping its keyword, the main
+    cities and the fee. Google showed only the first ~60 characters before.
+  • /services, and four articles with long headlines (birth chart guide,
+    Saturn return, career astrology, medical astrology), have a shorter
+    Google title. The headline on the page itself is unchanged.
+  • Eight services whose short card text was being used as their Google
+    description now have a proper 140-158 character description:
+    birth chart generation, love or arranged marriage, live consultation,
+    year-ahead forecast, Muhurat, Jyotish deep-dives, karmic astrology and
+    child naming. You can see and edit each one in Admin -> Services ->
+    Page & SEO.
+  • All 48 pages: titles 47-65 characters, descriptions 120-159.
+  • Anything you had already typed into those boxes yourself is kept.
+
+EARLIER: ONE SET OF FACTS, QUESTION HEADINGS, TRUE DATES
   • The business name is "Analysis of Karma - Vedic astrologer" everywhere
     the site names the business (footer, contact page, search-engine data,
     llms.txt), matching your Google Business Profile.

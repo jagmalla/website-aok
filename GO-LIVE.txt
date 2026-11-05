@@ -38,8 +38,8 @@ C. RIGHT AFTER UPLOAD
         upgrade (address, hours, Punjabi, question headings, the comparison
         table, the seven location pages). Hard-refresh: Ctrl+Shift+R.
 
-[ ] 7. Admin -> SEO Health. Expect: no red items. Two amber warnings about
-        long titles/descriptions on location pages are known (see section E).
+[ ] 7. Admin -> SEO Health. Expect a score of 100: no red and no amber items
+        (the only "info" item left is IndexNow, done in step 8 or later).
         The "Every address redirects once to https://www..." check now runs
         for real on the live domain: it must be green. If it is amber, step 5
         is not done.
@@ -101,10 +101,8 @@ E2. Consultation times. The location pages promise slots outside your
     The pages say "7 days a week by appointment", so nothing is false IF you
     take those calls. If you do not, tell me the real windows.
 
-E3. Long Google titles/descriptions on the location pages (4 titles over
-    ~65 characters, 6 descriptions over ~160). Google cuts off the ends. You
-    can now shorten them yourself: Admin -> Locations -> Edit, and watch the
-    counters in the Page & SEO panel. Or keep them, or ask me.
+E3. (Done: every Google title is now 65 characters or fewer and every
+    description 120-160, so Google shows them in full.)
 
 E4. Currency figures: "~£56 GBP" (UK page) and "$72-$75 USD" (US page) will
     drift with exchange rates. Keep, or remove and say "$100 CAD" only.

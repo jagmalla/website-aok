@@ -94,9 +94,16 @@ if (realpath((string)($_SERVER['SCRIPT_FILENAME'] ?? '')) === __FILE__) { http_r
 //   Planetary & Dasha Dynamics", "Conscious Karma & Practical Vedic Remedies") become the question each
 //   section answers, specific to the article. Only the heading line changes, and only while it is still
 //   exactly as shipped; the text under it is untouched.
+// Version 20:
+//   The seven location pages' Google titles (all 60 characters or fewer) and six of their descriptions
+//   (now 152-157 characters), short enough for Google to show in full. Each keeps its keyword, the
+//   main cities and the fee. Also: the /services page title, a Google title for four articles whose
+//   headline is longer than Google shows, and a Google description for eight services whose card text
+//   was too short to serve as one (only where none was written). Only a value still exactly as
+//   shipped, or empty, is changed.
 // Only text that is still exactly as first shipped is replaced. Text you have edited is kept. Nothing is deleted.
 
-const AOK_CONTENT_VERSION = 19;
+const AOK_CONTENT_VERSION = 20;
 
 // fingerprints (md5 of the normalised text) of the originally shipped FAQ answers, by question
 const AOK_OLD_FAQ = [
@@ -190,6 +197,7 @@ function aok_upgrade_payload(array $d): array {
     if ($v < 17) $d = aok_upgrade_v17($d);
     if ($v < 18) $d = aok_upgrade_v18($d, $def);
     if ($v < 19) $d = aok_upgrade_v19($d);
+    if ($v < 20) $d = aok_upgrade_v20($d, $def);
     $d['contentVersion'] = AOK_CONTENT_VERSION;
     return $d;
 }
@@ -1081,6 +1089,90 @@ function aok_upgrade_v19(array $d): array {
         }
         $new = implode("\n", $lines);
         if ($new !== str_replace("\r\n", "\n", $body)) { $d['blog'][$i]['body'] = $new; $d['blog'][$i]['updatedAt'] = gmdate('c'); }
+    }
+    return $d;
+}
+
+// v20: the location pages' Google titles and descriptions, at lengths Google shows in full (field => [shipped, new])
+const AOK_V20_LOCATION_SEO = [
+    'vedic-astrologer-surrey-bc' => [
+        'seoTitle' => ['Vedic Astrologer in Surrey, BC | Kundli & Marriage Matching | Jag Mallah', 'Vedic Astrologer in Surrey, BC | Kundli Reading | Jag Mallah'],
+        'seoDescription' => ['Book a 1-on-1 Kundli birth chart reading, Kundli Milan marriage matching, or Dosha consultation in Surrey, BC (15450 92a Ave, Fleetwood) or via Zoom. $100 CAD/hr, pay after satisfaction.', 'Kundli reading, Kundli Milan and dosha consultations in Surrey, BC (Fleetwood, 15450 92a Ave) or on Zoom. $100 CAD/hr; new clients pay only if satisfied.'],
+    ],
+    'vedic-astrologer-vancouver-lower-mainland' => [
+        'seoTitle' => ['Vedic Astrologer in Vancouver, Burnaby, Langley & Abbotsford | Jag Mallah', 'Vedic Astrologer in Vancouver & Lower Mainland | Jag Mallah'],
+        'seoDescription' => ['Book a 1-on-1 Kundli birth chart reading, marriage matching (Kundli Milan), or career consultation across Vancouver, Burnaby, Richmond, Delta, Langley & Abbotsford. $100 CAD/hr.', 'Kundli reading, Kundli Milan and career consultations for Vancouver, Burnaby, Richmond, Delta, Langley and Abbotsford. $100 CAD/hr, in person or online.'],
+    ],
+    'vedic-astrologer-british-columbia' => [
+        'seoTitle' => ['Online Vedic Astrologer in British Columbia | Victoria, Kelowna & Kamloops', 'Online Vedic Astrologer in British Columbia | Jag Mallah'],
+        'seoDescription' => ['Live 1-on-1 online Vedic astrology and meditation consultations across British Columbia — including Victoria, Nanaimo, Kelowna, Kamloops & Prince George. $100 CAD/hr, pay after satisfaction.', 'Online Vedic astrology and meditation sessions across BC, from Victoria and Nanaimo to Kelowna, Kamloops and Prince George. $100 CAD/hr, pay if satisfied.'],
+    ],
+    'online-vedic-astrologer-canada' => [
+        'seoTitle' => ['Online Vedic Astrologer in Canada | Zoom & WhatsApp Kundli Reading', 'Online Vedic Astrologer in Canada | Zoom & WhatsApp Kundli'],
+        'seoDescription' => ['Consult live with Canadian Vedic Astrologer Jag Mallah across Toronto, Brampton, Calgary, Edmonton, Winnipeg, Ottawa & Montreal via Zoom or WhatsApp. $100 CAD/hr, pay after satisfaction.', 'Consult Vedic astrologer Jag Mallah live on Zoom or WhatsApp from Toronto, Brampton, Calgary, Edmonton, Ottawa or Montreal. $100 CAD/hr, pay if satisfied.'],
+    ],
+    'online-vedic-astrologer-usa' => [
+        'seoTitle' => ['Online Vedic Astrologer in the USA | Live Zoom Kundli Consultations', 'Online Vedic Astrologer in the USA | Zoom Kundli Reading'],
+        'seoDescription' => ['Book a 60-minute 1-on-1 online Vedic astrology reading from Seattle, California, New York, New Jersey, Texas, or Chicago with Jag Mallah. $100 CAD/hr, pay after satisfaction.', '60-minute online Vedic astrology readings with Jag Mallah from Seattle, California, New York, New Jersey, Texas or Chicago. $100 CAD/hr, pay if satisfied.'],
+    ],
+    'online-vedic-astrologer-uk' => [
+        'seoTitle' => ['Online Vedic Astrologer in the UK | London, Birmingham & Leicester', 'Online Vedic Astrologer in the UK | London & Birmingham'],
+        'seoDescription' => ['Consult live via WhatsApp or Zoom with Vedic Astrologer Jag Mallah from London, Southall, Wembley, Birmingham, Leicester, or Manchester. UK evening appointments available.', 'Consult Vedic astrologer Jag Mallah live on WhatsApp or Zoom from London, Southall, Wembley, Birmingham, Leicester or Manchester. UK evening slots available.'],
+    ],
+    'online-vedic-astrologer-india' => [
+        'seoTitle' => ['Online Vedic Astrologer for India & NRI Families | Punjab, Delhi & Mumbai', 'Online Vedic Astrologer for India & NRIs | Jag Mallah'],
+    ],
+];
+
+// v20: Google descriptions for eight services whose card text was too short (filled only while empty)
+const AOK_V20_SERVICE_DESC = [
+    'birth-chart-generation' => 'An accurate Vedic birth chart (Kundli) from your exact birth time and place: Lahiri Ayanamsha, all 16 divisional charts and your dasha timeline. $100 CAD/hr.',
+    'love-or-arranged-marriage-astrology' => 'Will your marriage be love or arranged, and when? Jag Mallah reads your 5th, 7th and 9th houses, Venus and the Navamsha in a 60-minute session. $100 CAD/hr.',
+    'live-astrologer-consultation' => 'Live 1-on-1 Vedic astrology with Jag Mallah on Zoom, WhatsApp, phone or in person in Surrey. Ask anything in English, Hindi or Punjabi. $100 CAD per hour.',
+    'personalized-year-ahead-forecast' => 'Your year ahead from a Tajika solar return (Varshaphala) chart: the year\'s theme, quarter-by-quarter timing and dasha cross-checks. 60 minutes, $100 CAD/hr.',
+    'muhurat-auspicious-timing' => 'Auspicious dates and times (Muhurat) for weddings, launches, housewarmings and property, matched to your own birth chart. $100 CAD/hr, pay if satisfied.',
+    'vedic-astrology-jyotish-deep-dives' => 'A classical Jyotish deep-dive combining Parashari, Jaimini and Bhrigu Nandi Nadi methods: soul purpose, life themes and a 10-year dasha roadmap. $100 CAD/hr.',
+    'karmic-past-life-astrology' => 'Understand the karmic and past-life patterns in your chart through Rahu, Ketu, the D-60 chart and retrograde planets, with practical remedies. $100 CAD/hr.',
+    'child-naming-astrology-report' => 'Auspicious baby names from your child\'s birth nakshatra, plus a gentle report on temperament and learning strengths. No fear-based predictions. $100 CAD/hr.',
+];
+// v20: Google titles for four articles whose headline is longer than Google shows (shipped headline => title)
+const AOK_V20_POST_TITLES = [
+    'ultimate-guide-birth-chart' => ['The Ultimate Guide to Understanding Your Birth Chart (Natal Chart)', 'The Ultimate Guide to Your Vedic Birth Chart (Natal Chart)'],
+    'saturn-return-explained' => ['Saturn Return: What It Is, When It Happens, and How to Navigate It', 'Saturn Return: When It Happens and How to Navigate It'],
+    'career-astrology-midheaven' => ['Career Astrology: Finding Your True Calling Based on Your Midheaven', 'Career Astrology: Find Your True Calling From Your Midheaven'],
+    'medical-astrology-body' => ['Medical Astrology: How the Zodiac Signs Relate to the Physical Body', 'Medical Astrology: How the Zodiac Signs Relate to the Body'],
+];
+
+function aok_upgrade_v20(array $d, array $def): array {
+    // the /services page title, while it is still as shipped
+    if (isset($d['seo']['services']) && is_array($d['seo']['services']) && aok_norm($d['seo']['services']['title'] ?? '') === 'Vedic Astrology Services | Kundli, Matching & Remedies')
+        $d['seo']['services']['title'] = 'Vedic Astrology Services | Kundli & Remedies';
+    // services: a Google description where none was written
+    if (isset($d['services']) && is_array($d['services'])) {
+        require_once __DIR__ . '/seo-lib.php';
+        foreach ($d['services'] as $i => $s) {
+            if (!is_array($s) || trim((string)($s['seoDescription'] ?? '')) !== '') continue;
+            $txt = AOK_V20_SERVICE_DESC[aok_service_content_key($s, $def)] ?? '';
+            if ($txt !== '') $d['services'][$i]['seoDescription'] = $txt;
+        }
+    }
+    // articles: a shorter Google title, while the headline is as shipped and no Google title was written
+    if (isset($d['blog']) && is_array($d['blog'])) {
+        foreach ($d['blog'] as $i => $p) {
+            if (!is_array($p) || trim((string)($p['seoTitle'] ?? '')) !== '') continue;
+            $t = AOK_V20_POST_TITLES[(string)($p['slug'] ?? '')] ?? null;
+            if ($t && aok_norm($p['title'] ?? '') === aok_norm($t[0])) $d['blog'][$i]['seoTitle'] = $t[1];
+        }
+    }
+    if (!isset($d['locations']) || !is_array($d['locations'])) return $d;
+    foreach ($d['locations'] as $i => $l) {
+        if (!is_array($l)) continue;
+        $changed = false;
+        foreach (AOK_V20_LOCATION_SEO[(string)($l['slug'] ?? '')] ?? [] as $f => [$from, $to]) {
+            if (aok_norm($l[$f] ?? '') !== aok_norm($from)) continue;   // text the owner changed is kept
+            $d['locations'][$i][$f] = $to; $changed = true;
+        }
+        if ($changed) $d['locations'][$i]['updatedAt'] = gmdate('c');
     }
     return $d;
 }
