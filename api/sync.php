@@ -4,6 +4,8 @@ if (realpath((string)($_SERVER['SCRIPT_FILENAME'] ?? '')) === __FILE__) { http_r
 //   - each changed service gets a fresh updatedAt (the sitemap's <lastmod>);
 //   - a service whose address changed, or that was deleted, leaves a 301 behind, so no URL ever 404s;
 //   - a deleted shipped service stays deleted (deletedSeeds), instead of being added back as a default;
+//   - a published blog post that moves to a new address, or is deleted or unpublished, leaves a 301
+//     behind too, and a newly published post is queued for IndexNow;
 //   - the changed addresses are queued for IndexNow (Bing, Yandex … and the AI search built on them),
 //     sent at most every 10 minutes, after the response has gone out (aok_indexnow_flush).
 // The editor merges what this returns (aok_sync_patch) into its own copy, so the next autosave keeps it.
@@ -48,6 +50,28 @@ function aok_save_sync(?array $old, array &$new): array {
         if (aok_service_is_live($o)) { $add('/services/' . $oldSlug[$id], '/services'); $changed[] = '/services/' . $oldSlug[$id]; }
         if (!empty($o['seedKey'])) { $ds = (array)($new['deletedSeeds'] ?? []); if (!in_array($o['seedKey'], $ds, true)) $ds[] = $o['seedKey']; $new['deletedSeeds'] = array_values($ds); }
     }
+    // blog posts: a published post that moved forwards from its old address; one that was deleted or
+    // taken back to draft forwards to /blog; a post published (or moved) just now is sent to IndexNow
+    $oldP = []; foreach ((array)($old['blog'] ?? []) as $p) if (is_array($p) && !empty($p['id'])) $oldP[$p['id']] = $p;
+    $newP = []; foreach ((array)($new['blog'] ?? []) as $p) if (is_array($p) && !empty($p['id'])) $newP[$p['id']] = $p;
+    $live = function ($p) { return is_array($p) && !empty($p['published']) && empty($p['redirectTo']) && trim((string)($p['slug'] ?? '')) !== ''; };
+    foreach ($oldP as $id => $o) {
+        if (!$live($o)) continue;
+        $from = '/blog/' . $o['slug'];
+        $n = $newP[$id] ?? null;
+        if ($n !== null && $live($n) && (string)$n['slug'] === (string)$o['slug']) continue;
+        $add($from, ($n !== null && $live($n)) ? '/blog/' . $n['slug'] : '/blog');
+        $changed[] = $from;
+    }
+    foreach ($newP as $id => $n) {
+        if (!$live($n)) continue;
+        $o = $oldP[$id] ?? null;
+        if ($o === null || !$live($o) || (string)$o['slug'] !== (string)$n['slug'] || json_encode($o) !== json_encode($n)) $changed[] = '/blog/' . $n['slug'];
+    }
+    // a redirect never hides a post that is live at that address now (a reused address belongs to the post)
+    $livePosts = []; foreach ($newP as $n) if ($live($n)) $livePosts[$key('/blog/' . $n['slug'])] = 1;
+    $reds = array_values(array_filter($reds, function ($r) use ($livePosts, $key) { return empty($r['auto']) || !isset($livePosts[$key($r['from'] ?? '')]); }));
+
     // a redirect never points at an address that itself forwards (one hop, no chains)
     $map = []; foreach ($reds as $r) $map[$key($r['from'] ?? '')] = (string)($r['to'] ?? '');
     foreach ($reds as $k => $r) { $to = (string)($r['to'] ?? ''); $seen = 0; while (isset($map[$key($to)]) && $seen++ < 5 && $key($map[$key($to)]) !== $key($r['from'] ?? '')) $to = $map[$key($to)]; $reds[$k]['to'] = $to; }

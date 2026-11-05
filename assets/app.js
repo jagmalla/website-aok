@@ -574,8 +574,12 @@ class Component extends DCLogic {
     const m={title:brand,description:(d.seo.home&&d.seo.home.metaDescription)||'',robots:'index, follow',canonical:base+this.routePath()};
     if(['home','about','services','meditation','blog','contact','faq'].indexOf(r)>-1&&!(r==='blog'&&this.state.postId)){ const sc=d.seo[r]||{}; m.title=sc.title||brand; if(r!=='blog') m.title=this.withLocation(m.title); if(sc.metaDescription) m.description=sc.metaDescription; m.robots=sc.robots||'index, follow'; if(r==='faq'&&!sc.title) m.title=this.txt(d.faqPage.hero.title)+' | '+brand; }
     else if(r==='service'){ const s=(d.services||[]).find(x=>x.id===this.state.serviceId)||{}; m.title=(s.seoTitle||'').trim()||this.withLocation(this.txt(s.title)+' | '+brand); m.description=(s.seoDescription||'').trim()||this.cut(this.txt(s.desc),158); if(s.canonical) m.canonical=/^https?:/.test(s.canonical)?s.canonical:base+'/'+String(s.canonical).replace(/^\//,''); if(s.noindex) m.robots='noindex, follow'; }
-    else if(r==='blog'&&this.state.postId){ const p=(d.blog||[]).find(x=>x.id===this.state.postId)||{}; m.title=this.fitBrand(this.txt(p.title),brand); m.description=this.cut(this.txt(p.excerpt),158); m.robots=p.robots||'index, follow'; if(p.canonical) m.canonical=/^https?:/.test(p.canonical)?p.canonical:base+'/'+String(p.canonical).replace(/^\//,''); }
+    else if(r==='blog'&&this.state.postId){ const p=(d.blog||[]).find(x=>x.id===this.state.postId)||{}; m.title=String(p.seoTitle||'').trim()||this.fitBrand(this.txt(p.title),brand); m.description=this.cut(this.txt(p.excerpt),158); m.robots=p.robots||'index, follow'; if(p.canonical) m.canonical=/^https?:/.test(p.canonical)?p.canonical:base+'/'+String(p.canonical).replace(/^\//,''); }
     else if(r==='page'){ const pg=(d.pages||[]).find(x=>x.id===this.state.pageId)||{}; m.title=this.fitBrand(this.txt(pg.title),brand); m.description=this.pageDescription(pg); }
+    // the location pages (mirrors aok_meta in PHP): without these the browser replaced the server's
+    // title with the bare brand name as soon as the page loaded
+    else if(r==='locations'){ const lp=(d.locationsPage&&d.locationsPage.hero)||{}; m.title=this.fitBrand(this.txt(lp.title||'Locations'),brand); m.description=this.cut(this.txt(lp.sub||''),158); }
+    else if(r==='location'){ const l=(d.locations||[]).find(x=>x.id===this.state.locationId)||{}; m.title=String(l.seoTitle||'').trim()||this.fitBrand(this.txt(l.title),brand); m.description=String(l.seoDescription||'').trim()||this.cut(this.txt(l.answer),158); if(l.noindex) m.robots='noindex, follow'; }
     else if(r==='admin'){ m.title='Admin | '+brand; m.robots='noindex, nofollow'; m.canonical=''; }
     else if(r==='notfound'){ m.title='Page not found | '+brand; m.robots='noindex, follow'; m.canonical=''; }
     return m; }
@@ -2504,11 +2508,35 @@ class Component extends DCLogic {
   // ----- blog -----
   tabBlog(){ const h=React.createElement,P=this.P,d=this.state.data; const editing=this._blogEdit;
     if(editing!=null){ const p=d.blog.find(x=>x.id===editing)||{}; const upd=(k,v)=>{ const arr=d.blog.map(x=>x.id===editing?{...x,[k]:v}:x); this.commit('blog',arr); };
+      // A new post starts with a temporary address (new-post-...). While it is temporary it follows the
+      // title; publishing a post that still has one gives it a proper address first, so no post ever
+      // goes live as /blog/new-post-....
+      // follows: an unpublished post whose address is still the temporary one, or was made from the title
+      // and not edited by hand since. Checked on every keystroke, so it keeps following as you type.
+      const temp=/^new-post-/.test(p.slug||''); const follows=!p.published&&(temp||!!p.slugAuto);
+      const slugOf=t=>this.serviceSlugify(t)||('post-'+editing);
+      const setMany=o=>{ const arr=d.blog.map(x=>x.id===editing?{...x,...o}:x); this.commit('blog',arr); };
+      const taken=sl=>d.blog.some(x=>x.id!==editing&&x.slug===sl);
+      const free=t=>{ let sl=slugOf(t), k=2; while(taken(sl)) sl=slugOf(t)+'-'+(k++); return sl; };
+      const setTitle=v=>setMany(follows&&String(v).trim()?{title:v,slug:free(v),slugAuto:true}:{title:v});
+      const publish=on=>{ if(on&&(temp||!String(p.slug||'').trim())){ const sl=free(p.title||''); setMany({published:true,slug:sl,slugAuto:false}); this.flash('\u2713 Published at /blog/'+sl); }
+        else if(on){ setMany({published:true,slugAuto:false}); this.flash('\u2713 Published at /blog/'+p.slug); } else upd('published',false); };
+      const cnt=(n,lo,hi)=>h('span',{style:{fontWeight:600,color:n>=lo&&n<=hi?P.ok:P.bad}},' '+n+' characters');
       return h('div',null, this.adminHead('Edit post','Write naturally. Use the focus keyword in the title, first paragraph and a subheading to rank well.'),
         h('button',{onClick:()=>{this._blogEdit=null;this.forceUpdate();},style:{...this.iconBtn(),width:'auto',padding:'8px 14px',marginBottom:18}},'\u2190 Back to posts'),
+        !p.published? h('div',{style:{display:'flex',gap:14,alignItems:'center',flexWrap:'wrap',padding:'14px 18px',marginBottom:16,borderRadius:12,background:'#fbf1dc',border:'1px solid #e8cf98',font:'500 14px/1.5 Plus Jakarta Sans',color:P.ink}},
+          h('span',{style:{flex:'1 1 320px'}}, h('b',null,'Draft \u2014 only you can see this post. '), 'Visitors and Google get \u201cpage not found\u201d at its address until it is published.'),
+          this.btn('Publish now',()=>publish(true),{variant:'solid',pad:'8px 16px'})):null,
         this.card(h('div',{style:{display:'grid',gap:16}},
           h('label',null,h('span',{style:this.lbl()},'Featured image'), h('div',{style:{display:'flex',gap:12,alignItems:'center'}}, h('div',{style:{width:120,height:74,borderRadius:10,overflow:'hidden',border:'1px solid '+P.line,background:p.image?'transparent':'repeating-linear-gradient(45deg,#EFE7D8,#EFE7D8 10px,#F7F2E9 10px,#F7F2E9 20px)'}}, p.image?h('img',{src:p.image,style:{width:'100%',height:'100%',objectFit:'cover'}}):null), h('button',{onClick:()=>{const inp=document.createElement('input');inp.type='file';inp.accept='image/*';inp.onchange=e=>{const f=e.target.files[0];if(!f)return;this.scaleImage(f,u=>upd('image',u));};inp.click();},style:{...this.iconBtn(),width:'auto',padding:'10px 16px'}},'Upload image'), p.image?h('button',{onClick:()=>upd('image',null),style:{...this.iconBtn(true),width:'auto',padding:'10px 16px'}},'Remove'):null)),
-          h('label',null,h('span',{style:this.lbl()},'Title'),h('input',{value:p.title||'',onChange:e=>upd('title',e.target.value),style:this.inpStyle()})),
+          h('label',null,h('span',{style:this.lbl()},'Title ',h('span',{style:{fontWeight:400,color:P.muted}},'\u2014 the heading on the page')),h('input',{value:p.title||'',onChange:e=>setTitle(e.target.value),style:this.inpStyle()})),
+          h('label',null,h('span',{style:this.lbl()},'Page address ',h('span',{style:{fontWeight:400,color:P.muted}},
+              p.published?'\u2014 changing it leaves a redirect from the old address':follows?'\u2014 follows the title until you edit it here or publish':'\u2014 not public until you publish')),
+            h('div',{style:{display:'flex',alignItems:'center',gap:6}}, h('span',{style:{font:'500 13px ui-monospace,monospace',color:P.muted}},'/blog/'),
+              h('input',{value:p.slug||'',onChange:e=>setMany({slug:e.target.value,slugAuto:false}),onBlur:e=>{ const v=slugOf(e.target.value); if(v!==p.slug) setMany({slug:v,slugAuto:false}); },style:this.inpStyle()})),
+            p.slug&&taken(p.slug)?h('div',{style:{font:'600 12px '+this.HEAD,color:P.bad,marginTop:4}},'Another post already uses this address'):null),
+          h('label',null,h('span',{style:this.lbl()},'Google title ',h('span',{style:{fontWeight:400,color:P.muted}},'\u2014 optional; leave empty to use the title. Aim for 50\u201365.'),p.seoTitle?cnt(String(p.seoTitle).length,30,65):null),
+            h('input',{value:p.seoTitle||'',placeholder:this.fitBrand(this.txt(p.title||''),this.brandName()),onChange:e=>upd('seoTitle',e.target.value),style:this.inpStyle()})),
           h('div',{style:{display:'grid',gridTemplateColumns:'1fr 1fr 1fr',gap:14}},
             h('label',null,h('span',{style:this.lbl()},'Date'),h('input',{type:'date',value:p.date||'',onChange:e=>upd('date',e.target.value),style:this.inpStyle()})),
             h('label',null,h('span',{style:this.lbl()},'Focus keyword'),h('input',{value:p.focusKeyword||'',onChange:e=>upd('focusKeyword',e.target.value),style:this.inpStyle()})),
@@ -2516,9 +2544,9 @@ class Component extends DCLogic {
           h('div',{style:{display:'grid',gridTemplateColumns:'1fr 1fr',gap:14}},
             h('label',null,h('span',{style:this.lbl()},'Canonical URL ',h('span',{style:{fontWeight:400,color:P.muted}},'\u2014 only if another page should rank instead')),h('input',{value:p.canonical||'',placeholder:'/blog/\u2026',onChange:e=>upd('canonical',e.target.value),style:this.inpStyle()})),
             h('label',null,h('span',{style:this.lbl()},'301 redirect to ',h('span',{style:{fontWeight:400,color:P.muted}},'\u2014 merges this post into another page')),h('input',{value:p.redirectTo||'',placeholder:'/blog/\u2026',onChange:e=>upd('redirectTo',e.target.value),style:this.inpStyle()}))),
-          h('label',null,h('span',{style:this.lbl()},'Excerpt'),h('textarea',{value:p.excerpt||'',onChange:e=>upd('excerpt',e.target.value),rows:2,style:this.inpStyle()})),
+          h('label',null,h('span',{style:this.lbl()},'Excerpt ',h('span',{style:{fontWeight:400,color:P.muted}},'\u2014 also the Google description. Aim for 120\u2013160.'),cnt(String(p.excerpt||'').length,120,160)),h('textarea',{value:p.excerpt||'',onChange:e=>upd('excerpt',e.target.value),rows:2,style:this.inpStyle()})),
           h('label',null,h('span',{style:this.lbl()},'Body ',h('span',{style:{fontWeight:400,color:P.muted}},'\u2014 formatting: ## heading, ### sub-heading, - bullet, 1. numbered, > answer box, **bold**')),h('textarea',{value:p.body||'',onChange:e=>upd('body',e.target.value),rows:12,style:this.inpStyle()})),
-          h('label',{style:{display:'flex',gap:10,alignItems:'center',font:'500 15px Plus Jakarta Sans',color:P.ink}},h('input',{type:'checkbox',checked:!!p.published,onChange:e=>upd('published',e.target.checked),style:{width:18,height:18}}),'Published (visible on website)'))) ); }
+          h('label',{style:{display:'flex',gap:10,alignItems:'center',font:'500 15px Plus Jakarta Sans',color:P.ink}},h('input',{type:'checkbox',checked:!!p.published,onChange:e=>publish(e.target.checked),style:{width:18,height:18}}),'Published (visible on website)'))) ); }
     const move=(i,dir)=>{ const arr=[...d.blog]; const j=i+dir; if(j<0||j>=arr.length)return;[arr[i],arr[j]]=[arr[j],arr[i]];this.commit('blog',arr); };
     const del=id=>{ if(!confirm('Delete this post?'))return; this.commit('blog',d.blog.filter(x=>x.id!==id)); };
     const add=()=>{ const id=this.uid(); this.commit('blog',[{id,slug:'new-post-'+id,title:'New blog post',date:new Date().toISOString().slice(0,10),published:false,image:null,focusKeyword:'',robots:'index, follow',excerpt:'',body:''},...d.blog]); this._blogEdit=id; this.flash('Draft created'); this.forceUpdate(); };

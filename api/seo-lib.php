@@ -296,6 +296,7 @@ function aok_resolve(string $uri, array $d): array {
     $livePaths = [];
     $sl = aok_service_slugs($d['services'] ?? []);
     foreach ($d['services'] ?? [] as $s) if (aok_service_is_live($s)) $livePaths['/services/' . ($sl[(string)($s['id'] ?? '')] ?? '')] = 1;
+    foreach ($d['blog'] ?? [] as $bp) if (!empty($bp['published']) && empty($bp['redirectTo']) && !empty($bp['slug'])) $livePaths['/blog/' . strtolower((string)$bp['slug'])] = 1;
     foreach ($d['redirects'] ?? [] as $r) {
         $from = '/' . trim((string)($r['from'] ?? ''), '/');
         if (isset($livePaths[strtolower($from)])) continue;
@@ -479,7 +480,7 @@ function aok_meta(array $d, array $r): array {
         if (!empty($l['noindex'])) $m['robots'] = 'noindex, follow';
     } elseif ($t === 'post') {
         $p = $r['item'];
-        $m['title'] = aok_fit_brand(aok_text($p['title'] ?? ''), $brand);
+        $m['title'] = trim((string)($p['seoTitle'] ?? '')) ?: aok_fit_brand(aok_text($p['title'] ?? ''), $brand);
         $m['description'] = aok_cut(aok_text($p['excerpt'] ?? ''), 158);
         $m['robots'] = (string)($p['robots'] ?? '') ?: 'index, follow';
         $m['ogType'] = 'article';
@@ -846,6 +847,9 @@ function aok_graph(array $d, array $r, array $meta): array {
         if (!empty($p['date'])) { $post['datePublished'] = substr($p['date'], 0, 10); $post['dateModified'] = substr($p['date'], 0, 10); }
         if (!empty($p['focusKeyword'])) $post['keywords'] = $p['focusKeyword'];
         $graph[] = $post;
+        $qs = [];
+        foreach (aok_md_faq((string)($p['body'] ?? '')) as $x) $qs[] = ['@type' => 'Question', 'name' => $x[0], 'acceptedAnswer' => ['@type' => 'Answer', 'text' => $x[1]]];
+        if ($qs) $graph[] = ['@type' => 'FAQPage', '@id' => $url . '#faq', 'url' => $url, 'isPartOf' => ['@id' => $SITE], 'about' => ['@id' => $url . '#article'], 'mainEntity' => $qs];
     }
     $graph[] = $page;
 

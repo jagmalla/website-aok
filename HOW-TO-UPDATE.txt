@@ -1,7 +1,30 @@
 ANALYSIS OF KARMA — Update (SEO, local SEO, AI search & security)
 ===================================================================
 
-NEW IN THIS VERSION: ONE BUSINESS NAME
+NEW IN THIS VERSION: YOUR JUPITER-KETU ARTICLE, AND A FIXED BLOG EDITOR
+  • Your article "Major Astrological Transit 2026: Jupiter-Ketu Conjunction
+    and Neechbhang Raj Yoga" was saved as a draft, so visitors and Google saw
+    "page not found". After upload it is published at
+    /blog/jupiter-ketu-conjunction-leo-2026 and the old address
+    /blog/new-post-xmxoobh6 forwards to it, so any link you shared still works.
+  • It now has a short Google title, a Google description, a focus keyword,
+    a highlighted direct answer at the top, the 12 ascendants as headings,
+    and three FAQs that search engines and AI assistants can quote. Your
+    picture is used in all three shapes Google and social media ask for.
+  • The blog editor has a "Page address" box. It fills in from the title
+    as you type, until you edit it yourself or publish.
+  • A yellow banner now says when a post is still a draft, with a "Publish
+    now" button. Publishing a post with a temporary address gives it a
+    proper one first.
+  • New "Google title" box (optional) and a character counter on the
+    excerpt, which is also the Google description.
+  • Changing the address of a published post, or deleting it, now leaves a
+    redirect behind automatically, and a newly published post is sent to
+    search engines straight away.
+  • Also fixed: on the seven location pages the browser replaced the page
+    title with just "Analysis of Karma" after loading. Each keeps its own now.
+
+EARLIER: ONE BUSINESS NAME
   • The footer, the contact page, the search-engine data and llms.txt now
     all name the business "Analysis of Karma | Vedic astrologer" (the header
     logo stays "Analysis of Karma"). They had copied the long

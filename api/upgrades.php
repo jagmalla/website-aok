@@ -67,9 +67,15 @@ if (realpath((string)($_SERVER['SCRIPT_FILENAME'] ?? '')) === __FILE__) { http_r
 //   copied the Google listing's long name ("... - Vedic astrology & Meditation | Vedic Astrologer Jag
 //   Mallah") into the footer, the contact page and the structured data; the site now states the
 //   owner's name everywhere instead. Only the exact long value version 6 wrote is replaced.
+// Version 15:
+//   The Jupiter-Ketu article the owner wrote in the admin had stayed a draft at its temporary address
+//   /blog/new-post-xmxoobh6, so visitors and Google saw "page not found". It is published at
+//   /blog/jupiter-ketu-conjunction-leo-2026 with its title, Google title, description, focus keyword
+//   and finished text, and the temporary address forwards to it. Found by that address or its title;
+//   added if it is not there at all.
 // Only text that is still exactly as first shipped is replaced. Text you have edited is kept. Nothing is deleted.
 
-const AOK_CONTENT_VERSION = 14;
+const AOK_CONTENT_VERSION = 15;
 
 // fingerprints (md5 of the normalised text) of the originally shipped FAQ answers, by question
 const AOK_OLD_FAQ = [
@@ -158,6 +164,7 @@ function aok_upgrade_payload(array $d): array {
     $d = aok_upgrade_v11($d, $def);
     if ($v < 13) $d = aok_upgrade_v13($d);
     if ($v < 14) $d = aok_upgrade_v14($d);
+    if ($v < 15) $d = aok_upgrade_v15($d);
     $d['contentVersion'] = AOK_CONTENT_VERSION;
     return $d;
 }
@@ -789,5 +796,59 @@ function aok_upgrade_v14(array $d): array {
         $d['local']['listingName'] = 'Analysis of Karma | Vedic astrologer';
     if (isset($d['contact']) && is_array($d['contact']) && aok_norm($d['contact']['mapQuery'] ?? '') === aok_norm($long . ', ' . $addr))
         $d['contact']['mapQuery'] = 'Analysis of Karma, ' . $addr;
+    return $d;
+}
+
+// v15: publish the Jupiter-Ketu article properly.
+function aok_upgrade_v15(array $d): array {
+    $slug = 'jupiter-ketu-conjunction-leo-2026';
+    $old  = 'new-post-xmxoobh6';
+    $body = aok_content_md('new-posts', $slug);
+    if ($body === '') return $d;
+    $post = [
+        'title' => 'Major Astrological Transit 2026: Jupiter-Ketu Conjunction and Neechbhang Raj Yoga (Impact on All 12 Ascendants)',
+        'seoTitle' => 'Jupiter-Ketu Conjunction in Leo 2026: All 12 Ascendants',
+        'excerpt' => 'Jupiter and Ketu meet in Leo from 31 October to 25 November 2026, with a Neechbhang Raj Yoga in Libra. What this rare transit brings for all 12 ascendants.',
+        'focusKeyword' => 'Jupiter Ketu conjunction 2026',
+    ];
+    if (!isset($d['blog']) || !is_array($d['blog'])) $d['blog'] = [];
+
+    // the owner's draft: by its temporary address, or by its title if the address was changed
+    $at = null;
+    foreach ($d['blog'] as $i => $p) {
+        if (!is_array($p)) continue;
+        $sl = (string)($p['slug'] ?? '');
+        if ($sl === $slug || $sl === $old) { $at = $i; break; }
+        if ($at === null && stripos(aok_norm($p['title'] ?? ''), 'Jupiter-Ketu Conjunction') !== false) $at = $i;
+    }
+    if ($at === null) {
+        array_unshift($d['blog'], ['id' => 'jupiter-ketu-2026', 'slug' => $slug, 'date' => '2026-11-05', 'published' => true,
+            'image' => null, 'robots' => 'index, follow', 'body' => $body] + $post);
+    } else {
+        $p = $d['blog'][$at];
+        // if the owner had already published it under an address of their own, that one forwards too
+        $own = (string)($p['slug'] ?? '');
+        if (!empty($p['published']) && $own !== '' && $own !== $slug && $own !== $old) $alsoFrom = $own;
+        $p['slug'] = $slug;
+        $p['published'] = true;
+        unset($p['redirectTo']);
+        if (trim((string)($p['robots'] ?? '')) === '' || stripos((string)$p['robots'], 'noindex') !== false) $p['robots'] = 'index, follow';
+        foreach ($post as $k => $v) $p[$k] = $v;
+        // the finished text, unless it is already there
+        if (strpos((string)($p['body'] ?? ''), '## Frequently Asked Questions') === false) $p['body'] = $body;
+        // a picture pasted into the editor is stored inline and weighs down every page load; the same
+        // picture now ships in assets/img/posts/ under the post's address, in all three shapes
+        if (empty($p['image']) || preg_match('#^data:#i', (string)$p['image'])) $p['image'] = null;
+        if (trim((string)($p['date'] ?? '')) === '') $p['date'] = '2026-11-05';
+        $d['blog'][$at] = $p;
+    }
+
+    // the temporary address was shared: it forwards to the article
+    $reds = (isset($d['redirects']) && is_array($d['redirects'])) ? $d['redirects'] : [];
+    $have = false;
+    foreach ($reds as $r) if (strtolower(trim((string)($r['from'] ?? ''), '/')) === 'blog/' . $old) $have = true;
+    if (!$have) $reds[] = ['from' => '/blog/' . $old, 'to' => '/blog/' . $slug];
+    if (!empty($alsoFrom)) $reds[] = ['from' => '/blog/' . $alsoFrom, 'to' => '/blog/' . $slug];
+    $d['redirects'] = array_values($reds);
     return $d;
 }

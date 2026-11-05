@@ -48,8 +48,11 @@ C. RIGHT AFTER UPLOAD
           https://www.analysisofkarma.com/locations
           https://www.analysisofkarma.com/locations/vedic-astrologer-surrey-bc
           https://www.analysisofkarma.com/services   (table at the bottom)
+          https://www.analysisofkarma.com/blog/jupiter-ketu-conjunction-leo-2026
+          https://www.analysisofkarma.com/blog/new-post-xmxoobh6  (must forward
+             to the address above)
           https://www.analysisofkarma.com/llms.txt
-          https://www.analysisofkarma.com/sitemap.xml   (47 addresses)
+          https://www.analysisofkarma.com/sitemap.xml   (48 addresses)
           https://www.analysisofkarma.com/robots.txt
 
 [ ] 9. Tell search engines: Admin -> AI & GEO -> "Notify search engines now"

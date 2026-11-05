@@ -248,6 +248,23 @@ Assistants lift *passages*, not pages. So every important page has:
    The fee column is the service's own rate, so the price is never typed twice.
 5. **Plain language**, short sentences, jargon defined on first use.
 
+### Blog posts: drafts, addresses and redirects
+A new post starts as a draft with a temporary address (`new-post-…`). A draft is visible to
+the logged-in owner only; everyone else, Google included, gets a real 404 — so the editor
+shows a banner saying so, with a **Publish now** button.
+
+The **Page address** box follows the title while the post is unpublished and the address has
+not been edited by hand; publishing a post that still has a temporary address gives it one
+made from the title first, so nothing goes live as `/blog/new-post-…`. Once a post is
+public, changing its address or deleting it leaves a 301 behind automatically
+(`api/sync.php`), the same as for services, and a newly published or changed post is queued
+for IndexNow. A redirect never hides a post that is live at that address.
+
+Each post can carry a shorter **Google title** (`seoTitle`); the excerpt is its description.
+A `## Frequently Asked Questions` section in the body becomes `FAQPage` markup, as on the
+service and location pages. Pictures named `assets/img/posts/<address>-16x9|4x3|1x1.jpg`
+are found automatically, so a post needs no image of its own to have all three shapes.
+
 ### Tables in page text
 The light Markdown understands a pipe table:
 
