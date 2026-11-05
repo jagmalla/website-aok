@@ -271,7 +271,7 @@ class Component extends DCLogic {
       brand:{ name:'Analysis of Karma', astrologer:'Jag Mallah', tagline:'Vedic astrology guidance for love, career, health & life\u2019s bigger questions.', logo:null },
       contact:{ email:'', mailFrom:'', /* the enquiry inbox is set on the server (api/db.php) and never shown on the site */ phone:'+1 (236) 660-2000', whatsapp:'+1 (236) 660-2000',
         whatsappText:'Hello Jag Mallah, I would like to book a Vedic astrology consultation.', address:'15450 92a Ave, Surrey, BC V3R 9B1, Canada',
-        mapQuery:'Analysis of Karma - Vedic astrology & Meditation | Vedic Astrologer Jag Mallah, 15450 92a Ave, Surrey, BC V3R 9B1, Canada', mapUrl:'', mapEmbed:'',
+        mapQuery:'Analysis of Karma, 15450 92a Ave, Surrey, BC V3R 9B1, Canada', mapUrl:'', mapEmbed:'',
         instagram:'https://www.instagram.com/analysisofkarma', youtube:'https://www.youtube.com/@analysisofkarma',
         gmb:'https://share.google/r37d5nGpSJCeEXhvt', facebook:'', trustpilot:'https://ca.trustpilot.com/review/analysisofkarma.com',
         bookingUrl:'', replyTime:'within 12\u201324 hours' },
@@ -282,7 +282,7 @@ class Component extends DCLogic {
       local:{ businessName:'Analysis of Karma', legalName:'', businessType:'ProfessionalService',
         gbpPrimaryCategory:'Astrologer', gbpAdditionalCategories:['Spiritual Consultant','Psychic','Vedic Astrology & Karmic Consultation Service'],
         serviceAreaBusiness:false, streetAddress:'15450 92a Ave', locality:'Surrey', region:'British Columbia', regionCode:'BC', postalCode:'V3R 9B1',
-        listingName:'Analysis of Karma - Vedic astrology & Meditation | Vedic Astrologer Jag Mallah', hoursNote:'Online consultations available 7 days a week by appointment', country:'CA',
+        listingName:'Analysis of Karma | Vedic astrologer', hoursNote:'Online consultations available 7 days a week by appointment', country:'CA',
         // the Business Profile pin at 92 Ave and 154 St, not the centre of Surrey
         lat:'49.1712', lng:'-122.7939',
         areasServed:['Surrey, BC, Canada','Vancouver, BC, Canada','Burnaby, BC, Canada','Richmond, BC, Canada','Delta, BC, Canada','New Westminster, BC, Canada','Coquitlam, BC, Canada','Langley, BC, Canada','Abbotsford, BC, Canada','Chilliwack, BC, Canada','Maple Ridge, BC, Canada','Victoria, BC, Canada','Nanaimo, BC, Canada','Kelowna, BC, Canada','Kamloops, BC, Canada','Prince George, BC, Canada','British Columbia, Canada','Canada','Washington, USA','United States','United Kingdom','Punjab, India','Delhi, India','Haryana, India','Mumbai, Maharashtra, India','India'],

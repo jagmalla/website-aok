@@ -62,9 +62,14 @@ if (realpath((string)($_SERVER['SCRIPT_FILENAME'] ?? '')) === __FILE__) { http_r
 //   The phone number written as +1-236-660-2000 inside page text becomes +1 (236) 660-2000, the
 //   form used everywhere else on the site. This one is applied to edited pages too: it changes
 //   only how the owner's own number is punctuated, never any of their words.
+// Version 14:
+//   The business name is "Analysis of Karma | Vedic astrologer", the owner's choice. Version 6 had
+//   copied the Google listing's long name ("... - Vedic astrology & Meditation | Vedic Astrologer Jag
+//   Mallah") into the footer, the contact page and the structured data; the site now states the
+//   owner's name everywhere instead. Only the exact long value version 6 wrote is replaced.
 // Only text that is still exactly as first shipped is replaced. Text you have edited is kept. Nothing is deleted.
 
-const AOK_CONTENT_VERSION = 13;
+const AOK_CONTENT_VERSION = 14;
 
 // fingerprints (md5 of the normalised text) of the originally shipped FAQ answers, by question
 const AOK_OLD_FAQ = [
@@ -152,6 +157,7 @@ function aok_upgrade_payload(array $d): array {
     if ($v < 10) $d = aok_upgrade_v10($d, $def);
     $d = aok_upgrade_v11($d, $def);
     if ($v < 13) $d = aok_upgrade_v13($d);
+    if ($v < 14) $d = aok_upgrade_v14($d);
     $d['contentVersion'] = AOK_CONTENT_VERSION;
     return $d;
 }
@@ -772,5 +778,16 @@ function aok_upgrade_v13(array $d): array {
             if (is_array($x) && isset($x['detail']) && is_string($x['detail'])) $d[$k][$i]['detail'] = preg_replace($rx, $phone, $x['detail']);
         }
     }
+    return $d;
+}
+
+// v14: the owner's chosen business name, everywhere the site states one.
+function aok_upgrade_v14(array $d): array {
+    $long = 'Analysis of Karma - Vedic astrology & Meditation | Vedic Astrologer Jag Mallah';
+    $addr = '15450 92a Ave, Surrey, BC V3R 9B1, Canada';
+    if (isset($d['local']) && is_array($d['local']) && aok_norm($d['local']['listingName'] ?? '') === aok_norm($long))
+        $d['local']['listingName'] = 'Analysis of Karma | Vedic astrologer';
+    if (isset($d['contact']) && is_array($d['contact']) && aok_norm($d['contact']['mapQuery'] ?? '') === aok_norm($long . ', ' . $addr))
+        $d['contact']['mapQuery'] = 'Analysis of Karma, ' . $addr;
     return $d;
 }

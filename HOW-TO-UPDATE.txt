@@ -1,7 +1,14 @@
 ANALYSIS OF KARMA — Update (SEO, local SEO, AI search & security)
 ===================================================================
 
-NEW IN THIS VERSION: ALL SEVEN LOCATION PAGES ARE NOW WRITTEN
+NEW IN THIS VERSION: ONE BUSINESS NAME
+  • The footer, the contact page, the search-engine data and llms.txt now
+    all name the business "Analysis of Karma | Vedic astrologer" (the header
+    logo stays "Analysis of Karma"). They had copied the long
+    Google listing name, which worked against setting the listing back to
+    the short name. GO-LIVE.txt section F has the steps for Google.
+
+EARLIER: ALL SEVEN LOCATION PAGES ARE NOW WRITTEN
   • Vancouver & the Lower Mainland, and British Columbia, now have full
     pages like the other five: a highlighted direct answer, the question
     people ask as the heading, a comparison table and the FAQs.

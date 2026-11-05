@@ -59,9 +59,8 @@ C. RIGHT AFTER UPLOAD
 
 D. OFF-SITE (after the website is live)
 ---------------------------------------
-Decide the business name FIRST (see E1). Every listing you create copies it.
-
-Use exactly these, character for character:
+Use exactly these, character for character, on every listing:
+   Name:     Analysis of Karma | Vedic astrologer
    Address:  15450 92a Ave, Surrey, BC V3R 9B1, Canada
    Phone:    +1 (236) 660-2000
    Website:  https://www.analysisofkarma.com/
@@ -76,9 +75,11 @@ Use exactly these, character for character:
 
 [ ] 11. Google Business Profile: change Website to https://www.analysisofkarma.com/
          (with www). Check the hours say Monday-Friday 10:00-17:00.
+         For the business name, see section F below.
 
-[ ] 12. Bing Places for Business: use "Import from Google". Then check the
-         imported name, address and phone match the block above.
+[ ] 12. Bing Places for Business: use "Import from Google". Bing copies the
+         name Google shows TODAY, so if Google still shows the long name,
+         correct it to "Analysis of Karma | Vedic astrologer" in Bing after the import.
 
 [ ] 13. Apple Business Connect, Yelp Canada, YellowPages.ca: claim or create,
          using the block above exactly.
@@ -86,17 +87,7 @@ Use exactly these, character for character:
 
 E. DECISIONS ONLY YOU CAN MAKE
 ------------------------------
-E1. Business name. Your Google listing is named "Analysis of Karma - Vedic
-    astrology & Meditation | Vedic Astrologer Jag Mallah". Google's rules say
-    the listing name should be the real-world name (what is on your signage
-    and branding), and extra descriptive words are a common reason listings
-    get suspended or renamed. Apple and Yelp also tend to reject long names.
-    The website now copies this name into its structured data to match.
-      Option A: keep it, and use it identically everywhere (accepting the risk).
-      Option B: change the Google listing to "Analysis of Karma" first, then
-                tell me and I change the website to match in one line, then
-                claim the other directories.
-    Decide before step 12.
+E1. (Decided: the business name is "Analysis of Karma | Vedic astrologer". See section F.)
 
 E2. Consultation times. The location pages promise slots outside your
     published hours (Mon-Fri 10:00-17:00 Pacific):
@@ -123,3 +114,42 @@ E6. Four service pages still have the generic heading "Key Life Questions &
 
 E7. Location pages cannot be edited from the admin yet (no Locations tab).
     Ask me to add one if you want to change them yourself.
+
+
+F. THE GOOGLE BUSINESS NAME
+---------------------------
+You set the name to "Analysis of Karma" and Google changed it back to the
+long name by itself. The name you have chosen is now
+"Analysis of Karma | Vedic astrologer". Google does this when its other sources disagree with
+you. The website update now says "Analysis of Karma | Vedic astrologer"
+everywhere it names the business, so the website stops disagreeing. Work through these in order:
+
+[ ] F1. Upload the website first (sections B and C). Until then the live
+         website still shows the old wording.
+
+[ ] F2. Check where else the long name appears and change it to
+         "Analysis of Karma": the WordPress satellite, Facebook, Instagram,
+         YouTube, Trustpilot, LinkedIn, Pinterest, X. Google compares these.
+         (Short "Analysis of Karma" on social profiles is fine; the long
+         "- Vedic astrology & Meditation | Vedic Astrologer Jag Mallah" is not.)
+
+[ ] F3. Wait about a week, so Google re-reads the website.
+
+[ ] F4. In your Business Profile, look for a notice that Google updated your
+         profile, and reject or edit the name update. If there is no notice,
+         edit the name to "Analysis of Karma | Vedic astrologer" once more.
+
+[ ] F5. If Google changes it back again, do NOT keep editing it: repeated
+         name edits can put the listing under review. Instead contact
+         Business Profile support, and have proof ready that "Analysis of
+         Karma" is the real name (a business registration, a photo of your
+         sign or card).
+
+The words that were in the long name still belong on Google, just not in
+the name: put "Vedic astrology", "meditation" and "Jag Mallah" in the
+business description, the categories and the services list.
+
+Note: Google may still trim "| Vedic astrologer", because its rules want the
+name without descriptive words. If it does, accept "Analysis of Karma" rather
+than editing it back, and tell me so the website can match.
+
