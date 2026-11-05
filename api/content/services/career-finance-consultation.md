@@ -1,6 +1,8 @@
 > **Direct answer:** Our Career and Finance Consultation provides actionable strategic clarity for employment, business ventures, leadership transitions, and wealth timing. Through a 60-minute live session ($100 CAD/hr, pay after satisfaction), we align your professional trajectory with your planetary periods and favorable financial transits.
 
-## Classical Vedic Methodology & Texts Used
+## How Can Vedic Astrology Predict Career Changes and Financial Growth?
+Vedic career and finance consultations evaluate the 10th house (Karma Bhava), 2nd and 11th wealth houses (Dhana Yogas), and the specialized Dashamsha (D-10) divisional chart. By tracking active Mahadasha periods alongside Saturn and Jupiter transits, Jag Mallah pinpoints optimal windows for job transitions, promotions, or business launches.
+
 - **Dasamsha (D-10) Deep Dive:** Synthesizing the 10th house of the Rashi chart with the D-10 chart to isolate your true professional calling, leadership aptitude, and institutional authority.
 - **Wealth Houses (Dhana & Labha Bhavas):** Detailed evaluation of the 2nd house (accumulated wealth), 5th house (speculative intelligence), 9th house (fortune/luck), and 11th house (income and gains).
 - **Jaimini Amatyakaraka (AmK):** Identifying the planet representing career karma and vocation to determine whether corporate service, entrepreneurship, or independent practice suits your nature.

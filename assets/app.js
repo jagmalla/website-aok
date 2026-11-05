@@ -55,8 +55,22 @@ class Component extends DCLogic {
   // 301 redirect (Admin → Redirects → Undo restores them); api/upgrades.php applies the same merge to saved sites.
   // Page address of each of the 16 services (content version 5); the old automatic addresses 301 here (api/upgrades.php)
   serviceRoute(title){ return ({'Kundli / Birth Chart Reading':'kundli-birth-chart-reading','Kundli Milan \u2014 Marriage Matching':'kundli-milan-marriage-matching','Career & Finance Consultation':'career-finance-consultation','Dosha Analysis & Remedies':'dosha-analysis-remedies','Gemstone Recommendation':'gemstone-recommendation','Vedic Meditation Guidance':'vedic-meditation-guidance','Daily / Weekly / Monthly Horoscopes':'horoscopes-daily-weekly-monthly','Birth Chart (Natal Chart) Generation':'birth-chart-generation','Love or Arrange Marriage Possibilities':'love-or-arranged-marriage-astrology','Live Astrologer Consultations (Chat / Call / Video)':'live-astrologer-consultation','Personalized Year-Ahead Forecasts (Solar Return)':'personalized-year-ahead-forecast','Muhurat / Auspicious Timing Selection':'muhurat-auspicious-timing','Vedic Astrology (Jyotish) Deep Dives':'vedic-astrology-jyotish-deep-dives','Karmic & Past Life Astrology':'karmic-past-life-astrology','Newborn / Child Naming & Astrology Reports':'child-naming-astrology-report','Medical Astrology (Holistic / Overview)':'medical-astrology-holistic'})[title]||''; }
+
+  // The four extra columns of the /services comparison table. Answer engines quote a real <table>
+  // when someone asks what a Vedic reading costs or which one they need, so every consultation on it
+  // states what the astrologer actually looks at, how the session is held and how long it runs.
+  // The fee column comes from the service's own rate, so there is only ever one price on the site.
+  serviceTableFields(slug){ const T={
+    'kundli-birth-chart-reading':['Lagna, D-9, Nakshatras, Vimshottari Dasha','1-on-1 Zoom / WhatsApp','60 Minutes'],
+    'kundli-milan-marriage-matching':['36-Point Ashtakoota, D-9, Mangal Dosha','Dual-Chart Live Call','60 Minutes'],
+    'career-finance-consultation':['10th House, D-10, Dhana Yogas, Shani','1-on-1 Zoom / WhatsApp','60 Minutes'],
+    'dosha-analysis-remedies':['Mangal, Kaal Sarp, Pitra Dosha, Shadbala','1-on-1 Zoom / WhatsApp','60 Minutes'],
+    'gemstone-recommendation':['Lagna, 5th & 9th Lords (No Gem Sales)','1-on-1 Zoom / WhatsApp','60 Minutes'],
+    'vedic-meditation-guidance':['Pranayama, Mantra Japa, Pancha Mahabhuta','1-on-1 Guided Session','60 Minutes'],
+    'horoscopes-daily-weekly-monthly':['Chandra Rashi, Nakshatra, Ashtakavarga','1-on-1 Zoom / WhatsApp','60 Minutes']
+  }; const r=T[slug||'']; return r?{chartFactors:r[0],sessionFormat:r[1],duration:r[2]}:{}; }
   contentMerges(){ return { services:{'career-finance-reports': '/services/career-finance-consultation', 'gemstone-services': '/services/gemstone-recommendation', 'dosha-remedies': '/services/dosha-analysis-remedies'}, posts:{'understanding-your-kundli': '/blog/ultimate-guide-birth-chart', 'mangal-dosha-truth': '/blog/mangal-dosha-myths-facts-remedies'} }; }
-  seedServices(){ const S=(seedKey,icon,title,price,desc,detail)=>({id:this.uid(),seedKey,icon,title,...(this.serviceRoute(title)?{slug:this.serviceRoute(title)}:{}),price,desc,detail,image:null}); return [
+  seedServices(){ const S=(seedKey,icon,title,price,desc,detail)=>{ const sl=this.serviceRoute(title); return {id:this.uid(),seedKey,icon,title,...(sl?{slug:sl}:{}),price,desc,detail,image:null,...this.serviceTableFields(sl)}; }; return [
     S('horoscopes','\u263d','Daily / Weekly / Monthly Horoscopes','$100 CAD','Clear daily, weekly and monthly horoscope guidance based on your Moon sign and current transits \u2014 practical, not generic.',
       'Our horoscopes go beyond one-size-fits-all sun-sign columns. Daily readings track the Moon\u2019s fast movement and the key transits so you know the mood of each day; weekly and monthly outlooks map the bigger themes shaping your work, relationships and wellbeing.\n\nFor the sharpest accuracy we read against your own Moon sign and birth chart rather than just your Sun sign, so the guidance actually fits your life. Use it to plan important conversations, pick good days for effort, and stay steady when the planets get busy.'),
     S('birth-chart-generation','\u2609','Birth Chart (Natal Chart) Generation','$100 CAD','A precise, accurate Vedic birth chart (Kundli) prepared from your exact birth details, ready for reading.',
@@ -243,17 +257,19 @@ class Component extends DCLogic {
 
   // ---------- defaults ----------
   defaults(){
-    const svc=(icon,title,price,desc,detail)=>({id:this.uid(),icon,title,...(this.serviceRoute(title)?{slug:this.serviceRoute(title)}:{}),price,desc,...(detail?{detail}:{}),image:null});
+    const svc=(icon,title,price,desc,detail)=>{ const sl=this.serviceRoute(title); return {id:this.uid(),icon,title,...(sl?{slug:sl}:{}),price,desc,...(detail?{detail}:{}),image:null,...this.serviceTableFields(sl)}; };
     return {
       brand:{ name:'Analysis of Karma', astrologer:'Jag Mallah', tagline:'Vedic astrology guidance for love, career, health & life\u2019s bigger questions.', logo:null },
       contact:{ email:'', mailFrom:'', /* the enquiry inbox is set on the server (api/db.php) and never shown on the site */ phone:'+1 (236) 660-2000', whatsapp:'+1 (236) 660-2000',
-        whatsappText:'Hello Jag Mallah, I would like to book a Vedic astrology consultation.', address:'', mapQuery:'', mapUrl:'', mapEmbed:'',
+        whatsappText:'Hello Jag Mallah, I would like to book a Vedic astrology consultation.', address:'15450 92a Ave, Surrey, BC V3R 9B1, Canada',
+        mapQuery:'Analysis of Karma - Vedic astrology & Meditation | Vedic Astrologer Jag Mallah, 15450 92a Ave, Surrey, BC V3R 9B1, Canada', mapUrl:'', mapEmbed:'',
         instagram:'https://www.instagram.com/analysisofkarma', youtube:'https://www.youtube.com/@analysisofkarma',
         gmb:'https://share.google/r37d5nGpSJCeEXhvt', facebook:'', trustpilot:'https://ca.trustpilot.com/review/analysisofkarma.com',
         bookingUrl:'', replyTime:'within 12\u201324 hours' },
       siteUrl:'https://www.analysisofkarma.com',
       sitemapAuto:'off',
-      // Local SEO / Google Business Profile — a service-area business (no street address shown)
+      // Local SEO / Google Business Profile — the street address, hours and business name exactly as
+      // the Profile lists them, so the footer, the contact page and the structured data all match Maps
       local:{ businessName:'Analysis of Karma', legalName:'', businessType:'ProfessionalService',
         gbpPrimaryCategory:'Astrologer', gbpAdditionalCategories:['Spiritual Consultant','Psychic','Vedic Astrology & Karmic Consultation Service'],
         serviceAreaBusiness:false, streetAddress:'15450 92a Ave', locality:'Surrey', region:'British Columbia', regionCode:'BC', postalCode:'V3R 9B1',
@@ -263,8 +279,8 @@ class Component extends DCLogic {
         nearbyLabel:'Lower Mainland & Fraser Valley', nearbyCities:['Vancouver','Delta','Langley','Abbotsford','Chilliwack','Maple Ridge'],
         abroad:['the United States (Washington State)','the United Kingdom','India (Punjab, Delhi, Haryana and Mumbai)'],
         onlineWorldwide:true, onlineChannels:['Zoom','WhatsApp'],
-        hours:{Mo:{o:'10:00',c:'20:00'},Tu:{o:'10:00',c:'20:00'},We:{o:'10:00',c:'20:00'},Th:{o:'10:00',c:'20:00'},Fr:{o:'10:00',c:'20:00'},Sa:{o:'10:00',c:'20:00'},Su:{o:'10:00',c:'20:00'}},
-        timezone:'America/Vancouver', hoursNote:'Pacific Time, by appointment \u2014 early-morning and evening slots available for clients in India, the UK and across North America.',
+        hours:{Mo:{o:'10:00',c:'17:00'},Tu:{o:'10:00',c:'17:00'},We:{o:'10:00',c:'17:00'},Th:{o:'10:00',c:'17:00'},Fr:{o:'10:00',c:'17:00'}},
+        timezone:'America/Vancouver',
         mapsCidUrl:'https://maps.app.goo.gl/XrwSpDBGaVsFQ5dV8', reviewUrl:'https://maps.app.goo.gl/XrwSpDBGaVsFQ5dV8', priceRange:'$100 CAD per hour', currency:'CAD', languages:['English','Hindi','Punjabi'],
         sessionLength:'60 minutes', paymentMethods:['Interac e-Transfer','PayPal','Credit card','Debit card','International bank transfer'],
         paymentPolicy:'Pay after your reading: new clients pay only if they are completely satisfied with their consultation.',
@@ -1105,6 +1121,39 @@ class Component extends DCLogic {
       h('div',{className:'aok-hairline'})); }
 
   // ---------- SERVICES ----------
+  // The fee cell of the comparison table. It is the service's own rate with "CAD" dropped (the column
+  // heading already says CAD) plus the pay-after policy, so the price itself still lives in one place.
+  serviceFee(s){ let fee=String(s.price||'').replace(/\bCAD\b/ig,'').replace(/\s+/g,' ').trim();
+    if(!fee) return ''; const unit=String(s.priceUnit||'').trim(); if(unit) fee+=' '+unit;
+    return String(((this.state.data||{}).local||{}).paymentPolicy||'').trim()?fee+' (pay after)':fee; }
+
+  // "Which reading do I need, and what does it cost?" answered as one table. Only the consultations
+  // whose chart factors are filled in (Admin -> Services -> Comparison table) appear in it.
+  serviceCompareTable(){ const h=React.createElement,P=this.P;
+    const rows=this.liveServices().filter(s=>String(s.chartFactors||'').trim()!=='');
+    if(rows.length<2) return null;
+    const cols=['Service Name','Primary Chart Factors','Session Format','Duration','Fee (CAD)'];
+    const d=this.state.data||{}, langs=((d.local||{}).languages||[]).filter(Boolean);
+    const cap='Vedic astrology consultations with '+(((d.brand||{}).astrologer)||this.brandName())
+      +' \u2014 each one held one-to-one online'+(langs.length?', in '+this.joinList(langs):'')+'.';
+    // wrap() takes one child, so the three go in as an array
+    return h('section',{style:{padding:'0 0 70px'}}, this.wrap([
+      h('h2',{key:'h',style:{font:'800 clamp(26px,3.3vw,36px)/1.2 '+this.HEAD,color:P.maroon,textAlign:'center',margin:'0 0 10px'}},'Compare the consultations'),
+      h('p',{key:'s',style:{font:'400 15px/1.7 '+this.HEAD,color:P.muted,textAlign:'center',maxWidth:720,margin:'0 auto 26px'}},
+        'What each reading examines, how the session is held, how long it runs and what it costs.'),
+      h('div',{key:'t',className:'aok-cmp-wrap'},
+        h('table',{className:'aok-cmp'},
+          h('caption',null,cap),
+          h('thead',null,h('tr',null,...cols.map(c=>h('th',{key:c,scope:'col'},c)))),
+          h('tbody',null,...rows.map(s=>{ const open=()=>this.go('service',{serviceId:s.id});
+            return h('tr',{key:s.id},
+              h('th',{scope:'row'}, h('a',this.linkTo(this.serviceHref(s),open),s.title)),
+              h('td',null,s.chartFactors),
+              h('td',null,s.sessionFormat||''),
+              h('td',null,s.duration||''),
+              h('td',{className:'aok-cmp-fee'},this.serviceFee(s))); }))))]));
+  }
+
   renderServices(){ const h=React.createElement,P=this.P,d=this.state.data;
     return h('main',{style:{animation:'aokfade .4s'}}, this.pageHero('servicesPage.hero','services'),
       h('section',{style:{padding:'70px 0'}}, this.wrap(h('div',{style:{display:'grid',gridTemplateColumns:'repeat(2,1fr)',gap:24}}, ...this.liveServices().map((s,i)=>{ const open=()=>this.go('service',{serviceId:s.id}); const img=this.serviceImg(s);
@@ -1119,6 +1168,7 @@ class Component extends DCLogic {
           h('div',{style:{display:'flex',alignItems:'center',gap:18,flexWrap:'wrap'}},
             h('a',this.linkTo(this.serviceHref(s),open,{className:'aok-tap',style:{color:'#8A6A2E',font:'700 14px '+this.HEAD}}),'Read more \u2192'),
             this.ebtn('servicesPage.cardBtn',{label:'Book this \u2192',link:'contact',variant:'outline',size:'sm'},null,()=>this.goServiceBook(s)))))); })))),
+      this.serviceCompareTable(),
       this.ctaBand('home.cta')); }
 
   // ---------- MEDITATION ----------
@@ -2195,6 +2245,10 @@ class Component extends DCLogic {
       h('div',{style:{display:'grid',gridTemplateColumns:'1fr 1fr',gap:12}},
         h('label',null,L('Eyebrow','small line above the title'),h('input',{value:s.eyebrow||'',placeholder:'Vedic astrology service',onChange:e=>upd(i,'eyebrow',e.target.value),style:this.inpStyle()})),
         h('label',null,L('Booking button'),h('input',{value:s.ctaLabel||'',placeholder:'Book Consultation',onChange:e=>upd(i,'ctaLabel',e.target.value),style:this.inpStyle()}))),
+      h('div',{style:{display:'grid',gridTemplateColumns:'1.6fr 1fr 1fr',gap:12}},
+        h('label',null,L('Primary chart factors','comparison table on /services \u2014 leave empty to keep this service out of it'),h('input',{value:s.chartFactors||'',placeholder:'Lagna, D-9, Nakshatras, Vimshottari Dasha',onChange:e=>upd(i,'chartFactors',e.target.value),style:this.inpStyle()})),
+        h('label',null,L('Session format'),h('input',{value:s.sessionFormat||'',placeholder:'1-on-1 Zoom / WhatsApp',onChange:e=>upd(i,'sessionFormat',e.target.value),style:this.inpStyle()})),
+        h('label',null,L('Duration'),h('input',{value:s.duration||'',placeholder:'60 Minutes',onChange:e=>upd(i,'duration',e.target.value),style:this.inpStyle()}))),
       h('label',null,L('Short summary','the cards and the page’s opening line'),h('textarea',{value:s.desc||'',rows:2,onChange:e=>upd(i,'desc',e.target.value),style:this.inpStyle()})),
       h('div',{style:{display:'flex',alignItems:'center',gap:12,flexWrap:'wrap'}},L('Banner image', s.image?'uploaded':'the 3D banner is used'),this.serviceImg(s)?h('img',{src:this.serviceImg(s),alt:'',style:{width:128,height:72,objectFit:'cover',borderRadius:8},onError:e=>{ if(!this.svcImgFallback(e)) e.currentTarget.style.display='none'; }}):null,this.btn(s.image?'Replace image':'Upload image',pickImg,{variant:'outline',pad:'8px 14px'}),s.image?this.btn('Use the 3D banner',()=>upd(i,'image',null),{variant:'outline',pad:'8px 14px'}):null),
       h('div',{style:{display:'flex',justifyContent:'space-between',alignItems:'center',borderTop:'1px solid '+P.line,paddingTop:12}}, h('b',{style:{font:'700 14px '+this.HEAD,color:P.maroon}},'Page text'),

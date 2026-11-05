@@ -994,6 +994,47 @@ function aok_faq_html(array $d, string $tag = 'h3'): string {
     return $o;
 }
 
+// The fee cell of the /services comparison table: the service's own rate with "CAD" dropped (the
+// column heading says CAD) and the pay-after policy noted, so the price itself stays in one place.
+function aok_service_fee(array $d, array $s): string {
+    $fee = trim(preg_replace('/\s+/u', ' ', preg_replace('/\bCAD\b/i', '', aok_text($s['price'] ?? ''))));
+    if ($fee === '') return '';
+    $unit = trim(aok_text($s['priceUnit'] ?? ''));
+    if ($unit !== '') $fee .= ' ' . $unit;
+    return trim((string)aok_get($d, 'local.paymentPolicy', '')) !== '' ? $fee . ' (pay after)' : $fee;
+}
+
+// "Which reading do I need, and what does it cost?" answered as one table. An answer engine quotes a
+// real <table> row for that question, so this is a table and not a grid of cards. Only consultations
+// whose chart factors are filled in (Admin -> Services) appear; it must match serviceCompareTable()
+// in assets/app.js, which renders the same rows once the browser app takes over.
+function aok_service_table_html(array $d): string {
+    $slugs = aok_service_slugs($d['services'] ?? []);
+    $rows = '';
+    $n = 0;
+    foreach (aok_live_services($d) as $s) {
+        $factors = trim(aok_text($s['chartFactors'] ?? ''));
+        if ($factors === '') continue;
+        $slug = $slugs[(string)($s['id'] ?? '')] ?? aok_slugify((string)($s['title'] ?? ''));
+        $rows .= '<tr><th scope="row"><a href="/services/' . aok_e($slug) . '">' . aok_e(aok_text($s['title'] ?? '')) . '</a></th>'
+            . '<td>' . aok_e($factors) . '</td>'
+            . '<td>' . aok_e(aok_text($s['sessionFormat'] ?? '')) . '</td>'
+            . '<td>' . aok_e(aok_text($s['duration'] ?? '')) . '</td>'
+            . '<td class="aok-cmp-fee">' . aok_e(aok_service_fee($d, $s)) . '</td></tr>';
+        $n++;
+    }
+    if ($n < 2) return '';
+    $langs = array_values(array_filter(array_map('aok_text', (array)aok_get($d, 'local.languages', []))));
+    $cap = 'Vedic astrology consultations with ' . (aok_text(aok_get($d, 'brand.astrologer', '')) ?: aok_brand($d))
+        . " \u{2014} each one held one-to-one online" . ($langs ? ', in ' . aok_join_list($langs) : '') . '.';
+    return '<section aria-labelledby="aok-compare-h"><h2 id="aok-compare-h">Compare the consultations</h2>'
+        . '<p>What each reading examines, how the session is held, how long it runs and what it costs.</p>'
+        . '<div class="aok-cmp-wrap"><table class="aok-cmp"><caption>' . aok_e($cap) . '</caption>'
+        . '<thead><tr><th scope="col">Service Name</th><th scope="col">Primary Chart Factors</th>'
+        . '<th scope="col">Session Format</th><th scope="col">Duration</th><th scope="col">Fee (CAD)</th></tr></thead>'
+        . '<tbody>' . $rows . '</tbody></table></div></section>';
+}
+
 function aok_services_list(array $d, array $services, bool $withDesc = true): string {
     $slugs = aok_service_slugs($d['services'] ?? []);
     $o = '<ul>';
@@ -1074,7 +1115,8 @@ function aok_main_html(array $d, array $r): string {
         foreach ((array)$g('about.process.steps', []) as $s) $o .= '<li><h3>' . aok_e(aok_text($s['t'] ?? '')) . '</h3><p>' . aok_rich($s['d'] ?? '') . '</p></li>';
         $o .= '</ol></section><section><h2>' . aok_e(aok_text($g('faqPage.hero.title', 'FAQ'))) . '</h2>' . aok_faq_html($d) . '<p><a href="/faq">All frequently asked questions</a></p></section>' . aok_cta($d);
     } elseif ($t === 'services') {
-        $o .= aok_hero($d, 'servicesPage.hero', aok_text($g('seo.services.focusKeyword'))) . '<section>' . aok_services_list($d, $d['services'] ?? []) . '</section>' . aok_cta($d);
+        $o .= aok_hero($d, 'servicesPage.hero', aok_text($g('seo.services.focusKeyword'))) . '<section>' . aok_services_list($d, $d['services'] ?? []) . '</section>'
+            . aok_service_table_html($d) . aok_cta($d);
     } elseif ($t === 'service') {
         $s = $r['item'];
         $o .= aok_crumbs([['Home', '/'], ['Services', '/services'], [aok_text($s['title'] ?? ''), '']]);

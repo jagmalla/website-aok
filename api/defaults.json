@@ -41,6 +41,8 @@
   "region": "British Columbia",
   "regionCode": "BC",
   "postalCode": "V3R 9B1",
+  "listingName": "Analysis of Karma - Vedic astrology & Meditation | Vedic Astrologer Jag Mallah",
+  "hoursNote": "Online consultations available 7 days a week by appointment",
   "country": "CA",
   "lat": "49.1913",
   "lng": "-122.8490",
@@ -113,7 +115,6 @@
    }
   },
   "timezone": "America/Vancouver",
-  "hoursNote": "Online consultations available 7 days a week by appointment",
   "mapsCidUrl": "https://maps.app.goo.gl/XrwSpDBGaVsFQ5dV8",
   "reviewUrl": "https://maps.app.goo.gl/XrwSpDBGaVsFQ5dV8",
   "priceRange": "$100 CAD per hour",
@@ -133,8 +134,7 @@
   ],
   "paymentPolicy": "Pay after your reading: new clients pay only if they are completely satisfied with their consultation.",
   "directories": [],
-  "locationInTitles": true,
-  "listingName": "Analysis of Karma - Vedic astrology & Meditation | Vedic Astrologer Jag Mallah"
+  "locationInTitles": true
  },
  "person": {
   "name": "Jag Mallah",
@@ -461,7 +461,10 @@
    "slug": "kundli-birth-chart-reading",
    "price": "$100 CAD",
    "desc": "A complete Vedic birth-chart reading covering your personality, career, relationships, health and current planetary period (dasha), with practical remedies.",
-   "image": null
+   "image": null,
+   "chartFactors": "Lagna, D-9, Nakshatras, Vimshottari Dasha",
+   "sessionFormat": "1-on-1 Zoom / WhatsApp",
+   "duration": "60 Minutes"
   },
   {
    "id": "d8",
@@ -470,7 +473,10 @@
    "slug": "kundli-milan-marriage-matching",
    "price": "$100 CAD",
    "desc": "Detailed Guna Milan and compatibility analysis for two charts — including Mangal dosha, longevity and remedies for a harmonious marriage.",
-   "image": null
+   "image": null,
+   "chartFactors": "36-Point Ashtakoota, D-9, Mangal Dosha",
+   "sessionFormat": "Dual-Chart Live Call",
+   "duration": "60 Minutes"
   },
   {
    "id": "d9",
@@ -480,7 +486,10 @@
    "price": "$100 CAD",
    "desc": "Timing for job changes, business, and money decisions based on your dasha, transits and the houses of wealth and profession.",
    "detail": "Your career consultation focuses on the houses and planets of work and wealth — the 10th house of profession, the 2nd and 11th of income and gains, the 6th of daily work, and key planets such as Saturn, Mercury and the Sun. We read your natural talents and ideal fields, and use your dashas and transits to time job changes, business decisions and investments.\n\nYou receive practical, prioritised guidance: where your strengths lie, which periods favour bold moves, and the remedies that support steady financial growth.",
-   "image": null
+   "image": null,
+   "chartFactors": "10th House, D-10, Dhana Yogas, Shani",
+   "sessionFormat": "1-on-1 Zoom / WhatsApp",
+   "duration": "60 Minutes"
   },
   {
    "id": "d10",
@@ -490,7 +499,10 @@
    "price": "$100 CAD",
    "desc": "In-depth study of Mangal, Kaal Sarp, Pitra and other doshas — what they really mean for you, and the remedies that help.",
    "detail": "Doshas cause a lot of needless worry. We examine your chart for Mangal (Manglik), Kaal Sarp, Pitra and other doshas, and tell you the truth: whether a dosha is genuinely present and strong, or mild and already cancelled by other placements.\n\nWhere a real dosha exists, we prescribe classical, practical remedies — specific mantras, charity, fasts, gemstones and rituals — matched to your chart. The goal is never fear; it is to balance the energy and move forward with confidence, especially around marriage and major decisions.",
-   "image": null
+   "image": null,
+   "chartFactors": "Mangal, Kaal Sarp, Pitra Dosha, Shadbala",
+   "sessionFormat": "1-on-1 Zoom / WhatsApp",
+   "duration": "60 Minutes"
   },
   {
    "id": "d11",
@@ -500,7 +512,10 @@
    "price": "$100 CAD",
    "desc": "Which gemstone genuinely suits your chart (and which to avoid), with the right finger, metal, weight and energising ritual.",
    "detail": "Gemstones strengthen a beneficial planet, but the wrong stone can do harm — so this service begins with a careful study of your chart. We identify which planets need support and which stone (and which to avoid) is right for you, from ruby and pearl to yellow and blue sapphire, emerald, coral and diamond.\n\nYou receive clear guidance on the correct carat weight, metal and finger, and the day and mantra for energising and wearing it, so the gemstone works with your chart rather than against it.",
-   "image": null
+   "image": null,
+   "chartFactors": "Lagna, 5th & 9th Lords (No Gem Sales)",
+   "sessionFormat": "1-on-1 Zoom / WhatsApp",
+   "duration": "60 Minutes"
   },
   {
    "id": "d12",
@@ -509,7 +524,10 @@
    "slug": "vedic-meditation-guidance",
    "price": "$100 CAD",
    "desc": "A personalised meditation, mantra and breath practice matched to your chart to steady the mind and support your remedies.",
-   "image": null
+   "image": null,
+   "chartFactors": "Pranayama, Mantra Japa, Pancha Mahabhuta",
+   "sessionFormat": "1-on-1 Guided Session",
+   "duration": "60 Minutes"
   }
  ],
  "blogPage": {
@@ -699,7 +717,10 @@
    "price": "$100 CAD",
    "desc": "Clear daily, weekly and monthly horoscope guidance based on your Moon sign and current transits — practical, not generic.",
    "detail": "Our horoscopes go beyond one-size-fits-all sun-sign columns. Daily readings track the Moon’s fast movement and the key transits so you know the mood of each day; weekly and monthly outlooks map the bigger themes shaping your work, relationships and wellbeing.\n\nFor the sharpest accuracy we read against your own Moon sign and birth chart rather than just your Sun sign, so the guidance actually fits your life. Use it to plan important conversations, pick good days for effort, and stay steady when the planets get busy.",
-   "image": null
+   "image": null,
+   "chartFactors": "Chandra Rashi, Nakshatra, Ashtakavarga",
+   "sessionFormat": "1-on-1 Zoom / WhatsApp",
+   "duration": "60 Minutes"
   },
   {
    "id": "d17",

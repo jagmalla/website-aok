@@ -268,6 +268,22 @@ img{height:auto}
 .aok-svc-card-img{display:block;margin:8px 8px 0;border-radius:14px;overflow:hidden;aspect-ratio:16/9}
 .aok-svc-card-img img{display:block;width:100%;height:100%;object-fit:cover;transition:transform .6s}
 .aok-svc-card:hover .aok-svc-card-img img{transform:scale(1.04)}
+/* /services comparison table: a real <table>, because that is what an answer engine quotes when
+   someone asks what a reading costs or which one they need. It scrolls sideways rather than
+   collapsing into stacked cards, so the rows stay machine-readable at every width. */
+.aok-cmp-wrap{overflow-x:auto;-webkit-overflow-scrolling:touch;border:1px solid var(--aok-line);border-radius:18px;background:var(--aok-p-card,#FFFCF7);box-shadow:0 1px 0 #fff inset,0 22px 44px -32px rgba(120,96,50,.34)}
+.aok-cmp{width:100%;min-width:760px;border-collapse:collapse;font:400 14.5px/1.6 'Plus Jakarta Sans',sans-serif;color:var(--aok-p-ink,#3A3D42)}
+.aok-cmp caption{caption-side:bottom;padding:14px 20px 16px;font:400 12.5px/1.6 'Plus Jakarta Sans',sans-serif;color:var(--aok-p-muted,#6B6E73);text-align:left}
+.aok-cmp th,.aok-cmp td{padding:15px 20px;text-align:left;vertical-align:top;border-bottom:1px solid var(--aok-line)}
+.aok-cmp thead th{font:700 11.5px/1.4 'Plus Jakarta Sans',sans-serif;letter-spacing:.14em;text-transform:uppercase;color:var(--aok-gold-label);background:var(--aok-p-bg-alt,#F3EFE6);white-space:nowrap}
+.aok-cmp tbody th{font:700 15px/1.5 'Plus Jakarta Sans',sans-serif;color:var(--aok-p-maroon,#1E2022)}
+.aok-cmp tbody th a{color:inherit;text-decoration:none;border-bottom:1px solid var(--aok-line)}
+.aok-cmp tbody th a:hover{border-bottom-color:currentColor}
+.aok-cmp tbody tr:nth-child(even){background:rgba(243,239,230,.45)}
+.aok-cmp tbody tr:last-child th,.aok-cmp tbody tr:last-child td{border-bottom:none}
+.aok-cmp-fee{white-space:nowrap;font-weight:600;color:var(--aok-gold-label)}
+@media (max-width:767px){.aok-cmp{min-width:660px;font-size:13.5px}.aok-cmp th,.aok-cmp td{padding:12px 14px}}
+@container site (max-width:767px){.aok-cmp{min-width:660px;font-size:13.5px}.aok-cmp th,.aok-cmp td{padding:12px 14px}}
 @media (max-width:1023px){
 .aok-svc-top{grid-template-columns:minmax(0,1fr);gap:28px}
 .aok-svc-side{position:static;order:-1}
@@ -468,7 +484,7 @@ img{height:auto}
 </head>
 <body>
 <div id="root"></div>
-<script src="/assets/app.js?v=de22c8ab16" defer></script>
+<script src="/assets/app.js?v=8cfeae948b" defer></script>
 <!-- Hero 3D scene (assets/hero3d.js, Three.js via the import map): started once the page is idle, and skipped on
      data-saver / 2G connections and low-memory phones (they keep the static pearl background) -->
 <script type="module">

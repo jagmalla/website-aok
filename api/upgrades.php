@@ -28,9 +28,20 @@ if (realpath((string)($_SERVER['SCRIPT_FILENAME'] ?? '')) === __FILE__) { http_r
 //   (api/content/services/<address>.md), replacing the version 3 sections (kept in api/content/v3/ only
 //   to recognise them). Pages whose text the owner edited keep it; the SEO Health button adds the new
 //   sections after it.
+// Version 6:
+//   The business's real street address, Monday-Friday opening hours, the Google Business Profile
+//   listing name and Punjabi consultations, from the owner's Profile. Empty values only.
+// Version 7:
+//   1. The generic middle headings of five service pages become the questions people actually ask,
+//      each followed by a 40-60 word answer: an assistant quotes a question heading with its answer
+//      directly beneath it, and quotes nothing from "Classical Vedic Methodology & Texts Used".
+//      Only the heading line is replaced, so anything the owner wrote under it is untouched.
+//   2. The /services comparison table: every shipped consultation gains the chart factors, session
+//      format and duration the table needs. Services the owner added keep theirs empty and stay out
+//      of the table until they are filled in (Admin -> Services).
 // Only text that is still exactly as first shipped is replaced. Text you have edited is kept. Nothing is deleted.
 
-const AOK_CONTENT_VERSION = 6;
+const AOK_CONTENT_VERSION = 7;
 
 // fingerprints (md5 of the normalised text) of the originally shipped FAQ answers, by question
 const AOK_OLD_FAQ = [
@@ -112,6 +123,7 @@ function aok_upgrade_payload(array $d): array {
     if ($v < 4) $d = aok_upgrade_v4($d);
     $d = aok_upgrade_v5($d, $def);
     if ($v < 6) $d = aok_upgrade_v6($d);
+    if ($v < 7) $d = aok_upgrade_v7($d, $def);
     $d['contentVersion'] = AOK_CONTENT_VERSION;
     return $d;
 }
@@ -435,6 +447,74 @@ function aok_upgrade_v6(array $d): array {
             if (!$isEmpty) $keep[] = $b;
         }
         $d['blocks'][$route] = array_values($keep);
+    }
+    return $d;
+}
+
+// v7, part 1: the question headings. api/content/services/<key>.md already ships them, but a live
+// site's page text came from an earlier release, so the heading line is replaced in place: the
+// question takes over from the label and the answer paragraph is inserted directly beneath it.
+// Keyed by the page's shipped address, as aok_service_content_key() resolves it.
+const AOK_V7_HEADINGS = [
+    'kundli-birth-chart-reading' => [
+        ['## Classical Vedic Methodology & Texts Used',
+         '## How Does Jag Mallah Analyze a Vedic Birth Chart (Kundli)?',
+         'Jag Mallah analyzes your Vedic birth chart using classical Parashari Jyotish principles from the Brihat Parashara Hora Shastra. Every 60-minute reading evaluates your Sidereal Ascendant (Lagna), 27 lunar Nakshatras, divisional charts (Navamsha D-9 and Dashamsha D-10), Vimshottari Dasha timelines, and live planetary transits (Gochar) to deliver accurate life predictions.'],
+        ['## Key Life Questions & Chart Factors Analyzed',
+         '## What Life Questions Are Answered in a 1-on-1 Kundli Consultation?',
+         'A 1-on-1 Kundli consultation answers specific questions regarding career trajectory (10th House Karma Bhava), marriage compatibility and timing (7th House), wealth cycles (Dhana Yogas), health vulnerabilities, and life purpose. Sessions cost $100 CAD per hour via Zoom or WhatsApp, and new clients pay only after the session if satisfied.'],
+    ],
+    'kundli-milan-marriage-matching' => [
+        ['## Classical Vedic Methodology & Texts Used',
+         '## How Does Vedic Kundli Milan Evaluate Marriage Compatibility Beyond the 36 Points?',
+         "Authentic Kundli Milan goes beyond automated 36-point Ashtakoota Guna scores by examining both partners' Navamsha (D-9) charts, 7th house lord strengths, emotional Moon-Venus synastry, Mangal Dosha cancellations, and synchronised Vimshottari Dasha periods. This 60-minute session (\$100 CAD, pay after satisfaction) identifies real marital harmony and communication remedies."],
+    ],
+    'career-finance-consultation' => [
+        ['## Classical Vedic Methodology & Texts Used',
+         '## How Can Vedic Astrology Predict Career Changes and Financial Growth?',
+         'Vedic career and finance consultations evaluate the 10th house (Karma Bhava), 2nd and 11th wealth houses (Dhana Yogas), and the specialized Dashamsha (D-10) divisional chart. By tracking active Mahadasha periods alongside Saturn and Jupiter transits, Jag Mallah pinpoints optimal windows for job transitions, promotions, or business launches.'],
+    ],
+    'dosha-analysis-remedies' => [
+        ['## Classical Vedic Methodology & Texts Used',
+         '## How Are Mangal Dosha, Kaal Sarp Dosha, and Pitra Dosha Verified and Remedied?',
+         "Many online software reports trigger false Dosha alarms without checking classical cancellation rules (Dosha Bhanga). Jag Mallah inspects exact planetary degrees, Shadbala strength, and benefic aspects before confirming any affliction. When a Dosha is active, we prescribe practical mantra sadhana, meditation, and behavioral karma adjustments \u{2014} never expensive rituals."],
+    ],
+    'gemstone-recommendation' => [
+        ['## Classical Vedic Methodology & Texts Used',
+         '## How Are Astrological Gemstones Selected Without Commercial Sales Bias?',
+         'Gemstones act as planetary amplifiers and must only be prescribed for functional benefic lords (Lagna, 5th, and 9th houses) after auditing planetary dignity and Dasha timing. Because Analysis of Karma never sells gemstones or jewelry, every $100 CAD consultation gives you completely unbiased guidance on exact carat weight and wearing rituals.'],
+    ],
+];
+
+function aok_upgrade_v7(array $d, array $def): array {
+    if (!isset($d['services']) || !is_array($d['services'])) return $d;
+    require_once __DIR__ . '/seo-lib.php';   // aok_service_content_key, aok_default_service
+
+    foreach ($d['services'] as $i => $s) {
+        if (!is_array($s)) continue;
+        $o = aok_default_service($s, $def);
+
+        // 1. the question headings, on the five pages that have them
+        $detail = (string)($s['detail'] ?? '');
+        foreach (AOK_V7_HEADINGS[aok_service_content_key($s, $def)] ?? [] as [$from, $to, $answer]) {
+            if ($detail === '' || strpos($detail, $to) !== false) continue;   // already done
+            $lines = explode("\n", str_replace("\r\n", "\n", $detail));
+            foreach ($lines as $k => $line) {
+                if (trim($line) !== $from) continue;
+                // the blank line matters: without it the markdown parser folds the bullets that
+                // follow into the answer paragraph instead of keeping them a list
+                array_splice($lines, $k, 1, [$to, $answer, '']);
+                $detail = implode("\n", $lines);
+                break;
+            }
+        }
+        if ($detail !== (string)($s['detail'] ?? '')) $d['services'][$i]['detail'] = $detail;
+
+        // 2. the comparison table's columns, where this service ships them and has none of its own
+        foreach (['chartFactors', 'sessionFormat', 'duration'] as $f) {
+            if ($o !== null && trim((string)($o[$f] ?? '')) !== '' && trim((string)($s[$f] ?? '')) === '')
+                $d['services'][$i][$f] = $o[$f];
+        }
     }
     return $d;
 }

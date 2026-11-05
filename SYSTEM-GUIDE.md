@@ -210,7 +210,11 @@ Assistants lift *passages*, not pages. So every important page has:
 2. **Headings shaped like real questions** — "How long does it take?", not "Timings".
 3. **An FAQ with proper `FAQPage` markup** — 3+ questions, answers of 40–60 words, each
    understandable on its own without the surrounding page.
-4. **Tables** for prices, specifications and turnaround — trivially liftable.
+4. **Tables** for prices, specifications and turnaround — trivially liftable. `/services`
+   carries one: a real `<table>` comparing each consultation's chart factors, session format,
+   duration and fee. Fill in **Primary chart factors**, **Session format** and **Duration** in
+   Admin → Services to put a consultation in it; leave the chart factors empty to keep it out.
+   The fee column is the service's own rate, so the price is never typed twice.
 5. **Plain language**, short sentences, jargon defined on first use.
 
 ### `llms.txt` and `llms-full.txt`

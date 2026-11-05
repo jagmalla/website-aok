@@ -1,6 +1,8 @@
 > **Direct answer:** Dosha Analysis provides an honest, classical deconstruction of astrological afflictions such as Mangal, Kaal Sarp, and Pitra Doshas. In a 60-minute 1-on-1 session ($100 CAD/hr, pay after satisfaction), we dispel ungrounded superstitions, determine real chart impacts, and prescribe accessible, ethical Vedic remedies.
 
-## Classical Vedic Methodology & Texts Used
+## How Are Mangal Dosha, Kaal Sarp Dosha, and Pitra Dosha Verified and Remedied?
+Many online software reports trigger false Dosha alarms without checking classical cancellation rules (Dosha Bhanga). Jag Mallah inspects exact planetary degrees, Shadbala strength, and benefic aspects before confirming any affliction. When a Dosha is active, we prescribe practical mantra sadhana, meditation, and behavioral karma adjustments — never expensive rituals.
+
 - **Textual Verification:** Assessing dosha formulations strictly against Brihat Parashara Hora Shastra, Saravali, and Jataka Parijata rather than modern superstitious additions.
 - **Kaal Sarp Yoga vs. Dosha:** Evaluating whether the containment of all seven planets between Rahu and Ketu acts as a restrictive dosha or a transformative yoga driving worldly and spiritual accomplishment.
 - **Pitra Dosha Deconstruction:** Analyzing afflictions to the 9th house, 9th lord, and Sun to understand ancestral karmic duties and unresolved familial patterns.

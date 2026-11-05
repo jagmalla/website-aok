@@ -1,6 +1,8 @@
 > **Direct answer:** A scientific Vedic gemstone consultation determines which precious gems naturally strengthen your functional benefic planets and which must be strictly avoided. Through a 60-minute consultation ($100 CAD/hr, pay after satisfaction), you receive precise recommendations regarding carat weight, metal, finger, and energizing procedures.
 
-## Classical Vedic Methodology & Texts Used
+## How Are Astrological Gemstones Selected Without Commercial Sales Bias?
+Gemstones act as planetary amplifiers and must only be prescribed for functional benefic lords (Lagna, 5th, and 9th houses) after auditing planetary dignity and Dasha timing. Because Analysis of Karma never sells gemstones or jewelry, every $100 CAD consultation gives you completely unbiased guidance on exact carat weight and wearing rituals.
+
 - **Functional Benefic Rule:** Strict adherence to Parashari principles where gemstones are prescribed ONLY for functional benefic lords (Lagna, 5th, and 9th house lords), never for functional malefics (lords of 6th, 8th, or 12th houses).
 - **Graha Bala & Shadbala Analysis:** Verifying whether a weak benefic planet needs gemstone amplification or whether another remedial modality is safer.
 - **The Anukul vs. Pratikul System:** Ensuring gemstones align favorably with your natal Lagna rather than arbitrarily choosing a gem based solely on your birth star or zodiac sign.

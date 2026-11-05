@@ -1,6 +1,8 @@
 > **Direct answer:** Kundli Milan evaluates the holistic karmic and psychological compatibility between two individuals. Beyond the basic 36-point Guna Milan, our 60-minute dual-chart consultation ($100 CAD/hr, pay after satisfaction) examines emotional resilience, values, longevity, Mangal Dosha exceptions, and practical relationship remedies.
 
-## Classical Vedic Methodology & Texts Used
+## How Does Vedic Kundli Milan Evaluate Marriage Compatibility Beyond the 36 Points?
+Authentic Kundli Milan goes beyond automated 36-point Ashtakoota Guna scores by examining both partners' Navamsha (D-9) charts, 7th house lord strengths, emotional Moon-Venus synastry, Mangal Dosha cancellations, and synchronised Vimshottari Dasha periods. This 60-minute session ($100 CAD, pay after satisfaction) identifies real marital harmony and communication remedies.
+
 - **Ashtakoota Guna Milan:** Thorough calculation of the 8 classical compatibility categories totalling 36 points: Varna, Vashya, Tara, Yoni, Graha Maitri, Gana, Bhakoot, and Nadi.
 - **Beyond Guna Scores:** Textual rules from Brihat Parashara Hora Shastra dictate that Guna Milan alone is incomplete. We evaluate 7th house lords, Venus and Jupiter placements, and Navamsha (D-9) cross-aspects.
 - **Mangal Dosha (Kuja Dosha) Evaluation:** Analyzing Mars in the 1st, 2nd, 4th, 7th, 8th, or 12th houses with special attention to classical cancellation rules (Parihara) based on sign, house placement, and benefic aspects.

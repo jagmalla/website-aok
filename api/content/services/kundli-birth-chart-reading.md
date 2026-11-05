@@ -1,12 +1,16 @@
 > **Direct answer:** A Kundli or Vedic birth-chart reading is an in-depth astronomical analysis of the planetary positions at the exact moment and location of your birth. Through a 60-minute live session ($100 CAD/hr, pay after satisfaction), we analyze your core life purpose, timing cycles, relationship dynamics, and practical karmic remedies.
 
-## Classical Vedic Methodology & Texts Used
+## How Does Jag Mallah Analyze a Vedic Birth Chart (Kundli)?
+Jag Mallah analyzes your Vedic birth chart using classical Parashari Jyotish principles from the Brihat Parashara Hora Shastra. Every 60-minute reading evaluates your Sidereal Ascendant (Lagna), 27 lunar Nakshatras, divisional charts (Navamsha D-9 and Dashamsha D-10), Vimshottari Dasha timelines, and live planetary transits (Gochar) to deliver accurate life predictions.
+
 - **Textual Authority:** Grounded in the foundational principles of Maharishi Parashara's Brihat Parashara Hora Shastra (BPHS) and Mantreswara's Phaladeepika.
 - **Divisional Charts (Varga Chakra):** Analysis of the primary Rashi chart (D-1) synthesized with the Navamsha (D-9) for soul purpose and relationship dharma, and the Dasamsha (D-10) for career direction and public status.
 - **Planetary Periods (Vimshottari Dasha):** Precise calculation of major (Mahadasha), sub (Antardasha), and sub-sub (Pratyantardasha) cycles to determine the active karmic forces influencing current circumstances.
 - **Planetary Transits (Gochar & Vedha):** Cross-referencing current planetary movements against natal Moon and Lagna placements to assess timing accuracy.
 
-## Key Life Questions & Chart Factors Analyzed
+## What Life Questions Are Answered in a 1-on-1 Kundli Consultation?
+A 1-on-1 Kundli consultation answers specific questions regarding career trajectory (10th House Karma Bhava), marriage compatibility and timing (7th House), wealth cycles (Dhana Yogas), health vulnerabilities, and life purpose. Sessions cost $100 CAD per hour via Zoom or WhatsApp, and new clients pay only after the session if satisfied.
+
 - **1st House (Tanu Bhava):** Physical vitality, constitution, mental outlook, and self-identity.
 - **2nd & 11th Houses (Dhana & Labha Bhavas):** Wealth accumulation, financial stability, speech, and fulfillment of aspirations.
 - **7th House (Jaya Bhava):** Partnership compatibility, marital harmony, and significant interpersonal contracts.
