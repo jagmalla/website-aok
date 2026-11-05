@@ -1,7 +1,35 @@
 ANALYSIS OF KARMA — Update (SEO, local SEO, AI search & security)
 ===================================================================
 
-NEW IN THIS VERSION: PHONES, TABLETS AND LARGE SCREENS
+NEW IN THIS VERSION: YOUR GOOGLE ADDRESS, AND BEING QUOTED BY AI
+  • Footer, contact page and search-engine data now carry your full Google
+    Business Profile address, 15450 92a Ave, Surrey, BC V3R 9B1, with the
+    business name exactly as the Profile lists it. Google matches a business
+    on name, address and phone being identical everywhere, so the site and
+    Maps now agree.
+  • Opening hours are Monday to Friday, 10:00 to 17:00, with a note that
+    online consultations run seven days a week by appointment.
+  • The home page now says "Consultations in English, Hindi & Punjabi".
+  • The contact page has a new section, "Where Is Analysis of Karma Located
+    in Surrey, BC?", with the address, languages, fee and phone beneath it.
+    The leftover "Write your text here..." block is gone.
+  • Five service pages now open their middle sections with the question
+    people actually ask -- for example "How Does Jag Mallah Analyze a Vedic
+    Birth Chart (Kundli)?" instead of "Classical Vedic Methodology & Texts
+    Used" -- each followed by a short, factual answer. Assistants quote a
+    question with the answer under it; they never quote a label.
+  • The Services page ends with a comparison table: each consultation's
+    chart factors, session format, duration and fee, side by side. This is
+    what ChatGPT, Perplexity and Google AI Overviews lift when somebody
+    asks "how much does a Vedic astrologer cost in Surrey?".
+  • Admin -> Services has three new boxes per service -- Primary chart
+    factors, Session format and Duration -- which fill that table. Leave
+    the chart factors empty and the service stays out of it. The fee column
+    is the service's own rate, so you only ever type the price once.
+  • Nothing to set up: your existing pages are updated on the first visit
+    after upload, and any wording you changed yourself is left alone.
+
+EARLIER: PHONES, TABLETS AND LARGE SCREENS
   • Checked on every page at 11 screen widths, from small phones (320px)
     to large monitors (1920px): nothing is wider than the screen any more,
     so pages never slide sideways on a phone.
