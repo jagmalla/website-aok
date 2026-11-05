@@ -102,8 +102,9 @@ E2. Consultation times. The location pages promise slots outside your
     take those calls. If you do not, tell me the real windows.
 
 E3. Long Google titles/descriptions on the location pages (4 titles over
-    ~65 characters, 6 descriptions over ~160). Google cuts off the ends. Keep
-    as written, or ask me to trim.
+    ~65 characters, 6 descriptions over ~160). Google cuts off the ends. You
+    can now shorten them yourself: Admin -> Locations -> Edit, and watch the
+    counters in the Page & SEO panel. Or keep them, or ask me.
 
 E4. Currency figures: "~£56 GBP" (UK page) and "$72-$75 USD" (US page) will
     drift with exchange rates. Keep, or remove and say "$100 CAD" only.
@@ -115,8 +116,7 @@ E6. Four service pages still have the generic heading "Key Life Questions &
     Chart Factors Analyzed" (Kundli Milan, Career & Finance, Dosha, Gemstone).
     Send question-style wording and I will add it.
 
-E7. Location pages cannot be edited from the admin yet (no Locations tab).
-    Ask me to add one if you want to change them yourself.
+E7. (Done: Admin -> Locations edits the seven location pages.)
 
 
 F. THE GOOGLE BUSINESS NAME

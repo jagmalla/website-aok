@@ -248,6 +248,27 @@ Assistants lift *passages*, not pages. So every important page has:
    The fee column is the service's own rate, so the price is never typed twice.
 5. **Plain language**, short sentences, jargon defined on first use.
 
+### The Page & SEO panel
+Blog posts, services, custom pages and location pages share one editor panel (`seoPanel` in
+`assets/app.js`), always open at the top: heading, subheading, page address, Google title,
+Google description, focus keyword, a show-in-Google switch, a Google preview and a checklist.
+Each kind of page passes an adapter mapping those boxes onto its own fields — a post's
+description is its `excerpt`, a service's subheading is its `desc`, a page's description is
+`metaDescription` — so the panel is one piece of code and behaves the same everywhere.
+
+The checklist is computed, not stored: address set, readable, not temporary, not reserved
+and not taken; Google title 30–65 and description 120–160 characters, counting the defaults
+the site would actually use; and the focus keyword in the heading, Google title,
+description, address and first paragraph (matched word by word on the first five letters,
+so "remedies" matches "remedy").
+
+Defaults mean nothing goes out empty: no Google title uses the heading plus the brand; no
+description uses the subheading, then the first paragraph. A new post's or page's address
+follows its heading (`slugAuto`) until edited by hand; while it is following, address
+changes leave no redirect, so typing a heading does not litter the site with 301s from
+half-typed addresses. Once settled, a live page that moves leaves a 301 (`api/sync.php`), for
+all four kinds of page.
+
 ### Blog posts: drafts, addresses and redirects
 A new post starts as a draft with a temporary address (`new-post-…`). A draft is visible to
 the logged-in owner only; everyone else, Google included, gets a real 404 — so the editor

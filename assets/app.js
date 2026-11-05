@@ -567,15 +567,15 @@ class Component extends DCLogic {
     const j=t.lastIndexOf(' | '); return (t.length>65&&j>-1&&t.slice(j+3).toLowerCase().indexOf(this.brandName().toLowerCase())>-1)?t.slice(0,j):t; }
   // "Title | Brand" unless too long for Google (~65 chars) — mirrors aok_fit_brand in api/seo-lib.php
   fitBrand(title,brand){ const t=title+' | '+brand; return t.length>65&&title?title:t; }
-  pageDescription(pg){ if((pg.metaDescription||'').trim()) return pg.metaDescription.trim(); const blocks=((this.state.data.blocks||{})['page:'+pg.id])||[]; const parts=[];
+  pageDescription(pg){ if((pg.metaDescription||'').trim()) return pg.metaDescription.trim(); if((pg.subtitle||'').trim()) return this.cut(this.txt(pg.subtitle),158); const blocks=((this.state.data.blocks||{})['page:'+pg.id])||[]; const parts=[];
     blocks.forEach(b=>{ ['text','caption'].forEach(f=>{ if(b&&typeof b[f]==='string'&&b[f]) parts.push(this.txt(b[f])); }); }); const t=parts.join(' ').trim();
     return t?this.cut(t,158):((this.state.data.seo&&this.state.data.seo.home&&this.state.data.seo.home.metaDescription)||''); }
   headMeta(){ const d=this.state.data, r=this.state.route, brand=this.brandName(); const base=String(d.siteUrl||'https://www.analysisofkarma.com').replace(/\/$/,'').replace(/^http:/,'https:');
     const m={title:brand,description:(d.seo.home&&d.seo.home.metaDescription)||'',robots:'index, follow',canonical:base+this.routePath()};
     if(['home','about','services','meditation','blog','contact','faq'].indexOf(r)>-1&&!(r==='blog'&&this.state.postId)){ const sc=d.seo[r]||{}; m.title=sc.title||brand; if(r!=='blog') m.title=this.withLocation(m.title); if(sc.metaDescription) m.description=sc.metaDescription; m.robots=sc.robots||'index, follow'; if(r==='faq'&&!sc.title) m.title=this.txt(d.faqPage.hero.title)+' | '+brand; }
     else if(r==='service'){ const s=(d.services||[]).find(x=>x.id===this.state.serviceId)||{}; m.title=(s.seoTitle||'').trim()||this.withLocation(this.txt(s.title)+' | '+brand); m.description=(s.seoDescription||'').trim()||this.cut(this.txt(s.desc),158); if(s.canonical) m.canonical=/^https?:/.test(s.canonical)?s.canonical:base+'/'+String(s.canonical).replace(/^\//,''); if(s.noindex) m.robots='noindex, follow'; }
-    else if(r==='blog'&&this.state.postId){ const p=(d.blog||[]).find(x=>x.id===this.state.postId)||{}; m.title=String(p.seoTitle||'').trim()||this.fitBrand(this.txt(p.title),brand); m.description=this.cut(this.txt(p.excerpt),158); m.robots=p.robots||'index, follow'; if(p.canonical) m.canonical=/^https?:/.test(p.canonical)?p.canonical:base+'/'+String(p.canonical).replace(/^\//,''); }
-    else if(r==='page'){ const pg=(d.pages||[]).find(x=>x.id===this.state.pageId)||{}; m.title=this.fitBrand(this.txt(pg.title),brand); m.description=this.pageDescription(pg); }
+    else if(r==='blog'&&this.state.postId){ const p=(d.blog||[]).find(x=>x.id===this.state.postId)||{}; m.title=String(p.seoTitle||'').trim()||this.fitBrand(this.txt(p.title),brand); m.description=this.cut(this.txt(String(p.excerpt||'').trim()||String(p.subtitle||'').trim()||this.seoFirstPara(p.body)),158); m.robots=p.robots||'index, follow'; if(p.canonical) m.canonical=/^https?:/.test(p.canonical)?p.canonical:base+'/'+String(p.canonical).replace(/^\//,''); }
+    else if(r==='page'){ const pg=(d.pages||[]).find(x=>x.id===this.state.pageId)||{}; m.title=String(pg.seoTitle||'').trim()||this.fitBrand(this.txt(pg.title),brand); m.description=this.pageDescription(pg); if(pg.noindex) m.robots='noindex, follow'; }
     // the location pages (mirrors aok_meta in PHP): without these the browser replaced the server's
     // title with the bare brand name as soon as the page loaded
     else if(r==='locations'){ const lp=(d.locationsPage&&d.locationsPage.hero)||{}; m.title=this.fitBrand(this.txt(lp.title||'Locations'),brand); m.description=this.cut(this.txt(lp.sub||''),158); }
@@ -765,7 +765,8 @@ class Component extends DCLogic {
   renderCustomPage(){ const h=React.createElement,P=this.P,d=this.state.data; const pg=(d.pages||[]).find(p=>p.id===this.state.pageId);
     if(!pg) return this.renderNotFound();
     const showHero=pg.showTitle!==false;
-    return h('main',{style:{animation:'aokfade .4s',minHeight:'46vh'}}, showHero? h('section',{className:'aok-pagehero'}, this.wrap(h('div',{style:{padding:'44px 0 48px',textAlign:'center'}}, this.etext('pages.'+(d.pages.indexOf(pg))+'.title',{tag:'h1',style:{font:'800 clamp(30px,4.2vw,52px) '+this.HEAD,margin:0,color:P.maroon,letterSpacing:'-.015em'}}))), h('div',{className:'aok-hairline'})):null); }
+    return h('main',{style:{animation:'aokfade .4s',minHeight:'46vh'}}, showHero? h('section',{className:'aok-pagehero'}, this.wrap(h('div',{style:{padding:'44px 0 48px',textAlign:'center'}}, this.etext('pages.'+(d.pages.indexOf(pg))+'.title',{tag:'h1',style:{font:'800 clamp(30px,4.2vw,52px) '+this.HEAD,margin:0,color:P.maroon,letterSpacing:'-.015em'}}),
+        String(pg.subtitle||'').trim()? h('p',{style:{font:'400 clamp(16px,1.6vw,19px)/1.6 Plus Jakarta Sans',color:P.muted,margin:'14px auto 0',maxWidth:760}},pg.subtitle):null)), h('div',{className:'aok-hairline'})):null); }
 
   renderNotFound(){ const h=React.createElement,P=this.P;
     return h('main',{style:{padding:'90px 24px',textAlign:'center'}}, h('h1',{style:{font:'800 28px '+this.HEAD,color:P.maroon}},'Page not found'), h('p',{style:{color:P.muted,marginTop:10}}, h('a',this.linkTo('/',()=>this.go('home'),{style:{color:P.red,cursor:'pointer'}}),'← Back home'))); }
@@ -1287,7 +1288,8 @@ class Component extends DCLogic {
       h('section',{style:{padding:'40px 0 0'}}, this.wrap([
         h('nav',{key:'b','aria-label':'Breadcrumb',style:{font:'500 13px '+this.HEAD,color:P.muted,marginBottom:18}},
           crumb('Home','/',()=>this.go('home')),' › ',crumb('Locations','/locations',()=>this.go('locations')),' › ',h('span',null,l.title)),
-        h('h1',{key:'h',style:{font:'600 clamp(30px,4.4vw,48px)/1.1 '+this.SERIF,color:P.maroon,margin:'0 0 18px'}},l.title)])),
+        h('h1',{key:'h',style:{font:'600 clamp(30px,4.4vw,48px)/1.1 '+this.SERIF,color:P.maroon,margin:'0 0 18px'}},l.title),
+        String(l.subtitle||'').trim()? h('p',{key:'s',style:{font:'400 clamp(16px,1.6vw,19px)/1.6 Plus Jakarta Sans',color:P.muted,margin:'-6px 0 18px',maxWidth:760}},l.subtitle):null])),
 
       // A hub with its own page text is that text: the direct-answer box, the question headings,
       // the comparison table and the FAQ all live in it (mirrors aok_location_page_html in PHP).
@@ -1384,7 +1386,8 @@ class Component extends DCLogic {
       h('section',{className:'aok-pagehero'}, h('div',{className:'aok-svc-top aok-post-hero'}, h('div',{className:'aok-post-head'},
         h('a',this.linkTo('/blog',()=>this.setState({postId:null}),{style:{cursor:'pointer',font:'600 14px '+this.HEAD,color:'#8A6A2E'},className:'aok-tap'}),'← '+this.t('blog')),
         h('div',{style:{font:'600 12px '+this.HEAD,letterSpacing:'.14em',textTransform:'uppercase',color:'#8A6A2E',margin:'24px 0 14px'}}, this.fmtDate(p.date),' · ',mins+' min read',' · By ',h('a',{href:'#about-the-astrologer',className:'aok-tap',style:{color:'#8A6A2E'}},name)),
-        h('h1',{className:'aok-post-h1',style:{font:'800 clamp(28px,calc(1.25rem + 2vw),48px)/1.12 '+this.HEAD,color:P.maroon,margin:0,letterSpacing:'-.015em'}}, p.title))), h('div',{className:'aok-hairline'})),
+        h('h1',{className:'aok-post-h1',style:{font:'800 clamp(28px,calc(1.25rem + 2vw),48px)/1.12 '+this.HEAD,color:P.maroon,margin:0,letterSpacing:'-.015em'}}, p.title),
+        String(p.subtitle||'').trim()? h('p',{className:'aok-post-sub',style:{font:'400 clamp(16px,1.6vw,19px)/1.6 Plus Jakarta Sans',color:P.muted,margin:'14px 0 0',maxWidth:760}},p.subtitle):null)), h('div',{className:'aok-hairline'})),
       h('section',{className:'aok-svc-upper'}, h('div',{className:'aok-svc-top'},
         h('article',{className:'aok-svc-body aok-post-body'},
           h('div',{className:'aok-card',style:{padding:8,marginBottom:36}}, h('div',{style:{aspectRatio:p.image?'16/8':'16/9',borderRadius:14,overflow:'hidden',background:p.image?'transparent':'linear-gradient(135deg,#FFFFFF 0%,#F4EEE3 55%,#E9DCC2 100%)'}}, this.postImg(p)?h('img',{decoding:'async',src:this.postImg(p),alt:p.focusKeyword||p.title,onError:e=>{ e.currentTarget.style.display='none'; },style:{width:'100%',height:'100%',objectFit:'cover',display:'block'}}):h('div',{style:{height:'100%',display:'flex',alignItems:'center',justifyContent:'center'}},this.mark(64)))),
@@ -1755,8 +1758,10 @@ class Component extends DCLogic {
   cloneBlock(b){ const nb=JSON.parse(JSON.stringify(b)); const walk=o=>{ if(o&&typeof o==='object'){ if(typeof o.id==='string') o.id=this.uid(); for(const k in o) walk(o[k]); } }; walk(nb); return nb; }
   // ----- custom pages + menu helpers -----
   slugify(s){ return String(s||'').toLowerCase().trim().replace(/[^a-z0-9]+/g,'-').replace(/^-+|-+$/g,'').slice(0,60)||'page'; }
-  uniqueSlug(base,exceptId){ const d=this.state.data; const reserved=['','admin','about','services','meditation','blog','contact','home','p','api','assets','uploads','sitemap.xml','robots.txt']; let s0=this.slugify(base),s=s0,i=1; const taken=x=>reserved.indexOf(x)>-1||(d.pages||[]).some(p=>p.slug===x&&p.id!==exceptId); while(taken(s)){ s=s0+'-'+(++i); } return s; }
-  createPage(){ this.pushHist(); const id=this.uid(); const t='New Page'; const pages=[...(this.state.data.pages||[]),{id,slug:this.uniqueSlug(t),title:t,showTitle:true}]; this.save({...this.state.data,pages}); this.flash('Page created — click Design to build it'); this.forceUpdate(); return id; }
+  // the first part of an address the site itself answers: a custom page there would never be shown
+  reservedSlugs(){ return ['','admin','about','services','meditation','blog','contact','faq','locations','home','p','api','assets','uploads','render.php','index.html','sitemap.xml','sitemap-static.xml','robots.txt','llms.txt','llms-full.txt','rss.xml']; }
+  uniqueSlug(base,exceptId){ const d=this.state.data; const reserved=this.reservedSlugs(); let s0=this.slugify(base)||'page',s=s0,i=1; const taken=x=>reserved.indexOf(x)>-1||(d.pages||[]).some(p=>p.slug===x&&p.id!==exceptId); while(taken(s)){ s=s0+'-'+(++i); } return s; }
+  createPage(){ this.pushHist(); const id=this.uid(); const t='New Page'; const pages=[...(this.state.data.pages||[]),{id,slug:this.uniqueSlug(t,id),slugAuto:true,title:t,showTitle:true}]; this.save({...this.state.data,pages}); this._pgOpen={...(this._pgOpen||{}),[id]:true}; this.flash('Page created \u2014 give it a heading, then click Design to build it'); this.forceUpdate(); return id; }
   clonePageFrom(srcScope,title){ this.pushHist(); const id=this.uid(); const t=(title||'Page')+' (copy)'; const d=this.state.data; const cloned=((d.blocks&&d.blocks[srcScope])||[]).map(b=>this.cloneBlock(b)); const pages=[...(d.pages||[]),{id,slug:this.uniqueSlug(t),title:t,showTitle:true}]; const blocks={...(d.blocks||{})}; blocks['page:'+id]=cloned; this.save({...d,pages,blocks}); this.flash('Page cloned ('+cloned.length+' blocks copied)'); this.forceUpdate(); return id; }
   deletePage(id){ if(!confirm('Delete this page and all its content? This cannot be undone.'))return; this.pushHist(); const d=this.state.data; const pages=(d.pages||[]).filter(p=>p.id!==id); const blocks={...(d.blocks||{})}; delete blocks['page:'+id]; delete blocks['page:'+id+'::top']; const nav={...(d.nav||{})}; nav.items=((nav.items)||[]).filter(it=>!(it.type==='page'&&it.value===id)); this.save({...d,pages,blocks,nav}); this.setState({route:'admin',adminTab:'pages',pageId:null,editMode:false}); this.flash('Page deleted'); }
   navAdd(){ this.pushHist(); const items=[...((this.state.data.nav&&this.state.data.nav.items)||[]),{id:this.uid(),label:'New link',type:'route',value:'home'}]; this.save(this.setIn(this.state.data,'nav.items',items)); }
@@ -2253,7 +2258,7 @@ class Component extends DCLogic {
         this.btn('Save new password',null,{variant:'solid',style:{width:'100%',justifyContent:'center'}}),
         h('div',{style:{textAlign:'center',marginTop:14}}, h('button',{type:'button',onClick:()=>this.logout(),style:{background:'none',border:0,cursor:'pointer',font:'600 13px Plus Jakarta Sans',color:P.muted}},'Log out'))), this.renderToast()); }
   renderAdminShell(){ const h=React.createElement,P=this.P; if(this._mustChange) return this.renderMustChange();
-    const tabs=[['dashboard','\u25C8 Dashboard'],['pages','\u270e Visual Editor'],['services','\u2609 Services'],['blog','\u270d Blog'],['leads','\u2709 Leads'],['seo','\u2191 SEO'],['schema','{ } Schema'],['submit','\u2691 Search Engines'],['local','\u2316 Local & Business'],['person','\u2726 Practitioner'],['ai','\u25ce AI & GEO'],['rewrite','\u270D AI Content'],['redirects','\u21aa Redirects'],['health','\u271a SEO Health'],['settings','\u2699 Settings']];
+    const tabs=[['dashboard','\u25C8 Dashboard'],['pages','\u270e Visual Editor'],['services','\u2609 Services'],['blog','\u270d Blog'],['locations','\u2302 Locations'],['leads','\u2709 Leads'],['seo','\u2191 SEO'],['schema','{ } Schema'],['submit','\u2691 Search Engines'],['local','\u2316 Local & Business'],['person','\u2726 Practitioner'],['ai','\u25ce AI & GEO'],['rewrite','\u270D AI Content'],['redirects','\u21aa Redirects'],['health','\u271a SEO Health'],['settings','\u2699 Settings']];
     const unread=this.leadsList().filter(l=>!l.read).length;
     return h('div',{style:{minHeight:'100vh',display:'grid',gridTemplateColumns:'260px 1fr',background:P.bg}},
       h('aside',{style:{background:P.maroonD,color:P.cream,padding:'24px 16px',position:'sticky',top:0,height:'100vh',overflowY:'auto'}},
@@ -2271,7 +2276,7 @@ class Component extends DCLogic {
     let ctrl; if(opts.options) ctrl=h('select',{...common},...opts.options.map(o=>h('option',{key:o.value??o,value:o.value??o},o.label??o))); else if(opts.multiline) ctrl=h('textarea',{...common,rows:opts.rows||4}); else ctrl=h('input',{...common,type:opts.type||'text'});
     return h('label',{key:path,style:{display:'block',marginBottom:opts.mb??16}}, opts.label?h('span',{style:{display:'block',font:'600 12.5px '+this.HEAD,color:P.maroon,marginBottom:6,letterSpacing:'.02em'}},opts.label, opts.hint?h('span',{style:{fontWeight:400,color:P.muted}},'  \u2014 '+opts.hint):null):null, ctrl); }
 
-  renderAdminTab(){ switch(this.state.adminTab){ case 'pages':return this.tabPages(); case 'services':return this.tabServices(); case 'blog':return this.tabBlog(); case 'leads':return this.tabLeads(); case 'seo':return this.tabSeo(); case 'schema':return this.tabSchema(); case 'submit':return this.tabSubmit(); case 'local':return this.tabLocal(); case 'person':return this.tabPerson(); case 'ai':return this.tabAi(); case 'rewrite':return this.tabRewrite(); case 'redirects':return this.tabRedirects(); case 'health':return this.tabHealth(); case 'settings':return this.tabSettings(); default:return this.tabDashboard(); } }
+  renderAdminTab(){ switch(this.state.adminTab){ case 'pages':return this.tabPages(); case 'services':return this.tabServices(); case 'blog':return this.tabBlog(); case 'locations':return this.tabLocations(); case 'leads':return this.tabLeads(); case 'seo':return this.tabSeo(); case 'schema':return this.tabSchema(); case 'submit':return this.tabSubmit(); case 'local':return this.tabLocal(); case 'person':return this.tabPerson(); case 'ai':return this.tabAi(); case 'rewrite':return this.tabRewrite(); case 'redirects':return this.tabRedirects(); case 'health':return this.tabHealth(); case 'settings':return this.tabSettings(); default:return this.tabDashboard(); } }
 
   // ----- dashboard -----
   tabDashboard(){ const h=React.createElement,P=this.P,d=this.state.data; const unread=this.leadsList().filter(l=>!l.read).length;
@@ -2298,6 +2303,19 @@ class Component extends DCLogic {
     const navItems=(d.nav&&d.nav.items)||[];
     const fldLbl=t=>h('span',{style:{display:'block',font:'600 11.5px '+this.HEAD,color:P.maroon,marginBottom:5,letterSpacing:'.02em'}},t);
     const slugBlur=(i,raw)=>{ const want=this.uniqueSlug(raw||custom[i].title,custom[i].id); if(want!==custom[i].slug) this.commit('pages.'+i+'.slug',want); };
+    // a page's panel is open while it still has no real heading or address, or when opened by hand
+    const pgOpen=p=>{ const o=(this._pgOpen||{})[p.id]; return o!=null?o:(!!p.slugAuto||(p.title||'')==='New Page'); };
+    const pgSet=(i,o)=>this.commit('pages.'+i,{...custom[i],...o});
+    const pgBody=p=>{ const b=(((d.blocks||{})['page:'+p.id])||[]).find(x=>x&&(x.type==='text'||x.type==='heading')&&this.txt(x.text||x.title||'')); return b?this.txt(b.text||b.title||''):''; };
+    const pgSeo=(p,i)=>({ key:'page:'+p.id, prefix:'/', placeholderHeading:'New Page',
+      heading:p.title, setHeading:v=>pgSet(i,p.slugAuto&&String(v).trim()?{title:v,slug:this.uniqueSlug(v,p.id)}:{title:v}),
+      sub:p.subtitle, setSub:v=>pgSet(i,{subtitle:v}), subLabel:'Subheading', subHint:'one line under the heading, in the title banner',
+      slug:p.slug, setSlug:(v)=>pgSet(i,{slug:v,slugAuto:false}), follows:!!p.slugAuto, live:true,
+      gTitle:p.seoTitle, setGTitle:v=>pgSet(i,{seoTitle:v}), autoTitle:this.fitBrand(this.txt(p.title||''),this.brandName()),
+      gDesc:p.metaDescription, setGDesc:v=>pgSet(i,{metaDescription:v}), autoDesc:this.pageDescription(p),
+      keyword:p.focusKeyword, setKeyword:v=>pgSet(i,{focusKeyword:v}),
+      noindex:!!p.noindex, setNoindex:on=>pgSet(i,{noindex:on}),
+      body:pgBody(p), taken:sl=>custom.some(x=>x.id!==p.id&&x.slug===sl), reserved:sl=>this.reservedSlugs().indexOf(sl)>-1 });
     // ---- Custom Pages manager ----
     const cloneOpts=builtins.map(b=>['route:'+b[0],'Clone: '+b[1]]).concat(custom.map(p=>['page:'+p.id,'Clone: '+(p.title||'Untitled')]));
     const pagesMgr=this.card(h('div',null,
@@ -2312,9 +2330,10 @@ class Component extends DCLogic {
         h('select',{value:this._cloneSrc||cloneOpts[0][0],onChange:e=>{this._cloneSrc=e.target.value;this.forceUpdate();},style:{padding:'10px 12px',borderRadius:9,border:'1px solid '+P.line,background:P.white,font:'400 14px Plus Jakarta Sans',cursor:'pointer'}}, ...cloneOpts.map(o=>h('option',{key:o[0],value:o[0]},o[1]))),
         this.btn('Create the copy',()=>{ const src=this._cloneSrc||cloneOpts[0][0]; const isPage=src.indexOf('page:')===0; const scope=isPage?src:src.replace('route:',''); const title=isPage?((custom.find(p=>'page:'+p.id===src)||{}).title||'Page'):(builtins.find(b=>b[0]===scope)||[,'Page'])[1]; const id=this.clonePageFrom(scope,title); this.setState({_clonePick:false}); },{variant:'solid',pad:'10px 16px',style:{fontSize:13}})):null,
       custom.length? h('div',{style:{display:'grid',gap:12}}, ...custom.map((p,i)=>h('div',{key:p.id,style:{border:'1px solid '+P.line,borderRadius:12,padding:14,background:P.white}},
-        h('div',{style:{display:'grid',gridTemplateColumns:'1fr 1fr',gap:12,marginBottom:10}},
-          h('label',null,fldLbl('Page title'),h('input',{value:p.title||'',onChange:e=>this.commit('pages.'+i+'.title',e.target.value),style:{width:'100%',padding:'10px 12px',borderRadius:9,border:'1px solid '+P.line,background:P.white,font:'400 14px Plus Jakarta Sans'}})),
-          h('label',null,fldLbl('Web address (slug)'),h('div',{style:{display:'flex',alignItems:'center',gap:4}}, h('span',{style:{font:'500 13px Plus Jakarta Sans',color:P.muted}},'/'), h('input',{defaultValue:p.slug,key:p.slug,onBlur:e=>slugBlur(i,e.target.value),style:{width:'100%',padding:'10px 12px',borderRadius:9,border:'1px solid '+P.line,background:P.white,font:'400 14px Plus Jakarta Sans'}})))),
+        h('div',{style:{display:'flex',justifyContent:'space-between',alignItems:'center',gap:10,flexWrap:'wrap',marginBottom:10}},
+          h('div',{style:{minWidth:0}}, h('b',{style:{font:'700 15px '+this.HEAD,color:P.maroon}},p.title||'Untitled'), h('div',{style:{font:'500 12.5px ui-monospace,monospace',color:P.red,marginTop:2}},'/'+(p.slug||''))),
+          h('button',{onClick:()=>{ this._pgOpen={...(this._pgOpen||{}),[p.id]:!pgOpen(p)}; this.forceUpdate(); },style:{...this.iconBtn(),width:'auto',padding:'0 12px',height:32,font:'600 12.5px '+this.HEAD}},pgOpen(p)?'\u25be Close':'\u270e Page & SEO')),
+        pgOpen(p)? h('div',{style:{marginBottom:12}}, this.seoPanel(pgSeo(p,i))):null,
         h('div',{style:{display:'flex',gap:8,alignItems:'center',flexWrap:'wrap',justifyContent:'space-between'}},
           h('label',{style:{display:'flex',alignItems:'center',gap:7,font:'500 13px Plus Jakarta Sans',color:P.ink,cursor:'pointer'}}, h('input',{type:'checkbox',checked:p.showTitle!==false,onChange:e=>this.commit('pages.'+i+'.showTitle',e.target.checked)}),'Show title banner at top'),
           h('div',{style:{display:'flex',gap:8,flexWrap:'wrap'}},
@@ -2379,6 +2398,61 @@ class Component extends DCLogic {
   svcNewForm(){ return {title:'',slug:'',slugManual:false,icon:'✧',price:'$100 CAD',priceUnit:'',desc:'',answer:'',method:'',questions:'',image:null,
     steps:this.svcDefaultSteps().map(x=>{ const m=this.mdLabel(x); return {t:m[0],d:m[1]}; }),faqs:[{q:'',a:''},{q:'',a:''},{q:'',a:''}]}; }
   svcSlugTaken(slug,exceptId){ const d=this.state.data, sl=this.serviceSlugs(d.services||[]); return (d.services||[]).some(x=>x.id!==exceptId&&sl[x.id]===slug); }
+
+  // ---------- PAGE & SEO PANEL (shared by blog posts, services, custom pages and location pages) ----------
+  // One set of boxes for everything a page needs to be found: heading, subheading, page address, Google
+  // title and description, focus keyword, and whether Google may show it. Sensible defaults fill in
+  // what is left empty, and a checklist under the boxes says what still needs doing.
+  // a: { key, prefix, heading,setHeading, sub,setSub,subLabel,subHint, slug,setSlug(v,manual), follows,
+  //      live, gTitle,setGTitle,autoTitle, gDesc,setGDesc,autoDesc,descLabel, keyword,setKeyword,
+  //      noindex,setNoindex, body, taken(slug), reserved(slug), placeholderHeading }
+  seoTokens(t){ return String(t||'').toLowerCase().replace(/&/g,' and ').split(/[^a-z0-9ऀ-ॿ]+/).filter(w=>w.length>=3); }
+  seoHas(text,kw){ const ks=this.seoTokens(kw); if(!ks.length) return false; const t=' '+this.seoTokens(text).join(' ')+' ';
+    return ks.every(k=>t.indexOf(' '+k)>-1||t.indexOf(k.slice(0,5))>-1); }
+  seoFirstPara(md){ const b=this.mdBlocks(String(md||'')).find(x=>x[0]==='p'||x[0]==='answer'); return b?this.txt(String(b[1]).replace(/\*\*[^*]+\*\*\s*/,'')):''; }
+  seoPanel(a){ const h=React.createElement,P=this.P;
+    const base=(this.state.data.siteUrl||'https://www.analysisofkarma.com').replace(/\/$/,'');
+    const gT=String(a.gTitle||'').trim()||a.autoTitle||'', gD=String(a.gDesc||'').trim()||a.autoDesc||'';
+    const sl=String(a.slug||''), kw=String(a.keyword||'').trim();
+    const temp=/^new-(post|page)(-|$)/.test(sl);
+    const lab=(t,hint,extra)=>h('span',{style:this.lbl()},t,hint?h('span',{style:{fontWeight:400,color:P.muted}},' — '+hint):null,extra||null);
+    const count=(n,lo,hi)=>h('span',{style:{fontWeight:700,color:n>=lo&&n<=hi?P.ok:n?'#a06a12':P.muted,marginLeft:6}},n+' / '+hi);
+    const inp=(val,on,o)=>h(o&&o.multi?'textarea':'input',{value:val||'',placeholder:(o&&o.ph)||'',rows:o&&o.multi?(o.rows||2):undefined,onChange:e=>on(e.target.value),onBlur:o&&o.blur,style:{...this.inpStyle(),...(o&&o.big?{font:'600 17px '+this.HEAD}:{})}});
+    // the checklist: true = done, false = to do, null = for information
+    const checks=[
+      [!!String(a.heading||'').trim()&&String(a.heading).trim()!==a.placeholderHeading, 'The page has a heading'+(a.placeholderHeading&&String(a.heading||'').trim()===a.placeholderHeading?' (still “'+a.placeholderHeading+'”)':'')],
+      [!!sl&&!temp&&!(a.reserved&&a.reserved(sl))&&!(a.taken&&a.taken(sl)), !sl?'The page needs an address':temp?'The address is still the temporary one':(a.reserved&&a.reserved(sl))?'This address is used by the site itself — choose another':(a.taken&&a.taken(sl))?'Another page already uses this address':'The address is set and readable'],
+      [sl.length<=60, 'The address is short (60 characters or fewer)'],
+      [gT.length>=30&&gT.length<=65, 'Google title is 30–65 characters ('+gT.length+')'],
+      [gD.length>=120&&gD.length<=160, 'Google description is 120–160 characters ('+gD.length+')'],
+      [!!kw, kw?'Focus keyword: “'+kw+'”':'Add a focus keyword — the phrase people type to find this page'],
+    ];
+    if(kw){ checks.push([this.seoHas(a.heading,kw),'Keyword in the heading'],[this.seoHas(gT,kw),'Keyword in the Google title'],[this.seoHas(gD,kw),'Keyword in the Google description'],[this.seoHas(sl.replace(/-/g,' '),kw),'Keyword in the address']);
+      if(a.body!=null) checks.push([this.seoHas(a.body,kw),'Keyword in the first paragraph']); }
+    checks.push([null, a.noindex?'Hidden from Google (switch below)':a.live?'Live, and Google may show it':'Not public yet']);
+    const done=checks.filter(c=>c[0]===true).length, todo=checks.filter(c=>c[0]===false).length;
+    return this.card(h('div',{style:{display:'grid',gap:14}},
+      h('div',{style:{display:'flex',justifyContent:'space-between',alignItems:'baseline',gap:12,flexWrap:'wrap'}},
+        h('div',{style:{font:'700 16px '+this.HEAD,color:P.maroon}},'Page & SEO'),
+        h('span',{style:{padding:'3px 11px',borderRadius:999,font:'700 12px '+this.HEAD,background:todo?'#fbf1dc':'#e4f2e7',color:todo?'#8A5A12':P.ok}},todo?todo+' to do · '+done+' done':'✓ All '+done+' SEO checks pass')),
+      h('label',null,lab('Heading (H1)','the main title on the page'),inp(a.heading,a.setHeading,{big:true,ph:a.placeholderHeading||''})),
+      a.setSub? h('label',null,lab(a.subLabel||'Subheading',a.subHint||'one line under the heading'),inp(a.sub,a.setSub,{multi:true,rows:2})):null,
+      h('label',null,lab('Page address',a.live&&!a.follows?'changing it leaves a redirect from the old address':a.follows?'follows the heading until you edit it here':'not public yet'),
+        h('div',{style:{display:'flex',alignItems:'center',gap:6}}, h('span',{style:{font:'500 13px ui-monospace,monospace',color:P.muted,whiteSpace:'nowrap'}},a.prefix),
+          h('input',{value:sl,onChange:e=>a.setSlug(e.target.value,true),onBlur:e=>{ const v=this.serviceSlugify(e.target.value); if(v&&v!==sl) a.setSlug(v,true); },style:this.inpStyle()}))),
+      h('div',{style:{display:'grid',gridTemplateColumns:'minmax(0,1fr) minmax(0,1fr)',gap:14}},
+        h('label',null,lab('Google title',null,count(gT.length,30,65)),inp(a.gTitle,a.setGTitle,{ph:a.autoTitle})),
+        h('label',null,lab('Focus keyword','what people type into Google'),inp(a.keyword,a.setKeyword,{ph:'e.g. kundli reading surrey'}))),
+      h('label',null,lab(a.descLabel||'Google description',null,count(gD.length,120,160)),inp(a.gDesc,a.setGDesc,{multi:true,rows:2,ph:a.autoDesc})),
+      h('div',{style:{border:'1px solid '+P.line,borderRadius:12,padding:'12px 14px',background:'#fff'}},
+        h('div',{style:{font:'600 11px '+this.HEAD,letterSpacing:'.12em',textTransform:'uppercase',color:P.muted,marginBottom:6}},'Google preview'),
+        h('div',{style:{font:'400 13px Arial,sans-serif',color:'#202124',overflowWrap:'anywhere'}},base.replace(/^https?:\/\//,'')+(a.prefix+sl).replace(/\/+$/,'').replace(/\//g,' › ')),
+        h('div',{style:{font:'400 18px Arial,sans-serif',color:'#1a0dab',margin:'3px 0'}},this.cut(gT,62)||'(no title)'),
+        h('div',{style:{font:'400 13.5px/1.5 Arial,sans-serif',color:'#4d5156'}},this.cut(gD,158)||'(no description)')),
+      h('div',{style:{display:'grid',gap:5}}, ...checks.map((c,i)=>h('div',{key:i,style:{display:'flex',gap:9,alignItems:'baseline',font:'500 13px/1.45 Plus Jakarta Sans',color:c[0]===false?'#8A5A12':P.ink}},
+        h('span',{style:{width:16,flexShrink:0,textAlign:'center',fontWeight:800,color:c[0]===true?P.ok:c[0]===false?'#c98a1a':P.muted}},c[0]===true?'✓':c[0]===false?'○':'i'),c[1]))),
+      a.setNoindex? h('label',{style:{display:'flex',gap:10,alignItems:'center',font:'500 14px Plus Jakarta Sans',color:P.ink}},
+        h('input',{type:'checkbox',checked:!a.noindex,onChange:e=>a.setNoindex(!e.target.checked),style:{width:18,height:18}}),'Show this page in Google and AI search'):null)); }
 
   // ---------- SERVICES MANAGER (admin) ----------
   tabServices(){ const h=React.createElement,P=this.P,d=this.state.data; const sl=this.serviceSlugs(d.services||[]);
@@ -2454,10 +2528,20 @@ class Component extends DCLogic {
             bi(m?m[0]:'',v=>ops.setLabeled(b[2],j,v,m?m[1]:li),{k:'l'+b[2]+'.'+j,ph:'Label (optional)'}), bi(m?m[1]:li,v=>m?ops.setLabeled(b[2],j,m[0],v):ops.setItem(b[2],j,v),{k:'v'+b[2]+'.'+j,multi:true}),
             h('button',{onClick:()=>ops.moveItem(b[2],j,-1),title:'Move up',style:{...this.iconBtn(),width:30,height:30}},'↑'), x(()=>ops.setItem(b[2],j,''))); }), this.btn(b[0]==='ol'?'+ Add step':'+ Add point',()=>ops.addItem(b[2],b[1].length-1),{variant:'outline',pad:'6px 12px'}));
         return h('div',{key:b[2],style:{marginBottom:6}},bi(b[0]==='p'?b[1]:this.mdSerialize([[b[0],b[1]]]),v=>ops.setText(b[2],v,true),{k:'t'+b[2],multi:true,rows:3})); }), !bl.length?this.btn('+ Add paragraph',()=>ops.addPara(sec.at),{variant:'outline',pad:'6px 12px'}):null); };
+    const all=this.state.data.services||[], slugs=this.serviceSlugs(all);
+    const seo=this.seoPanel({ key:'service:'+s.id, prefix:'/services/',
+      heading:s.title, setHeading:v=>upd(i,'title',v),
+      sub:s.desc, setSub:v=>upd(i,'desc',v), subLabel:'Subheading', subHint:'the opening line under the heading, and the text on the service cards',
+      slug:s.slug||slugs[s.id], setSlug:v=>upd(i,'slug',v), follows:false, live:this.serviceIsLive(s),
+      gTitle:s.seoTitle, setGTitle:v=>upd(i,'seoTitle',v), autoTitle:this.withLocation(this.txt(s.title)+' | '+this.brandName()),
+      gDesc:s.seoDescription, setGDesc:v=>upd(i,'seoDescription',v), autoDesc:this.cut(this.txt(s.desc||''),158),
+      keyword:s.focusKeyword, setKeyword:v=>upd(i,'focusKeyword',v),
+      noindex:!!s.noindex, setNoindex:on=>upd(i,'noindex',on),
+      body:ansTxt||this.seoFirstPara(s.detail), taken:sl=>all.some(x=>x.id!==s.id&&slugs[x.id]===sl) });
     return h('div',{style:{marginTop:16,borderTop:'1px solid '+P.line,paddingTop:16,display:'grid',gap:14}},
-      h('div',{style:{display:'grid',gridTemplateColumns:'90px 2fr 1fr 1fr',gap:12}},
+      seo,
+      h('div',{style:{display:'grid',gridTemplateColumns:'90px 1fr 1fr',gap:12}},
         h('label',null,L('Icon'),h('select',{value:s.icon,onChange:e=>upd(i,'icon',e.target.value),style:{...this.inpStyle(),fontSize:18,textAlign:'center'}},...icons.map(ic=>h('option',{key:ic,value:ic},ic)))),
-        h('label',null,L('Title'),h('input',{value:s.title,onChange:e=>upd(i,'title',e.target.value),style:this.inpStyle()})),
         h('label',null,L('Rate'),h('input',{value:s.price||'',onChange:e=>upd(i,'price',e.target.value),style:this.inpStyle()})),
         h('label',null,L('Rate unit'),h('input',{value:s.priceUnit||'',placeholder:(this.state.data.about.pricing||{}).unit||'per hour',onChange:e=>upd(i,'priceUnit',e.target.value),style:this.inpStyle()}))),
       h('div',{style:{display:'grid',gridTemplateColumns:'1fr 1fr',gap:12}},
@@ -2467,7 +2551,6 @@ class Component extends DCLogic {
         h('label',null,L('Primary chart factors','comparison table on /services \u2014 leave empty to keep this service out of it'),h('input',{value:s.chartFactors||'',placeholder:'Lagna, D-9, Nakshatras, Vimshottari Dasha',onChange:e=>upd(i,'chartFactors',e.target.value),style:this.inpStyle()})),
         h('label',null,L('Session format'),h('input',{value:s.sessionFormat||'',placeholder:'1-on-1 Zoom / WhatsApp',onChange:e=>upd(i,'sessionFormat',e.target.value),style:this.inpStyle()})),
         h('label',null,L('Duration'),h('input',{value:s.duration||'',placeholder:'60 Minutes',onChange:e=>upd(i,'duration',e.target.value),style:this.inpStyle()}))),
-      h('label',null,L('Short summary','the cards and the page’s opening line'),h('textarea',{value:s.desc||'',rows:2,onChange:e=>upd(i,'desc',e.target.value),style:this.inpStyle()})),
       h('div',{style:{display:'flex',alignItems:'center',gap:12,flexWrap:'wrap'}},L('Banner image', s.image?'uploaded':'the 3D banner is used'),this.serviceImg(s)?h('img',{src:this.serviceImg(s),alt:'',style:{width:128,height:72,objectFit:'cover',borderRadius:8},onError:e=>{ if(!this.svcImgFallback(e)) e.currentTarget.style.display='none'; }}):null,this.btn(s.image?'Replace image':'Upload image',pickImg,{variant:'outline',pad:'8px 14px'}),s.image?this.btn('Use the 3D banner',()=>upd(i,'image',null),{variant:'outline',pad:'8px 14px'}):null),
       h('div',{style:{display:'flex',justifyContent:'space-between',alignItems:'center',borderTop:'1px solid '+P.line,paddingTop:12}}, h('b',{style:{font:'700 14px '+this.HEAD,color:P.maroon}},'Page text'),
         h('button',{onClick:()=>{ this._svcMd={...(this._svcMd||{}),[s.id]:!md}; this.forceUpdate(); },style:{...this.iconBtn(),width:'auto',padding:'0 12px',font:'600 12.5px '+this.HEAD}},md?'☰ Section editor':'</> Edit as Markdown')),
@@ -2506,25 +2589,17 @@ class Component extends DCLogic {
         !(others.some(x=>'/services/'+sl[x.id]===to)||to==='/services')?h('input',{value:dl.to,placeholder:'/some-page or https://…',onChange:e=>{ this._svcDlg={...dl,to:e.target.value}; this.forceUpdate(); },style:{...this.inpStyle(),marginTop:8}}):null,
         h('div',{style:{display:'flex',gap:10,justifyContent:'flex-end',marginTop:20}}, this.btn('Cancel',close,{variant:'outline'}), this.btn(dl.mode==='delete'?'Delete and redirect':'Unpublish and redirect',go,{variant:'solid',style:dl.mode==='delete'?{background:P.bad,color:'#fff'}:{}})))); }
   // per-service page address, SEO title/description, canonical, 301 redirect and noindex (collapsed by default)
-  svcSeoPanel(s,i,upd){ const h=React.createElement,P=this.P; const open=(this._svcSeo||{})[s.id]; const url='/services/'+this.serviceSlugs(this.state.data.services)[s.id];
+  // The advanced settings left after the Page & SEO panel took the address, titles and keyword:
+  // canonical and 301 redirect, which most services never need.
+  svcSeoPanel(s,i,upd){ const h=React.createElement,P=this.P; const open=(this._svcSeo||{})[s.id];
     const toggle=()=>{ this._svcSeo={...(this._svcSeo||{}),[s.id]:!open}; this.forceUpdate(); };
-    const flags=[s.redirectTo?'\u21aa merged \u2192 '+s.redirectTo:null,s.canonical?'canonical \u2192 '+s.canonical:null,s.noindex?'hidden from Google':null].filter(Boolean);
-    const f=(k,label,hint,ph,multi)=>h('label',{key:k,style:{display:'block'}}, h('span',{style:this.lbl()},label,hint?h('span',{style:{fontWeight:400,color:P.muted}},'  \u2014 '+hint):null), h(multi?'textarea':'input',{value:s[k]||'',placeholder:ph||'',rows:multi?2:undefined,onChange:e=>upd(i,k,e.target.value),onBlur:k==='slug'?(e=>{ const v=this.serviceSlugify(e.target.value); if(v!==(s.slug||'')) upd(i,'slug',v); }):undefined,style:this.inpStyle()}));
-    const autoTitle=this.withLocation(this.txt(s.title)+' | '+this.brandName());
+    const flags=[s.redirectTo?'\u21aa merged \u2192 '+s.redirectTo:null,s.canonical?'canonical \u2192 '+s.canonical:null].filter(Boolean);
+    const f=(k,label,hint,ph)=>h('label',{key:k,style:{display:'block'}}, h('span',{style:this.lbl()},label,hint?h('span',{style:{fontWeight:400,color:P.muted}},'  \u2014 '+hint):null), h('input',{value:s[k]||'',placeholder:ph||'',onChange:e=>upd(i,k,e.target.value),style:this.inpStyle()}));
     return h('div',{style:{marginTop:14,borderTop:'1px solid '+P.line,paddingTop:12}},
-      h('div',{style:{display:'flex',alignItems:'center',gap:10,flexWrap:'wrap'}}, h('button',{onClick:toggle,style:{...this.iconBtn(),width:'auto',padding:'0 12px',font:'600 12.5px '+this.HEAD}},(open?'\u25be':'\u25b8')+' Page address, SEO & redirect'), h('a',{href:url,target:'_blank',style:{font:'500 12.5px ui-monospace,monospace',color:P.red}},url), ...flags.map(t=>h('span',{key:t,style:{padding:'2px 9px',borderRadius:999,background:'#fbf1dc',color:P.maroon,font:'600 11.5px '+this.HEAD}},t))),
+      h('div',{style:{display:'flex',alignItems:'center',gap:10,flexWrap:'wrap'}}, h('button',{onClick:toggle,style:{...this.iconBtn(),width:'auto',padding:'0 12px',font:'600 12.5px '+this.HEAD}},(open?'\u25be':'\u25b8')+' Advanced: canonical & redirect'), ...flags.map(t=>h('span',{key:t,style:{padding:'2px 9px',borderRadius:999,background:'#fbf1dc',color:P.maroon,font:'600 11.5px '+this.HEAD}},t))),
       open?h('div',{style:{display:'grid',gap:12,marginTop:12}},
-        f('slug','Page address (slug)','empty = made from the title',this.serviceSlugify(s.title||'')),
-        f('seoTitle','SEO title','empty = \u201c'+autoTitle+'\u201d'),
-        f('seoDescription','Meta description','empty = the short description',null,true),
-        f('focusKeyword','Focus keyword','the main search phrase; added to the Service schema as keywords','e.g. kundli reading surrey'),
-        h('div',{style:{border:'1px solid '+P.line,borderRadius:12,padding:'12px 14px',background:'#fff'}}, h('div',{style:{font:'600 11px '+this.HEAD,letterSpacing:'.12em',textTransform:'uppercase',color:P.muted,marginBottom:6}},'Google preview'),
-          h('div',{style:{font:'400 13px Arial,sans-serif',color:'#202124'}},(this.state.data.siteUrl||'https://www.analysisofkarma.com').replace(/^https?:\/\//,'')+' \u203a services \u203a '+this.serviceSlugs(this.state.data.services)[s.id]),
-          h('div',{style:{font:'400 18px Arial,sans-serif',color:'#1a0dab',margin:'3px 0'}},this.cut((s.seoTitle||'').trim()||autoTitle,62)),
-          h('div',{style:{font:'400 13.5px/1.5 Arial,sans-serif',color:'#4d5156'}},this.cut((s.seoDescription||'').trim()||this.txt(s.desc||''),158))),
         f('canonical','Canonical URL','only if another page should rank instead of this one','/services/\u2026'),
-        f('redirectTo','301 redirect to','merges this service into another page: it leaves the site and its address forwards there','/services/\u2026'),
-        h('label',{style:{display:'flex',gap:10,alignItems:'center',font:'500 14px Plus Jakarta Sans',color:P.ink}}, h('input',{type:'checkbox',checked:!!s.noindex,onChange:e=>upd(i,'noindex',e.target.checked),style:{width:18,height:18}}),'Hide this page from Google (noindex)')):null); }
+        f('redirectTo','301 redirect to','merges this service into another page: it leaves the site and its address forwards there','/services/\u2026')):null); }
 
   iconBtn(danger){ const P=this.P; return {width:34,height:34,borderRadius:9,border:'1px solid '+P.line,background:danger?'#fbe9e3':P.white,color:danger?P.bad:P.maroon,cursor:'pointer',font:'600 15px '+this.HEAD}; }
   inpStyle(){ const P=this.P; return {width:'100%',padding:'11px 13px',borderRadius:10,border:'1px solid '+P.line,background:P.white,font:'400 14.5px Plus Jakarta Sans',color:P.ink,resize:'vertical'}; }
@@ -2545,30 +2620,30 @@ class Component extends DCLogic {
       const setTitle=v=>setMany(follows&&String(v).trim()?{title:v,slug:free(v),slugAuto:true}:{title:v});
       const publish=on=>{ if(on&&(temp||!String(p.slug||'').trim())){ const sl=free(p.title||''); setMany({published:true,slug:sl,slugAuto:false}); this.flash('\u2713 Published at /blog/'+sl); }
         else if(on){ setMany({published:true,slugAuto:false}); this.flash('\u2713 Published at /blog/'+p.slug); } else upd('published',false); };
-      const cnt=(n,lo,hi)=>h('span',{style:{fontWeight:600,color:n>=lo&&n<=hi?P.ok:P.bad}},' '+n+' characters');
-      return h('div',null, this.adminHead('Edit post','Write naturally. Use the focus keyword in the title, first paragraph and a subheading to rank well.'),
+      const brand=this.brandName();
+      const seo=this.seoPanel({ key:'post:'+editing, prefix:'/blog/', placeholderHeading:'New blog post',
+        heading:p.title, setHeading:setTitle,
+        sub:p.subtitle, setSub:v=>upd('subtitle',v), subLabel:'Subheading', subHint:'one line under the heading, shown on the post',
+        slug:p.slug, setSlug:(v,manual)=>setMany({slug:v,slugAuto:false}), follows, live:!!p.published,
+        gTitle:p.seoTitle, setGTitle:v=>upd('seoTitle',v), autoTitle:this.fitBrand(this.txt(p.title||''),brand),
+        gDesc:p.excerpt, setGDesc:v=>upd('excerpt',v), autoDesc:this.cut(this.txt(String(p.subtitle||'').trim()||this.seoFirstPara(p.body)),158), descLabel:'Google description (also the excerpt on the blog page)',
+        keyword:p.focusKeyword, setKeyword:v=>upd('focusKeyword',v),
+        noindex:/noindex/i.test(p.robots||''), setNoindex:on=>upd('robots',on?'noindex, follow':'index, follow'),
+        body:this.seoFirstPara(p.body), taken });
+      return h('div',null, this.adminHead('Edit post','Fill in the Page & SEO boxes first: the heading, the address and what Google shows. The checklist says what is left.'),
         h('button',{onClick:()=>{this._blogEdit=null;this.forceUpdate();},style:{...this.iconBtn(),width:'auto',padding:'8px 14px',marginBottom:18}},'\u2190 Back to posts'),
         !p.published? h('div',{style:{display:'flex',gap:14,alignItems:'center',flexWrap:'wrap',padding:'14px 18px',marginBottom:16,borderRadius:12,background:'#fbf1dc',border:'1px solid #e8cf98',font:'500 14px/1.5 Plus Jakarta Sans',color:P.ink}},
           h('span',{style:{flex:'1 1 320px'}}, h('b',null,'Draft \u2014 only you can see this post. '), 'Visitors and Google get \u201cpage not found\u201d at its address until it is published.'),
           this.btn('Publish now',()=>publish(true),{variant:'solid',pad:'8px 16px'})):null,
+        seo,
         this.card(h('div',{style:{display:'grid',gap:16}},
           h('label',null,h('span',{style:this.lbl()},'Featured image'), h('div',{style:{display:'flex',gap:12,alignItems:'center'}}, h('div',{style:{width:120,height:74,borderRadius:10,overflow:'hidden',border:'1px solid '+P.line,background:p.image?'transparent':'repeating-linear-gradient(45deg,#EFE7D8,#EFE7D8 10px,#F7F2E9 10px,#F7F2E9 20px)'}}, p.image?h('img',{src:p.image,style:{width:'100%',height:'100%',objectFit:'cover'}}):null), h('button',{onClick:()=>{const inp=document.createElement('input');inp.type='file';inp.accept='image/*';inp.onchange=e=>{const f=e.target.files[0];if(!f)return;this.scaleImage(f,u=>upd('image',u));};inp.click();},style:{...this.iconBtn(),width:'auto',padding:'10px 16px'}},'Upload image'), p.image?h('button',{onClick:()=>upd('image',null),style:{...this.iconBtn(true),width:'auto',padding:'10px 16px'}},'Remove'):null)),
-          h('label',null,h('span',{style:this.lbl()},'Title ',h('span',{style:{fontWeight:400,color:P.muted}},'\u2014 the heading on the page')),h('input',{value:p.title||'',onChange:e=>setTitle(e.target.value),style:this.inpStyle()})),
-          h('label',null,h('span',{style:this.lbl()},'Page address ',h('span',{style:{fontWeight:400,color:P.muted}},
-              p.published?'\u2014 changing it leaves a redirect from the old address':follows?'\u2014 follows the title until you edit it here or publish':'\u2014 not public until you publish')),
-            h('div',{style:{display:'flex',alignItems:'center',gap:6}}, h('span',{style:{font:'500 13px ui-monospace,monospace',color:P.muted}},'/blog/'),
-              h('input',{value:p.slug||'',onChange:e=>setMany({slug:e.target.value,slugAuto:false}),onBlur:e=>{ const v=slugOf(e.target.value); if(v!==p.slug) setMany({slug:v,slugAuto:false}); },style:this.inpStyle()})),
-            p.slug&&taken(p.slug)?h('div',{style:{font:'600 12px '+this.HEAD,color:P.bad,marginTop:4}},'Another post already uses this address'):null),
-          h('label',null,h('span',{style:this.lbl()},'Google title ',h('span',{style:{fontWeight:400,color:P.muted}},'\u2014 optional; leave empty to use the title. Aim for 50\u201365.'),p.seoTitle?cnt(String(p.seoTitle).length,30,65):null),
-            h('input',{value:p.seoTitle||'',placeholder:this.fitBrand(this.txt(p.title||''),this.brandName()),onChange:e=>upd('seoTitle',e.target.value),style:this.inpStyle()})),
-          h('div',{style:{display:'grid',gridTemplateColumns:'1fr 1fr 1fr',gap:14}},
+          h('div',{style:{display:'grid',gridTemplateColumns:'1fr 2fr',gap:14}},
             h('label',null,h('span',{style:this.lbl()},'Date'),h('input',{type:'date',value:p.date||'',onChange:e=>upd('date',e.target.value),style:this.inpStyle()})),
-            h('label',null,h('span',{style:this.lbl()},'Focus keyword'),h('input',{value:p.focusKeyword||'',onChange:e=>upd('focusKeyword',e.target.value),style:this.inpStyle()})),
-            h('label',null,h('span',{style:this.lbl()},'Search engines'),h('select',{value:p.robots||'index, follow',onChange:e=>upd('robots',e.target.value),style:this.inpStyle()},h('option',null,'index, follow'),h('option',null,'noindex, follow'),h('option',null,'noindex, nofollow')))),
+            h('div')),
           h('div',{style:{display:'grid',gridTemplateColumns:'1fr 1fr',gap:14}},
             h('label',null,h('span',{style:this.lbl()},'Canonical URL ',h('span',{style:{fontWeight:400,color:P.muted}},'\u2014 only if another page should rank instead')),h('input',{value:p.canonical||'',placeholder:'/blog/\u2026',onChange:e=>upd('canonical',e.target.value),style:this.inpStyle()})),
             h('label',null,h('span',{style:this.lbl()},'301 redirect to ',h('span',{style:{fontWeight:400,color:P.muted}},'\u2014 merges this post into another page')),h('input',{value:p.redirectTo||'',placeholder:'/blog/\u2026',onChange:e=>upd('redirectTo',e.target.value),style:this.inpStyle()}))),
-          h('label',null,h('span',{style:this.lbl()},'Excerpt ',h('span',{style:{fontWeight:400,color:P.muted}},'\u2014 also the Google description. Aim for 120\u2013160.'),cnt(String(p.excerpt||'').length,120,160)),h('textarea',{value:p.excerpt||'',onChange:e=>upd('excerpt',e.target.value),rows:2,style:this.inpStyle()})),
           h('label',null,h('span',{style:this.lbl()},'Body ',h('span',{style:{fontWeight:400,color:P.muted}},'\u2014 formatting: ## heading, ### sub-heading, - bullet, 1. numbered, > answer box, **bold**')),h('textarea',{value:p.body||'',onChange:e=>upd('body',e.target.value),rows:12,style:this.inpStyle()})),
           h('label',{style:{display:'flex',gap:10,alignItems:'center',font:'500 15px Plus Jakarta Sans',color:P.ink}},h('input',{type:'checkbox',checked:!!p.published,onChange:e=>publish(e.target.checked),style:{width:18,height:18}}),'Published (visible on website)'))) ); }
     const move=(i,dir)=>{ const arr=[...d.blog]; const j=i+dir; if(j<0||j>=arr.length)return;[arr[i],arr[j]]=[arr[j],arr[i]];this.commit('blog',arr); };
@@ -2580,6 +2655,55 @@ class Component extends DCLogic {
         h('div',{style:{width:70,height:48,borderRadius:9,overflow:'hidden',flexShrink:0,border:'1px solid '+P.line,background:p.image?'transparent':'repeating-linear-gradient(45deg,#EFE7D8,#EFE7D8 9px,#F7F2E9 9px,#F7F2E9 18px)'}}, p.image?h('img',{src:p.image,style:{width:'100%',height:'100%',objectFit:'cover'}}):null),
         h('div',{style:{flex:1,minWidth:0}}, h('div',{style:{font:'700 16px '+this.HEAD,color:P.maroon,marginBottom:3,overflow:'hidden',textOverflow:'ellipsis',whiteSpace:'nowrap'}},p.title), h('div',{style:{font:'400 13px Plus Jakarta Sans',color:P.muted}}, this.fmtDate(p.date)+' \u00b7 '+(p.published?'Published':'Draft')+(p.focusKeyword?' \u00b7 \u201c'+p.focusKeyword+'\u201d':''))),
         h('div',{style:{display:'flex',gap:6}}, h('button',{onClick:()=>move(i,-1),style:this.iconBtn()},'\u2191'), h('button',{onClick:()=>move(i,1),style:this.iconBtn()},'\u2193'), h('button',{title:'Edit text & SEO',onClick:()=>{this._blogEdit=p.id;this.forceUpdate();},style:{...this.iconBtn(),width:'auto',padding:'0 14px'}},'Edit'), h('button',{title:'Customise this post with the visual editor',onClick:()=>this.setState({route:'blog',postId:p.id,editMode:true,authed:true,selBlock:null,menuOpen:false}),style:{...this.iconBtn(),width:'auto',padding:'0 12px',color:P.red,borderColor:P.red}},'\u270e Design'), h('button',{onClick:()=>del(p.id),style:this.iconBtn(true)},'\u2715')))))) ); }
+
+  // ----- location pages (/locations/...) -----
+  // The seven geo pages had no editor at all. Each gets the Page & SEO panel, its place details and its
+  // page text; changing the address of a live one leaves a redirect (api/sync.php).
+  tabLocations(){ const h=React.createElement,P=this.P,d=this.state.data; const locs=d.locations||[]; const editing=this._locEdit;
+    const L=(t,hint)=>h('span',{style:this.lbl()},t,hint?h('span',{style:{fontWeight:400,color:P.muted}},' — '+hint):null);
+    if(editing!=null){ const i=locs.findIndex(x=>x.id===editing); const l=locs[i]||{};
+      const set=o=>this.commit('locations.'+i,{...l,...o});
+      const seo=this.seoPanel({ key:'loc:'+l.id, prefix:'/locations/',
+        heading:l.title, setHeading:v=>set({title:v}),
+        sub:l.subtitle, setSub:v=>set({subtitle:v}), subLabel:'Subheading', subHint:'one line under the heading',
+        slug:l.slug, setSlug:v=>set({slug:v}), follows:false, live:!l.unpublished,
+        gTitle:l.seoTitle, setGTitle:v=>set({seoTitle:v}), autoTitle:this.fitBrand(this.txt(l.title||''),this.brandName()),
+        gDesc:l.seoDescription, setGDesc:v=>set({seoDescription:v}), autoDesc:this.cut(this.txt(l.answer||''),158),
+        keyword:l.focusKeyword, setKeyword:v=>set({focusKeyword:v}),
+        noindex:!!l.noindex, setNoindex:on=>set({noindex:on}),
+        body:this.seoFirstPara(l.detail)||this.txt(l.answer||''), taken:sl=>locs.some(x=>x.id!==l.id&&x.slug===sl) });
+      const inp=(k,ph)=>h('input',{value:l[k]||'',placeholder:ph||'',onChange:e=>set({[k]:e.target.value}),style:this.inpStyle()});
+      return h('div',null, this.adminHead('Edit location page','The heading, address and Google boxes first; the place details and the page text below.'),
+        h('div',{style:{display:'flex',gap:10,flexWrap:'wrap',marginBottom:18}},
+          h('button',{onClick:()=>{this._locEdit=null;this.forceUpdate();},style:{...this.iconBtn(),width:'auto',padding:'8px 14px'}},'← Back to locations'),
+          h('a',{href:'/locations/'+(l.slug||''),target:'_blank',rel:'noopener',style:{...this.iconBtn(),width:'auto',padding:'8px 14px',display:'inline-flex',alignItems:'center',textDecoration:'none'}},'↗ View page')),
+        seo,
+        this.card(h('div',{style:{display:'grid',gap:14}},
+          h('div',{style:{font:'700 16px '+this.HEAD,color:P.maroon}},'Place details'),
+          h('div',{style:{display:'grid',gridTemplateColumns:'1fr 1fr',gap:14}},
+            h('label',null,L('Short name','used in the footer and between location pages'),inp('navLabel','e.g. Canada-Wide Online (Toronto, Brampton…)')),
+            h('label',null,L('Region','“Consultations available in …”'),inp('scope','e.g. the United Kingdom'))),
+          h('div',{style:{display:'grid',gridTemplateColumns:'1fr 1fr',gap:14}},
+            h('label',null,L('Consultation format'),inp('format','Live 1-on-1 on Zoom, WhatsApp or the phone')),
+            h('label',null,L('Time zones served'),inp('timezones','Pacific Time (PST / PDT)'))),
+          h('label',null,L('Heading above the city list'),inp('cityLabel','Cities served')),
+          h('label',null,L('Cities and areas','one per line'),h('textarea',{value:(l.cities||[]).join('\n'),rows:5,onChange:e=>set({cities:e.target.value.split('\n').map(x=>x.trim()).filter(Boolean)}),style:this.inpStyle()})),
+          h('label',null,L('Opening question','used when the page has no page text of its own'),inp('question')),
+          h('label',null,L('Short answer','40–60 words; also what llms.txt says about this place'),h('textarea',{value:l.answer||'',rows:3,onChange:e=>set({answer:e.target.value}),style:this.inpStyle()})))),
+        this.card(h('div',{style:{display:'grid',gap:10}},
+          h('div',{style:{font:'700 16px '+this.HEAD,color:P.maroon}},'Page text'),
+          h('label',null,L('Light Markdown','> answer box · ## heading · ### question · - point · | table | · **bold**'),
+            h('textarea',{value:l.detail||'',rows:22,onChange:e=>set({detail:e.target.value}),style:{...this.inpStyle(),fontFamily:'ui-monospace,monospace',fontSize:13}})),
+          h('label',{style:{display:'flex',gap:10,alignItems:'center',font:'500 15px Plus Jakarta Sans',color:P.ink}},
+            h('input',{type:'checkbox',checked:!l.unpublished,onChange:e=>set({unpublished:!e.target.checked}),style:{width:18,height:18}}),'Published (visible on website)'))));
+    }
+    return h('div',null, this.adminHead('Locations','One page per place you serve. Open one to change its heading, address, Google title and description, cities or text.'),
+      h('div',{style:{display:'grid',gap:12}}, ...locs.map(l=>this.card(h('div',{style:{display:'flex',alignItems:'center',gap:14,flexWrap:'wrap'}},
+        h('div',{style:{flex:'1 1 280px',minWidth:0}},
+          h('div',{style:{font:'700 15.5px '+this.HEAD,color:P.maroon}},String(l.navLabel||'').trim()||l.title),
+          h('div',{style:{font:'500 12.5px ui-monospace,monospace',color:P.red,marginTop:3}},'/locations/'+(l.slug||''),
+            h('span',{style:{fontFamily:'Plus Jakarta Sans',color:l.unpublished?P.bad:P.muted,marginLeft:10}},l.unpublished?'Unpublished':l.noindex?'Hidden from Google':'Live'))),
+        h('button',{onClick:()=>{this._locEdit=l.id;this.forceUpdate();},style:{...this.iconBtn(),width:'auto',padding:'0 14px',height:34}},'✎ Edit')))))); }
 
   lbl(){ return {display:'block',font:'600 12.5px '+this.HEAD,color:this.P.maroon,marginBottom:6}; }
 

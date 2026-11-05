@@ -50,6 +50,7 @@ function aok_save_sync(?array $old, array &$new): array {
         if (aok_service_is_live($o)) { $add('/services/' . $oldSlug[$id], '/services'); $changed[] = '/services/' . $oldSlug[$id]; }
         if (!empty($o['seedKey'])) { $ds = (array)($new['deletedSeeds'] ?? []); if (!in_array($o['seedKey'], $ds, true)) $ds[] = $o['seedKey']; $new['deletedSeeds'] = array_values($ds); }
     }
+    $livePosts = [];
     // blog posts: a published post that moved forwards from its old address; one that was deleted or
     // taken back to draft forwards to /blog; a post published (or moved) just now is sent to IndexNow
     $oldP = []; foreach ((array)($old['blog'] ?? []) as $p) if (is_array($p) && !empty($p['id'])) $oldP[$p['id']] = $p;
@@ -68,8 +69,30 @@ function aok_save_sync(?array $old, array &$new): array {
         $o = $oldP[$id] ?? null;
         if ($o === null || !$live($o) || (string)$o['slug'] !== (string)$n['slug'] || json_encode($o) !== json_encode($n)) $changed[] = '/blog/' . $n['slug'];
     }
+    // custom pages and location pages: a live one that moved forwards from its old address. While a page's
+    // address is still following its heading as it is typed (slugAuto), it was never settled and leaves
+    // no trail of half-typed addresses behind.
+    foreach ([['pages', '/', '/'], ['locations', '/locations/', '/locations']] as [$kind, $pre, $home]) {
+        $oldX = []; foreach ((array)($old[$kind] ?? []) as $x) if (is_array($x) && !empty($x['id'])) $oldX[$x['id']] = $x;
+        $newX = []; foreach ((array)($new[$kind] ?? []) as $x) if (is_array($x) && !empty($x['id'])) $newX[$x['id']] = $x;
+        $up = function ($x) use ($kind) { return is_array($x) && trim((string)($x['slug'] ?? '')) !== '' && ($kind !== 'locations' || empty($x['unpublished'])); };
+        foreach ($oldX as $id => $o) {
+            if (!$up($o) || !empty($o['slugAuto'])) continue;
+            $n = $newX[$id] ?? null;
+            if ($n !== null && $up($n) && (string)$n['slug'] === (string)$o['slug']) continue;
+            if ($n !== null && !empty($n['slugAuto'])) continue;
+            $add($pre . $o['slug'], ($n !== null && $up($n)) ? $pre . $n['slug'] : $home);
+            $changed[] = $pre . $o['slug'];
+        }
+        foreach ($newX as $id => $n) {
+            $o = $oldX[$id] ?? null;
+            if ($up($n) && ($o === null || json_encode($o) !== json_encode($n))) $changed[] = $pre . $n['slug'];
+            if ($up($n)) $livePosts[$key($pre . $n['slug'])] = 1;
+        }
+    }
+
     // a redirect never hides a post that is live at that address now (a reused address belongs to the post)
-    $livePosts = []; foreach ($newP as $n) if ($live($n)) $livePosts[$key('/blog/' . $n['slug'])] = 1;
+    foreach ($newP as $n) if ($live($n)) $livePosts[$key('/blog/' . $n['slug'])] = 1;
     $reds = array_values(array_filter($reds, function ($r) use ($livePosts, $key) { return empty($r['auto']) || !isset($livePosts[$key($r['from'] ?? '')]); }));
 
     // a redirect never points at an address that itself forwards (one hop, no chains)

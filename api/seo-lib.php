@@ -172,6 +172,12 @@ function aok_md_blocks(string $text): array {
     return $out;
 }
 
+// The first paragraph (or answer box) of light Markdown, as plain text: a description of last resort.
+function aok_first_para(string $md): string {
+    foreach (aok_md_blocks($md) as $b) if ($b[0] === 'p' || $b[0] === 'answer') return trim(preg_replace('/\*\*[^*]+\*\*\s*/', '', aok_text($b[1]), 1));
+    return '';
+}
+
 function aok_md_inline(string $s): string {
     $h = preg_replace('/&(?![a-zA-Z][a-zA-Z0-9]*;|#\d+;|#x[0-9a-fA-F]+;)/', '&amp;', aok_rich($s));   // bare & -> &amp;
     return preg_replace('/\*\*(.+?)\*\*/s', '<strong>$1</strong>', $h);
@@ -297,6 +303,8 @@ function aok_resolve(string $uri, array $d): array {
     $sl = aok_service_slugs($d['services'] ?? []);
     foreach ($d['services'] ?? [] as $s) if (aok_service_is_live($s)) $livePaths['/services/' . ($sl[(string)($s['id'] ?? '')] ?? '')] = 1;
     foreach ($d['blog'] ?? [] as $bp) if (!empty($bp['published']) && empty($bp['redirectTo']) && !empty($bp['slug'])) $livePaths['/blog/' . strtolower((string)$bp['slug'])] = 1;
+    foreach ($d['pages'] ?? [] as $pg) if (!empty($pg['slug'])) $livePaths['/' . strtolower((string)$pg['slug'])] = 1;
+    foreach (aok_locations($d) as $lc) $livePaths['/locations/' . strtolower((string)$lc['slug'])] = 1;
     foreach ($d['redirects'] ?? [] as $r) {
         $from = '/' . trim((string)($r['from'] ?? ''), '/');
         if (isset($livePaths[strtolower($from)])) continue;
@@ -433,6 +441,7 @@ function aok_fit_brand(string $title, string $brand): string {
 function aok_page_description(array $d, array $pg): string {
     $own = trim((string)($pg['metaDescription'] ?? ''));
     if ($own !== '') return $own;
+    if (($sub = trim(aok_text($pg['subtitle'] ?? ''))) !== '') return aok_cut($sub, 158);
     $parts = [];
     foreach ((array)aok_get($d, 'blocks', []) as $k => $blocks) {
         if ($k !== 'page:' . ($pg['id'] ?? '')) continue;
@@ -481,7 +490,8 @@ function aok_meta(array $d, array $r): array {
     } elseif ($t === 'post') {
         $p = $r['item'];
         $m['title'] = trim((string)($p['seoTitle'] ?? '')) ?: aok_fit_brand(aok_text($p['title'] ?? ''), $brand);
-        $m['description'] = aok_cut(aok_text($p['excerpt'] ?? ''), 158);
+        // what Google shows: the excerpt, else the subheading, else the first paragraph -- never nothing
+        $m['description'] = aok_cut(aok_text(trim((string)($p['excerpt'] ?? '')) ?: (trim((string)($p['subtitle'] ?? '')) ?: aok_first_para((string)($p['body'] ?? '')))), 158);
         $m['robots'] = (string)($p['robots'] ?? '') ?: 'index, follow';
         $m['ogType'] = 'article';
         $m['imageAlt'] = aok_text($p['title'] ?? '');
@@ -489,8 +499,9 @@ function aok_meta(array $d, array $r): array {
         elseif ($img = aok_post_images($d, $p)) { $m['image'] = $img[0]; $m['imageSize'] = [1200, 675]; }
         if (!empty($p['canonical'])) $m['canonical'] = aok_abs($base, $p['canonical']);
     } elseif ($t === 'page') {
-        $m['title'] = aok_fit_brand(aok_text($r['item']['title'] ?? ''), $brand);
+        $m['title'] = trim((string)($r['item']['seoTitle'] ?? '')) ?: aok_fit_brand(aok_text($r['item']['title'] ?? ''), $brand);
         $m['description'] = aok_page_description($d, $r['item']);
+        if (!empty($r['item']['noindex'])) $m['robots'] = 'noindex, follow';
     } elseif ($t === 'admin') {
         $m['title'] = 'Admin | ' . $brand; $m['robots'] = 'noindex, nofollow'; $m['canonical'] = '';
     } else {
@@ -1421,7 +1432,7 @@ function aok_main_html(array $d, array $r): string {
             $side .= '</ul></nav>';
         }
         $side .= '</aside>';
-        $o .= '<article><h1>' . aok_e(aok_text($p['title'] ?? '')) . '</h1><p>'
+        $o .= '<article><h1>' . aok_e(aok_text($p['title'] ?? '')) . '</h1>' . (($sb = trim(aok_text($p['subtitle'] ?? ''))) !== '' ? '<p>' . aok_e($sb) . '</p>' : '') . '<p>'
             . (!empty($p['date']) ? '<time datetime="' . aok_e(substr($p['date'], 0, 10)) . '">' . aok_e(date('j F Y', strtotime($p['date']))) . '</time> · ' : '')
             . 'By <a href="/about">' . aok_e($g('brand.astrologer', 'Jag Mallah')) . '</a>, Vedic astrologer · Analysis of Karma</p>'
             . '<div class="aok-ssr-top"><div class="aok-ssr-main">' . aok_featured_img_html($d, $p) . aok_md_html($blocks, 1) . '</div>' . $side . '</div></article>'
@@ -1448,12 +1459,12 @@ function aok_main_html(array $d, array $r): string {
     } elseif ($t === 'location') {
         $l = $r['item'];
         $o .= aok_crumbs([['Home', '/'], ['Locations', '/locations'], [aok_text($l['title'] ?? ''), '']]);
-        $o .= '<h1>' . aok_e(aok_text($l['title'] ?? '')) . '</h1>';
+        $o .= '<h1>' . aok_e(aok_text($l['title'] ?? '')) . '</h1>' . (($sb = trim(aok_text($l['subtitle'] ?? ''))) !== '' ? '<p>' . aok_e($sb) . '</p>' : '');
         $o .= aok_location_page_html($d, $l);
         $o .= '<section>' . aok_author_card_html($d) . '</section>' . aok_cta($d);
     } elseif ($t === 'page') {
         $pg = $r['item'];
-        $o .= '<h1>' . aok_e(aok_text($pg['title'] ?? '')) . '</h1>' . aok_blocks_html((array)aok_get($d, 'blocks.page:' . ($pg['id'] ?? ''), []));
+        $o .= '<h1>' . aok_e(aok_text($pg['title'] ?? '')) . '</h1>' . (($sb = trim(aok_text($pg['subtitle'] ?? ''))) !== '' ? '<p>' . aok_e($sb) . '</p>' : '') . aok_blocks_html((array)aok_get($d, 'blocks.page:' . ($pg['id'] ?? ''), []));
     } elseif ($t === 'admin') {
         $o .= '<h1>Admin</h1><p>The admin area needs JavaScript.</p>';
     } else {
@@ -1487,6 +1498,6 @@ function aok_sitemap_urls(array $d): array {
         $out[] = [$base . '/locations', $mod, 'monthly'];
         foreach (aok_locations($d) as $l) if (empty($l['noindex'])) $out[] = [$base . '/locations/' . rawurlencode((string)$l['slug']), $mod, 'monthly'];
     }
-    foreach ($d['pages'] ?? [] as $pg) if (!empty($pg['slug'])) $out[] = [$base . '/' . rawurlencode($pg['slug']), $mod, 'monthly'];
+    foreach ($d['pages'] ?? [] as $pg) if (!empty($pg['slug']) && empty($pg['noindex'])) $out[] = [$base . '/' . rawurlencode($pg['slug']), $mod, 'monthly'];
     return $out;
 }

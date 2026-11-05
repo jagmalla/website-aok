@@ -1,7 +1,36 @@
 ANALYSIS OF KARMA — Update (SEO, local SEO, AI search & security)
 ===================================================================
 
-NEW IN THIS VERSION: A BALANCED FOOTER
+NEW IN THIS VERSION: A "PAGE & SEO" PANEL ON EVERY PAGE YOU EDIT
+  • Blog posts, services, custom pages and location pages now all open with
+    the same "Page & SEO" panel at the top. Type into its boxes and the site
+    builds the page from them:
+      Heading (H1)        the main title on the page
+      Subheading          one line under the heading
+      Page address        the web address, e.g. /blog/vedic-remedies-for-sade-sati
+      Google title        what Google shows as the blue link (counter 30-65)
+      Google description  the grey text under it (counter 120-160)
+      Focus keyword       the phrase people type into Google
+      Show in Google      a tick-box to hide a page from search engines
+    with a live Google preview and a checklist that ticks itself as you type:
+    is the address readable, are the lengths right, is the keyword in the
+    heading, the title, the description, the address and the first paragraph.
+  • The page address fills in from the heading as you type, for new blog
+    posts and new pages, until you change it yourself. Changing the address
+    of a page that is already live leaves a redirect from the old one, so no
+    link breaks.
+  • If you leave the Google description empty, the site uses the subheading,
+    then the first paragraph, so a page never goes out with no description.
+  • NEW: Admin -> Locations. The seven location pages can now be edited:
+    the Page & SEO panel, the short name used in the footer, region, format,
+    time zones, cities, the opening question and answer, and the page text.
+  • Services: the address, Google title, description and keyword used to be
+    hidden in a closed section at the bottom. They are now in the panel at
+    the top; only canonical and redirect stay at the bottom, under "Advanced".
+  • A custom page can no longer be given an address the site itself uses
+    (faq, locations, rss.xml, llms.txt and so on), where it would never show.
+
+EARLIER: A BALANCED FOOTER
   • The footer's first column now holds only the name, address and phone.
     The "Serving" list and the hours moved to a full-width strip underneath
     the three columns, so the columns end at the same height. On a phone
