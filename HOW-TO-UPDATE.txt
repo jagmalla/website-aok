@@ -1,30 +1,480 @@
-ANALYSIS OF KARMA — Update (editable FAQs, meditation practices, mobile fixes)
-==============================================================================
+ANALYSIS OF KARMA — Update (SEO, local SEO, AI search & security)
+===================================================================
 
-WHAT'S NEW IN THIS UPDATE
-  • FAQs are now fully editable. Open Admin -> Visual Editor -> "Edit
-    About Us" (or "Edit Contact Us"), scroll to the FAQ section, and you
-    can:  + Add FAQ,  reorder with the up/down arrows, and remove any FAQ
-    with the X button. Click the question/answer text to edit it.
-  • Meditation -> "What we practise": you can now add, reorder and remove
-    the practice cards. Open Admin -> Visual Editor -> "Edit Meditation",
-    scroll to that section, and use  + Add practice  / the up-down arrows /
-    X Remove. Click a card's title or text to edit it.
-  • Cross-device compatibility checked and tightened on phones, tablets
-    (iPad portrait & landscape) and desktop. Fixed a small horizontal-
-    scroll issue on very narrow phones (360px) on the Contact page; all
-    pages now fit cleanly with no sideways scrolling.
+NEW IN THIS VERSION: A COMPLETE SOCIAL SHARE IMAGE
+  • The picture WhatsApp, Facebook and LinkedIn show when your site is
+    shared now carries your logo, "Analysis of Karma", "with Jag Mallah ·
+    Independent Vedic Astrologer", your tagline, Surrey in person and
+    worldwide online, Phone & WhatsApp +1 (236) 660-2000 (in bold), English, Hindi
+    and Punjabi, $100 CAD per hour with pay-only-if-satisfied, and
+    www.analysisofkarma.com. It ships ready as assets/og-image.jpg.
+  • Admin -> Settings -> Social share image draws the same card from your
+    current settings. If you change your phone, WhatsApp, fee, languages,
+    logo or theme, press Redraw, Download og-image.jpg and upload it to
+    assets/og-image.jpg.
+  • The site adds a version stamp to the image address, so WhatsApp and
+    Facebook fetch the new picture instead of an old cached one. Already
+    shared links may still show the old picture: paste your address into
+    the Facebook Sharing Debugger (developers.facebook.com/tools/debug) and
+    press "Scrape Again" to refresh it.
 
-(Also includes the previous update: menu-bar editor, custom pages, and
- expanded social links — Facebook, Instagram, YouTube, Google Maps + add
- your own.)
+EARLIER: EVERY PAGE "READS NATURALLY" IN ADMIN -> AI CONTENT
+  • Admin -> AI Content -> Check all pages: average 25%, all 42 pages in
+    the green "reads naturally" band (before: average 48%, 14 natural,
+    19 worth a look, 9 needs rewriting).
+  • What changed is a line edit, not a rewrite. The biggest problem was the
+    same three-word phrase said again and again on one page ("the 10th
+    house" 12 times, "Rahu and Ketu" 10 times, "Here is how" in 7 blog
+    excerpts). Those are now said in different words. Stiff forms
+    ("you do not", "it is considered") became what people actually say.
+  • Facts, prices, headings people search for, and the direct-answer boxes
+    are unchanged. The FAQ answers are still 40-60 words.
+  • Your Jupiter-Ketu article got only light edits where a phrase repeated
+    (for example "There may be..." four times). Please read it once.
+  • The check now skips breadcrumbs and tables, the same way it already
+    skipped the address block: a fee repeated down a table column, or a
+    page's name in its breadcrumb, is layout, not repeated writing.
+  • The booking box on service pages is headed "Book this consultation"
+    instead of repeating the service's full name.
+  • On the live site, a sentence is replaced only where it is still
+    exactly as shipped; anything you rewrote yourself is kept.
 
-HOW TO APPLY (1 file, nothing else changes)
-  1. cPanel -> File Manager -> public_html (your web root).
-  2. Upload the included index.html and choose "Overwrite".
-     Only index.html changed. Do NOT touch api/, config.php, uploads/,
-     or anything else. Your database content is untouched.
-  3. Open your site and hard-refresh:  Ctrl+Shift+R  (Cmd+Shift+R on Mac).
-  4. Go to /#admin, log in, then Visual Editor to use the new options.
+EARLIER: SEO HEALTH 100 (EVERY TITLE AND DESCRIPTION FITS GOOGLE)
+  • The seven location pages have shorter Google titles (60 characters or
+    fewer) and descriptions (152-157), each keeping its keyword, the main
+    cities and the fee. Google showed only the first ~60 characters before.
+  • /services, and four articles with long headlines (birth chart guide,
+    Saturn return, career astrology, medical astrology), have a shorter
+    Google title. The headline on the page itself is unchanged.
+  • Eight services whose short card text was being used as their Google
+    description now have a proper 140-158 character description:
+    birth chart generation, love or arranged marriage, live consultation,
+    year-ahead forecast, Muhurat, Jyotish deep-dives, karmic astrology and
+    child naming. You can see and edit each one in Admin -> Services ->
+    Page & SEO.
+  • All 48 pages: titles 47-65 characters, descriptions 120-159.
+  • Anything you had already typed into those boxes yourself is kept.
 
-All your existing content, photos and settings stay exactly as they are.
+EARLIER: ONE SET OF FACTS, QUESTION HEADINGS, TRUE DATES
+  • The business name is "Analysis of Karma - Vedic astrologer" everywhere
+    the site names the business (footer, contact page, search-engine data,
+    llms.txt), matching your Google Business Profile.
+  • The Google Maps link the site uses (the map button, "Review us on
+    Google" and the search-engine data) is https://share.google/qMDfkFkxgAA3NY9Nk.
+    The other Google links stay listed as your profiles.
+  • Training now reads: Advanced Parashari Jyotish, Tajika Varshaphala,
+    Prashna Shastra, Muhurta and Medical Astrology, under Sh. Sharawan Jha.
+    (Your own first-person story on the About page is unchanged.)
+  • Every service page: the generic headings "Classical Vedic Methodology &
+    Texts Used" and "Key Life Questions & Chart Factors Analyzed" are now
+    the question a client would ask, each with a 40-60 word direct answer
+    under it. The bullet points are unchanged. A new service added from
+    Admin -> Services gets question headings automatically.
+  • Every blog article: the three generic headings ("Classical Foundations
+    in Jyotish" and so on) are now questions specific to the article.
+  • Each blog post, page and location page now remembers when you last
+    changed it. Google sees that date in the sitemap and in the article's
+    "last updated" data, instead of the publish date.
+  • Every service page now links to three related articles (two pages had
+    only one).
+  • The search-engine data now lists the Surrey neighbourhoods you serve
+    (Fleetwood, Newton, Guildford, Cloverdale, Panorama Ridge, South Surrey)
+    and names the business and practitioner with stable ids (#business,
+    #jag-mallah).
+  • Headings or text you have already edited yourself are never replaced.
+
+EARLIER: A "PAGE & SEO" PANEL ON EVERY PAGE YOU EDIT
+  • Blog posts, services, custom pages and location pages now all open with
+    the same "Page & SEO" panel at the top. Type into its boxes and the site
+    builds the page from them:
+      Heading (H1)        the main title on the page
+      Subheading          one line under the heading
+      Page address        the web address, e.g. /blog/vedic-remedies-for-sade-sati
+      Google title        what Google shows as the blue link (counter 30-65)
+      Google description  the grey text under it (counter 120-160)
+      Focus keyword       the phrase people type into Google
+      Show in Google      a tick-box to hide a page from search engines
+    with a live Google preview and a checklist that ticks itself as you type:
+    is the address readable, are the lengths right, is the keyword in the
+    heading, the title, the description, the address and the first paragraph.
+  • The page address fills in from the heading as you type, for new blog
+    posts and new pages, until you change it yourself. Changing the address
+    of a page that is already live leaves a redirect from the old one, so no
+    link breaks.
+  • If you leave the Google description empty, the site uses the subheading,
+    then the first paragraph, so a page never goes out with no description.
+  • NEW: Admin -> Locations. The seven location pages can now be edited:
+    the Page & SEO panel, the short name used in the footer, region, format,
+    time zones, cities, the opening question and answer, and the page text.
+  • Services: the address, Google title, description and keyword used to be
+    hidden in a closed section at the bottom. They are now in the panel at
+    the top; only canonical and redirect stay at the bottom, under "Advanced".
+  • A custom page can no longer be given an address the site itself uses
+    (faq, locations, rss.xml, llms.txt and so on), where it would never show.
+
+EARLIER: A BALANCED FOOTER
+  • The footer's first column now holds only the name, address and phone.
+    The "Serving" list and the hours moved to a full-width strip underneath
+    the three columns, so the columns end at the same height. On a phone
+    everything stacks in order.
+  • Hours read "Mon–Fri 10:00–17:00 (Pacific Time)" instead of listing
+    the same hours five times.
+  • The note under the hours is now the one you asked for in Phase 1:
+    "Online consultations available 7 days a week by appointment". The
+    earlier update only filled an empty note, and yours already held an
+    older one, so it had never changed.
+  • The line above the disclaimer now runs the full width like the others.
+
+EARLIER: YOUR JUPITER-KETU ARTICLE, AND A FIXED BLOG EDITOR
+  • Your article "Major Astrological Transit 2026: Jupiter-Ketu Conjunction
+    and Neechbhang Raj Yoga" was saved as a draft, so visitors and Google saw
+    "page not found". After upload it is published at
+    /blog/jupiter-ketu-conjunction-leo-2026 and the old address
+    /blog/new-post-xmxoobh6 forwards to it, so any link you shared still works.
+  • It now has a short Google title, a Google description, a focus keyword,
+    a highlighted direct answer at the top, the 12 ascendants as headings,
+    and three FAQs that search engines and AI assistants can quote. Your
+    picture is used in all three shapes Google and social media ask for.
+  • The blog editor has a "Page address" box. It fills in from the title
+    as you type, until you edit it yourself or publish.
+  • A yellow banner now says when a post is still a draft, with a "Publish
+    now" button. Publishing a post with a temporary address gives it a
+    proper one first.
+  • New "Google title" box (optional) and a character counter on the
+    excerpt, which is also the Google description.
+  • Changing the address of a published post, or deleting it, now leaves a
+    redirect behind automatically, and a newly published post is sent to
+    search engines straight away.
+  • Also fixed: on the seven location pages the browser replaced the page
+    title with just "Analysis of Karma" after loading. Each keeps its own now.
+
+EARLIER: ONE BUSINESS NAME
+  • The footer, the contact page, the search-engine data and llms.txt now
+    all name the business "Analysis of Karma - Vedic astrologer" (the header
+    logo stays "Analysis of Karma"). They had copied the long
+    Google listing name, which worked against setting the listing back to
+    the short name. GO-LIVE.txt section F has the steps for Google.
+
+EARLIER: ALL SEVEN LOCATION PAGES ARE NOW WRITTEN
+  • Vancouver & the Lower Mainland, and British Columbia, now have full
+    pages like the other five: a highlighted direct answer, the question
+    people ask as the heading, a comparison table and the FAQs.
+  • The Lower Mainland table splits the region four ways (Metro Vancouver
+    core, South of the Fraser, Tri-Cities & the Ridge, Fraser Valley) and
+    now names White Rock, Port Coquitlam, Port Moody, Pitt Meadows, Mission
+    and Aldergrove as well.
+  • The British Columbia table covers Vancouver Island, the Okanagan, the
+    Thompson & Interior, and Northern BC & the Kootenays, naming Langford,
+    Duncan, Courtenay, Campbell River, West Kelowna, Osoyoos, Merritt,
+    Salmon Arm, Revelstoke, Dawson Creek, Fort St. John, Cranbrook and
+    Nelson.
+  • llms-full.txt — the file AI assistants read — now opens its services
+    section with a table of all seven consultations, their addresses, the
+    chart factors each one examines, duration and fee; and the entity block
+    now lists your Trustpilot profile and every other profile that links
+    back to you.
+  • PLEASE READ: Google titles and descriptions. Four of the seven location
+    titles are 66-74 characters and six of the descriptions are 171-190.
+    Google shows about 60-65 and 155-160 and cuts off the rest. Nothing is
+    broken and rankings are unaffected, but the ends will not be visible in
+    search results. Tell me and I will shorten them in one pass.
+
+EARLIER: FULL WRITTEN PAGES FOR FIVE OF THE SEVEN LOCATIONS
+  • Surrey, Canada, the USA, the UK and India now have complete pages: a
+    highlighted direct answer at the top, the question people ask as the
+    heading, a comparison table, and two or three frequently asked questions
+    with full answers.
+  • Each table is different and fits its page: the Surrey one lists the six
+    services with their chart factors and fee; Canada lists provinces, cities
+    and the best calling window for each time zone; the USA lists the three
+    time zones; the UK lists regions with UK evening slots; India lists
+    regions with the topics each one asks about most.
+  • Google titles and descriptions are set for all five.
+  • Tables now work anywhere you write page text. Type them like this:
+        | Service | Fee |
+        |---|---|
+        | Kundli reading | $100 |
+    and they become a proper table on the page. On a phone the table scrolls
+    sideways inside its own box, so the page itself never slides.
+  • Vancouver/Lower Mainland and British Columbia keep their shorter Phase 5
+    pages, because no new copy was written for those two.
+  • Two notes on the supplied text, which I left exactly as written: two of
+    the Google titles are 72-73 characters and four of the descriptions are
+    171-186 characters, so Google will cut the ends off in search results;
+    and the "~£56 GBP" and "$72-$75 USD" figures will drift as exchange
+    rates move. Say the word and I will shorten or remove them.
+
+EARLIER: SEVEN NEW PAGES, ONE PER PLACE YOU WORK
+  • Seven new pages under /locations/ : Surrey BC, Vancouver & the Lower
+    Mainland, British Columbia, Canada, the United States, the United Kingdom
+    and India. Plus an index at /locations listing all seven.
+  • Each one opens with the question people in that place actually type —
+    "Where Can I Book an Authentic Vedic Astrologer in Surrey, BC?" — and
+    answers it in about 50 words, then states the consultation format, session
+    length, time zones, languages and fee, and names the cities it covers.
+  • The Surrey page is the only one with the street address and the Google
+    map, plus driving directions from Newton, Guildford and Cloverdale. The
+    other six are online-only, as they should be.
+  • Every page of the site now has a "In-person & online consultations
+    worldwide" block in the footer linking to all seven, so Google and the AI
+    crawlers find them from anywhere on the site.
+  • Each page also links to the seven consultations, and to the other six
+    locations, so nothing is more than two clicks from the home page.
+  • Service areas in your search-engine data grew from 18 to 27: Burnaby,
+    Richmond, New Westminster, Coquitlam, Victoria, Nanaimo, Kelowna, Kamloops
+    and Prince George are now named explicitly.
+  • These pages cannot yet be edited from the admin — there is no Locations
+    tab. Changing one means editing the site data directly, so ask for help.
+    (Earlier notes said otherwise; that was wrong.)
+  • Your sitemap went from 39 pages to 47.
+
+EARLIER: ONE BUSINESS, NOT THREE, IN THE SEARCH-ENGINE DATA
+  • The structured data now gives your business its Google Business Profile
+    name, with "Analysis of Karma" as the short alternative, and declares it
+    as a LocalBusiness as well as a ProfessionalService.
+  • The map pin was the middle of Surrey; it is now your actual location at
+    92 Ave and 154 St (49.1712, -122.7939).
+  • Your Google place link and place-ID link are now listed alongside the
+    Maps link, so Google can see the website, the Profile and the map pin are
+    all the same business.
+  • Jag Mallah's job title now says both roles: Independent Vedic Astrologer
+    and Meditation Guide.
+  • The site is declared as being in English, Hindi and Punjabi, not English
+    only, and payment in CAD and USD.
+  • One thing NOT added, on purpose: a 5.0 star rating in the code. Google
+    ignores a rating a business publishes about itself, and can penalise it.
+    Your 4 real Google reviews already show in Maps. If you want stars in the
+    search results, the way to get them is to show the real reviews on the
+    website with each reviewer's name and date — ask and I will build it.
+
+EARLIER: CRAWLER FILES AND ONE ADDRESS FOR THE SITE
+  • llms.txt — the summary AI assistants read — now opens with a "Core Entity
+    Facts" block: your business name exactly as Google Business Profile lists
+    it, the street address, fee, session length, payment and ethical policy,
+    languages, opening hours, phone and the Business Profile link.
+  • robots.txt now names Claude-Web as well, alongside GPTBot, OAI-SearchBot,
+    ChatGPT-User, ClaudeBot, Claude-SearchBot, Claude-User, PerplexityBot,
+    Perplexity-User, Google-Extended, Applebot-Extended and the rest. All are
+    switchable in Admin -> AI & GEO.
+  • New box in Admin -> Local & Business -> Pricing & languages: "Ethical
+    policy". It is pre-filled with "100% confidential; zero sales of gemstones,
+    talismans, or commercial rituals." Change it and llms.txt follows.
+  • The address now reads the same everywhere, exactly as your Google Business
+    Profile writes it: "15450 92a Ave, Surrey, BC V3R 9B1, Canada". The contact
+    page used to drop the comma after Surrey, and the footer spelled out
+    "British Columbia" where Google, Canada Post and your search-engine data
+    all use "BC". One line of text now feeds all three.
+  • Admin -> SEO Health now tests all three wrong ways into your site
+    (http, https without www, and http with www) and insists each one answers
+    with a single 301 to https://www.analysisofkarma.com. If any of them does
+    not, it says which, so split rankings cannot go unnoticed.
+  • ONE THING TO DO IN YOUR HOSTING DASHBOARD: turn on "Force HTTPS" and
+    "Force WWW" (cPanel -> Domains, and check SSL covers both www and non-www
+    under SSL/TLS Status). The site already redirects by itself, but doing it
+    at the host as well means it keeps working even if .htaccess is replaced.
+
+EARLIER: YOUR GOOGLE ADDRESS, AND BEING QUOTED BY AI
+  • Footer, contact page and search-engine data now carry your full Google
+    Business Profile address, 15450 92a Ave, Surrey, BC V3R 9B1, with the
+    business name exactly as the Profile lists it. Google matches a business
+    on name, address and phone being identical everywhere, so the site and
+    Maps now agree.
+  • Opening hours are Monday to Friday, 10:00 to 17:00, with a note that
+    online consultations run seven days a week by appointment.
+  • The home page now says "Consultations in English, Hindi & Punjabi".
+  • The contact page has a new section, "Where Is Analysis of Karma Located
+    in Surrey, BC?", with the address, languages, fee and phone beneath it.
+    The leftover "Write your text here..." block is gone.
+  • Five service pages now open their middle sections with the question
+    people actually ask -- for example "How Does Jag Mallah Analyze a Vedic
+    Birth Chart (Kundli)?" instead of "Classical Vedic Methodology & Texts
+    Used" -- each followed by a short, factual answer. Assistants quote a
+    question with the answer under it; they never quote a label.
+  • The Services page ends with a comparison table: each consultation's
+    chart factors, session format, duration and fee, side by side. This is
+    what ChatGPT, Perplexity and Google AI Overviews lift when somebody
+    asks "how much does a Vedic astrologer cost in Surrey?".
+  • Admin -> Services has three new boxes per service -- Primary chart
+    factors, Session format and Duration -- which fill that table. Leave
+    the chart factors empty and the service stays out of it. The fee column
+    is the service's own rate, so you only ever type the price once.
+  • Nothing to set up: your existing pages are updated on the first visit
+    after upload, and any wording you changed yourself is left alone.
+
+EARLIER: PHONES, TABLETS AND LARGE SCREENS
+  • Checked on every page at 11 screen widths, from small phones (320px)
+    to large monitors (1920px): nothing is wider than the screen any more,
+    so pages never slide sideways on a phone.
+  • Blog posts now use the service-page layout: the article beside a
+    sticky "Book a consultation" card with an "In this article" menu, then
+    the About the Astrologer card and related consultations below.
+  • The menu bar and the booking card stay in view while you scroll on
+    computers again (an old style rule had switched this off).
+  • On tablets the booking card becomes a compact strip above the text;
+    on phones it is shorter, so the article starts sooner.
+  • Every link and button is at least 44px tall, easy to tap with a thumb.
+    Form fields use 16px text, so iPhones no longer zoom in when tapped.
+  • The WhatsApp / Call buttons keep clear of the iPhone home bar, and the
+    footer leaves room so its last lines are never hidden behind them.
+  • Headlines scale smoothly with the screen size.
+  • Nothing to set up. Search-engine data (schema) is unchanged.
+
+EARLIER: SERVICE PAGE LAYOUT
+  • The 16 service pages have a new, balanced layout: the methodology and
+    chart-factor sections sit beside the sticky "Consultation fee" card;
+    from "How Your Consultation Works" on, the page runs in one centred
+    full-width column (4 connected step cards, a centred FAQ with +/-
+    bars, related articles, and a two-column About the Astrologer card),
+    so there is no empty space on the right any more.
+  • Tablets: the fee card sits under the top banner as a compact strip.
+    Phones: everything is one column with even 16px margins.
+  • The main menu switches to the menu button below 1140px wide, so the
+    logo never overlaps the links on tablets and small laptops.
+  • Nothing to set up: all service pages, including new ones, use it.
+
+ALSO IN THIS UPDATE (if not uploaded yet): SECURITY
+  • After uploading, log in once: you will be asked to choose a new admin
+    password (10+ characters). The old website made its password readable,
+    so it can no longer be trusted. Saving it signs every other device out.
+  • You get an email when the admin is opened from a new device, and when
+    many wrong passwords are tried. Admin sessions end after 8 hours idle.
+  • The contact form is now protected on the server (spam bots can no
+    longer skip the question), and enquiries are kept only on the server.
+    Older enquiries you deleted may show once more, marked FROM BACKUP;
+    delete them again if you don't need them.
+  • Pages are protected against injected code (Content-Security-Policy),
+    the 3D library is served from your own site, uploads must be real
+    pictures, and private files (error logs, backups, settings) are blocked.
+  • New files: api/leads.php, the folder assets/vendor/ and the hidden file
+    uploads/.htaccess (turn on "Show Hidden Files"). Also replace your
+    .htaccess with the new one, keeping your cPanel PHP lines (DEPLOY.md A3).
+  • Fresh installs: there is no default password any more. Use "Forgot
+    password?" on the login page to set the first one.
+
+EARLIER: SERVICES MANAGER AND ON-PAGE EDITING
+  • Admin -> Services is now a Services Manager. "+ Add new service" opens
+    a form (title, page address, summary, direct answer, methodology, life
+    questions, the 4 consultation steps, 3 FAQs, image); the $100 CAD rate,
+    Zoom/WhatsApp session and pay-after-satisfaction steps are pre-filled.
+  • Every service has: Edit in Admin (all text, sections, FAQs, SEO title,
+    description, focus keyword, Google preview), Open in Visual Editor,
+    View live page, Unpublish / Publish, Delete and move up/down.
+  • Unpublish keeps the text; Delete removes it. Either way you choose
+    where the old address forwards (the Services page, another service or
+    any address), so no service link ever shows "page not found".
+  • Open a service page with the editor on and click any text to change
+    it: title, the line above it, summary, booking button, rate, the
+    direct-answer box (with a live 45-55 word counter), every heading,
+    card, step and FAQ. Add or remove points, steps, questions and whole
+    sections, and replace the banner image. Changes save by themselves.
+  • Every save updates the sitemap (with the change date), llms.txt,
+    llms-full.txt, the structured data (Service, Offer, FAQPage) and the
+    page Google sees, and tells Bing/IndexNow about the changed pages.
+  • New files: api/sync.php and api/discovery-lib.php (upload the whole
+    zip as usual).
+
+EARLIER: CONTENT VERSION 5
+  • Every service now opens its own full page, for example
+    /services/kundli-birth-chart-reading, with a 3D Pearl & Gold banner,
+    your original description, a direct-answer box, the classical
+    methodology, the chart factors, the 4 consultation steps, FAQs, the
+    About the Astrologer card and a booking form for that service, plus
+    WhatsApp and call buttons. The text comes from your Services document.
+  • 11 services have new page addresses from that document; the old
+    addresses forward to the new ones automatically (301 redirects).
+  • Clicking a service card, "Read more" or "Book this" opens the page
+    ("Book this" jumps straight to its booking form).
+  • Bookings from a service page arrive marked with the service name.
+  • Edit any service page in Admin -> Services or right on the page.
+
+EARLIER: CONTENT VERSION 3
+  • Your phone & WhatsApp +1 (236) 660-2000 is in the header, footer,
+    contact page and Google's structured data, with WhatsApp and Call
+    buttons (a small floating bar on every page) and Google Maps and
+    Trustpilot review buttons on the contact page and in the footer.
+  • Hours Mon-Sun 10:00-20:00 (Pacific), the 17 service areas, your
+    Google Business categories, English/Hindi/Punjabi, the "pay after your
+    reading" policy and your 9 social profiles are filled in for you.
+  • All 16 services (650-1,200+ words) and 16 blog posts (950-2,200 words)
+    now have in-depth classical sections: a short direct answer, the
+    classical texts and methods, the chart factors, how a consultation
+    works, FAQs (services) and remedies. Your existing text stays first.
+  • Every service and post has its own branded Pearl & Gold image for
+    Google and social media, in the three shapes Google asks for.
+  • New uploads: api/upgrade-content.php and the folders api/content/ and
+    assets/img/ (see DEPLOY.md, Part A2). Everything is applied by itself
+    on the first page view. Pages you had edited are left alone: click
+    Admin -> SEO Health -> "Apply Full 32-Page Classical Content Upgrade"
+    to add the sections after your text there too.
+  • Admin -> AI & GEO has fields for the Google and Bing verification codes.
+  • "Forgot password?" on the admin login emails a one-time reset link
+    (valid 30 minutes) to the owner's private recovery address.
+  • Email addresses are no longer shown anywhere on the website (spam).
+    Contact-form messages go to analysisofkarma@gmail.com (Admin ->
+    Settings can change the inbox; it stays private).
+
+EARLIER IN THIS UPDATE
+  • Google and AI assistants now see your real pages. Every page is built on
+    the server with its own title, description, structured data and content,
+    so ChatGPT, Claude, Perplexity and Google can read and cite it.
+  • Every service has its own page:  /services/kundli-birth-chart-reading  etc.
+    A new FAQ page lives at /faq. All your existing text is unchanged.
+  • "Surrey, BC" is added to page titles in Google (not to your page text).
+    You can switch this off in Admin -> Local & Business.
+  • New admin tabs:
+      Local & Business  - service area, hours, phone, Google Business links
+      Practitioner      - your bio, training and expertise
+      AI & GEO          - choose which AI assistants may read your site,
+                          llms.txt, IndexNow
+      Redirects         - the 3 duplicate services and 2 duplicate blog posts
+                          are merged into their main page (301 redirect, text
+                          kept); Undo restores any of them; custom redirects
+      SEO Health        - one score with a to-do list
+  • Each service now has "Page address, SEO & redirect" settings; each blog
+    post has Canonical URL and 301 redirect fields.
+  • Every blog post links to its most relevant service pages (and back),
+    every service page and post ends with an "About the Astrologer" card
+    showing your training, and service and contact pages show "Service
+    Areas & Online Consultations" (Surrey and its neighbourhoods, the
+    Lower Mainland & Fraser Valley, and clients abroad via Zoom & WhatsApp).
+  • Seven short FAQ answers are expanded to 50-55 words, the length AI
+    answer engines quote, and three SEO titles/descriptions are shortened.
+    This happens by itself on the first page view after upload (answers
+    you edited yourself are left alone).
+  • Faster: the logo is 13 KB instead of 2.4 MB, the website code is cached
+    by browsers, and the 3D scene loads after the page (and is skipped on
+    data-saver connections and low-memory phones).
+  • Security: the admin password is now checked on the server and stored
+    only as a secure hash. Your password and client leads are no longer
+    readable in the public site data.
+
+IMPORTANT: THIS UPDATE HAS MORE THAN ONE FILE
+  Full step-by-step checklist: DEPLOY.md, "Part A - Upgrade the live site"
+  and "Part C - Verify the upload". In short:
+
+  1. Back up: download your current .htaccess and api/config.php, and use
+     Admin -> Settings -> Backup -> Export content.
+  2. Upload the files listed in DEPLOY.md (Part A2) into public_html/,
+     public_html/assets/ and public_html/api/, with "Overwrite" ticked.
+     This update contains no api/config.php, so your live database
+     settings cannot be overwritten. Delete install.php if you still have it.
+  3. Upload .htaccess LAST. If your old .htaccess had cPanel "php handler"
+     lines, paste them into the marked block at the top of the new one first.
+     (File Manager -> Settings -> "Show Hidden Files" to see .htaccess.)
+  4. Log in at  https://www.analysisofkarma.com/admin  with your CURRENT
+     password. It keeps working; the server secures it on that first login.
+  5. Change your password: Admin -> Settings -> Security.
+     (Recommended, because the old one was publicly readable before.)
+  6. Check the Local & Business and Practitioner tabs, click Save changes.
+  7. Open Admin -> SEO Health. The first group, "Server setup (after
+     upload)", should be all green; each red item says how to fix it.
+     If it lists pages without the classical sections, click "Apply Full
+     32-Page Classical Content Upgrade". The score should then be 100.
+  8. Hard-refresh: Ctrl+Shift+R (Cmd+Shift+R on Mac).
+
+IF SOMETHING GOES WRONG
+  Put your old .htaccess back (or rename the new one to .htaccess-off).
+  The site keeps working as before (admin at /#admin) while you check the
+  steps above.
+
+All your existing content, photos, leads and settings stay exactly as they are.

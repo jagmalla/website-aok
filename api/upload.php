@@ -1,6 +1,7 @@
 <?php
 require_once __DIR__ . '/db.php';
 cors();
+require_admin();   // admin only
 
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
     json_out(['ok' => false, 'error' => 'method_not_allowed'], 405);
@@ -9,15 +10,15 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
 // Accepts either a multipart file upload OR a JSON body with a base64 data URL
 $maxBytes = MAX_UPLOAD_MB * 1024 * 1024;
 
-if (!empty($_FILES['file']['tmp_name'])) {
+if (!empty($_FILES['file']['tmp_name']) && is_uploaded_file($_FILES['file']['tmp_name'])) {
     // Multipart upload
     $tmp  = $_FILES['file']['tmp_name'];
     $mime = mime_content_type($tmp);
     $size = $_FILES['file']['size'];
 } else {
     // JSON body: { "data": "data:image/jpeg;base64,..." }
-    $body = json_in();
-    $raw  = $body['data'] ?? '';
+    $body = json_in_limited((int)($maxBytes * 1.4) + 4096);   // base64 is a third larger than the file
+    $raw  = (string)($body['data'] ?? '');
     if (!preg_match('#^data:(image/[a-z]+);base64,#', $raw, $m)) {
         json_out(['ok' => false, 'error' => 'invalid_data_url'], 400);
     }
@@ -32,12 +33,20 @@ if (!empty($_FILES['file']['tmp_name'])) {
     $cleanup = true;
 }
 
-// Validate
+// Validate: the file itself must be a JPEG, PNG, GIF or WebP picture (what the browser *says* it is doesn't count)
 $allowed = ['image/jpeg', 'image/png', 'image/gif', 'image/webp'];
+$info = @getimagesize($tmp);
+$real = $info ? image_type_to_mime_type($info[2]) : '';
+if (!in_array($real, $allowed, true) || empty($info[0]) || empty($info[1])) {
+    if (isset($cleanup)) @unlink($tmp);
+    json_out(['ok' => false, 'error' => 'not_an_image'], 400);
+}
+$mime = $real;   // the extension comes from the real type
 if (!in_array($mime, $allowed, true)) {
     json_out(['ok' => false, 'error' => 'unsupported_type'], 400);
 }
 if ($size > $maxBytes) {
+    if (isset($cleanup)) @unlink($tmp);
     json_out(['ok' => false, 'error' => 'file_too_large'], 400);
 }
 

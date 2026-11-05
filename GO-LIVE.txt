@@ -1,0 +1,154 @@
+ANALYSIS OF KARMA — GO-LIVE CHECKLIST
+=====================================
+Do these in order. Each step says what "done" looks like.
+
+
+A. BEFORE YOU UPLOAD
+--------------------
+[ ] 1. Back up your content: Admin -> Settings -> Backup -> Export content.
+        Save the file somewhere safe. The update changes your saved content
+        once, on the first page load, and that change is one-way.
+
+[ ] 2. Back up the server: in cPanel File Manager, download a copy of
+        public_html (or at least .htaccess and the api folder).
+
+
+B. UPLOAD
+---------
+[ ] 3. Upload the FULL site zip (analysisofkarma-GO-LIVE-full-site.zip),
+        not a "changed files only" zip. Extract it into public_html with
+        "Overwrite" ticked. It contains no api/config.php, so your database
+        settings cannot be overwritten.
+        Why the full zip: the smaller zips assumed your server already had
+        the update before Phase 1 (the AI rewriter, RSS feed and theme
+        presets). If it does not, parts of the admin would break.
+
+[ ] 4. Upload .htaccess LAST (sent separately as htaccess.txt — rename it to
+        .htaccess). If your current .htaccess has cPanel "php handler" lines
+        at the top, copy them into the marked block at the top of the new one
+        first. (File Manager -> Settings -> "Show Hidden Files".)
+
+[ ] 5. Hosting dashboard: turn on "Force HTTPS" and "Force WWW", and check
+        cPanel -> SSL/TLS Status covers both www and non-www.
+
+
+C. RIGHT AFTER UPLOAD
+---------------------
+[ ] 6. Open https://www.analysisofkarma.com/ once. This runs the content
+        upgrade (address, hours, Punjabi, question headings, the comparison
+        table, the seven location pages). Hard-refresh: Ctrl+Shift+R.
+
+[ ] 7. Admin -> SEO Health. Expect a score of 100: no red and no amber items
+        (the only "info" item left is IndexNow, done in step 8 or later).
+        The "Every address redirects once to https://www..." check now runs
+        for real on the live domain: it must be green. If it is amber, step 5
+        is not done.
+
+[ ] 8. Open these and check they load:
+          https://www.analysisofkarma.com/locations
+          https://www.analysisofkarma.com/locations/vedic-astrologer-surrey-bc
+          https://www.analysisofkarma.com/services   (table at the bottom)
+          https://www.analysisofkarma.com/blog/jupiter-ketu-conjunction-leo-2026
+          https://www.analysisofkarma.com/blog/new-post-xmxoobh6  (must forward
+             to the address above)
+          https://www.analysisofkarma.com/llms.txt
+          https://www.analysisofkarma.com/sitemap.xml   (48 addresses)
+          https://www.analysisofkarma.com/robots.txt
+
+[ ] 9. Tell search engines: Admin -> AI & GEO -> "Notify search engines now"
+        (IndexNow). Then in Google Search Console and Bing Webmaster Tools,
+        resubmit https://www.analysisofkarma.com/sitemap.xml.
+
+
+D. OFF-SITE (after the website is live)
+---------------------------------------
+Use exactly these, character for character, on every listing:
+   Name:     Analysis of Karma - Vedic astrologer
+   Address:  15450 92a Ave, Surrey, BC V3R 9B1, Canada
+   Phone:    +1 (236) 660-2000
+   Website:  https://www.analysisofkarma.com/
+   Hours:    Monday-Friday, 10:00-17:00 Pacific (plus your by-appointment note)
+
+[ ] 10. WordPress satellite (analysisofkarmasurrey.wordpress.com): delete the
+         theme's sample widget showing "123 Example Street, San Francisco" and
+         "(123) 456-7890". Replace it with the address and phone above, and a
+         link to https://www.analysisofkarma.com/. This one matters most: a
+         fake San Francisco address next to your name confuses every
+         directory that reads it.
+
+[ ] 11. Google Business Profile: change Website to https://www.analysisofkarma.com/
+         (with www). Check the hours say Monday-Friday 10:00-17:00.
+         For the business name, see section F below.
+
+[ ] 12. Bing Places for Business: use "Import from Google". Bing copies the
+         name Google shows TODAY, so if Google still shows the long name,
+         correct it to "Analysis of Karma - Vedic astrologer" in Bing after the import.
+
+[ ] 13. Apple Business Connect, Yelp Canada, YellowPages.ca: claim or create,
+         using the block above exactly.
+
+
+E. DECISIONS ONLY YOU CAN MAKE
+------------------------------
+E1. (Decided: the business name is "Analysis of Karma - Vedic astrologer". See section F.)
+
+E2. Consultation times. The location pages promise slots outside your
+    published hours (Mon-Fri 10:00-17:00 Pacific):
+      India morning slots (7:30-11:00 AM IST)  = 6:00-10:30 PM Pacific
+      India evening slots (8:30-11:30 PM IST)  = 7:00-11:00 AM Pacific
+      UK slots (5:00-11:00 PM UK)              = from 9:00 AM Pacific
+      Canada windows                            = until 6:00 PM Pacific
+    The pages say "7 days a week by appointment", so nothing is false IF you
+    take those calls. If you do not, tell me the real windows.
+
+E3. (Done: every Google title is now 65 characters or fewer and every
+    description 120-160, so Google shows them in full.)
+
+E4. Currency figures: "~£56 GBP" (UK page) and "$72-$75 USD" (US page) will
+    drift with exchange rates. Keep, or remove and say "$100 CAD" only.
+
+E5. "Payment in CAD and USD" is in your search-engine data. Confirm you
+    accept US dollars, or tell me to set it back to CAD only.
+
+E6. (Done: every service page and blog article now uses question headings.)
+
+E7. (Done: Admin -> Locations edits the seven location pages.)
+
+
+F. THE GOOGLE BUSINESS NAME
+---------------------------
+You set the name to "Analysis of Karma" and Google changed it back to the
+long name by itself. The name you have chosen is now
+"Analysis of Karma - Vedic astrologer". Google does this when its other sources disagree with
+you. The website update now says "Analysis of Karma - Vedic astrologer"
+everywhere it names the business, so the website stops disagreeing. Work through these in order:
+
+[ ] F1. Upload the website first (sections B and C). Until then the live
+         website still shows the old wording.
+
+[ ] F2. Check where else the long name appears and change it to
+         "Analysis of Karma": the WordPress satellite, Facebook, Instagram,
+         YouTube, Trustpilot, LinkedIn, Pinterest, X. Google compares these.
+         (Short "Analysis of Karma" on social profiles is fine; the long
+         "- Vedic astrology & Meditation | Vedic Astrologer Jag Mallah" is not.)
+
+[ ] F3. Wait about a week, so Google re-reads the website.
+
+[ ] F4. In your Business Profile, look for a notice that Google updated your
+         profile, and reject or edit the name update. If there is no notice,
+         edit the name to "Analysis of Karma - Vedic astrologer" once more.
+
+[ ] F5. If Google changes it back again, do NOT keep editing it: repeated
+         name edits can put the listing under review. Instead contact
+         Business Profile support, and have proof ready that "Analysis of
+         Karma" is the real name (a business registration, a photo of your
+         sign or card).
+
+The words that were in the long name still belong on Google, just not in
+the name: put "Vedic astrology", "meditation" and "Jag Mallah" in the
+business description, the categories and the services list.
+
+Note: Google may still trim "- Vedic astrologer", because its rules want the
+name without descriptive words. If it does, accept "Analysis of Karma" rather
+than editing it back, and tell me so the website can match.
+

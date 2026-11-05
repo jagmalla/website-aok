@@ -1,6 +1,7 @@
 <?php
 require_once __DIR__ . '/db.php';
 cors();
+require_admin();   // admin only
 
 // Sends a test email so the admin can confirm delivery works.
 // Optional POST body: { "to": "override@example.com" } to test an unsaved address.
