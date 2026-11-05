@@ -470,7 +470,7 @@ function aok_meta(array $d, array $r): array {
     $base = aok_base($d); $brand = aok_brand($d);
     $t = $r['type']; $seo = (array)aok_get($d, 'seo.' . $t, []);
     $m = ['title' => '', 'description' => '', 'robots' => 'index, follow', 'canonical' => $base . ($r['path'] ?? '/'),
-          'ogType' => 'website', 'image' => $base . '/assets/og-image.jpg', 'imageSize' => [1200, 630], 'imageAlt' => aok_brand($d)];
+          'ogType' => 'website', 'image' => aok_og_image($base), 'imageSize' => [1200, 630], 'imageAlt' => aok_brand($d)];
     if (in_array($t, ['home', 'about', 'services', 'meditation', 'blog', 'contact', 'faq'], true)) {
         $m['title'] = (string)($seo['title'] ?? '') ?: $brand;
         $m['description'] = (string)($seo['metaDescription'] ?? '');
@@ -527,9 +527,16 @@ function aok_robots_full(string $robots): string {
     return $robots . ', max-image-preview:large, max-snippet:-1, max-video-preview:-1';
 }
 
+// The site-wide share image, with a version stamp taken from the file itself: WhatsApp, Facebook and
+// LinkedIn keep a shared picture by its address, so a new og-image.jpg would otherwise go unseen for weeks.
+function aok_og_image(string $base): string {
+    $f = dirname(__DIR__) . '/assets/og-image.jpg';
+    return $base . '/assets/og-image.jpg' . (is_file($f) ? '?v=' . filemtime($f) : '');
+}
+
 function aok_abs(string $base, $url): string {
     $url = (string)$url;
-    if ($url === '' || preg_match('#^data:#i', $url)) return $base . '/assets/og-image.jpg';
+    if ($url === '' || preg_match('#^data:#i', $url)) return aok_og_image($base);
     if (preg_match('#^https?://#i', $url)) return $url;
     return $base . '/' . ltrim($url, '/');
 }

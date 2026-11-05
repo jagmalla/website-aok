@@ -3163,24 +3163,73 @@ class Component extends DCLogic {
     {id:'high-energy',      label:'High-Energy',     hint:'Crimson & slate',         primary:'#1F2937',secondary:'#DC2626',accent:'#EF4444',accentLight:'#FCA5A5',bg:'#FAFAFA'}]; }
 
   // ---- Social share card: drawn in the browser from the live theme, 1200x630 ----
-  drawOgCard(cv){ try{ const d=this.state.data,P=this.P,x=cv.getContext('2d'); const W=1200,H=630;
+  // The social share card (1200x630): logo, business name, practitioner, what you offer, where, phone,
+  // languages, fee policy and the website, all from the site's own settings. Fonts and the logo load
+  // first, so the download is never taken from a half-drawn card (cv._ready).
+  drawOgCard(cv){ const run=async()=>{ try{
+    const d=this.state.data||{},P=this.P,x=cv.getContext('2d'),W=1200,H=630;
+    const L=d.local||{},C=d.contact||{},B=d.brand||{},pe=d.person||{};
+    const SERIF="'Cormorant Garamond',Georgia,serif", SANS="'Plus Jakarta Sans',system-ui,sans-serif";
+    try{ if(document.fonts&&document.fonts.load) await Promise.all(["600 80px 'Cormorant Garamond'","italic 600 80px 'Cormorant Garamond'","600 24px 'Plus Jakarta Sans'","400 22px 'Plus Jakarta Sans'","700 24px 'Plus Jakarta Sans'","800 21px 'Plus Jakarta Sans'","500 20px 'Plus Jakarta Sans'"].map(f=>document.fonts.load(f))); }catch(e){}
+    const loadImg=src=>new Promise(res=>{ if(!src){ res(null); return; } const im=new Image(); if(/^https?:/i.test(src)&&src.indexOf(location.origin)!==0) im.crossOrigin='anonymous'; im.onload=()=>res(im); im.onerror=()=>res(null); im.src=src; });
+    const logo=(await loadImg(B.logo||''))||(await loadImg('/assets/logo-512.png'));
+    // background, frame, rings
     const g=x.createLinearGradient(0,0,W,H); g.addColorStop(0,P.bg); g.addColorStop(1,P.bgAlt); x.fillStyle=g; x.fillRect(0,0,W,H);
-    x.strokeStyle=P.gold; x.globalAlpha=.30; x.lineWidth=2;
-    for(let r=120;r<760;r+=70){ x.beginPath(); x.arc(W-150,H/2,r,0,Math.PI*2); x.stroke(); }
-    x.globalAlpha=1; x.fillStyle=P.gold; x.fillRect(84,96,70,5);
-    const name=this.txt(d.brand&&d.brand.name)||'', tag=this.txt(d.brand&&d.brand.tagline)||'';
-    x.fillStyle=P.maroon; x.font="600 74px Georgia,serif";
-    const wrap=(t,max,limit)=>{ const w=String(t).split(' '),out=[]; let ln='';
-      for(const word of w){ const tryLn=ln?ln+' '+word:word; if(x.measureText(tryLn).width>max&&ln){ out.push(ln); ln=word; if(out.length>=limit) break; } else ln=tryLn; }
-      if(out.length<limit&&ln) out.push(ln); return out; };
-    wrap(name,660,2).forEach((l,i)=>x.fillText(l,84,250+i*86));
-    x.fillStyle=P.muted; x.font="400 31px 'Plus Jakarta Sans',system-ui,sans-serif";
-    wrap(tag,640,2).forEach((l,i)=>x.fillText(l,84,430+i*44));
-    const c=(d.contact&&d.contact.phone)||''; const place=this.txt((d.local&&d.local.locality)||'');
-    x.fillStyle=P.gold; x.font="600 25px 'Plus Jakarta Sans',system-ui,sans-serif";
-    x.fillText([place,c].filter(Boolean).join('   ·   '),84,560);
-  }catch(e){} }
-  downloadOgCard(){ const cv=this._ogCanvas; if(!cv){ this.flash('⚠ Nothing to download yet'); return; }
+    const rr=(X,Y,w,h,r)=>{ x.beginPath(); x.moveTo(X+r,Y); x.arcTo(X+w,Y,X+w,Y+h,r); x.arcTo(X+w,Y+h,X,Y+h,r); x.arcTo(X,Y+h,X,Y,r); x.arcTo(X,Y,X+w,Y,r); x.closePath(); };
+    x.strokeStyle=P.gold; x.lineWidth=2; x.globalAlpha=.35; rr(26,26,W-52,H-52,26); x.stroke(); x.globalAlpha=.18; rr(38,38,W-76,H-76,18); x.stroke();
+    const cx=W-292, cy=H/2, R=196;
+    x.globalAlpha=.14; for(let r=R+36;r<R+260;r+=54){ x.beginPath(); x.arc(cx,cy,r,0,Math.PI*2); x.stroke(); }
+    x.globalAlpha=1;
+    // logo in a soft-shadowed circle
+    x.save(); x.shadowColor='rgba(0,0,0,.16)'; x.shadowBlur=40; x.shadowOffsetY=12; x.fillStyle=P.white; x.beginPath(); x.arc(cx,cy,R,0,Math.PI*2); x.fill(); x.restore();
+    if(logo){ x.save(); x.beginPath(); x.arc(cx,cy,R-4,0,Math.PI*2); x.clip(); const s=Math.max((2*R)/logo.width,(2*R)/logo.height); x.drawImage(logo,cx-logo.width*s/2,cy-logo.height*s/2,logo.width*s,logo.height*s); x.restore(); }
+    // text column
+    const X0=84, MAXW=560;
+    const wrap=(t,max,limit)=>{ const w=String(t||'').split(/\s+/).filter(Boolean),out=[]; let ln='';
+      for(const word of w){ const tryLn=ln?ln+' '+word:word; if(x.measureText(tryLn).width>max&&ln){ out.push(ln); ln=word; if(out.length>=limit) return out; } else ln=tryLn; }
+      if(ln&&out.length<limit) out.push(ln); return out; };
+    const spaced=(t,X,Y,sp)=>{ let px=X; for(const ch of t){ x.fillText(ch,px,Y); px+=x.measureText(ch).width+sp; } };
+    const med=(pe.additionalRoles||[]).some(r=>/meditat/i.test(r));
+    x.fillStyle=P.gold; x.font="700 19px "+SANS; spaced(('Vedic Astrologer \u00b7 Jyotish'+(med?' & Meditation':'')).toUpperCase(),X0,104,3.2);
+    // a line that must stay on one line: the largest size from 'big' down to 'small' that fits
+    const fit=(t,weight,big,small,max,fam)=>{ let z=big; x.font=weight+' '+z+'px '+(fam||SANS); while(z>small&&x.measureText(t).width>max){ z--; x.font=weight+' '+z+'px '+(fam||SANS); } return z; };
+    // name: two lines at most, the last two words together ("Analysis / of Karma"), the last word in gold
+    // italics as on the website
+    const name=this.txt(B.name)||this.brandName(), words=name.split(/\s+/).filter(Boolean);
+    x.font="600 76px "+SERIF; let nl=[name];
+    if(x.measureText(name).width>MAXW&&words.length>1){ const k=words.length>2?words.length-2:words.length-1; nl=[words.slice(0,k).join(' '),words.slice(k).join(' ')]; }
+    let y=nl.length>1?176:212;
+    nl.forEach((ln,i)=>{ const z=fit(ln,'600',76,46,MAXW,SERIF); const last=i===nl.length-1;
+      const k=ln.lastIndexOf(' '); const head=last?(k>0?ln.slice(0,k+1):''):ln, tail=last?ln.slice(k+1):'';
+      x.fillStyle=P.maroon; x.font='600 '+z+'px '+SERIF; x.fillText(head,X0,y); const hw=head?x.measureText(head).width:0;
+      if(tail){ x.fillStyle=P.gold; x.font='italic 600 '+z+'px '+SERIF; x.fillText(tail,X0+hw,y); }
+      y+=74; });
+    y=y-74+26; x.fillStyle=P.gold; x.fillRect(X0,y,84,3); y+=42;
+    const who=[B.astrologer||pe.name,pe.jobTitle].filter(Boolean).join(' \u00b7 ');
+    if(who){ x.fillStyle=P.maroon; fit('with '+who,'600',25,18,MAXW); x.fillText('with '+who,X0,y); y+=34; }
+    const tg=this.txt(B.tagline); if(tg){ x.fillStyle=P.muted; const z=fit(tg,'400',21,17,MAXW);
+      if(x.measureText(tg).width<=MAXW){ x.fillText(tg,X0,y); y+=26; } else { wrap(tg,MAXW,2).forEach(l=>{ x.fillText(l,X0,y); y+=z+6; }); } }
+    y+=20;
+    // facts, each behind a small gold dot
+    const place=[L.locality,L.regionCode||L.region].filter(Boolean).join(', ');
+    const facts=[
+      [place?place+' in person':'', 'Worldwide on Zoom & WhatsApp'].filter(Boolean).join('  \u00b7  '),
+      // phone and WhatsApp: one line when they are the same number, both when they differ
+      (()=>{ const ph=String(C.phone||'').trim(), wa=String(C.whatsapp||'').trim(), dg=v=>v.replace(/\D/g,'');
+        const t=(ph&&wa&&dg(ph)===dg(wa))?'Phone & WhatsApp '+ph:[ph?'Phone '+ph:'', wa?'WhatsApp '+wa:''].filter(Boolean).join('  \u00b7  ');
+        return t?{t,bold:true}:''; })(),   // the number people act on, in bold
+      (L.languages||[]).length?'Consultations in '+this.joinList(L.languages):'',
+      [L.priceRange||'', 'New clients pay only if satisfied'].filter(Boolean).join('  ·  ')
+    ].filter(Boolean);
+    facts.forEach(f=>{ const t=typeof f==='string'?f:f.t, bold=typeof f==='object'&&f.bold;
+      x.fillStyle=P.gold; x.beginPath(); x.arc(X0+5,y-7,4,0,Math.PI*2); x.fill();
+      x.fillStyle=bold?P.maroon:P.ink; fit(t,bold?'800':'500',bold?21:20,15,MAXW-20); x.fillText(t,X0+20,y); y+=32; });
+    // the website
+    const site=String(d.siteUrl||'https://www.analysisofkarma.com').replace(/^https?:\/\//,'').replace(/\/$/,'');
+    x.fillStyle=P.gold; x.font="700 25px "+SANS; spaced(site,X0,Math.min(Math.max(y+22,540),562),1);
+  }catch(e){} }; cv._ready=run(); return cv._ready; }
+  async downloadOgCard(){ const cv=this._ogCanvas; if(!cv){ this.flash('⚠ Nothing to download yet'); return; }
+    try{ await (cv._ready||Promise.resolve()); }catch(e){}
     try{ cv.toBlob(b=>{ if(!b){ this.flash('⚠ Could not create the image'); return; }
       const a=document.createElement('a'); a.href=URL.createObjectURL(b); a.download='og-image.jpg'; a.click();
       setTimeout(()=>URL.revokeObjectURL(a.href),4000); this.flash('✓ Downloaded — upload it as assets/og-image.jpg'); },'image/jpeg',0.9);
@@ -3242,7 +3291,7 @@ class Component extends DCLogic {
                   h('div',{style:{font:'400 11.5px/1.45 Plus Jakarta Sans',color:P.muted,marginTop:2}},t.hint)); })),
             this.note('A theme changes colours only. Reload the page after choosing one.','ok')),{marginBottom:18}),
           this.card(h('div',null, h('div',{style:{font:'700 16px '+this.HEAD,color:P.maroon,marginBottom:6}},'Social share image'),
-            h('p',{style:{font:'400 13px Plus Jakarta Sans',color:P.muted,margin:'0 0 14px'}},'The picture shown when someone shares your site on WhatsApp, Facebook or LinkedIn. Without one, every share is a blank box. This draws a 1200×630 card from your theme and business name.'),
+            h('p',{style:{font:'400 13px Plus Jakarta Sans',color:P.muted,margin:'0 0 14px'}},'The picture shown when someone shares your site on WhatsApp, Facebook or LinkedIn. Without one, every share is a blank box. This draws a 1200×630 card from your theme, logo and business details: name, practitioner, location, phone, languages, fee and website. Change any of them in Local & Business, Practitioner or Settings, then Redraw.'),
             h('div',{style:{display:'flex',gap:12,alignItems:'flex-start',flexWrap:'wrap'}},
               h('canvas',{ref:el=>{ this._ogCanvas=el; if(el&&!el._drawn){ el._drawn=1; this.drawOgCard(el); } },width:1200,height:630,
                 style:{width:340,height:178,borderRadius:10,border:'1px solid '+P.line,background:P.white}}),

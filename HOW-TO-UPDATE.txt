@@ -1,7 +1,24 @@
 ANALYSIS OF KARMA — Update (SEO, local SEO, AI search & security)
 ===================================================================
 
-NEW IN THIS VERSION: EVERY PAGE "READS NATURALLY" IN ADMIN -> AI CONTENT
+NEW IN THIS VERSION: A COMPLETE SOCIAL SHARE IMAGE
+  • The picture WhatsApp, Facebook and LinkedIn show when your site is
+    shared now carries your logo, "Analysis of Karma", "with Jag Mallah ·
+    Independent Vedic Astrologer", your tagline, Surrey in person and
+    worldwide online, Phone & WhatsApp +1 (236) 660-2000 (in bold), English, Hindi
+    and Punjabi, $100 CAD per hour with pay-only-if-satisfied, and
+    www.analysisofkarma.com. It ships ready as assets/og-image.jpg.
+  • Admin -> Settings -> Social share image draws the same card from your
+    current settings. If you change your phone, WhatsApp, fee, languages,
+    logo or theme, press Redraw, Download og-image.jpg and upload it to
+    assets/og-image.jpg.
+  • The site adds a version stamp to the image address, so WhatsApp and
+    Facebook fetch the new picture instead of an old cached one. Already
+    shared links may still show the old picture: paste your address into
+    the Facebook Sharing Debugger (developers.facebook.com/tools/debug) and
+    press "Scrape Again" to refresh it.
+
+EARLIER: EVERY PAGE "READS NATURALLY" IN ADMIN -> AI CONTENT
   • Admin -> AI Content -> Check all pages: average 25%, all 42 pages in
     the green "reads naturally" band (before: average 48%, 14 natural,
     19 worth a look, 9 needs rewriting).
