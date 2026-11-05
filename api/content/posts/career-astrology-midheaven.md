@@ -3,7 +3,7 @@
 ## What Do the Classical Texts Say About Career in a Birth Chart?
 
 ### The Midheaven and the 10th house
-Western astrology often centres a career reading on the Midheaven (MC), the point where the ecliptic crosses the meridian overhead at birth. Jyotish knows this point as the **cusp (madhya) of the 10th Bhava** and does use it, especially in Bhava Chalit charts. But the main framework is the **10th house counted sign by sign from the ascendant**, which **Brihat Parashara Hora Shastra** calls the house of **Karma**: action, profession, status and one's work in the world. Because houses are whole signs, the Vedic 10th house and the sign of the MC are not always the same, and the difference can change the reading.
+Western astrology often centres a career reading on the Midheaven (MC), the point where the ecliptic crosses the meridian overhead at birth. Jyotish knows this point as the **cusp (madhya) of the 10th Bhava** and does use it, especially in Bhava Chalit charts. But the main framework is **Karma Bhava, the 10th counted sign by sign from the ascendant**, which **Brihat Parashara Hora Shastra** calls the house of **Karma**: action, profession, status and one's work in the world. Because houses are whole signs, the Vedic 10th house and the sign of the MC are not always the same, and the difference can change the reading.
 
 ### The four houses of work and wealth
 Career in Jyotish is never one house alone. It is a team:
@@ -29,41 +29,41 @@ The 10th, 6th and 11th are **Upachaya** houses, which grow stronger with time an
 - **Ketu:** research, coding, spirituality, alternative healing and precision work.
 
 ### The Jaimini view: Amatyakaraka and Rajya Pada
-The **Jaimini Upadesa Sutras** rank the planets by degree. The **Atmakaraka** (highest degree) is the soul; the **Amatyakaraka** (second highest) is its minister and describes the kind of work that serves the soul's purpose. Jaimini also uses the **Arudha of the 10th house (Rajya Pada)**, which shows how your career is seen by others, your public image, as distinct from the work itself.
+The **Jaimini Upadesa Sutras** rank the planets by degree. The **Atmakaraka** (highest degree) is the soul; the **Amatyakaraka** (second highest) is its minister and describes the kind of work that serves the soul's purpose. Jaimini also uses the **Arudha of this house (Rajya Pada)**, which shows how your career is seen by others, your public image, as distinct from the work itself.
 
 ## How Do the 10th House, D-10 Chart and Dashas Shape Your Career?
 
 ### Reading the 10th lord
-The single most informative factor is the **lord of the 10th house**: its sign, its house placement and its dignity.
+The single most informative factor is the **tenth lord** itself: its sign, its house placement and its dignity.
 
 - **10th lord in the 10th or a Kendra:** a clear, visible career and steady status.
 - **10th lord in a Trikona (5th or 9th):** fortunate, purpose-driven work, often in teaching, advisory or creative fields.
-- **10th lord in the 7th:** business, partnerships, client-facing work, or work abroad.
-- **10th lord in the 6th, 8th or 12th:** service, research, hidden or behind-the-scenes roles, or work in foreign lands. These are not "bad", but they often build success through effort over time.
+- **Placed in the 7th:** business, partnerships, client-facing work, or work abroad.
+- **Placed in the 6th, 8th or 12th:** service, research, hidden or behind-the-scenes roles, or work in foreign lands. These are not "bad", but they often build success through effort over time.
 
 ### The D-10 Dasamsha
-BPHS assigns the **D-10 Dasamsha** to "great achievements" and power. It confirms which planets truly support your profession. A planet weak in the birth chart but strong in the D-10 can still rise to prominence in its dasha. The D-10 ascendant and its lord describe the professional persona you grow into.
+BPHS assigns the **Dasamsha** to "great achievements" and power. It confirms which planets truly support your profession. A planet weak in the birth chart but strong in the Dasamsha can still rise to prominence in its dasha. The D-10 ascendant and its lord describe the professional persona you grow into.
 
 ### Raja yogas and Dhana yogas
 Links between the lords of Kendras (1, 4, 7, 10) and Trikonas (1, 5, 9) create **Raja yogas** of rise and recognition. Links between the 2nd, 5th, 9th and 11th lords create **Dhana yogas** of wealth. **Viparita Raja yogas**, formed by the lords of the 6th, 8th and 12th houses, describe success that comes through adversity, often in crisis-management, medicine or turnaround roles.
 
 ### Timing career changes
 - **Dashas:** promotions and new roles tend to arrive in the Mahadasha or Antardasha of the 10th lord, of planets in the 10th, of the Amatyakaraka, or of strong Raja yoga planets. Periods of the 6th lord often bring jobs and competition; the 11th lord brings gains.
-- **Saturn's transits:** Saturn crossing the 10th house, or aspecting it from the 4th, 7th or 1st, often marks a defining career chapter. Sometimes it is heavy with responsibility, but it lays foundations that last.
-- **Jupiter's transits:** Jupiter transiting or aspecting the 10th house, its lord, or the Moon's 10th, frequently coincides with opportunity, recognition and expansion.
+- **Saturn's transits:** Saturn crossing your tenth, or aspecting it from the 4th, 7th or 1st, often marks a defining career chapter. Sometimes it is heavy with responsibility, but it lays foundations that last.
+- **Jupiter's transits:** Jupiter transiting or aspecting that house, its lord, or the Moon's 10th, frequently coincides with opportunity, recognition and expansion.
 - **The Nadi view:** **Bhrigu Nandi Nadi** treats Saturn as the native's karma, their work, and Jupiter's transit over natal Saturn or the signs in trine to it as a classic trigger for career shifts.
 
 ### Job or business?
 The balance between the **6th house** (service and employment) and the **7th house** (trade, clients and partnerships) is the classical starting point. A strong 7th house and 7th lord, a well-placed Mercury and a link between the 10th and 7th lords favour business or self-employment. A dominant 6th house, a strong Saturn and a 10th lord connected to the 6th favour salaried work, especially in large organisations. Many charts show both. In that case the dashas usually reveal which phase of life suits employment and which suits independence.
 
 ### Working abroad
-For families in Surrey, Vancouver and across the diaspora, the question of foreign careers matters a great deal. The **12th house** (foreign lands and distant places), the **9th** (long-distance travel and fortune) and the **7th** (living away from one's birthplace) are central, together with **Rahu**, the significator of the foreign and the unconventional. A 10th lord linked to the 12th, or Rahu connected to the 10th house, often appears in the charts of people who build their careers far from home. The dasha of these planets tends to coincide with the move.
+For families in Surrey, Vancouver and across the diaspora, the question of foreign careers matters a great deal. The **12th house** (foreign lands and distant places), the **9th** (long-distance travel and fortune) and the **7th** (living away from one's birthplace) are central, together with **Rahu**, the significator of the foreign and the unconventional. A 10th lord linked to the 12th, or Rahu connected to the career house, often appears in the charts of people who build their careers far from home. The dasha of these planets tends to coincide with the move.
 
 ### A short checklist for your own chart
 1. Find your 10th house sign and its lord's placement.
 2. Note planets in or aspecting the 10th, especially the Sun, Saturn and Mercury.
 3. Identify your Amatyakaraka by degree.
-4. Check the D-10 ascendant and where your 10th lord lands in it.
+4. Check the Dasamsha's rising sign and where your 10th lord lands in it.
 5. Look at your current and next Antardasha, and where Saturn and Jupiter will transit over the next three years.
 
 ## Which Practical Remedies Support Career Growth?
@@ -78,4 +78,4 @@ The 10th house is literally the house of **Karma**, action. That makes career th
 - **Dhyana:** a short meditation before major decisions, together with Swarodaya awareness of the active breath, to act from clarity rather than anxiety.
 - **Timing:** start applications, launches and negotiations in supportive Antardashas and on favourable days (Tara Bala), and use demanding periods for training and consolidation.
 
-The Midheaven, the 10th house and the D-10 together describe not just a job title but the kind of work through which you grow. When timing is added, career decisions become far less of a gamble. That is the practical value of Vedic career astrology. Your chart cannot choose your career for you, but it can show where your effort will be met by the strongest support.
+The Midheaven, Karma Bhava and the Dasamsha together describe not just a job title but the kind of work through which you grow. When timing is added, career decisions become far less of a gamble. That is the practical value of Vedic career astrology. Your chart cannot choose your career for you, but it can show where your effort will be met by the strongest support.

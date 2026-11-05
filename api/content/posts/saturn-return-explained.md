@@ -6,7 +6,7 @@
 Saturn, **Shani**, is the slowest of the classical planets, taking about 29.5 years to circle the zodiac and spending roughly two and a half years in each sign. **Brihat Parashara Hora Shastra** calls Saturn the significator of longevity, service, labour, discipline, detachment and sorrow, and describes him as a servant in the planetary cabinet. **Phaladeepika** links him with patience, endurance, old age, the common people and hard-won achievement. Saturn is also the planet of **karma made visible**: he gives results in proportion to effort and integrity, often after a delay.
 
 ### What a Saturn return means in Jyotish
-In Western astrology the Saturn return is a well-known milestone. Jyotish describes the same event in its own terms: **transiting Saturn returning to the sign it occupied at birth**. Because Jyotish uses the sidereal zodiac and whole-sign houses, the sign in question may differ from your Western one, and the Vedic return is read from that sign and the house it occupies from your ascendant and Moon.
+In Western astrology this is a well-known milestone. Jyotish describes the same event in its own terms: **transiting Saturn returning to the sign it occupied at birth**. Because Jyotish uses the sidereal zodiac and whole-sign houses, the sign in question may differ from your Western one, and the Vedic return is read from that sign and the house it occupies from your ascendant and Moon.
 
 ### Saturn's dignity
 How the return feels depends heavily on Saturn's condition in your chart. Saturn is **exalted in Libra**, **debilitated in Aries**, and owns Capricorn and Aquarius, with Aquarius his Moolatrikona sign. For Taurus and Libra ascendants Saturn is a **Yogakaraka**, ruling both a Kendra and a Trikona, and his return can mark one of the most productive periods of life. For other ascendants, his houses decide what is restructured.
@@ -30,7 +30,7 @@ Jyotish emphasises two further Saturn transits counted from the **natal Moon**:
 - **Ashtama Shani:** Saturn transiting the 8th sign from the Moon, associated with obstacles and change.
 - **Kantaka Shani:** Saturn in the 4th, 7th or 10th from the Moon, in some traditions considered testing for home, relationships or work.
 
-When a Saturn return falls during Sade Sati, people often describe it as one of the defining periods of their lives. When it falls outside these phases, it may pass far more gently.
+When the return falls during Sade Sati, people often describe it as one of the defining periods of their lives. When it falls outside these phases, it may pass far more gently.
 
 ### The dasha decides the volume
 A transit only gives strong results when the dasha supports it. If you are running **Saturn Mahadasha or Antardasha**, or the dasha of the lord of the sign Saturn occupies, the return becomes central. If your dasha belongs to a strong benefic, the return may feel like healthy consolidation rather than strain. This is why two people of the same age can experience their Saturn returns so differently.

@@ -1,7 +1,7 @@
 > **Direct answer:** Karmic and Past Life Astrology investigates the profound spiritual forces shaping your current existence. Through a 60-minute 1-on-1 reading ($100 CAD/hr, pay after satisfaction), we decode the karmic axis of Rahu and Ketu, the Shashtiamsha (D-60) chart, and retrograde planets to resolve past burdens and embrace present evolution.
 
 ## How Does Vedic Astrology Read Past-Life Karma?
-Vedic astrology reads past-life karma mainly through the Rahu-Ketu axis: Ketu shows accumulated mastery and old attachments, while Rahu shows the desires your soul is growing toward. Jag Mallah adds the Shashtiamsha (D-60) chart, retrograde planets, and the 5th and 9th houses of Poorva Punya, as described in Brihat Parashara Hora Shastra.
+Jyotish reads it mainly through the Rahu-Ketu axis: Ketu shows accumulated mastery and old attachments, while Rahu shows the desires your soul is growing toward. Jag Mallah adds the Shashtiamsha, the sixtieth divisional chart, along with retrograde planets and the 5th and 9th houses of Poorva Punya, as described in Brihat Parashara Hora Shastra.
 
 - **The Rahu-Ketu Axis:** Deep exploration of the lunar nodes. Ketu reveals accumulated mastery, past-life attachments, and subconscious habits; Rahu indicates unfulfilled desires, evolution, and future destiny.
 - **Shashtiamsha (D-60) Chart:** Analyzing the highest classical harmonic chart, reserved in Brihat Parashara Hora Shastra specifically for past-life karma (Prarabdha Karma).

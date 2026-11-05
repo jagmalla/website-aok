@@ -1,7 +1,7 @@
 > **Direct answer:** Our Birth Chart Generation service provides an astronomically accurate, high-precision calculation of your Vedic horoscope. Prepared using the Lahiri Ayanamsha and Swiss Ephemeris data, this consultation ($100 CAD/hr, pay after satisfaction) delivers both the comprehensive mathematical chart documentation and an interactive walkthrough.
 
 ## How Is an Accurate Vedic Birth Chart Calculated?
-An accurate Vedic birth chart is calculated from your exact birth date, time and place using Swiss Ephemeris astronomy, the Lahiri (Chitrapaksha) Ayanamsha, and the correct latitude, longitude and Daylight Saving adjustments. Jag Mallah then generates all 16 divisional charts (Shodashvarga) and the Shadbala planetary strengths, so every later reading rests on precise mathematics.
+It's worked out from your exact birth date, time and place, using Swiss Ephemeris astronomy, the Lahiri (Chitrapaksha) Ayanamsha, and the correct latitude, longitude and Daylight Saving adjustments. Jag Mallah then generates all 16 divisional charts (Shodashvarga) and the Shadbala planetary strengths, so every later reading rests on precise mathematics.
 
 - **Astronomical Precision:** Built on genuine Swiss Ephemeris astronomical calculations accounting for exact geographic latitude, longitude, and Daylight Saving Time adjustments.
 - **Ayanamsha Accuracy:** Utilizing the standardized Chitrapaksha (Lahiri) Ayanamsha to bridge celestial mechanics with Vedic sidereal interpretation.

@@ -1,9 +1,9 @@
 > **Direct answer:** Our Jyotish Deep Dive is an exhaustive, master-level consultation synthesizing classical Parashari, Jaimini, and Bhrigu Nandi Nadi frameworks. In a thorough 60-minute session ($100 CAD/hr, pay after satisfaction), we dissect your overarching soul journey, strengths, hidden karmic patterns, and long-range life trajectory.
 
 ## What Makes a Jyotish Deep-Dive Different From a Standard Reading?
-A Jyotish deep-dive combines three classical systems in one reading: Parashari principles from Brihat Parashara Hora Shastra, Jaimini Chara Karakas such as the Atmakaraka (soul planet), and Bhrigu Nandi Nadi linkages. It examines the D-1, D-9, D-10, D-12 and D-60 charts and Argala influences, so hidden supports and karmic blocks become visible.
+It combines three classical systems in one reading: Parashari principles from Brihat Parashara Hora Shastra, Jaimini Chara Karakas such as the Atmakaraka (soul planet), and the planet-to-planet links of Nadi astrology. It examines the D-1, D-9, D-10, D-12 and D-60 charts and Argala influences, so hidden supports and karmic blocks become visible.
 
-- **Integrated Shastra Mastery:** Synthesizing Brihat Parashara Hora Shastra with the symbolic brevity of Jaimini Upadesa Sutras and Bhrigu Nandi Nadi linkages.
+- **Integrated Shastra Mastery:** Synthesizing Brihat Parashara Hora Shastra with the symbolic brevity of the Jaimini Upadesa Sutras and the BNN method of planetary linkages.
 - **Jaimini Chara Karakas:** Evaluating the Atmakaraka (soul planet), Amatyakaraka (career indicator), and Darakaraka (spouse indicator) to uncover inner drives.
 - **Complete Divisional Analysis:** Thorough investigation of the D-1 (Physical life), D-9 (Dharma & Relationships), D-10 (Profession), D-12 (Ancestral roots), and D-60 (Past life karmic seed).
 - **Argala & Planetary Obstructions:** Evaluating supportive interventions (Shubha Argala) and karmic blocks (Virodha Argala) influencing life progress.

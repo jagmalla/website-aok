@@ -28,7 +28,7 @@ The Moon is exalted in Taurus and debilitated in Scorpio; the Sun is exalted in 
 Classical practice often reads a chart from the ascendant, the Moon and the Sun in turn. When a house is strong from all three, its results are emphasised; when a difficulty appears from only one, it is moderated. This **Sudarshana Chakra** principle, described in BPHS, is a useful way to weigh the big three together rather than separately.
 
 ### Timing through the Moon
-Because the Vimshottari dasha starts from the Moon's Nakshatra, the Moon quietly governs the timing of your whole life. **Transits** are also read primarily from the Moon sign. Saturn's **Sade Sati**, for example, is counted from the natal Moon, not the Sun. This is why Vedic horoscopes are written for Moon signs.
+Because the Vimshottari dasha starts from the Moon's Nakshatra, the Moon quietly governs the timing of your whole life. **Transits** are also read mainly from the natal Moon. Saturn's **Sade Sati**, for example, is counted from the natal Moon, not the Sun. This is why Vedic horoscopes are written for Moon signs.
 
 ### Finding your big three
 1. Collect your **date, exact time and place of birth**.

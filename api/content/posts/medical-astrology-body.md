@@ -18,7 +18,7 @@
 - **Aquarius:** calves and ankles
 - **Pisces:** feet
 
-Classical texts assign the Kalapurusha's body to the houses as well: the 1st house is the head, the 2nd the face, and so on to the 12th, the feet. An astrologer therefore reads a sensitive area of the body from both the sign and the house.
+Classical texts assign the Kalapurusha's body to the houses as well: the 1st house is the head, the 2nd the face, and so on to the 12th, the feet. An astrologer therefore reads a sensitive area from both the sign and the house.
 
 ### Planets, organs and doshas
 The classical texts also link each planet with bodily systems and the three Ayurvedic **doshas**:

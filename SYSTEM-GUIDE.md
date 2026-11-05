@@ -258,6 +258,13 @@ Assistants lift *passages*, not pages. So every important page has:
    Admin → Services to put a consultation in it; leave the chart factors empty to keep it out.
    The fee column is the service's own rate, so the price is never typed twice.
 5. **Plain language**, short sentences, jargon defined on first use.
+6. **No phrase said over and over.** Admin → AI Content scores each page (`api/ai-audit.php`,
+   maths in `api/ai-audit-lib.php`). Its strongest signal is the most-repeated three-word phrase
+   on the page; four or more repeats of one phrase alone push a page into amber. Say a repeated
+   term another way (the 10th house → Karma Bhava, the tenth, this house). The check reads the
+   page's prose only: address, service-area list, breadcrumbs and tables are skipped.
+   Content version 21 carried such a line edit to live sites as sentence pairs in
+   `api/content/v21-edits.json`.
 
 ### The Page & SEO panel
 Blog posts, services, custom pages and location pages share one editor panel (`seoPanel` in

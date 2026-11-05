@@ -33,11 +33,11 @@ Traditional practice often begins with three stones linked to the 1st, 5th and 9
 - **Cancer:** pearl (Moon), with coral (Mars, Yogakaraka) considered.
 - **Leo:** ruby (Sun), with coral (Mars, Yogakaraka) considered.
 - **Virgo:** emerald (Mercury), with diamond (Venus, 9th) considered.
-- **Libra:** diamond (Venus), with blue sapphire (Saturn, Yogakaraka) evaluated carefully.
+- **Libra:** diamond (Venus); blue sapphire for Saturn, the Yogakaraka, needs careful evaluation.
 - **Scorpio:** coral (Mars), with pearl (Moon, 9th) considered.
 - **Sagittarius:** yellow sapphire (Jupiter), with ruby (Sun, 9th) considered.
 - **Capricorn:** blue sapphire (Saturn), with diamond (Venus, Yogakaraka) considered.
-- **Aquarius:** blue sapphire (Saturn), with diamond (Venus, Yogakaraka) considered.
+- **Aquarius:** blue sapphire (Saturn), and a diamond for Venus, the Yogakaraka, may also suit.
 - **Pisces:** yellow sapphire (Jupiter), with pearl (Moon, 5th) considered.
 
 This list is only a starting point. The final choice depends on the planet's placement, strength and associations in your own chart.

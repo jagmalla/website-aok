@@ -3,12 +3,12 @@
 ## What Do the Classical Texts Say About Rahu and Ketu?
 
 ### The Chhaya Grahas
-Rahu and Ketu are called **Chhaya Grahas**, shadow planets. They have no physical body; they are the two points where the Moon's orbit crosses the ecliptic, the Sun's apparent path. Eclipses happen only when a full or new moon falls near them, which is why tradition links them with the swallowing of the Sun and Moon.
+Both are called **Chhaya Grahas**, shadow planets. They have no physical body; they are the two points where the Moon's orbit crosses the ecliptic, the Sun's apparent path. Eclipses happen only when a full or new moon falls near them, which is why tradition links them with the swallowing of the Sun and Moon.
 
 The Puranic story of the **Samudra Manthan**, the churning of the ocean, tells how the demon Svarbhanu drank the nectar of immortality and was cut in two by Vishnu's discus. The head became Rahu, endlessly hungry; the body became Ketu, headless and detached. The image is still the best summary of their natures.
 
 ### Their significations in the classical texts
-**Brihat Parashara Hora Shastra** includes Rahu and Ketu among the nine grahas and gives them their own Mahadashas. Classical writers broadly agree:
+**Brihat Parashara Hora Shastra** counts both nodes among the nine grahas and gives them their own Mahadashas. Classical writers broadly agree:
 
 - **Rahu:** ambition, obsession, foreign lands and people, technology, innovation, unconventional paths, illusion and sudden rise. Rahu behaves like Saturn in many respects.
 - **Ketu:** detachment, spirituality, intuition, research, precision, past-life skill, liberation (Moksha) and sudden separation. Ketu behaves like Mars in many respects.
@@ -16,9 +16,9 @@ The Puranic story of the **Samudra Manthan**, the churning of the ocean, tells h
 Many traditions consider Rahu strong in Taurus and Gemini and Ketu strong in Scorpio and Sagittarius, although texts differ on their exact exaltation signs.
 
 ### The karmic axis
-Because the nodes are always exactly opposite, they create an **axis** through two houses. Ketu's house shows where you arrive already knowing, sometimes so well that it feels empty. Rahu's house shows what you hunger for and must learn in this life. **Bhrigu Nandi Nadi** treats Ketu as a strong indicator of past-life karma and the direction the soul is moving away from, and Rahu as the direction it is moving toward.
+Because they always sit exactly opposite each other, they create an **axis** through two houses. Ketu's house shows where you arrive already knowing, sometimes so well that it feels empty. Rahu's house shows what you hunger for and must learn in this life. **Bhrigu Nandi Nadi** treats Ketu as a strong indicator of past-life karma and the direction the soul is moving away from, and Rahu as the direction it is moving toward.
 
-## How Do Rahu and Ketu Work Through Houses and Dashas?
+## How Do the Nodes Work Through Houses and Dashas?
 
 ### The six axes
 - **1st–7th:** self versus partnership. Rahu in the 1st seeks identity and recognition; Rahu in the 7th seeks relationship and partnership, often unconventional.
@@ -31,7 +31,7 @@ Because the nodes are always exactly opposite, they create an **axis** through t
 The nodes are traditionally considered helpful in the **Upachaya houses** (3rd, 6th, 10th and 11th), where their restlessness is channelled into effort.
 
 ### Nodes give the results of their lords
-A key classical principle is that Rahu and Ketu, lacking bodies, give the results of the **lord of the sign they occupy** and of the planets they join or are aspected by. Rahu in Sagittarius, for example, carries much of Jupiter's condition. A node with a strong benefic lord can be very productive; a node in a difficult house with an afflicted lord asks for more care.
+A key classical principle is that the pair, lacking bodies, give the results of the **lord of the sign they occupy** and of the planets they join or are aspected by. Rahu in Sagittarius, for example, carries much of Jupiter's condition. A node with a strong benefic lord can be very productive; a node in a difficult house with an afflicted lord asks for more care.
 
 ### Conjunctions
 - **Rahu with the Sun or Moon:** a classical eclipse combination, often linked with intensity in the matters of the father or mother, or of confidence and the mind.
@@ -45,7 +45,7 @@ The **Rahu Mahadasha** lasts 18 years and often brings major ambition, travel, m
 ### The Jaimini view
 The **Jaimini Upadesa Sutras** use Ketu in the 12th house from the **Karakamsha** (the Atmakaraka's Navamsha sign) as a classic indication of spiritual liberation. Jaimini also reads the nodes' sign aspects, adding another layer to their influence.
 
-## How Can You Direct the Energy of Rahu and Ketu?
+## How Can You Direct the Nodes' Energy?
 
 The nodes are among the clearest illustrations of **Kriyamana karma**: you cannot remove Rahu's hunger or Ketu's detachment, but you can direct them.
 

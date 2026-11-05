@@ -101,9 +101,15 @@ if (realpath((string)($_SERVER['SCRIPT_FILENAME'] ?? '')) === __FILE__) { http_r
 //   headline is longer than Google shows, and a Google description for eight services whose card text
 //   was too short to serve as one (only where none was written). Only a value still exactly as
 //   shipped, or empty, is changed.
+// Version 21:
+//   A line edit of the site's own writing, so it reads like a person talking rather than a template: a
+//   phrase repeated over and over on one page is said in different words, stiff forms ("do not", "it is")
+//   become what people say, and long runs of same-length sentences are broken up. Facts, headings, prices
+//   and the direct-answer boxes are unchanged. The edits are sentence-for-sentence pairs in
+//   api/content/v21-edits.json; a sentence is replaced only where it is still exactly as shipped.
 // Only text that is still exactly as first shipped is replaced. Text you have edited is kept. Nothing is deleted.
 
-const AOK_CONTENT_VERSION = 20;
+const AOK_CONTENT_VERSION = 21;
 
 // fingerprints (md5 of the normalised text) of the originally shipped FAQ answers, by question
 const AOK_OLD_FAQ = [
@@ -198,6 +204,7 @@ function aok_upgrade_payload(array $d): array {
     if ($v < 18) $d = aok_upgrade_v18($d, $def);
     if ($v < 19) $d = aok_upgrade_v19($d);
     if ($v < 20) $d = aok_upgrade_v20($d, $def);
+    if ($v < 21) $d = aok_upgrade_v21($d);
     $d['contentVersion'] = AOK_CONTENT_VERSION;
     return $d;
 }
@@ -1174,5 +1181,40 @@ function aok_upgrade_v20(array $d, array $def): array {
         }
         if ($changed) $d['locations'][$i]['updatedAt'] = gmdate('c');
     }
+    return $d;
+}
+
+// v21: sentence-for-sentence line edits (api/content/v21-edits.json: [[shipped, new], ...]). Every text
+// field of the site is checked; a field changes only where it still contains a shipped sentence exactly.
+function aok_upgrade_v21(array $d): array {
+    $f = __DIR__ . '/content/v21-edits.json';
+    $pairs = is_file($f) ? json_decode((string)file_get_contents($f), true) : null;
+    if (!is_array($pairs) || !$pairs) return $d;
+    $from = []; $to = [];
+    foreach ($pairs as $p) if (is_array($p) && isset($p[0], $p[1]) && is_string($p[0]) && is_string($p[1]) && mb_strlen($p[0]) >= 20) { $from[] = $p[0]; $to[] = $p[1]; }
+    if (!$from) return $d;
+    $skip = ['redirects' => 1, 'id' => 1, 'slug' => 1, 'image' => 1, 'banner' => 1, 'updatedAt' => 1, 'date' => 1, 'schema' => 1];
+    $walk = function (&$x, $key = '') use (&$walk, $from, $to, $skip) {
+        if (isset($skip[(string)$key])) return false;
+        if (is_string($x)) {
+            if (mb_strlen($x) < 20) return false;
+            $n = str_replace($from, $to, $x);
+            if ($n !== $x) { $x = $n; return true; }
+            return false;
+        }
+        if (!is_array($x)) return false;
+        $hit = false;
+        foreach ($x as $k => &$v) if ($walk($v, $k)) $hit = true;
+        unset($v);
+        return $hit;
+    };
+    foreach ($d as $k => &$v) {
+        if (isset($skip[(string)$k])) continue;
+        if (in_array($k, ['services', 'blog', 'locations', 'pages'], true) && is_array($v)) {
+            foreach ($v as &$item) if (is_array($item) && $walk($item)) $item['updatedAt'] = gmdate('c');   // a real change of what readers see
+            unset($item);
+        } else $walk($v, $k);
+    }
+    unset($v);
     return $d;
 }

@@ -1,7 +1,28 @@
 ANALYSIS OF KARMA — Update (SEO, local SEO, AI search & security)
 ===================================================================
 
-NEW IN THIS VERSION: SEO HEALTH 100 (EVERY TITLE AND DESCRIPTION FITS GOOGLE)
+NEW IN THIS VERSION: EVERY PAGE "READS NATURALLY" IN ADMIN -> AI CONTENT
+  • Admin -> AI Content -> Check all pages: average 25%, all 42 pages in
+    the green "reads naturally" band (before: average 48%, 14 natural,
+    19 worth a look, 9 needs rewriting).
+  • What changed is a line edit, not a rewrite. The biggest problem was the
+    same three-word phrase said again and again on one page ("the 10th
+    house" 12 times, "Rahu and Ketu" 10 times, "Here is how" in 7 blog
+    excerpts). Those are now said in different words. Stiff forms
+    ("you do not", "it is considered") became what people actually say.
+  • Facts, prices, headings people search for, and the direct-answer boxes
+    are unchanged. The FAQ answers are still 40-60 words.
+  • Your Jupiter-Ketu article got only light edits where a phrase repeated
+    (for example "There may be..." four times). Please read it once.
+  • The check now skips breadcrumbs and tables, the same way it already
+    skipped the address block: a fee repeated down a table column, or a
+    page's name in its breadcrumb, is layout, not repeated writing.
+  • The booking box on service pages is headed "Book this consultation"
+    instead of repeating the service's full name.
+  • On the live site, a sentence is replaced only where it is still
+    exactly as shipped; anything you rewrote yourself is kept.
+
+EARLIER: SEO HEALTH 100 (EVERY TITLE AND DESCRIPTION FITS GOOGLE)
   • The seven location pages have shorter Google titles (60 characters or
     fewer) and descriptions (152-157), each keeping its keyword, the main
     cities and the fee. Google showed only the first ~60 characters before.

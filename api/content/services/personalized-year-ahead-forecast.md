@@ -1,7 +1,7 @@
 > **Direct answer:** The Personalized Year-Ahead Forecast utilizes the classical Tajika Varshaphala system to map your upcoming 12 months. In a 60-minute live session ($100 CAD/hr, pay after satisfaction), we analyze your annual solar return ascendant, the Muntha, the Year Lord (Varsheshwara), and key quarterly opportunities.
 
 ## How Does a Tajika Solar Return Chart Forecast Your Year?
-A Tajika solar return (Varshaphala) chart is cast for the exact moment the Sun returns to its natal degree each year. Following Tajika Neelakanthi, Jag Mallah finds the Muntha, the year's focal house, crowns the Year Lord (Varsheshwara) from the five office-bearers, and times events with Ithasala, Ishrafa and Muthashila yogas.
+A Tajika solar return (Varshaphala) chart is cast for the moment each year when the Sun comes back to the exact degree it held at your birth. Following Tajika Neelakanthi, Jag Mallah finds the Muntha, the year's focal house, crowns the Year Lord (Varsheshwara) from the five office-bearers, and times events with Ithasala, Ishrafa and Muthashila yogas.
 
 - **Classical Tajika Shastra:** Rigorously applying Neelakanthi Tajika principles, which cast an annual chart at the precise moment the transiting Sun returns to its exact natal longitudinal degree.
 - **The Muntha Progression:** Calculating the year's moving focal point (Muntha) to identify which house and life themes will dominate the 12-month period.
@@ -9,7 +9,7 @@ A Tajika solar return (Varshaphala) chart is cast for the exact moment the Sun r
 - **Tajika Aspects & Yogas:** Utilizing Ithasala (mutual application), Ishrafa, and Muthashila yogas for precise timing of specific annual events.
 
 ## What Does a Year-Ahead Forecast Cover?
-A year-ahead forecast shows the year's main theme, whether expansion, relationships or introspection, then breaks it into quarters so you know when to push forward and when to be patient. It tracks your energy and vitality, and cross-checks every annual promise against your Vimshottari Dasha, so the forecast fits your longer life cycle.
+It shows the year's main theme, whether expansion, relationships or introspection, then breaks it into quarters so you know when to push forward and when to be patient. It tracks your energy and vitality, and cross-checks every annual promise against your Vimshottari Dasha, so the forecast fits your longer life cycle.
 
 - **Major Annual Themes:** Understanding whether the upcoming year is primed for financial expansion, relationship focus, or introspection.
 - **Quarterly Breakdown:** Mapping Q1 through Q4 to anticipate high-energy momentum versus periods requiring patience.

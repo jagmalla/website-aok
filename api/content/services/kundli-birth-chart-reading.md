@@ -1,7 +1,7 @@
 > **Direct answer:** A Kundli or Vedic birth-chart reading is an in-depth astronomical analysis of the planetary positions at the exact moment and location of your birth. Through a 60-minute live session ($100 CAD/hr, pay after satisfaction), we analyze your core life purpose, timing cycles, relationship dynamics, and practical karmic remedies.
 
 ## How Does Jag Mallah Analyze a Vedic Birth Chart (Kundli)?
-Jag Mallah analyzes your Vedic birth chart using classical Parashari Jyotish principles from the Brihat Parashara Hora Shastra. Every 60-minute reading evaluates your Sidereal Ascendant (Lagna), 27 lunar Nakshatras, divisional charts (Navamsha D-9 and Dashamsha D-10), Vimshottari Dasha timelines, and live planetary transits (Gochar) to deliver accurate life predictions.
+He reads your Kundli with classical Parashari Jyotish principles from the Brihat Parashara Hora Shastra. Every 60-minute reading evaluates your Sidereal Ascendant (Lagna), 27 lunar Nakshatras, divisional charts (Navamsha D-9 and Dashamsha D-10), Vimshottari Dasha timelines, and live planetary transits (Gochar) to deliver accurate life predictions.
 
 - **Textual Authority:** Grounded in the foundational principles of Maharishi Parashara's Brihat Parashara Hora Shastra (BPHS) and Mantreswara's Phaladeepika.
 - **Divisional Charts (Varga Chakra):** Analysis of the primary Rashi chart (D-1) synthesized with the Navamsha (D-9) for soul purpose and relationship dharma, and the Dasamsha (D-10) for career direction and public status.

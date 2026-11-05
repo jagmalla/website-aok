@@ -43,8 +43,13 @@ function app_audit_label(array $d, array $r): string {
 // The prose of a rendered page. The business-details card (<address>: name, phone, a "Mon 09:00–17:00 · Tue …" hours
 // list) and the service-areas list of place names are data, not writing: scored as prose they read as perfectly
 // uniform, keyword-stuffed text and gave an untouched Contact page a 52% "AI" score. They stay on the page.
+// Only the writing is scored. The address, the service-area list, navigation (breadcrumbs) and tables are
+// data: a fee or a time repeated down a table column, or the page's own name in its breadcrumb, is the
+// layout doing its job, not a phrase the writer repeated.
 function app_audit_prose_html(string $html): string {
     $html = (string)preg_replace('#<address\b[^>]*>.*?</address>#is', ' ', $html);
+    $html = (string)preg_replace('#<nav\b[^>]*>.*?</nav>#is', ' ', $html);
+    $html = (string)preg_replace('#<table\b[^>]*>.*?</table>#is', ' ', $html);
     return (string)preg_replace('#<section\b[^>]*\bid="service-areas"[^>]*>.*?</section>#is', ' ', $html);
 }
 

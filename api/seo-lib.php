@@ -1421,7 +1421,7 @@ function aok_main_html(array $d, array $r): string {
         if ($low) $o .= '<div class="aok-ssr-wide">' . aok_md_html($low, $nTop + 1) . '</div>';
         $o .= '</article>';
         $o .= '<div class="aok-ssr-wide">' . aok_related_posts_html($d, $s) . aok_author_card_html($d) . '</div>';
-        $o .= '<section id="book"><h2>Book: ' . aok_e($title) . '</h2><p>Send your birth details and your question through the booking form, and Jag Mallah will reply '
+        $o .= '<section id="book"><h2>Book this consultation</h2><p>Send your birth details and your question through the booking form, and Jag Mallah will reply '
             . aok_e(aok_text(aok_get($d, 'contact.replyTime', 'within 12–24 hours'))) . '.</p><p>' . aok_btn($d, 'servicesPage.cardBtn', 'Book this →', 'contact') . '</p>' . aok_contact_links_html($d) . '</section>';
         $o .= aok_areas_html($d);
         $others = array_values(array_filter($d['services'] ?? [], function ($x) use ($s) { return ($x['id'] ?? '') !== ($s['id'] ?? '') && aok_service_is_live($x); }));
@@ -1477,7 +1477,9 @@ function aok_main_html(array $d, array $r): string {
         $o .= aok_hero($d, 'locationsPage.hero', 'Vedic astrologer near you');
         $o .= '<section><ul>';
         foreach (aok_locations($d) as $l) {
-            $o .= '<li><h2><a href="/locations/' . aok_e((string)$l['slug']) . '">' . aok_e(aok_text($l['title'] ?? '')) . '</a></h2>'
+            // the short name, as on the visible page (the hub's full title is its own page's H1)
+            $name = trim(aok_text($l['navLabel'] ?? '')) ?: aok_text($l['title'] ?? '');
+            $o .= '<li><h2><a href="/locations/' . aok_e((string)$l['slug']) . '">' . aok_e($name) . '</a></h2>'
                 . '<p>' . aok_e(aok_cut(aok_text($l['answer'] ?? ''), 180)) . '</p></li>';
         }
         $o .= '</ul></section>' . aok_cta($d);

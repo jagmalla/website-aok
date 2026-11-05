@@ -1,7 +1,7 @@
 > **Direct answer:** Analysis of Karma provides classical Parashari Vedic astrology (Jyotish) and meditation consultations in Surrey, BC from our Fleetwood office at 15450 92a Ave and online via Zoom or WhatsApp. Led by Independent Vedic Astrologer Jag Mallah, 60-minute 1-on-1 readings cost $100 CAD/hr — and new clients pay after the session only if satisfied.
 
-## Where Can I Book an Authentic Vedic Astrologer in Surrey, BC?
-Independent Vedic Astrologer Jag Mallah serves clients across Surrey, British Columbia from 15450 92a Ave, Surrey, BC V3R 9B1 (Fleetwood), with convenient appointment scheduling for residents in Newton, Guildford, Cloverdale, Panorama Ridge, Whalley, City Centre, and South Surrey. Whether you prefer an in-person consultation by appointment or a live screen-shared session over Zoom or WhatsApp, every consultation is conducted confidentially in English, Hindi, or Punjabi.
+## Where Can I Book an Authentic Vedic Astrologer in Surrey?
+Independent Vedic Astrologer Jag Mallah serves clients across Surrey, British Columbia from his office in Fleetwood, with convenient appointment scheduling for residents in Newton, Guildford, Cloverdale, Panorama Ridge, Whalley, City Centre, and South Surrey. Whether you prefer an in-person consultation by appointment or a live screen-shared session over Zoom or WhatsApp, every consultation is conducted confidentially in English, Hindi, or Punjabi.
 
 ## What Vedic Astrology Services Are Available in Surrey?
 Every 60-minute consultation examines your astronomical Sidereal birth chart (Lagna), 27 lunar Nakshatras, divisional Varga charts (Navamsha D-9 and Dashamsha D-10), Vimshottari Dasha timelines, and active planetary transits (Gochar):
