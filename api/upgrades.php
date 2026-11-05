@@ -73,9 +73,14 @@ if (realpath((string)($_SERVER['SCRIPT_FILENAME'] ?? '')) === __FILE__) { http_r
 //   /blog/jupiter-ketu-conjunction-leo-2026 with its title, Google title, description, focus keyword
 //   and finished text, and the temporary address forwards to it. Found by that address or its title;
 //   added if it is not there at all.
+// Version 16:
+//   The hours note the owner asked for in Phase 1, "Online consultations available 7 days a week by
+//   appointment". Version 6 only filled an empty note, but live sites already carried the note this
+//   project shipped earlier ("Pacific Time, by appointment ..."), so the request never reached them.
+//   Replaced only while it is still exactly that shipped text.
 // Only text that is still exactly as first shipped is replaced. Text you have edited is kept. Nothing is deleted.
 
-const AOK_CONTENT_VERSION = 15;
+const AOK_CONTENT_VERSION = 16;
 
 // fingerprints (md5 of the normalised text) of the originally shipped FAQ answers, by question
 const AOK_OLD_FAQ = [
@@ -165,6 +170,7 @@ function aok_upgrade_payload(array $d): array {
     if ($v < 13) $d = aok_upgrade_v13($d);
     if ($v < 14) $d = aok_upgrade_v14($d);
     if ($v < 15) $d = aok_upgrade_v15($d);
+    if ($v < 16) $d = aok_upgrade_v16($d);
     $d['contentVersion'] = AOK_CONTENT_VERSION;
     return $d;
 }
@@ -850,5 +856,13 @@ function aok_upgrade_v15(array $d): array {
     if (!$have) $reds[] = ['from' => '/blog/' . $old, 'to' => '/blog/' . $slug];
     if (!empty($alsoFrom)) $reds[] = ['from' => '/blog/' . $alsoFrom, 'to' => '/blog/' . $slug];
     $d['redirects'] = array_values($reds);
+    return $d;
+}
+
+// v16: the hours note as the owner asked for it.
+function aok_upgrade_v16(array $d): array {
+    $shipped = "Pacific Time, by appointment \u{2014} early-morning and evening slots available for clients in India, the UK and across North America.";
+    if (isset($d['local']) && is_array($d['local']) && aok_norm($d['local']['hoursNote'] ?? '') === aok_norm($shipped))
+        $d['local']['hoursNote'] = 'Online consultations available 7 days a week by appointment';
     return $d;
 }

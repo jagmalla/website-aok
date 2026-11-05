@@ -1079,28 +1079,64 @@ function aok_locations_nav_html(array $d, string $except = ''): string {
     return $o . '</ul></nav>';
 }
 
-function aok_nap_html(array $d): string {
-    // the business's name exactly as Google Business Profile lists it (see napBlock in app.js)
+// Opening hours on one line, consecutive days with the same hours grouped: "Mon–Fri 10:00–17:00",
+// or "Mon–Fri 10:00–17:00 · Sat 11:00–15:00". Mirrors hoursLine() in app.js.
+function aok_hours_line(array $d): string {
+    $hrs = aok_hours_text($d);
+    if (!$hrs) return '';
+    $order = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+    $runs = [];
+    foreach ($order as $i => $day) {
+        if (!isset($hrs[$day])) continue;
+        $last = count($runs) - 1;
+        if ($last >= 0 && $runs[$last]['t'] === $hrs[$day] && $runs[$last]['end'] === $i - 1) { $runs[$last]['end'] = $i; continue; }
+        $runs[] = ['start' => $i, 'end' => $i, 't' => $hrs[$day]];
+    }
+    $parts = [];
+    foreach ($runs as $r) $parts[] = ($r['start'] === $r['end'] ? $order[$r['start']] : $order[$r['start']] . "\u{2013}" . $order[$r['end']]) . ' ' . $r['t'];
+    return implode(" \u{00b7} ", $parts) . (aok_get($d, 'local.timezone', '') === 'America/Vancouver' ? ' (Pacific Time)' : '');
+}
+
+// "Serving: …" as one line of text (short city names, then the online note).
+function aok_serving_line(array $d): string {
+    $areas = aok_area_short_names($d);
+    if (!$areas) return '';
+    return implode(', ', $areas) . (aok_get($d, 'local.onlineWorldwide', true)
+        ? " \u{00b7} Worldwide online (" . implode(' & ', array_filter((array)aok_get($d, 'local.onlineChannels', ['Zoom', 'WhatsApp']))) . ')' : '');
+}
+
+// The name, address and phone block. $withDetails = false leaves out the areas and hours, which the
+// footer shows in its own full-width strip (aok_footer_details_html) so the first column stays short.
+// Mirrors napBlock() in app.js.
+function aok_nap_html(array $d, bool $withDetails = true): string {
+    // the business's name as the owner chose it for Google (see napBlock in app.js)
     $listed = trim((string)aok_get($d, 'local.listingName', '')) ?: aok_brand($d);
     $o = '<address><strong>' . aok_e($listed) . '</strong><br>' . aok_e(aok_get($d, 'person.jobTitle', 'Vedic Astrologer')) . ' ' . aok_e(aok_get($d, 'person.name', 'Jag Mallah'));
     $street = trim((string)aok_get($d, 'local.streetAddress', ''));
     if (!aok_get($d, 'local.serviceAreaBusiness', true) && $street !== '') $o .= '<br>' . aok_e($street);
     $o .= '<br>' . aok_e(aok_locality_line($d));
     if ($ph = trim((string)aok_get($d, 'contact.phone', ''))) $o .= '<br>Phone &amp; WhatsApp: <a href="tel:' . aok_e(aok_e164($ph)) . '">' . aok_e($ph) . '</a>';
-    $areas = aok_area_short_names($d);
-    if ($areas) $o .= '<br>Serving: ' . aok_e(implode(', ', $areas)) . (aok_get($d, 'local.onlineWorldwide', true) ? ' · Worldwide online (' . aok_e(implode(' & ', array_filter((array)aok_get($d, 'local.onlineChannels', ['Zoom', 'WhatsApp'])))) . ')' : '');
-    if ($hrs = aok_hours_text($d)) {
-        $p = []; foreach ($hrs as $day => $t) $p[] = $day . ' ' . $t;
-        $o .= '<br>Hours: ' . aok_e(count($hrs) === 7 && count(array_unique($hrs)) === 1 ? 'Mon–Sun ' . reset($hrs) : implode(' · ', $p))
-            . (aok_get($d, 'local.timezone', '') === 'America/Vancouver' ? ' (Pacific Time)' : '');
+    if ($withDetails) {
+        if (($sv = aok_serving_line($d)) !== '') $o .= '<br>Serving: ' . aok_e($sv);
+        if (($hl = aok_hours_line($d)) !== '') $o .= '<br>Hours: ' . aok_e($hl);
+        if ($note = trim((string)aok_get($d, 'local.hoursNote', ''))) $o .= '<br>' . aok_e($note);
     }
-    if ($note = trim((string)aok_get($d, 'local.hoursNote', ''))) $o .= '<br>' . aok_e($note);
     return $o . '</address>';
 }
 
+// The footer's full-width strip under the three columns: where the business serves, and when.
+function aok_footer_details_html(array $d): string {
+    $sv = aok_serving_line($d); $hl = aok_hours_line($d); $note = trim((string)aok_get($d, 'local.hoursNote', ''));
+    if ($sv === '' && $hl === '' && $note === '') return '';
+    $o = '<div class="aok-foot-details">';
+    if ($sv !== '') $o .= '<p><strong>Serving:</strong> ' . aok_e($sv) . '</p>';
+    if ($hl !== '' || $note !== '') $o .= '<p>' . ($hl !== '' ? '<strong>Hours:</strong> ' . aok_e($hl) : '') . ($hl !== '' && $note !== '' ? '<br>' : '') . aok_e($note) . '</p>';
+    return $o . '</div>';
+}
+
 function aok_html_footer(array $d): string {
-    $f = '<footer><p>' . aok_e(aok_text(aok_get($d, 'brand.tagline', ''))) . '</p>' . aok_nap_html($d) . aok_review_links_html($d)
-       . aok_locations_nav_html($d) . '<nav aria-label="Footer"><ul>';
+    $f = '<footer><p>' . aok_e(aok_text(aok_get($d, 'brand.tagline', ''))) . '</p>' . aok_nap_html($d, false) . aok_review_links_html($d)
+       . aok_footer_details_html($d) . aok_locations_nav_html($d) . '<nav aria-label="Footer"><ul>';
     foreach ([['/', 'Home'], ['/about', 'About Us'], ['/services', 'Services'], ['/meditation', 'Meditation'], ['/blog', 'Blog'], ['/faq', 'FAQ'], ['/contact', 'Contact']] as $l)
         $f .= '<li><a href="' . $l[0] . '">' . $l[1] . '</a></li>';
     $f .= '</ul></nav>';

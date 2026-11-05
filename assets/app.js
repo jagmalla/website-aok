@@ -1627,7 +1627,18 @@ class Component extends DCLogic {
         c.phone?h('span',null,' Call or WhatsApp ',h('a',{href:this.telHref(),className:'aok-footlink'},c.phone),'.'):null));
   }
 
-  napBlock(){ const h=React.createElement,P=this.P,d=this.state.data,L=d.local||{},pe=d.person||{},c=d.contact||{};
+  // Opening hours on one line, consecutive days with the same hours grouped ("Mon\u2013Fri 10:00\u201317:00").
+  // Mirrors aok_hours_line() in api/seo-lib.php.
+  hoursLine(){ const L=(this.state.data||{}).local||{}, H=L.hours||{};
+    const days=[['Mo','Mon'],['Tu','Tue'],['We','Wed'],['Th','Thu'],['Fr','Fri'],['Sa','Sat'],['Su','Sun']];
+    const runs=[]; days.forEach(([k,n],i)=>{ const x=H[k]; if(!x||!x.o||!x.c) return; const t=x.o+'\u2013'+x.c, r=runs[runs.length-1];
+      if(r&&r.t===t&&r.end===i-1){ r.end=i; return; } runs.push({start:i,end:i,t}); });
+    if(!runs.length) return '';
+    return runs.map(r=>(r.start===r.end?days[r.start][1]:days[r.start][1]+'\u2013'+days[r.end][1])+' '+r.t).join(' \u00b7 ')+(L.timezone==='America/Vancouver'?' (Pacific Time)':''); }
+  // "Serving: ..." as one line (short city names, then the online note). Mirrors aok_serving_line().
+  servingLine(){ const L=(this.state.data||{}).local||{}; const areas=this.areaShortNames(); if(!areas.length) return '';
+    return areas.join(', ')+(L.onlineWorldwide!==false?' \u00b7 Worldwide online ('+(L.onlineChannels||['Zoom','WhatsApp']).filter(Boolean).join(' & ')+')':''); }
+  napBlock(core){ const h=React.createElement,P=this.P,d=this.state.data,L=d.local||{},pe=d.person||{},c=d.contact||{};
     const br=k=>h('br',{key:k});
     // The listing name is the business's name exactly as Google Business Profile shows it. Search
     // engines match a business on name + address + phone being identical everywhere, so the address
@@ -1637,26 +1648,39 @@ class Component extends DCLogic {
     if(!L.serviceAreaBusiness&&L.streetAddress) parts.push(br('b1'),L.streetAddress);
     parts.push(br('b2'),this.localityLine());
     if(c.phone) parts.push(br('b3'),'Phone & WhatsApp: ',h('a',{key:'tel',href:this.telHref(),className:'aok-footlink'},c.phone));
-    const areas=this.areaShortNames(); if(areas.length) parts.push(br('b5'),'Serving: '+areas.join(', ')+(L.onlineWorldwide!==false?' \u00b7 Worldwide online ('+(L.onlineChannels||['Zoom','WhatsApp']).filter(Boolean).join(' & ')+')':''));
-    const days=[['Mo','Mon'],['Tu','Tue'],['We','Wed'],['Th','Thu'],['Fr','Fri'],['Sa','Sat'],['Su','Sun']].filter(x=>L.hours&&L.hours[x[0]]&&L.hours[x[0]].o&&L.hours[x[0]].c).map(x=>x[1]+' '+L.hours[x[0]].o+'\u2013'+L.hours[x[0]].c);
-    if(days.length) parts.push(br('b6'),'Hours: '+(days.length===7&&new Set(days.map(x=>x.slice(4))).size===1?'Mon\u2013Sun '+days[0].slice(4):days.join(' \u00b7 '))+(L.timezone==='America/Vancouver'?' (Pacific Time)':''));
-    if((L.hoursNote||'').trim()) parts.push(br('b7'),L.hoursNote.trim());
+    if(!core){ const sv=this.servingLine(), hl=this.hoursLine();
+      if(sv) parts.push(br('b5'),'Serving: '+sv);
+      if(hl) parts.push(br('b6'),'Hours: '+hl);
+      if((L.hoursNote||'').trim()) parts.push(br('b7'),L.hoursNote.trim()); }
     return h('address',{style:{fontStyle:'normal',font:'400 13.5px/1.75 Plus Jakarta Sans',color:P.ink,marginTop:18,maxWidth:360}},...parts); }
+  // The footer's full-width strip: where the business serves (wide column) and when (narrow one).
+  // It used to sit inside the first column, which made that column far taller than the other two.
+  // An inline grid, so the site-wide rule stacks it to one column at 760px and below.
+  footerDetails(){ const h=React.createElement,P=this.P,L=(this.state.data||{}).local||{};
+    const sv=this.servingLine(), hl=this.hoursLine(), note=String(L.hoursNote||'').trim();
+    if(!sv&&!hl&&!note) return null;
+    const txt={font:'400 13.5px/1.75 Plus Jakarta Sans',color:P.ink,margin:0};
+    const lab=t=>h('strong',{style:{color:P.maroon,fontWeight:600}},t+' ');
+    return h('div',{className:'aok-foot-details',style:{display:'grid',gridTemplateColumns:'minmax(0,1.7fr) minmax(0,1fr)',gap:'14px 48px',borderTop:'1px solid '+P.line,padding:'22px 0 24px'}},
+      sv? h('p',{style:txt}, lab('Serving:'), sv):h('span'),
+      (hl||note)? h('p',{style:txt}, hl?lab('Hours:'):null, hl||null, hl&&note?h('br'):null, note||null):null); }
   renderFooter(){ const h=React.createElement,P=this.P,d=this.state.data;
     const links=[['home',this.t('home')],['about',this.t('about')],['services',this.t('services')],['meditation',this.t('meditation')],['blog',this.t('blog')],['faq',this.t('faq')],['contact',this.t('contact')]];
     const head=t=>h('div',{style:{font:'600 12px '+this.HEAD,letterSpacing:'.2em',textTransform:'uppercase',color:'#8A6A2E',marginBottom:16}}, t);
     return h('footer',{className:'aok-footer'}, h('div',{className:'aok-hairline'}), this.wrap(h('div',{style:{position:'relative'}},
-      h('div',{style:{display:'grid',gridTemplateColumns:'1.4fr 1fr 1.2fr',gap:40,padding:'60px 0 38px'}},
+      h('div',{style:{display:'grid',gridTemplateColumns:'1.4fr 1fr 1.2fr',gap:40,padding:'60px 0 32px'}},
         h('div',null, h('div',{style:{display:'flex',alignItems:'center',gap:12,marginBottom:16}}, h('span',{className:'aok-brand-mark'},this.mark(46)), h('div',{className:'aok-goldtext',style:{font:'600 26px/1 '+this.SERIF}}, d.brand.name)),
-          h('p',{style:{font:'400 14.5px/1.75 Plus Jakarta Sans',maxWidth:330,margin:0,color:P.ink}}, d.brand.tagline), this.napBlock()),
+          h('p',{style:{font:'400 14.5px/1.75 Plus Jakarta Sans',maxWidth:330,margin:0,color:P.ink}}, d.brand.tagline), this.napBlock(true)),
         h('div',null, head(this.t('quicklinks')),
           h('div',{style:{display:'grid',gap:10}}, ...links.map(l=>h('a',{key:l[0],...this.linkTo(this.routeHref(l[0]),()=>this.go(l[0])),className:'aok-footlink'},l[1])))),
         h('div',null, head(this.t('follow')),
           h('div',{style:{display:'flex',gap:10,marginBottom:18,flexWrap:'wrap'}}, ...this.socialLinks().map((s,i)=>h('a',{key:i,href:s[1],target:'_blank',rel:'noopener',title:s[0],'aria-label':s[0],className:'aok-badge3d is-sm',style:{font:'600 16px/1 Plus Jakarta Sans'}},h('span',null,s[2])))),
           h('a',{...this.linkTo('/contact',()=>this.go('contact')),className:'aok-footlink'}, 'Contact form →'),
           ...this.reviewLinks().map((r,i)=>h('a',{key:'rv'+i,href:r[1],target:'_blank',rel:'noopener',className:'aok-footlink',style:{display:'block',marginTop:10}},'\u2605 '+r[0])))),
+      this.footerDetails(),
       this.liveLocations().length? h('div',{style:{borderTop:'1px solid '+P.line,padding:'22px 0 4px'}}, this.locationsNav()):null,
-      h('div',{style:{borderTop:'1px solid '+P.line,padding:'22px 0 2px',font:'400 12.5px/1.7 Plus Jakarta Sans',color:P.muted,maxWidth:800}}, h('strong',{style:{color:P.ink,fontWeight:600}},'Disclaimer: '), d.disclaimer),
+      // the divider runs the full width like the others; only the text is kept to a readable measure
+      h('div',{style:{borderTop:'1px solid '+P.line,padding:'22px 0 2px'}}, h('div',{style:{font:'400 12.5px/1.7 Plus Jakarta Sans',color:P.muted,maxWidth:800}}, h('strong',{style:{color:P.ink,fontWeight:600}},'Disclaimer: '), d.disclaimer)),
       h('div',{style:{borderTop:'1px solid '+P.line,padding:'20px 0',display:'flex',justifyContent:'space-between',alignItems:'center',flexWrap:'wrap',gap:12,font:'400 13px Plus Jakarta Sans',color:P.muted}},
         h('span',null,'© '+new Date().getFullYear()+' '+d.brand.name+'. All rights reserved.'))))); }
 

@@ -1,7 +1,20 @@
 ANALYSIS OF KARMA — Update (SEO, local SEO, AI search & security)
 ===================================================================
 
-NEW IN THIS VERSION: YOUR JUPITER-KETU ARTICLE, AND A FIXED BLOG EDITOR
+NEW IN THIS VERSION: A BALANCED FOOTER
+  • The footer's first column now holds only the name, address and phone.
+    The "Serving" list and the hours moved to a full-width strip underneath
+    the three columns, so the columns end at the same height. On a phone
+    everything stacks in order.
+  • Hours read "Mon–Fri 10:00–17:00 (Pacific Time)" instead of listing
+    the same hours five times.
+  • The note under the hours is now the one you asked for in Phase 1:
+    "Online consultations available 7 days a week by appointment". The
+    earlier update only filled an empty note, and yours already held an
+    older one, so it had never changed.
+  • The line above the disclaimer now runs the full width like the others.
+
+EARLIER: YOUR JUPITER-KETU ARTICLE, AND A FIXED BLOG EDITOR
   • Your article "Major Astrological Transit 2026: Jupiter-Ketu Conjunction
     and Neechbhang Raj Yoga" was saved as a draft, so visitors and Google saw
     "page not found". After upload it is published at
