@@ -119,6 +119,8 @@ class Component extends DCLogic {
       const none={route:'notfound',postId:null,pageId:null,serviceId:null};
       if(parts[0]==='blog'&&parts[1]){ const slug=decodeURIComponent(parts[1]); const post=((data&&data.blog)||[]).find(x=>x.slug===slug&&(x.published||this.state.editMode)); return post?{route:'blog',postId:post.id,pageId:null,serviceId:null}:none; }
       if(parts[0]==='services'&&parts[1]){ const sv=(data&&data.services)||[]; const slugs=this.serviceSlugs(sv); const s=sv.find(x=>slugs[x.id]===decodeURIComponent(parts[1]).toLowerCase()); if(s&&(s.redirectTo||s.unpublished)&&!this.state.editMode){ const r2=follow(s.redirectTo||'/services'); if(r2) return r2; } return s?{route:'service',serviceId:s.id,postId:null,pageId:null}:none; }
+      if(parts[0]==='locations'&&parts.length===1) return {route:'locations',postId:null,pageId:null,serviceId:null,locationId:null};
+      if(parts[0]==='locations'&&parts[1]){ const l=this.locationBySlug(decodeURIComponent(parts[1]),data); return l?{route:'location',locationId:l.id,postId:null,pageId:null,serviceId:null}:none; }
       const known=['about','services','meditation','blog','contact','faq']; if(parts.length===1&&known.indexOf(parts[0])>-1) return {route:parts[0],postId:null,pageId:null,serviceId:null};
       const pg=((data&&data.pages)||[]).find(p=>p.slug===decodeURIComponent(parts[0])); if(pg&&parts.length===1) return {route:'page',pageId:pg.id,postId:null,serviceId:null};
       return none; }catch(e){ return null; } }
@@ -128,6 +130,7 @@ class Component extends DCLogic {
     if(r==='blog'&&st.postId){ const p=(d.blog||[]).find(x=>x.id===st.postId); return p&&p.slug?'/blog/'+encodeURIComponent(p.slug):'/blog'; }
     if(r==='service'){ const slugs=this.serviceSlugs(d.services||[]); return slugs[st.serviceId]?'/services/'+slugs[st.serviceId]:'/services'; }
     if(r==='page'){ const pg=(d.pages||[]).find(x=>x.id===st.pageId); return pg&&pg.slug?'/'+encodeURIComponent(pg.slug):'/'; }
+    if(r==='location'){ const l=(d.locations||[]).find(x=>x.id===st.locationId); return l&&l.slug?'/locations/'+encodeURIComponent(l.slug):'/locations'; }
     if(r==='notfound') return location.pathname;
     return '/'+r; }
   // id -> URL slug for each service (custom slug, else from the title; duplicates get -2, -3 …) — same rules as aok_service_slugs()
@@ -140,7 +143,7 @@ class Component extends DCLogic {
   // a real link (crawlable, opens in a new tab with ctrl/cmd-click) that navigates inside the app on a normal click
   linkTo(href,fn,extra){ return {href,onClick:e=>{ if(e.metaKey||e.ctrlKey||e.shiftKey||e.altKey||e.button===1) return; e.preventDefault(); fn(); },...(extra||{})}; }
   routeHref(route){ return route==='home'?'/':'/'+route; }
-  checkUrl(){ const r=this._routeFromUrl(this.state.data); if(!r) return; if(r.route==='admin') this.checkAuth(); if(r.route!==this.state.route||r.postId!==this.state.postId||r.pageId!==this.state.pageId||(r.serviceId||null)!==(this.state.serviceId||null)) this.setState(r); }
+  checkUrl(){ const r=this._routeFromUrl(this.state.data); if(!r) return; if(r.route==='admin') this.checkAuth(); if(r.route!==this.state.route||r.postId!==this.state.postId||r.pageId!==this.state.pageId||(r.serviceId||null)!==(this.state.serviceId||null)||(r.locationId||null)!==(this.state.locationId||null)) this.setState(r); }
 
   // ---------- admin session (server-side login, api/auth.php) ----------
   apiHeaders(){ return {'Content-Type':'application/json','X-AOK-CSRF':this._csrf||''}; }
@@ -167,7 +170,7 @@ class Component extends DCLogic {
     try{
       fetch('/api/data.php',{ headers:{'Accept':'application/json'} })
         .then(r=>r.ok?r.json():null)
-        .then(srv=>{ if(!srv||srv.ok===false) return; const merged=this.fill(this.defaults(),srv); try{ localStorage.setItem('aok_site_v1', this._cacheJson(merged)); }catch(e){} const r=this._routeFromUrl(merged)||{}; const patch={data:merged}; if(r.route&&r.route!=='admin'){ patch.route=r.route; patch.postId=r.postId; patch.pageId=r.pageId; patch.serviceId=r.serviceId||null; } this.setState(patch,()=>{ this.syncHead(); }); })
+        .then(srv=>{ if(!srv||srv.ok===false) return; const merged=this.fill(this.defaults(),srv); try{ localStorage.setItem('aok_site_v1', this._cacheJson(merged)); }catch(e){} const r=this._routeFromUrl(merged)||{}; const patch={data:merged}; if(r.route&&r.route!=='admin'){ patch.route=r.route; patch.postId=r.postId; patch.pageId=r.pageId; patch.serviceId=r.serviceId||null; patch.locationId=r.locationId||null; } this.setState(patch,()=>{ this.syncHead(); }); })
         .catch(()=>{});
     }catch(e){}
   }
@@ -253,10 +256,13 @@ class Component extends DCLogic {
   flash(msg){ this.setState({toast:msg}); clearTimeout(this._tt); this._tt=setTimeout(()=>this.setState({toast:null}),2200); }
   uid(){ return 'x'+Math.random().toString(36).slice(2,9); }
 
-  go(route, extra){ this.setState({route, menuOpen:false, postId:null, serviceId:null, ...(extra||{})}); window.scrollTo&&window.scrollTo(0,0); }
+  go(route, extra){ this.setState({route, menuOpen:false, postId:null, serviceId:null, locationId:null, ...(extra||{})}); window.scrollTo&&window.scrollTo(0,0); }
 
   // ---------- defaults ----------
   defaults(){
+    const loc=(slug,title,question,answer,o)=>({id:this.uid(),slug,title,question,answer,
+      scope:o.scope||'',cityLabel:o.cityLabel||'Areas served',cities:o.cities||[],format:o.format||'',
+      timezones:o.timezones||'',areas:o.areas||[],...(o.inPerson?{inPerson:true}:{}),...(o.travel?{travel:o.travel}:{}),detail:''});
     const svc=(icon,title,price,desc,detail)=>{ const sl=this.serviceRoute(title); return {id:this.uid(),icon,title,...(sl?{slug:sl}:{}),price,desc,...(detail?{detail}:{}),image:null,...this.serviceTableFields(sl)}; };
     return {
       brand:{ name:'Analysis of Karma', astrologer:'Jag Mallah', tagline:'Vedic astrology guidance for love, career, health & life\u2019s bigger questions.', logo:null },
@@ -274,9 +280,11 @@ class Component extends DCLogic {
         gbpPrimaryCategory:'Astrologer', gbpAdditionalCategories:['Spiritual Consultant','Psychic','Vedic Astrology & Karmic Consultation Service'],
         serviceAreaBusiness:false, streetAddress:'15450 92a Ave', locality:'Surrey', region:'British Columbia', regionCode:'BC', postalCode:'V3R 9B1',
         listingName:'Analysis of Karma - Vedic astrology & Meditation | Vedic Astrologer Jag Mallah', hoursNote:'Online consultations available 7 days a week by appointment', country:'CA',
-        lat:'49.1712', lng:'-122.7939',   // the Business Profile pin at 92 Ave & 154 St, not the centre of Surrey areasServed:['Surrey, BC, Canada','Vancouver, BC, Canada','Delta, BC, Canada','Langley, BC, Canada','Abbotsford, BC, Canada','Chilliwack, BC, Canada','Maple Ridge, BC, Canada','British Columbia, Canada','Canada','Washington, USA','United States','United Kingdom','Punjab, India','Delhi, India','Haryana, India','Mumbai, Maharashtra, India','India'],
+        // the Business Profile pin at 92 Ave and 154 St, not the centre of Surrey
+        lat:'49.1712', lng:'-122.7939',
+        areasServed:['Surrey, BC, Canada','Vancouver, BC, Canada','Burnaby, BC, Canada','Richmond, BC, Canada','Delta, BC, Canada','New Westminster, BC, Canada','Coquitlam, BC, Canada','Langley, BC, Canada','Abbotsford, BC, Canada','Chilliwack, BC, Canada','Maple Ridge, BC, Canada','Victoria, BC, Canada','Nanaimo, BC, Canada','Kelowna, BC, Canada','Kamloops, BC, Canada','Prince George, BC, Canada','British Columbia, Canada','Canada','Washington, USA','United States','United Kingdom','Punjab, India','Delhi, India','Haryana, India','Mumbai, Maharashtra, India','India'],
         neighbourhoods:['Newton','Fleetwood','Cloverdale','Guildford','Panorama Ridge','South Surrey'],
-        nearbyLabel:'Lower Mainland & Fraser Valley', nearbyCities:['Vancouver','Delta','Langley','Abbotsford','Chilliwack','Maple Ridge'],
+        nearbyLabel:'Lower Mainland & Fraser Valley', nearbyCities:['Vancouver','Burnaby','Richmond','Delta','Langley','Abbotsford','Chilliwack','Maple Ridge'],
         abroad:['the United States (Washington State)','the United Kingdom','India (Punjab, Delhi, Haryana and Mumbai)'],
         onlineWorldwide:true, onlineChannels:['Zoom','WhatsApp'],
         hours:{Mo:{o:'10:00',c:'17:00'},Tu:{o:'10:00',c:'17:00'},We:{o:'10:00',c:'17:00'},Th:{o:'10:00',c:'17:00'},Fr:{o:'10:00',c:'17:00'}},
@@ -384,6 +392,66 @@ class Component extends DCLogic {
         svc('\u2645','Gemstone Recommendation','$100 CAD','Which gemstone genuinely suits your chart (and which to avoid), with the right finger, metal, weight and energising ritual.',
           'Gemstones strengthen a beneficial planet, but the wrong stone can do harm \u2014 so this service begins with a careful study of your chart. We identify which planets need support and which stone (and which to avoid) is right for you, from ruby and pearl to yellow and blue sapphire, emerald, coral and diamond.\n\nYou receive clear guidance on the correct carat weight, metal and finger, and the day and mantra for energising and wearing it, so the gemstone works with your chart rather than against it.'),
         svc('\u262f','Vedic Meditation Guidance','$100 CAD','A personalised meditation, mantra and breath practice matched to your chart to steady the mind and support your remedies.')
+      ],
+      // ---------- geo hubs (/locations/{slug}) ----------
+      // One page per place people actually search from. Each opens with the question they type and
+      // answers it in 40-60 words, then states the format, the time zones covered and the fee, so an
+      // answer engine can quote the whole thing without reading the rest of the site.
+      // inPerson: the one page with a street address and a map. The rest are online-only.
+      locationsPage:{ hero:{ title:'Vedic astrology consultations, where you are',
+        sub:'In person in Surrey, British Columbia, and live one-to-one on Zoom, WhatsApp or the phone across Canada, the United States, the United Kingdom and India — in English, Hindi or Punjabi.' } },
+      locations:[
+        loc('vedic-astrologer-surrey-bc','Vedic Astrologer in Surrey, BC',
+          'Where Can I Book an Authentic Vedic Astrologer in Surrey, BC?',
+          'Independent Vedic Astrologer Jag Mallah provides 60-minute 1-on-1 Kundli readings, marriage matching (Kundli Milan), Dosha analysis, and Vedic meditation guidance in Surrey, BC from 15450 92a Ave (Fleetwood) and online via Zoom or WhatsApp. Consultations are offered in English, Hindi, and Punjabi for $100 CAD/hr, with payment after satisfaction.',
+          { areas:[['City','Surrey, BC, Canada']], inPerson:true, scope:'Surrey, British Columbia',
+            cityLabel:'Neighbourhoods served from the Fleetwood office',
+            cities:['Fleetwood','Newton','Guildford','Cloverdale','Panorama Ridge','Whalley','City Centre','South Surrey'],
+            format:'In person by appointment, or live on Zoom, WhatsApp or the phone',
+            timezones:'Pacific Time (PST / PDT)',
+            travel:'The office is on 92a Avenue in Fleetwood, a short drive from Newton along 152 Street, from Guildford down 152 Street or 104 Avenue, and from Cloverdale along the Fraser Highway.' }),
+        loc('vedic-astrologer-vancouver-lower-mainland','Vedic Astrologer for Vancouver & the Lower Mainland',
+          'How Do Clients in Vancouver, Burnaby, Langley, and Abbotsford Consult With Jag Mallah?',
+          'Clients across Metro Vancouver and the Fraser Valley—including Vancouver, Burnaby, Richmond, Delta, Langley, Abbotsford, and Chilliwack—can book live 60-minute Zoom or WhatsApp screen-share consultations or schedule an appointment at our Surrey office. Every session ($100 CAD/hr, pay after satisfaction) examines your Sidereal Lagna, Navamsha, and Vimshottari Dasha.',
+          { areas:[['City','Vancouver, BC, Canada'],['City','Burnaby, BC, Canada'],['City','Richmond, BC, Canada'],['City','Delta, BC, Canada'],['City','New Westminster, BC, Canada'],['City','Coquitlam, BC, Canada'],['City','Langley, BC, Canada'],['City','Abbotsford, BC, Canada'],['City','Chilliwack, BC, Canada'],['City','Maple Ridge, BC, Canada']], scope:'Metro Vancouver & the Fraser Valley', cityLabel:'Cities served',
+            cities:['Vancouver','Burnaby','Richmond','Delta','North Delta','Ladner','Tsawwassen','New Westminster','Coquitlam','Langley','Abbotsford','Chilliwack','Maple Ridge'],
+            format:'Live 1-on-1 on Zoom, WhatsApp or the phone, or in person at the Surrey office by appointment',
+            timezones:'Pacific Time (PST / PDT)' }),
+        loc('vedic-astrologer-british-columbia','Vedic Astrologer for British Columbia',
+          'Are Live 1-on-1 Vedic Astrology Consultations Available Throughout British Columbia?',
+          'Yes. Analysis of Karma serves clients throughout British Columbia—including Victoria, Nanaimo, Kelowna, Kamloops, and Prince George—through live 60-minute Zoom, WhatsApp, and phone sessions on Pacific Time. Jag Mallah delivers classical Parashari birth chart readings, career timing, and unbiased gemstone guidance ($100 CAD/hr) with zero travel required.',
+          { areas:[['AdministrativeArea','British Columbia, Canada'],['City','Victoria, BC, Canada'],['City','Nanaimo, BC, Canada'],['City','Kelowna, BC, Canada'],['City','Kamloops, BC, Canada'],['City','Prince George, BC, Canada']], scope:'British Columbia', cityLabel:'Communities served across the province',
+            cities:['Victoria','Saanich','Nanaimo','Kelowna','Vernon','Penticton','Kamloops','Prince George','Vancouver Island','the Okanagan','the BC Interior','the BC coast'],
+            format:'Live 1-on-1 on Zoom, WhatsApp or the phone — no travel required',
+            timezones:'Pacific Time (PST / PDT), and Mountain Time in the Kootenays' }),
+        loc('online-vedic-astrologer-canada','Online Vedic Astrologer for Canada',
+          'How Do Online Vedic Astrology Consultations Work Across Canada?',
+          'Clients across Canada—including Brampton, Toronto, Mississauga, Calgary, Edmonton, Winnipeg, Ottawa, and Montreal—connect live with Surrey-based Vedic Astrologer Jag Mallah via Zoom or WhatsApp. Sessions last 60 minutes ($100 CAD/hr via Interac e-Transfer after you are satisfied) and accommodate Mountain, Central, Eastern, and Atlantic time zones.',
+          { areas:[['Country','Canada']], scope:'Canada', cityLabel:'Cities served coast to coast',
+            cities:['Brampton','Mississauga','Toronto','Markham','Ottawa','Hamilton','Kitchener–Waterloo','Calgary','Edmonton','Red Deer','Winnipeg','Saskatoon','Regina','Montreal','Halifax'],
+            format:'Live 1-on-1 on Zoom, WhatsApp or the phone',
+            timezones:'Pacific, Mountain, Central, Eastern and Atlantic Time' }),
+        loc('online-vedic-astrologer-usa','Online Vedic Astrologer for the United States',
+          'Can Clients in the United States Book Online Vedic Astrology Readings With Jag Mallah?',
+          'Yes. Clients across the United States—from Seattle and California to New York, New Jersey, Texas, and Chicago—book live 60-minute 1-on-1 consultations via Zoom or WhatsApp. Operating on Pacific Time, Jag Mallah provides convenient daytime and evening slots for US time zones ($100 CAD/hr, paid only after satisfaction).',
+          { areas:[['Country','United States']], scope:'the United States', cityLabel:'States and metro areas served',
+            cities:['Seattle','Bellevue','Bellingham','Tacoma','Kent','San Francisco Bay Area','San Jose','Fremont','Sacramento','Fresno','Los Angeles','San Diego','New York','New Jersey (Edison, Jersey City)','Dallas','Houston','Austin','Chicago','Atlanta','Virginia','Michigan'],
+            format:'Live 1-on-1 on Zoom, WhatsApp or the phone',
+            timezones:'Pacific, Mountain, Central and Eastern Time' }),
+        loc('online-vedic-astrologer-uk','Online Vedic Astrologer for the United Kingdom',
+          'How Do Clients in the United Kingdom Schedule Live Vedic Astrology Sessions?',
+          'Clients throughout the United Kingdom—including London, Southall, Wembley, Birmingham, Leicester, Manchester, and Glasgow—consult live with Jag Mallah via WhatsApp or Zoom. Morning appointments in British Columbia align seamlessly with UK late-afternoon and evening hours (5:00 PM to 11:00 PM GMT/BST), conducted in English, Hindi, or Punjabi.',
+          { areas:[['Country','United Kingdom']], scope:'the United Kingdom', cityLabel:'Cities and communities served',
+            cities:['London','Southall','Wembley','Hounslow','Harrow','Ilford','Croydon','Birmingham','Wolverhampton','Coventry','Leicester','Manchester','Leeds','Bradford','Glasgow','Edinburgh'],
+            format:'Live 1-on-1 on WhatsApp or Zoom',
+            timezones:'GMT / BST — late-afternoon and evening slots, 5:00 PM to 11:00 PM UK time' }),
+        loc('online-vedic-astrologer-india','Online Vedic Astrologer for India',
+          'How Can Clients in Punjab, Delhi NCR, and Across India Consult With Jag Mallah?',
+          'Clients across India—including Chandigarh, Ludhiana, Amritsar, Jalandhar, Delhi NCR, Haryana, and Mumbai—can book 1-on-1 WhatsApp or Zoom consultations directly in Punjabi, Hindi, or English. Early-morning and evening IST time slots allow seamless live Kundli readings, NRI marriage matching, and career consultations with Jag Mallah.',
+          { areas:[['Country','India']], scope:'India', cityLabel:'States and cities served',
+            cities:['Chandigarh','Mohali','Ludhiana','Amritsar','Jalandhar','Patiala','Bathinda','New Delhi','Gurugram','Noida','Faridabad','Karnal','Ambala','Panipat','Panchkula','Himachal Pradesh','Uttar Pradesh','Rajasthan','Mumbai','Pune','Ahmedabad','Vadodara','Bengaluru','Hyderabad'],
+            format:'Live 1-on-1 on WhatsApp or Zoom',
+            timezones:'IST — early-morning and evening slots' })
       ],
       blogPage:{ hero:{ title:'Vedic astrology blog \u2014 Jyotish notes & remedies', sub:'Plain-language writing on Vedic astrology, doshas, nakshatras, remedies and meditation from Jag Mallah.' } },
       blog:[
@@ -702,7 +770,7 @@ class Component extends DCLogic {
   }
 
   // ---------- page switch ----------
-  renderPage(){ switch(this.state.route){ case 'about':return this.renderAbout(); case 'services':return this.renderServices(); case 'blog':return this.state.postId?this.renderPost():this.renderBlog(); case 'meditation':return this.renderMeditation(); case 'contact':return this.renderContact(); case 'page':return this.renderCustomPage(); case 'faq':return this.renderFaq(); case 'service':return this.renderServiceDetail(); case 'notfound':return this.renderNotFound(); default:return this.renderHome(); } }
+  renderPage(){ switch(this.state.route){ case 'locations':return this.renderLocations(); case 'location':return this.renderLocation(); case 'about':return this.renderAbout(); case 'services':return this.renderServices(); case 'blog':return this.state.postId?this.renderPost():this.renderBlog(); case 'meditation':return this.renderMeditation(); case 'contact':return this.renderContact(); case 'page':return this.renderCustomPage(); case 'faq':return this.renderFaq(); case 'service':return this.renderServiceDetail(); case 'notfound':return this.renderNotFound(); default:return this.renderHome(); } }
   renderCustomPage(){ const h=React.createElement,P=this.P,d=this.state.data; const pg=(d.pages||[]).find(p=>p.id===this.state.pageId);
     if(!pg) return this.renderNotFound();
     const showHero=pg.showTitle!==false;
@@ -1175,6 +1243,93 @@ class Component extends DCLogic {
       this.serviceCompareTable(),
       this.ctaBand('home.cta')); }
 
+  // ---------- GEO HUBS (/locations and /locations/{slug}) ----------
+  // One page per place people search from. Mirrors aok_location_page_html in api/seo-lib.php.
+  liveLocations(){ return ((this.state.data||{}).locations||[]).filter(l=>l&&l.slug&&(!l.unpublished||this.state.editMode)); }
+  locationBySlug(slug,data){ const ls=((data||this.state.data||{}).locations)||[];
+    return ls.find(l=>l&&String(l.slug||'').toLowerCase()===String(slug||'').toLowerCase())||null; }
+  locationHref(l){ return '/locations/'+encodeURIComponent(l.slug); }
+  goLocation(l){ this.go('location',{locationId:l.id}); }
+
+  // the facts every hub states outright, in the same order as the server's version
+  locationFacts(l){ const d=this.state.data||{}, L=d.local||{}, pr=(d.about&&d.about.pricing)||{};
+    const langs=(L.languages||[]).filter(Boolean);
+    const fee=[pr.fee,pr.unit].filter(Boolean).join(' ');
+    const out=[];
+    if((l.format||'').trim()) out.push(['Consultation format',l.format]);
+    out.push(['Session length',L.sessionLength||'60 minutes']);
+    if((l.timezones||'').trim()) out.push(['Time zones served',l.timezones]);
+    if(langs.length) out.push(['Languages',this.joinList(langs)]);
+    if(fee) out.push(['Fee',fee+((L.paymentPolicy||'').trim()?', paid after the consultation':'')]);
+    return out; }
+
+  renderLocations(){ const h=React.createElement,P=this.P; const ls=this.liveLocations();
+    return h('main',{style:{animation:'aokfade .4s'}}, this.pageHero('locationsPage.hero','locations'),
+      h('section',{style:{padding:'70px 0'}}, this.wrap(
+        h('div',{style:{display:'grid',gridTemplateColumns:'repeat(2,minmax(0,1fr))',gap:24}}, ...ls.map(l=>{
+          const open=()=>this.goLocation(l);
+          return h('div',{key:l.id,className:'aok-card aok-reveal',onClick:e=>{ if(e.target.closest&&e.target.closest('a,button')) return; open(); },style:{padding:'26px 28px',cursor:'pointer',display:'flex',flexDirection:'column',gap:10}},
+            h('h2',{style:{font:'700 20px '+this.HEAD,color:P.maroon,margin:0}},
+              h('a',this.linkTo(this.locationHref(l),open,{className:'aok-tap',style:{color:'inherit'}}),l.title)),
+            h('p',{style:{font:'400 15px/1.7 Plus Jakarta Sans',color:P.muted,margin:0}},this.cut(l.answer,180)),
+            h('div',{style:{marginTop:'auto',paddingTop:6,font:'700 14px '+this.HEAD,color:'#8A6A2E'}},
+              h('a',this.linkTo(this.locationHref(l),open,{className:'aok-tap',style:{color:'inherit'}}),'Read more →'))); })))),
+      this.ctaBand('home.cta')); }
+
+  renderLocation(){ const h=React.createElement,P=this.P,d=this.state.data;
+    const l=(d.locations||[]).find(x=>x.id===this.state.locationId);
+    if(!l) return this.renderNotFound();
+    const crumb=(t,href,fn)=>h('a',this.linkTo(href,fn,{className:'aok-tap',style:{color:'inherit',textDecoration:'none'}}),t);
+    const cities=(l.cities||[]).filter(Boolean);
+    return h('main',{style:{animation:'aokfade .4s'}},
+      h('section',{style:{padding:'40px 0 0'}}, this.wrap([
+        h('nav',{key:'b','aria-label':'Breadcrumb',style:{font:'500 13px '+this.HEAD,color:P.muted,marginBottom:18}},
+          crumb('Home','/',()=>this.go('home')),' › ',crumb('Locations','/locations',()=>this.go('locations')),' › ',h('span',null,l.title)),
+        h('h1',{key:'h',style:{font:'600 clamp(30px,4.4vw,48px)/1.1 '+this.SERIF,color:P.maroon,margin:'0 0 18px'}},l.title)])),
+
+      h('section',{style:{padding:'26px 0 0'}}, this.wrap([
+        h('h2',{key:'q',style:{font:'600 clamp(22px,2.7vw,30px)/1.2 '+this.SERIF,color:P.maroon,margin:'0 0 12px'}},l.question),
+        h('aside',{key:'a',className:'aok-answer'},h('p',{style:{margin:0}},l.answer))])),
+
+      h('section',{style:{padding:'34px 0 0'}}, this.wrap(
+        h('div',{className:'aok-feats'}, ...this.locationFacts(l).map(([k,v],i)=>
+          h('div',{key:i,className:'aok-feat'}, h('h3',null,k), h('p',{style:{font:'400 15px/1.6 Plus Jakarta Sans',color:P.ink,margin:0}},v)))))),
+
+      cities.length? h('section',{style:{padding:'44px 0 0'}}, this.wrap([
+        h('h2',{key:'h',style:{font:'600 clamp(21px,2.4vw,27px)/1.25 '+this.SERIF,color:P.maroon,margin:'0 0 14px'}},l.cityLabel||'Areas served'),
+        h('ul',{key:'u',className:'aok-chips'}, ...cities.map((c,i)=>h('li',{key:i},c)))])):null,
+
+      l.inPerson? h('section',{style:{padding:'44px 0 0'}}, this.wrap([
+        h('div',{key:'l'}, this.locationBlock()),
+        (l.travel||'').trim()? h('p',{key:'t',style:{font:'400 15.5px/1.75 Plus Jakarta Sans',color:P.ink,margin:'14px 0 18px'}},l.travel):null,
+        h('div',{key:'m'}, this.mapCard('21/9'))])):null,
+
+      (l.detail||'').trim()? h('section',{style:{padding:'40px 0 0'}}, this.wrap(
+        h('div',null,...this.mdRender(l.detail)))):null,
+
+      h('section',{style:{padding:'54px 0 0'}}, this.wrap(this.locationServicesBlock(l))),
+
+      h('section',{style:{padding:'54px 0 0'}}, this.wrap(this.locationsNav(l.slug))),
+      this.ctaBand('home.cta')); }
+
+  // every hub links on to the consultations themselves, using the same cards as the article pages
+  locationServicesBlock(l){ const h=React.createElement; const svc=this.liveServices().slice(0,7); if(!svc.length) return null;
+    return h('section',{'aria-labelledby':'loc-services-h',className:'aok-svc-wide aok-svc-rel'},
+      h('div',{className:'aok-svc-head is-center'},
+        h('h2',{id:'loc-services-h',className:'aok-svc-h2'},'Consultations available'+(l.scope?' in '+l.scope:'')),
+        h('p',{className:'aok-svc-sub'},'Every reading below is held one-to-one, in the formats and time zones above.')),
+      h('div',{className:'aok-rel-grid'}, ...svc.map(sv=>h('a',this.linkTo(this.serviceHref(sv),()=>this.go('service',{serviceId:sv.id}),{key:sv.id,className:'aok-card aok-rel-card'}),
+        h('div',{style:{marginBottom:12}},this.badge(sv.icon)), h('div',{className:'aok-rel-t'},sv.title),
+        h('div',{className:'aok-rel-x'},this.cut(this.txt(sv.desc),120)), h('span',{className:'aok-rel-more'},'Explore '+this.txt(sv.title)+' \u2192'))))); }
+
+  // the block of links to every other hub: in the footer, and at the foot of each hub page
+  locationsNav(except){ const h=React.createElement; const ls=this.liveLocations().filter(l=>!except||String(l.slug)!==String(except));
+    if(!ls.length) return null;
+    return h('nav',{'aria-label':'Locations and online consultations worldwide'},
+      h('h3',{style:{font:'700 12px '+this.HEAD,letterSpacing:'.14em',textTransform:'uppercase',color:'var(--aok-gold-label)',margin:'0 0 12px'}},'In-person & online consultations worldwide'),
+      h('ul',{className:'aok-chips'}, ...ls.map(l=>h('li',{key:l.id},
+        h('a',this.linkTo(this.locationHref(l),()=>this.goLocation(l),{className:'aok-tap',style:{color:'inherit',textDecoration:'none'}}),l.title))))); }
+
   // ---------- MEDITATION ----------
   renderMeditation(){ const h=React.createElement,P=this.P,d=this.state.data; const m=d.meditation||{hero:{},intro:{},offerings:[]}; const em=this.state.editMode;
     return h('main',{style:{animation:'aokfade .4s'}},
@@ -1249,15 +1404,30 @@ class Component extends DCLogic {
 
   fmtDate(s){ try{ return new Date(s).toLocaleDateString('en-IN',{day:'numeric',month:'long',year:'numeric'}); }catch(e){ return s; } }
 
-  // ---------- CONTACT ----------
-  renderContact(){ const h=React.createElement,P=this.P,d=this.state.data; const c=d.contact;
+  // Which map to show: pasted embed code wins, then an embeddable URL built from the map link or the
+  // address, with the Business Profile link as the fallback. Used by the contact page and the Surrey
+  // geo hub, so the two can never show different pins.
+  mapInfo(){ const c=(this.state.data||{}).contact||{};
     const mq=c.mapQuery||c.address; const mapEmbed=(c.mapEmbed||'').trim(); const raw=(c.mapUrl||'').trim();
     const isEmbedUrl=u=>/output=embed|\/maps\/embed/i.test(u||''); const isShort=/(share\.google|goo\.gl|maps\.app\.goo\.gl|g\.co\/)/i.test(raw); const looksUrl=/^https?:\/\//i.test(raw);
     const coord=raw.match(/@(-?\d+\.\d+),(-?\d+\.\d+)/)||raw.match(/[?&]q=(-?\d+\.\d+),(-?\d+\.\d+)/);
     let mapSrc=null;
     if(raw){ if(isEmbedUrl(raw)) mapSrc=raw; else if(coord) mapSrc='https://maps.google.com/maps?q='+coord[1]+','+coord[2]+'&z=15&ie=UTF8&iwloc=&output=embed'; else if(isShort||looksUrl) mapSrc=null; else mapSrc='https://maps.google.com/maps?q='+encodeURIComponent(raw)+'&t=&z=14&ie=UTF8&iwloc=&output=embed'; }
     else if(mq){ mapSrc='https://maps.google.com/maps?q='+encodeURIComponent(mq)+'&t=&z=14&ie=UTF8&iwloc=&output=embed'; }
-    const mapLink=this.safeHref((looksUrl?raw:'')||c.gmb||(raw?('https://maps.google.com/maps?q='+encodeURIComponent(raw)):''));
+    return {mapEmbed, mapSrc, mapLink:this.safeHref((looksUrl?raw:'')||c.gmb||(raw?('https://maps.google.com/maps?q='+encodeURIComponent(raw)):''))}; }
+
+  // The map on a geo hub with a street address: the same pin as the contact page, no edit overlay.
+  mapCard(ratio){ const h=React.createElement,P=this.P; const {mapEmbed,mapSrc,mapLink}=this.mapInfo();
+    const inner = mapEmbed ? h('div',{className:'aok-mapembed',style:{width:'100%',height:'100%'},dangerouslySetInnerHTML:{__html:this.cleanHtml(mapEmbed,{frames:true})}})
+      : mapSrc ? h('iframe',{src:mapSrc,style:{width:'100%',height:'100%',border:0},loading:'lazy',title:'Business location map'})
+      : mapLink ? h('a',{href:mapLink,target:'_blank',rel:'noopener',style:{height:'100%',display:'flex',alignItems:'center',justifyContent:'center',textDecoration:'none',font:'600 16px '+this.HEAD,color:P.maroon}},'Open in Google Maps \u2192')
+      : null;
+    return inner ? h('div',{className:'aok-card',style:{padding:8}},
+      h('div',{style:{position:'relative',borderRadius:14,overflow:'hidden',aspectRatio:ratio||'16/9',background:P.bgAlt}}, inner)) : null; }
+
+  // ---------- CONTACT ----------
+  renderContact(){ const h=React.createElement,P=this.P,d=this.state.data; const c=d.contact;
+    const {mapEmbed,mapSrc,mapLink}=this.mapInfo();
     const rows=[c.phone&&['Phone',c.phone,this.telHref()],c.whatsapp&&['WhatsApp',c.whatsapp,this.waUrl()],c.bookingUrl&&['Book online','Choose a time',c.bookingUrl],c.address&&['Visit',c.address,null]].filter(Boolean);
     const pearl='radial-gradient(120% 90% at 30% 10%,#FFFFFF 0%,#F7F1E6 55%,#EADDC3 100%)';
     return h('main',{style:{animation:'aokfade .4s'}}, this.pageHero('contactPage','contact'),
@@ -1482,6 +1652,7 @@ class Component extends DCLogic {
           h('div',{style:{display:'flex',gap:10,marginBottom:18,flexWrap:'wrap'}}, ...this.socialLinks().map((s,i)=>h('a',{key:i,href:s[1],target:'_blank',rel:'noopener',title:s[0],'aria-label':s[0],className:'aok-badge3d is-sm',style:{font:'600 16px/1 Plus Jakarta Sans'}},h('span',null,s[2])))),
           h('a',{...this.linkTo('/contact',()=>this.go('contact')),className:'aok-footlink'}, 'Contact form →'),
           ...this.reviewLinks().map((r,i)=>h('a',{key:'rv'+i,href:r[1],target:'_blank',rel:'noopener',className:'aok-footlink',style:{display:'block',marginTop:10}},'\u2605 '+r[0])))),
+      this.liveLocations().length? h('div',{style:{borderTop:'1px solid '+P.line,padding:'22px 0 4px'}}, this.locationsNav()):null,
       h('div',{style:{borderTop:'1px solid '+P.line,padding:'22px 0 2px',font:'400 12.5px/1.7 Plus Jakarta Sans',color:P.muted,maxWidth:800}}, h('strong',{style:{color:P.ink,fontWeight:600}},'Disclaimer: '), d.disclaimer),
       h('div',{style:{borderTop:'1px solid '+P.line,padding:'20px 0',display:'flex',justifyContent:'space-between',alignItems:'center',flexWrap:'wrap',gap:12,font:'400 13px Plus Jakarta Sans',color:P.muted}},
         h('span',null,'© '+new Date().getFullYear()+' '+d.brand.name+'. All rights reserved.'))))); }

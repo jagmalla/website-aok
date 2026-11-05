@@ -47,9 +47,12 @@ if (realpath((string)($_SERVER['SCRIPT_FILENAME'] ?? '')) === __FILE__) { http_r
 // Version 9:
 //   The map pin, the currencies and two more Google links for the entity graph. The shipped
 //   coordinates were the middle of Surrey, not the Business Profile's pin at 92 Ave and 154 St.
+// Version 10:
+//   The seven geo hubs (/locations/...), their index page, and the cities they name added to the
+//   service areas. Hubs the owner has edited or deleted are left alone.
 // Only text that is still exactly as first shipped is replaced. Text you have edited is kept. Nothing is deleted.
 
-const AOK_CONTENT_VERSION = 9;
+const AOK_CONTENT_VERSION = 10;
 
 // fingerprints (md5 of the normalised text) of the originally shipped FAQ answers, by question
 const AOK_OLD_FAQ = [
@@ -134,6 +137,7 @@ function aok_upgrade_payload(array $d): array {
     if ($v < 7) $d = aok_upgrade_v7($d, $def);
     if ($v < 8) $d = aok_upgrade_v8($d, $def);
     if ($v < 9) $d = aok_upgrade_v9($d, $def);
+    if ($v < 10) $d = aok_upgrade_v10($d, $def);
     $d['contentVersion'] = AOK_CONTENT_VERSION;
     return $d;
 }
@@ -579,5 +583,34 @@ function aok_upgrade_v9(array $d, array $def): array {
         else $L[$key] = array_values($cur);
     }
     unset($L);
+    return $d;
+}
+
+// v10: the geo hubs. One page per place people search from, each answering the question they type
+// there. Added by slug, so a hub the owner has deleted stays deleted and one they have edited is
+// left exactly as they left it.
+function aok_upgrade_v10(array $d, array $def): array {
+    if (!isset($d['locations']) || !is_array($d['locations'])) $d['locations'] = [];
+    $have = [];
+    foreach ($d['locations'] as $l) if (is_array($l) && ($sl = strtolower(trim((string)($l['slug'] ?? '')))) !== '') $have[$sl] = 1;
+    foreach ((array)($d['deletedLocations'] ?? []) as $sl) $have[strtolower((string)$sl)] = 1;
+    foreach ((array)aok_get($def, 'locations', []) as $l) {
+        $sl = strtolower(trim((string)($l['slug'] ?? '')));
+        if ($sl !== '' && empty($have[$sl])) { $d['locations'][] = $l; $have[$sl] = 1; }
+    }
+    if (!isset($d['locationsPage']) || !is_array($d['locationsPage'])) $d['locationsPage'] = (array)aok_get($def, 'locationsPage', []);
+
+    // the cities the hubs name, added to the service areas so the structured data covers them too
+    foreach (['areasServed', 'nearbyCities'] as $k) {
+        $cur = array_values(array_filter((array)aok_get($d, 'local.' . $k, [])));
+        $seen = [];
+        foreach ($cur as $x) $seen[mb_strtolower(aok_norm($x), 'UTF-8')] = 1;
+        foreach ((array)aok_get($def, 'local.' . $k, []) as $x) {
+            $n = mb_strtolower(aok_norm($x), 'UTF-8');
+            if ($n !== '' && empty($seen[$n])) { $cur[] = $x; $seen[$n] = 1; }
+        }
+        if (!isset($d['local']) || !is_array($d['local'])) $d['local'] = [];
+        $d['local'][$k] = $cur;
+    }
     return $d;
 }

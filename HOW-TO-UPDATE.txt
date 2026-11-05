@@ -1,7 +1,30 @@
 ANALYSIS OF KARMA — Update (SEO, local SEO, AI search & security)
 ===================================================================
 
-NEW IN THIS VERSION: ONE BUSINESS, NOT THREE, IN THE SEARCH-ENGINE DATA
+NEW IN THIS VERSION: SEVEN NEW PAGES, ONE PER PLACE YOU WORK
+  • Seven new pages under /locations/ : Surrey BC, Vancouver & the Lower
+    Mainland, British Columbia, Canada, the United States, the United Kingdom
+    and India. Plus an index at /locations listing all seven.
+  • Each one opens with the question people in that place actually type —
+    "Where Can I Book an Authentic Vedic Astrologer in Surrey, BC?" — and
+    answers it in about 50 words, then states the consultation format, session
+    length, time zones, languages and fee, and names the cities it covers.
+  • The Surrey page is the only one with the street address and the Google
+    map, plus driving directions from Newton, Guildford and Cloverdale. The
+    other six are online-only, as they should be.
+  • Every page of the site now has a "In-person & online consultations
+    worldwide" block in the footer linking to all seven, so Google and the AI
+    crawlers find them from anywhere on the site.
+  • Each page also links to the seven consultations, and to the other six
+    locations, so nothing is more than two clicks from the home page.
+  • Service areas in your search-engine data grew from 18 to 27: Burnaby,
+    Richmond, New Westminster, Coquitlam, Victoria, Nanaimo, Kelowna, Kamloops
+    and Prince George are now named explicitly.
+  • You can edit any of these pages: they are ordinary content in your site
+    data. Delete one and it stays deleted.
+  • Your sitemap went from 39 pages to 47.
+
+EARLIER: ONE BUSINESS, NOT THREE, IN THE SEARCH-ENGINE DATA
   • The structured data now gives your business its Google Business Profile
     name, with "Analysis of Karma" as the short alternative, and declares it
     as a LocalBusiness as well as a ProfessionalService.

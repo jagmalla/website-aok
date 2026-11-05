@@ -123,11 +123,25 @@ function aok_llms_text(array $d, bool $full): string {
     foreach ((array)aok_get($d, 'about.privacy.points', []) as $p) $o .= '- ' . $T($p['t'] ?? '') . ': ' . $T($p['d'] ?? '') . "\n";
     $o .= "\nDisclaimer: " . $T(aok_get($d, 'disclaimer', '')) . "\n";
     
+    // the geo hubs: which places are served, in which format, on which clock
+    if ($locs = aok_locations($d)) {
+        $o .= "\n## Where consultations are available\n\n";
+        foreach ($locs as $l) {
+            $u = $base . '/locations/' . rawurlencode((string)$l['slug']);
+            $bits = array_values(array_filter([$T($l['format'] ?? ''), $T($l['timezones'] ?? '')]));
+            $line = $T($l['answer'] ?? '') . ($bits ? ' ' . implode('. ', $bits) . '.' : '');
+            if ($full) $o .= '### ' . $T($l['title'] ?? '') . "\n\n$u\n\n$line\n\n"
+                . (($c = array_filter((array)($l['cities'] ?? []))) ? $T($l['cityLabel'] ?? 'Areas served') . ': ' . implode(', ', array_map($T, $c)) . "\n\n" : '');
+            else $o .= '- [' . $T($l['title'] ?? '') . "]($u): $line\n";
+        }
+    }
+
     $o .= "\n## Key pages\n\n";
     foreach ([['', 'Home'], ['about', 'About'], ['services', 'Services'], ['meditation', 'Meditation'], ['faq', 'FAQ'], ['blog', 'Blog'], ['contact', 'Contact']] as $p) {
         $r = $p[0] === '' ? 'home' : $p[0];
         $o .= "- [{$p[1]}]($base/{$p[0]}): " . $T(aok_get($d, 'seo.' . $r . '.metaDescription', '')) . "\n";
     }
+    if (aok_locations($d)) $o .= "- [Locations]($base/locations): " . $T(aok_get($d, 'locationsPage.hero.sub', '')) . "\n";
     
     if ($full) {
         $o .= "\n## About " . $person . "\n\n" . $T(aok_get($d, 'about.hero.sub', '')) . "\n\n" . $T(aok_get($d, 'about.story.body', '')) . "\n";

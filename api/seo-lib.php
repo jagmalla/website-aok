@@ -284,6 +284,11 @@ function aok_resolve(string $uri, array $d): array {
     if (!$parts) return ['type' => 'home', 'path' => '/'];
     $p0 = strtolower($parts[0]);
     if (count($parts) === 1 && in_array($p0, ['about', 'services', 'meditation', 'blog', 'contact', 'faq'], true)) return ['type' => $p0, 'path' => '/' . $p0];
+    if ($p0 === 'locations' && count($parts) === 1) return ['type' => 'locations', 'path' => '/locations'];
+    if ($p0 === 'locations' && count($parts) === 2) {
+        $l = aok_location_by_slug($d, strtolower($parts[1]));
+        if ($l) return ['type' => 'location', 'item' => $l, 'slug' => (string)$l['slug'], 'path' => '/locations/' . $l['slug']];
+    }
     if ($p0 === 'admin' && count($parts) === 1) return ['type' => 'admin', 'path' => '/admin'];
     if ($p0 === 'services' && count($parts) === 2) {
         $slugs = aok_service_slugs($d['services'] ?? []);
@@ -440,6 +445,16 @@ function aok_meta(array $d, array $r): array {
         elseif ($img = aok_service_images($d, $s)) { $m['image'] = $img[0]; $m['imageSize'] = [1200, 675]; }
         if (!empty($s['canonical'])) $m['canonical'] = aok_abs($base, $s['canonical']);
         if (!empty($s['noindex'])) $m['robots'] = 'noindex, follow';
+    } elseif ($t === 'locations') {
+        $m['title'] = aok_fit_brand(aok_text(aok_get($d, 'locationsPage.hero.title', 'Locations')), $brand);
+        $m['description'] = aok_cut(aok_text(aok_get($d, 'locationsPage.hero.sub', '')), 158);
+    } elseif ($t === 'location') {
+        $l = $r['item'];
+        // the title is the hub's own, which already names the place: no location suffix on top of it
+        $m['title'] = trim((string)($l['seoTitle'] ?? '')) ?: aok_fit_brand(aok_text($l['title'] ?? ''), $brand);
+        $m['description'] = trim((string)($l['seoDescription'] ?? '')) ?: aok_cut(aok_text($l['answer'] ?? ''), 158);
+        $m['imageAlt'] = aok_text($l['title'] ?? '') . " \u{2014} " . $brand;
+        if (!empty($l['noindex'])) $m['robots'] = 'noindex, follow';
     } elseif ($t === 'post') {
         $p = $r['item'];
         $m['title'] = aok_fit_brand(aok_text($p['title'] ?? ''), $brand);
@@ -721,7 +736,7 @@ function aok_graph(array $d, array $r, array $meta): array {
     }
 
     // the page itself
-    $types = ['about' => 'AboutPage', 'contact' => 'ContactPage', 'blog' => 'CollectionPage', 'services' => 'CollectionPage', 'faq' => 'FAQPage'];
+    $types = ['about' => 'AboutPage', 'contact' => 'ContactPage', 'blog' => 'CollectionPage', 'services' => 'CollectionPage', 'faq' => 'FAQPage', 'locations' => 'CollectionPage'];
     $page = ['@type' => $types[$r['type']] ?? 'WebPage', '@id' => $url . '#webpage', 'url' => $url, 'name' => $meta['title'],
         'description' => $meta['description'], 'isPartOf' => ['@id' => $SITE], 'inLanguage' => 'en-CA', 'dateModified' => aok_last_modified()];
     if ($r['type'] === 'home') $page['about'] = ['@id' => $ORG];
@@ -733,6 +748,7 @@ function aok_graph(array $d, array $r, array $meta): array {
     $label = ['about' => 'About', 'services' => 'Services', 'meditation' => 'Meditation', 'blog' => 'Blog', 'contact' => 'Contact', 'faq' => 'FAQ'];
     if (isset($label[$r['type']])) $crumbs[] = [$label[$r['type']], $url];
     if ($r['type'] === 'service') { $crumbs[] = ['Services', $base . '/services']; $crumbs[] = [aok_text($r['item']['title'] ?? ''), $url]; }
+    if ($r['type'] === 'location') { $crumbs[] = ['Locations', $base . '/locations']; $crumbs[] = [aok_text($r['item']['title'] ?? ''), $url]; }
     if ($r['type'] === 'post') { $crumbs[] = ['Blog', $base . '/blog']; $crumbs[] = [aok_text($r['item']['title'] ?? ''), $url]; }
     if ($r['type'] === 'page') $crumbs[] = [aok_text($r['item']['title'] ?? ''), $url];
     if (count($crumbs) > 1) {
@@ -754,6 +770,38 @@ function aok_graph(array $d, array $r, array $meta): array {
         $qs = [];
         foreach (aok_md_faq((string)($r['item']['detail'] ?? '')) as $x) $qs[] = ['@type' => 'Question', 'name' => $x[0], 'acceptedAnswer' => ['@type' => 'Answer', 'text' => $x[1]]];
         if ($qs) $graph[] = ['@type' => 'FAQPage', '@id' => $url . '#faq', 'url' => $url, 'isPartOf' => ['@id' => $SITE], 'about' => ['@id' => $node['@id']], 'mainEntity' => $qs];
+    }
+    // a geo hub: the same consultation, stated as being offered in this place. The visible question
+    // and its answer are the page's one FAQ, so they are marked up as one.
+    if ($r['type'] === 'location') {
+        $l = $r['item'];
+        $areas = [];
+        foreach ((array)($l['areas'] ?? []) as $a) {
+            $type = (string)($a[0] ?? ''); $name = aok_text($a[1] ?? '');
+            if (in_array($type, ['City', 'AdministrativeArea', 'Country', 'State', 'Place'], true) && $name !== '') $areas[] = ['@type' => $type, 'name' => $name];
+        }
+        [$price, $cur] = aok_price((string)aok_get($d, 'about.pricing.fee', '$100 CAD'));
+        $node = ['@type' => 'Service', '@id' => $url . '#service', 'name' => aok_text($l['title'] ?? ''),
+            'serviceType' => 'Vedic astrology consultation', 'description' => aok_text($l['answer'] ?? ''),
+            'url' => $url, 'provider' => [['@id' => $ORG], ['@id' => $PERSON]], 'availableLanguage' => $lang];
+        if ($areas) $node['areaServed'] = $areas;
+        if ($price !== '') $node['offers'] = ['@type' => 'Offer', 'price' => $price, 'priceCurrency' => $cur, 'url' => $base . '/contact',
+            'availability' => 'https://schema.org/InStock', 'seller' => ['@id' => $ORG]];
+        $chan = ['@type' => 'ServiceChannel', 'serviceUrl' => $base . '/contact', 'availableLanguage' => $lang];
+        if ($tel !== '') $chan['servicePhone'] = ['@type' => 'ContactPoint', 'telephone' => $tel, 'contactType' => 'customer service'];
+        $node['availableChannel'] = $chan;
+        $graph[] = $node;
+        $page['mainEntity'] = ['@id' => $node['@id']];
+        $q = aok_text($l['question'] ?? ''); $a = aok_text($l['answer'] ?? '');
+        if ($q !== '' && $a !== '') $graph[] = ['@type' => 'FAQPage', '@id' => $url . '#faq', 'url' => $url, 'isPartOf' => ['@id' => $SITE],
+            'about' => ['@id' => $node['@id']], 'mainEntity' => [['@type' => 'Question', 'name' => $q, 'acceptedAnswer' => ['@type' => 'Answer', 'text' => $a]]]];
+    }
+    if ($r['type'] === 'locations') {
+        $items = [];
+        foreach (aok_locations($d) as $i => $l) $items[] = ['@type' => 'ListItem', 'position' => $i + 1,
+            'name' => aok_text($l['title'] ?? ''), 'url' => $base . '/locations/' . rawurlencode((string)$l['slug'])];
+        if ($items) { $graph[] = ['@type' => 'ItemList', '@id' => $url . '#list', 'name' => 'Locations served', 'itemListElement' => $items];
+            $page['mainEntity'] = ['@id' => $url . '#list']; }
     }
     if ($r['type'] === 'post') {
         $p = $r['item'];
@@ -887,7 +935,7 @@ function aok_locality_line(array $d): string {
     return implode(', ', array_filter([$city, trim($reg . ' ' . $pc), $country]));
 }
 
-function aok_location_html(array $d): string {
+function aok_location_html_address(array $d): string {
     $L = (array)aok_get($d, 'local', []);
     $full = aok_address_line($d);
     if ($full === '') return '';
@@ -910,6 +958,83 @@ function aok_location_html(array $d): string {
     return $o . '</p></section>';
 }
 
+// ------------------------------------------------------------- geo hubs ----
+// One page per place people search from (/locations/{slug}), each answering the question they type
+// there. Mirrors locationBySlug / renderLocation in assets/app.js.
+
+function aok_locations(array $d): array {
+    $out = [];
+    foreach ((array)($d['locations'] ?? []) as $l) {
+        if (is_array($l) && trim((string)($l['slug'] ?? '')) !== '' && empty($l['unpublished'])) $out[] = $l;
+    }
+    return $out;
+}
+
+function aok_location_by_slug(array $d, string $slug): ?array {
+    foreach (aok_locations($d) as $l) if (strcasecmp((string)$l['slug'], $slug) === 0) return $l;
+    return null;
+}
+
+// The facts every hub states outright: how the session is held, how long it runs, which clocks it
+// covers, which languages, and what it costs. An assistant quoting the page should not have to hunt.
+function aok_location_facts(array $d, array $l): array {
+    $langs = array_values(array_filter((array)aok_get($d, 'local.languages', [])));
+    $fee = trim(aok_text(aok_get($d, 'about.pricing.fee', '')) . ' ' . aok_text(aok_get($d, 'about.pricing.unit', '')));
+    $facts = [];
+    if (($v = trim(aok_text($l['format'] ?? ''))) !== '') $facts['Consultation format'] = $v;
+    $facts['Session length'] = aok_text(aok_get($d, 'local.sessionLength', '60 minutes'));
+    if (($v = trim(aok_text($l['timezones'] ?? ''))) !== '') $facts['Time zones served'] = $v;
+    if ($langs) $facts['Languages'] = aok_join_list($langs);
+    if ($fee !== '') $facts['Fee'] = $fee . (trim((string)aok_get($d, 'local.paymentPolicy', '')) !== '' ? ', paid after the consultation' : '');
+    return $facts;
+}
+
+function aok_location_page_html(array $d, array $l): string {
+    $o = '<section aria-labelledby="loc-answer"><h2 id="loc-answer">' . aok_e(aok_text($l['question'] ?? '')) . '</h2>'
+       . '<p>' . aok_e(aok_text($l['answer'] ?? '')) . '</p></section>';
+
+    if ($facts = aok_location_facts($d, $l)) {
+        $o .= '<section aria-labelledby="loc-facts"><h2 id="loc-facts">At a glance</h2><dl>';
+        foreach ($facts as $k => $v) $o .= '<dt>' . aok_e($k) . '</dt><dd>' . aok_e($v) . '</dd>';
+        $o .= '</dl></section>';
+    }
+
+    $cities = array_values(array_filter(array_map('aok_text', (array)($l['cities'] ?? []))));
+    if ($cities) {
+        $o .= '<section aria-labelledby="loc-areas"><h2 id="loc-areas">' . aok_e(aok_text($l['cityLabel'] ?? 'Areas served')) . '</h2><ul>';
+        foreach ($cities as $c) $o .= '<li>' . aok_e($c) . '</li>';
+        $o .= '</ul></section>';
+    }
+
+    // the one hub with a street address also carries it, the map pin and how to drive there
+    if (!empty($l['inPerson'])) {
+        $o .= aok_location_html_address($d);
+        if (($t = trim(aok_text($l['travel'] ?? ''))) !== '') $o .= '<p>' . aok_e($t) . '</p>';
+    }
+
+    if (($md = trim((string)($l['detail'] ?? ''))) !== '') $o .= aok_md_html(aok_md_blocks($md), 1);
+
+    // every hub links on to the consultations themselves, so a crawler never lands in a dead end
+    if ($svc = array_slice(aok_live_services($d), 0, 7)) {
+        $scope = trim(aok_text($l['scope'] ?? ''));
+        $o .= '<section aria-labelledby="loc-services"><h2 id="loc-services">Consultations available '
+            . ($scope !== '' ? 'in ' . aok_e($scope) : 'here') . '</h2>' . aok_services_list($d, $svc) . '</section>';
+    }
+    return $o . aok_locations_nav_html($d, (string)($l['slug'] ?? ''));
+}
+
+// The footer block, and the "other places" list at the foot of each hub.
+function aok_locations_nav_html(array $d, string $except = ''): string {
+    $locs = aok_locations($d);
+    if (count($locs) < 2) return '';
+    $o = '<nav aria-label="Locations and online consultations worldwide"><h3>In-person &amp; online consultations worldwide</h3><ul>';
+    foreach ($locs as $l) {
+        if ($except !== '' && strcasecmp((string)$l['slug'], $except) === 0) continue;
+        $o .= '<li><a href="/locations/' . aok_e((string)$l['slug']) . '">' . aok_e(aok_text($l['navLabel'] ?? ($l['title'] ?? ''))) . '</a></li>';
+    }
+    return $o . '</ul></nav>';
+}
+
 function aok_nap_html(array $d): string {
     // the business's name exactly as Google Business Profile lists it (see napBlock in app.js)
     $listed = trim((string)aok_get($d, 'local.listingName', '')) ?: aok_brand($d);
@@ -930,7 +1055,8 @@ function aok_nap_html(array $d): string {
 }
 
 function aok_html_footer(array $d): string {
-    $f = '<footer><p>' . aok_e(aok_text(aok_get($d, 'brand.tagline', ''))) . '</p>' . aok_nap_html($d) . aok_review_links_html($d) . '<nav aria-label="Footer"><ul>';
+    $f = '<footer><p>' . aok_e(aok_text(aok_get($d, 'brand.tagline', ''))) . '</p>' . aok_nap_html($d) . aok_review_links_html($d)
+       . aok_locations_nav_html($d) . '<nav aria-label="Footer"><ul>';
     foreach ([['/', 'Home'], ['/about', 'About Us'], ['/services', 'Services'], ['/meditation', 'Meditation'], ['/blog', 'Blog'], ['/faq', 'FAQ'], ['/contact', 'Contact']] as $l)
         $f .= '<li><a href="' . $l[0] . '">' . $l[1] . '</a></li>';
     $f .= '</ul></nav>';
@@ -1226,11 +1352,25 @@ function aok_main_html(array $d, array $r): string {
         $o .= '<section><h2>Send your details</h2><p>' . aok_rich($g('contactPage.note')) . '</p><p>Consultation fee: <strong>' . aok_e(aok_text($g('about.pricing.fee', '$100 CAD'))) . '</strong> ' . aok_e(aok_text($g('about.pricing.unit', 'per hour'))) . '</p>' . aok_contact_links_html($d)
             . (($rt = trim((string)$g('contact.replyTime', ''))) !== '' ? '<p>Jag Mallah replies personally, usually ' . aok_e($rt) . '. Consultations in English, Hindi and Punjabi.</p>' : '')
             . (($bk = trim((string)$g('contact.bookingUrl', ''))) !== '' && preg_match('#^https?://#i', $bk) ? '<p><a href="' . aok_e($bk) . '" rel="noopener">Book online</a></p>' : '')
-            . '</section>' . aok_location_html($d) . '<section>' . aok_nap_html($d) . aok_review_links_html($d) . '</section>';
+            . '</section>' . aok_location_html_address($d) . '<section>' . aok_nap_html($d) . aok_review_links_html($d) . '</section>';
         $o .= aok_areas_html($d);
         $o .= '<section><h2>' . aok_e(aok_text($g('faqPage.hero.title', 'FAQ'))) . '</h2>' . aok_faq_html($d) . '</section>';
     } elseif ($t === 'faq') {
         $o .= aok_hero($d, 'faqPage.hero', 'FAQ') . '<section>' . aok_faq_html($d, 'h2') . '</section>' . aok_cta($d);
+    } elseif ($t === 'locations') {
+        $o .= aok_hero($d, 'locationsPage.hero', 'Vedic astrologer near you');
+        $o .= '<section><ul>';
+        foreach (aok_locations($d) as $l) {
+            $o .= '<li><h2><a href="/locations/' . aok_e((string)$l['slug']) . '">' . aok_e(aok_text($l['title'] ?? '')) . '</a></h2>'
+                . '<p>' . aok_e(aok_cut(aok_text($l['answer'] ?? ''), 180)) . '</p></li>';
+        }
+        $o .= '</ul></section>' . aok_cta($d);
+    } elseif ($t === 'location') {
+        $l = $r['item'];
+        $o .= aok_crumbs([['Home', '/'], ['Locations', '/locations'], [aok_text($l['title'] ?? ''), '']]);
+        $o .= '<h1>' . aok_e(aok_text($l['title'] ?? '')) . '</h1>';
+        $o .= aok_location_page_html($d, $l);
+        $o .= '<section>' . aok_author_card_html($d) . '</section>' . aok_cta($d);
     } elseif ($t === 'page') {
         $pg = $r['item'];
         $o .= '<h1>' . aok_e(aok_text($pg['title'] ?? '')) . '</h1>' . aok_blocks_html((array)aok_get($d, 'blocks.page:' . ($pg['id'] ?? ''), []));
@@ -1262,6 +1402,10 @@ function aok_sitemap_urls(array $d): array {
     foreach ($d['blog'] ?? [] as $p) {
         if (empty($p['published']) || empty($p['slug']) || !empty($p['redirectTo']) || !empty($p['canonical']) || !$indexable($p['robots'] ?? '')) continue;
         $out[] = [$base . '/blog/' . rawurlencode($p['slug']), preg_match('/^\d{4}-\d{2}-\d{2}/', (string)($p['date'] ?? '')) ? substr($p['date'], 0, 10) : $mod, 'monthly'];
+    }
+    if (aok_locations($d)) {
+        $out[] = [$base . '/locations', $mod, 'monthly'];
+        foreach (aok_locations($d) as $l) if (empty($l['noindex'])) $out[] = [$base . '/locations/' . rawurlencode((string)$l['slug']), $mod, 'monthly'];
     }
     foreach ($d['pages'] ?? [] as $pg) if (!empty($pg['slug'])) $out[] = [$base . '/' . rawurlencode($pg['slug']), $mod, 'monthly'];
     return $out;

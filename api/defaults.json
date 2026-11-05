@@ -46,6 +46,34 @@
   "country": "CA",
   "lat": "49.1712",
   "lng": "-122.7939",
+  "areasServed": [
+   "Surrey, BC, Canada",
+   "Vancouver, BC, Canada",
+   "Burnaby, BC, Canada",
+   "Richmond, BC, Canada",
+   "Delta, BC, Canada",
+   "New Westminster, BC, Canada",
+   "Coquitlam, BC, Canada",
+   "Langley, BC, Canada",
+   "Abbotsford, BC, Canada",
+   "Chilliwack, BC, Canada",
+   "Maple Ridge, BC, Canada",
+   "Victoria, BC, Canada",
+   "Nanaimo, BC, Canada",
+   "Kelowna, BC, Canada",
+   "Kamloops, BC, Canada",
+   "Prince George, BC, Canada",
+   "British Columbia, Canada",
+   "Canada",
+   "Washington, USA",
+   "United States",
+   "United Kingdom",
+   "Punjab, India",
+   "Delhi, India",
+   "Haryana, India",
+   "Mumbai, Maharashtra, India",
+   "India"
+  ],
   "neighbourhoods": [
    "Newton",
    "Fleetwood",
@@ -57,6 +85,8 @@
   "nearbyLabel": "Lower Mainland & Fraser Valley",
   "nearbyCities": [
    "Vancouver",
+   "Burnaby",
+   "Richmond",
    "Delta",
    "Langley",
    "Abbotsford",
@@ -518,6 +548,321 @@
    "duration": "60 Minutes"
   }
  ],
+ "locationsPage": {
+  "hero": {
+   "title": "Vedic astrology consultations, where you are",
+   "sub": "In person in Surrey, British Columbia, and live one-to-one on Zoom, WhatsApp or the phone across Canada, the United States, the United Kingdom and India — in English, Hindi or Punjabi."
+  }
+ },
+ "locations": [
+  {
+   "id": "d13",
+   "slug": "vedic-astrologer-surrey-bc",
+   "title": "Vedic Astrologer in Surrey, BC",
+   "question": "Where Can I Book an Authentic Vedic Astrologer in Surrey, BC?",
+   "answer": "Independent Vedic Astrologer Jag Mallah provides 60-minute 1-on-1 Kundli readings, marriage matching (Kundli Milan), Dosha analysis, and Vedic meditation guidance in Surrey, BC from 15450 92a Ave (Fleetwood) and online via Zoom or WhatsApp. Consultations are offered in English, Hindi, and Punjabi for $100 CAD/hr, with payment after satisfaction.",
+   "scope": "Surrey, British Columbia",
+   "cityLabel": "Neighbourhoods served from the Fleetwood office",
+   "cities": [
+    "Fleetwood",
+    "Newton",
+    "Guildford",
+    "Cloverdale",
+    "Panorama Ridge",
+    "Whalley",
+    "City Centre",
+    "South Surrey"
+   ],
+   "format": "In person by appointment, or live on Zoom, WhatsApp or the phone",
+   "timezones": "Pacific Time (PST / PDT)",
+   "areas": [
+    [
+     "City",
+     "Surrey, BC, Canada"
+    ]
+   ],
+   "inPerson": true,
+   "travel": "The office is on 92a Avenue in Fleetwood, a short drive from Newton along 152 Street, from Guildford down 152 Street or 104 Avenue, and from Cloverdale along the Fraser Highway.",
+   "detail": ""
+  },
+  {
+   "id": "d14",
+   "slug": "vedic-astrologer-vancouver-lower-mainland",
+   "title": "Vedic Astrologer for Vancouver & the Lower Mainland",
+   "question": "How Do Clients in Vancouver, Burnaby, Langley, and Abbotsford Consult With Jag Mallah?",
+   "answer": "Clients across Metro Vancouver and the Fraser Valley—including Vancouver, Burnaby, Richmond, Delta, Langley, Abbotsford, and Chilliwack—can book live 60-minute Zoom or WhatsApp screen-share consultations or schedule an appointment at our Surrey office. Every session ($100 CAD/hr, pay after satisfaction) examines your Sidereal Lagna, Navamsha, and Vimshottari Dasha.",
+   "scope": "Metro Vancouver & the Fraser Valley",
+   "cityLabel": "Cities served",
+   "cities": [
+    "Vancouver",
+    "Burnaby",
+    "Richmond",
+    "Delta",
+    "North Delta",
+    "Ladner",
+    "Tsawwassen",
+    "New Westminster",
+    "Coquitlam",
+    "Langley",
+    "Abbotsford",
+    "Chilliwack",
+    "Maple Ridge"
+   ],
+   "format": "Live 1-on-1 on Zoom, WhatsApp or the phone, or in person at the Surrey office by appointment",
+   "timezones": "Pacific Time (PST / PDT)",
+   "areas": [
+    [
+     "City",
+     "Vancouver, BC, Canada"
+    ],
+    [
+     "City",
+     "Burnaby, BC, Canada"
+    ],
+    [
+     "City",
+     "Richmond, BC, Canada"
+    ],
+    [
+     "City",
+     "Delta, BC, Canada"
+    ],
+    [
+     "City",
+     "New Westminster, BC, Canada"
+    ],
+    [
+     "City",
+     "Coquitlam, BC, Canada"
+    ],
+    [
+     "City",
+     "Langley, BC, Canada"
+    ],
+    [
+     "City",
+     "Abbotsford, BC, Canada"
+    ],
+    [
+     "City",
+     "Chilliwack, BC, Canada"
+    ],
+    [
+     "City",
+     "Maple Ridge, BC, Canada"
+    ]
+   ],
+   "detail": ""
+  },
+  {
+   "id": "d15",
+   "slug": "vedic-astrologer-british-columbia",
+   "title": "Vedic Astrologer for British Columbia",
+   "question": "Are Live 1-on-1 Vedic Astrology Consultations Available Throughout British Columbia?",
+   "answer": "Yes. Analysis of Karma serves clients throughout British Columbia—including Victoria, Nanaimo, Kelowna, Kamloops, and Prince George—through live 60-minute Zoom, WhatsApp, and phone sessions on Pacific Time. Jag Mallah delivers classical Parashari birth chart readings, career timing, and unbiased gemstone guidance ($100 CAD/hr) with zero travel required.",
+   "scope": "British Columbia",
+   "cityLabel": "Communities served across the province",
+   "cities": [
+    "Victoria",
+    "Saanich",
+    "Nanaimo",
+    "Kelowna",
+    "Vernon",
+    "Penticton",
+    "Kamloops",
+    "Prince George",
+    "Vancouver Island",
+    "the Okanagan",
+    "the BC Interior",
+    "the BC coast"
+   ],
+   "format": "Live 1-on-1 on Zoom, WhatsApp or the phone — no travel required",
+   "timezones": "Pacific Time (PST / PDT), and Mountain Time in the Kootenays",
+   "areas": [
+    [
+     "AdministrativeArea",
+     "British Columbia, Canada"
+    ],
+    [
+     "City",
+     "Victoria, BC, Canada"
+    ],
+    [
+     "City",
+     "Nanaimo, BC, Canada"
+    ],
+    [
+     "City",
+     "Kelowna, BC, Canada"
+    ],
+    [
+     "City",
+     "Kamloops, BC, Canada"
+    ],
+    [
+     "City",
+     "Prince George, BC, Canada"
+    ]
+   ],
+   "detail": ""
+  },
+  {
+   "id": "d16",
+   "slug": "online-vedic-astrologer-canada",
+   "title": "Online Vedic Astrologer for Canada",
+   "question": "How Do Online Vedic Astrology Consultations Work Across Canada?",
+   "answer": "Clients across Canada—including Brampton, Toronto, Mississauga, Calgary, Edmonton, Winnipeg, Ottawa, and Montreal—connect live with Surrey-based Vedic Astrologer Jag Mallah via Zoom or WhatsApp. Sessions last 60 minutes ($100 CAD/hr via Interac e-Transfer after you are satisfied) and accommodate Mountain, Central, Eastern, and Atlantic time zones.",
+   "scope": "Canada",
+   "cityLabel": "Cities served coast to coast",
+   "cities": [
+    "Brampton",
+    "Mississauga",
+    "Toronto",
+    "Markham",
+    "Ottawa",
+    "Hamilton",
+    "Kitchener–Waterloo",
+    "Calgary",
+    "Edmonton",
+    "Red Deer",
+    "Winnipeg",
+    "Saskatoon",
+    "Regina",
+    "Montreal",
+    "Halifax"
+   ],
+   "format": "Live 1-on-1 on Zoom, WhatsApp or the phone",
+   "timezones": "Pacific, Mountain, Central, Eastern and Atlantic Time",
+   "areas": [
+    [
+     "Country",
+     "Canada"
+    ]
+   ],
+   "detail": ""
+  },
+  {
+   "id": "d17",
+   "slug": "online-vedic-astrologer-usa",
+   "title": "Online Vedic Astrologer for the United States",
+   "question": "Can Clients in the United States Book Online Vedic Astrology Readings With Jag Mallah?",
+   "answer": "Yes. Clients across the United States—from Seattle and California to New York, New Jersey, Texas, and Chicago—book live 60-minute 1-on-1 consultations via Zoom or WhatsApp. Operating on Pacific Time, Jag Mallah provides convenient daytime and evening slots for US time zones ($100 CAD/hr, paid only after satisfaction).",
+   "scope": "the United States",
+   "cityLabel": "States and metro areas served",
+   "cities": [
+    "Seattle",
+    "Bellevue",
+    "Bellingham",
+    "Tacoma",
+    "Kent",
+    "San Francisco Bay Area",
+    "San Jose",
+    "Fremont",
+    "Sacramento",
+    "Fresno",
+    "Los Angeles",
+    "San Diego",
+    "New York",
+    "New Jersey (Edison, Jersey City)",
+    "Dallas",
+    "Houston",
+    "Austin",
+    "Chicago",
+    "Atlanta",
+    "Virginia",
+    "Michigan"
+   ],
+   "format": "Live 1-on-1 on Zoom, WhatsApp or the phone",
+   "timezones": "Pacific, Mountain, Central and Eastern Time",
+   "areas": [
+    [
+     "Country",
+     "United States"
+    ]
+   ],
+   "detail": ""
+  },
+  {
+   "id": "d18",
+   "slug": "online-vedic-astrologer-uk",
+   "title": "Online Vedic Astrologer for the United Kingdom",
+   "question": "How Do Clients in the United Kingdom Schedule Live Vedic Astrology Sessions?",
+   "answer": "Clients throughout the United Kingdom—including London, Southall, Wembley, Birmingham, Leicester, Manchester, and Glasgow—consult live with Jag Mallah via WhatsApp or Zoom. Morning appointments in British Columbia align seamlessly with UK late-afternoon and evening hours (5:00 PM to 11:00 PM GMT/BST), conducted in English, Hindi, or Punjabi.",
+   "scope": "the United Kingdom",
+   "cityLabel": "Cities and communities served",
+   "cities": [
+    "London",
+    "Southall",
+    "Wembley",
+    "Hounslow",
+    "Harrow",
+    "Ilford",
+    "Croydon",
+    "Birmingham",
+    "Wolverhampton",
+    "Coventry",
+    "Leicester",
+    "Manchester",
+    "Leeds",
+    "Bradford",
+    "Glasgow",
+    "Edinburgh"
+   ],
+   "format": "Live 1-on-1 on WhatsApp or Zoom",
+   "timezones": "GMT / BST — late-afternoon and evening slots, 5:00 PM to 11:00 PM UK time",
+   "areas": [
+    [
+     "Country",
+     "United Kingdom"
+    ]
+   ],
+   "detail": ""
+  },
+  {
+   "id": "d19",
+   "slug": "online-vedic-astrologer-india",
+   "title": "Online Vedic Astrologer for India",
+   "question": "How Can Clients in Punjab, Delhi NCR, and Across India Consult With Jag Mallah?",
+   "answer": "Clients across India—including Chandigarh, Ludhiana, Amritsar, Jalandhar, Delhi NCR, Haryana, and Mumbai—can book 1-on-1 WhatsApp or Zoom consultations directly in Punjabi, Hindi, or English. Early-morning and evening IST time slots allow seamless live Kundli readings, NRI marriage matching, and career consultations with Jag Mallah.",
+   "scope": "India",
+   "cityLabel": "States and cities served",
+   "cities": [
+    "Chandigarh",
+    "Mohali",
+    "Ludhiana",
+    "Amritsar",
+    "Jalandhar",
+    "Patiala",
+    "Bathinda",
+    "New Delhi",
+    "Gurugram",
+    "Noida",
+    "Faridabad",
+    "Karnal",
+    "Ambala",
+    "Panipat",
+    "Panchkula",
+    "Himachal Pradesh",
+    "Uttar Pradesh",
+    "Rajasthan",
+    "Mumbai",
+    "Pune",
+    "Ahmedabad",
+    "Vadodara",
+    "Bengaluru",
+    "Hyderabad"
+   ],
+   "format": "Live 1-on-1 on WhatsApp or Zoom",
+   "timezones": "IST — early-morning and evening slots",
+   "areas": [
+    [
+     "Country",
+     "India"
+    ]
+   ],
+   "detail": ""
+  }
+ ],
  "blogPage": {
   "hero": {
    "title": "Vedic astrology blog — Jyotish notes & remedies",
@@ -526,7 +871,7 @@
  },
  "blog": [
   {
-   "id": "d13",
+   "id": "d20",
    "slug": "understanding-your-kundli",
    "redirectTo": "/blog/ultimate-guide-birth-chart",
    "title": "Understanding your Kundli: a beginner’s guide to the Vedic birth chart",
@@ -539,7 +884,7 @@
    "body": "Your Vedic birth chart, or Kundli, is a snapshot of the sky at the exact moment you were born. In classical Jyotish it is the foundation of every reading.\n\nThe chart is divided into twelve houses, each governing an area of life — self, wealth, courage, home, creativity, health, partnership, transformation, fortune, career, gains and liberation. The nine planets move through these houses and through the twenty-seven nakshatras, colouring each area with their nature.\n\nReading a Vedic birth chart is less about prediction and more about understanding pattern and timing. The dasha system tells us which planet is shaping your current chapter. Remedies — mantra, gemstone, meditation — help you work with that energy rather than against it. Start by knowing your ascendant and the planet ruling your present dasha, and the chart slowly begins to speak."
   },
   {
-   "id": "d14",
+   "id": "d21",
    "slug": "mangal-dosha-truth",
    "redirectTo": "/blog/mangal-dosha-myths-facts-remedies",
    "title": "Mangal Dosha: what it really means for marriage (and what it doesn’t)",
@@ -552,7 +897,7 @@
    "body": "Few terms cause as much worry as Mangal Dosha. When Mars sits in certain houses of the birth chart, a chart is called Manglik — and families often panic.\n\nThe truth is gentler. Mangal Dosha is one factor among many in marriage matching, and it is frequently cancelled by other placements. An experienced Vedic astrologer weighs the whole chart — not a single word.\n\nWhere a genuine dosha exists, classical remedies are well established: specific mantras, charitable acts, and in some cases matching with another Manglik chart. The goal is never fear; it is a steady, well-matched marriage. If Mangal Dosha is worrying you, a proper Kundli Milan will tell you far more than a label ever could."
   },
   {
-   "id": "d15",
+   "id": "d22",
    "slug": "meditation-and-remedies",
    "title": "Why meditation makes astrological remedies work",
    "date": "2026-03-01",
@@ -697,7 +1042,7 @@
  "schema": "{\n  \"@context\": \"https://schema.org\",\n  \"@type\": \"ProfessionalService\",\n  \"name\": \"Analysis of Karma\",\n  \"description\": \"Vedic astrology and Kundli reading services by astrologer Jag Mallah.\",\n  \"image\": \"\",\n  \"url\": \"https://www.analysisofkarma.com\",\n  \"founder\": {\n    \"@type\": \"Person\",\n    \"name\": \"Jag Mallah\"\n  },\n  \"areaServed\": \"Worldwide\",\n  \"priceRange\": \"$$\",\n  \"sameAs\": [\n    \"https://www.instagram.com/analysisofkarma/\",\n    \"https://www.youtube.com/@analysisofkarma\"\n  ],\n  \"knowsAbout\": [\n    \"Vedic Astrology\",\n    \"Jyotish\",\n    \"Kundli\",\n    \"Marriage Matching\",\n    \"Meditation\"\n  ]\n}",
  "_seedServices": [
   {
-   "id": "d16",
+   "id": "d23",
    "seedKey": "horoscopes",
    "icon": "☽",
    "title": "Daily / Weekly / Monthly Horoscopes",
@@ -711,7 +1056,7 @@
    "duration": "60 Minutes"
   },
   {
-   "id": "d17",
+   "id": "d24",
    "seedKey": "birth-chart-generation",
    "icon": "☉",
    "title": "Birth Chart (Natal Chart) Generation",
@@ -722,7 +1067,7 @@
    "image": null
   },
   {
-   "id": "d18",
+   "id": "d25",
    "seedKey": "marriage-possibilities",
    "icon": "⚚",
    "title": "Love or Arrange Marriage Possibilities",
@@ -733,7 +1078,7 @@
    "image": null
   },
   {
-   "id": "d19",
+   "id": "d26",
    "seedKey": "live-consultations",
    "icon": "☎",
    "title": "Live Astrologer Consultations (Chat / Call / Video)",
@@ -744,7 +1089,7 @@
    "image": null
   },
   {
-   "id": "d20",
+   "id": "d27",
    "seedKey": "year-ahead-forecast",
    "icon": "☀",
    "title": "Personalized Year-Ahead Forecasts (Solar Return)",
@@ -755,7 +1100,7 @@
    "image": null
   },
   {
-   "id": "d21",
+   "id": "d28",
    "seedKey": "muhurat-timing",
    "icon": "☼",
    "title": "Muhurat / Auspicious Timing Selection",
@@ -766,7 +1111,7 @@
    "image": null
   },
   {
-   "id": "d22",
+   "id": "d29",
    "seedKey": "gemstone-services",
    "icon": "♦",
    "title": "Gemstone Recommendation Services",
@@ -777,7 +1122,7 @@
    "redirectTo": "/services/gemstone-recommendation"
   },
   {
-   "id": "d23",
+   "id": "d30",
    "seedKey": "jyotish-deep-dive",
    "icon": "ॐ",
    "title": "Vedic Astrology (Jyotish) Deep Dives",
@@ -788,7 +1133,7 @@
    "image": null
   },
   {
-   "id": "d24",
+   "id": "d31",
    "seedKey": "career-finance-reports",
    "icon": "♃",
    "title": "Career & Financial Astrology Reports",
@@ -799,7 +1144,7 @@
    "redirectTo": "/services/career-finance-consultation"
   },
   {
-   "id": "d25",
+   "id": "d32",
    "seedKey": "karmic-past-life",
    "icon": "☯",
    "title": "Karmic & Past Life Astrology",
@@ -810,7 +1155,7 @@
    "image": null
   },
   {
-   "id": "d26",
+   "id": "d33",
    "seedKey": "dosha-remedies",
    "icon": "♂",
    "title": "Dosha & Remedial Solutions (e.g. Mangalik)",
@@ -821,7 +1166,7 @@
    "redirectTo": "/services/dosha-analysis-remedies"
   },
   {
-   "id": "d27",
+   "id": "d34",
    "seedKey": "child-naming",
    "icon": "☆",
    "title": "Newborn / Child Naming & Astrology Reports",
@@ -832,7 +1177,7 @@
    "image": null
   },
   {
-   "id": "d28",
+   "id": "d35",
    "seedKey": "medical-astrology",
    "icon": "⚕",
    "title": "Medical Astrology (Holistic / Overview)",
@@ -845,7 +1190,7 @@
  ],
  "_seedPosts": [
   {
-   "id": "d29",
+   "id": "d36",
    "slug": "ultimate-guide-birth-chart",
    "title": "The Ultimate Guide to Understanding Your Birth Chart (Natal Chart)",
    "date": "2026-06-15",
@@ -857,7 +1202,7 @@
    "body": "Your birth chart — also called the natal chart or Kundli — is a snapshot of the sky at the precise moment you were born. Every planet was sitting in a particular sign and house, and that exact arrangement never repeats. It is the single most important tool in astrology, and in classical Jyotish it is the foundation of every reading.\n\nThree ingredients build the chart. The signs (Aries through Pisces) describe how energy expresses itself. The planets describe what kind of energy is at play — the Sun is identity, the Moon is emotion, Mercury is the mind, and so on. The houses, twelve slices of the chart, describe where in life that energy lands: money, marriage, career, health.\n\nIn the Vedic chart, each of the twelve houses governs an area of life — self, wealth, courage, home, creativity, health, partnership, transformation, fortune, career, gains and liberation. The nine planets move through these houses and through the twenty-seven nakshatras, colouring each area with their nature.\n\nThe Ascendant, or Rising sign, is your starting point — the sign on the eastern horizon at your birth. It frames the whole house system and is why two people born on the same day can feel so different. Once you know your Ascendant and the sign and house of each planet, the chart begins to read like a sentence.\n\nReading a Vedic birth chart is less about prediction and more about understanding pattern and timing. The dasha system tells us which planet is shaping your current chapter. Remedies — mantra, gemstone, meditation — help you work with that energy rather than against it.\n\nReading well takes practice, but you can start today: find your Sun, Moon and Rising, notice which houses hold the most planets, and look at where Saturn sits to understand your biggest lessons. Know your ascendant and the planet ruling your present dasha, and the chart slowly begins to speak. From there, a personal consultation can connect the dots into one clear, practical story."
   },
   {
-   "id": "d30",
+   "id": "d37",
    "slug": "sun-moon-rising-signs",
    "title": "Sun, Moon, and Rising Signs: What They Mean & How to Find Yours",
    "date": "2026-06-08",
@@ -869,7 +1214,7 @@
    "body": "If astrology had a headline, it would be your big three: the Sun, the Moon and the Rising sign. Together they sketch the core of your personality before any deeper reading begins.\n\nYour Sun sign is your essential identity — your ego, your vitality and the role you are here to grow into. It is set by your date of birth, which is why it is the sign most people know. Your Moon sign rules your emotional inner world: your instincts, your moods and what makes you feel safe. Because the Moon moves quickly, you need your date and rough time of birth to find it.\n\nYour Rising sign, or Ascendant, is the face you meet the world with — your first impression and outward style. It changes roughly every two hours, so it needs your exact birth time. This is why two people with the same Sun sign can come across so differently.\n\nTo find all three you need three details: date, time and place of birth. Enter them into any chart calculator, or better, bring them to a reading — because the interplay between the three, not just the labels, is where the real insight lives."
   },
   {
-   "id": "d31",
+   "id": "d38",
    "slug": "zodiac-compatibility-best-worst-matches",
    "title": "Zodiac Compatibility: The Best and Worst Matches for Every Sign",
    "date": "2026-06-01",
@@ -881,7 +1226,7 @@
    "body": "Zodiac compatibility is the most-searched question in astrology, and the simplest answer starts with the elements. Fire signs (Aries, Leo, Sagittarius) bring passion and drive. Earth signs (Taurus, Virgo, Capricorn) bring stability. Air signs (Gemini, Libra, Aquarius) bring ideas and communication. Water signs (Cancer, Scorpio, Pisces) bring emotion and depth.\n\nAs a rule of thumb, signs of the same element flow easily, and complementary elements — fire with air, earth with water — tend to support one another. The classically “challenging” pairs sit at a square to each other, where styles can grate. But challenge is not doom; friction often creates the most growth.\n\nHere is the honest truth: sun-sign compatibility is a fun starting point, not a verdict. Real compatibility comes from synastry — comparing two full birth charts, including the Moon, Venus, Mars and the Ascendant. In Vedic astrology, Guna Milan and Mangal Dosha analysis go deeper still. If a relationship matters to you, a proper matching reading will tell you far more than your Sun signs alone."
   },
   {
-   "id": "d32",
+   "id": "d39",
    "slug": "mercury-retrograde-survival-guide",
    "title": "What is Mercury Retrograde and How to Survive It",
    "date": "2026-05-20",
@@ -893,7 +1238,7 @@
    "body": "A few times a year, the planet Mercury appears to move backward across the sky. It is an optical illusion — Mercury never truly reverses — but astrologically the effect is real enough to notice. Mercury rules communication, technology, travel and contracts, so when it turns retrograde these areas can get tangled.\n\nTypical signs include missed messages, technology glitches, travel delays and old conversations resurfacing. Rather than a curse, think of it as a cosmic invitation to slow down. The prefix “re” is your guide: review, revise, reflect, reconnect and repair are all favoured, while launching brand-new ventures is not.\n\nTo move through it smoothly, back up your devices, read contracts twice, confirm travel plans, and pause before sending a heated message. Finish lingering tasks instead of starting fresh ones. Used well, Mercury retrograde becomes a useful clean-up window rather than a season of dread — and in about three weeks, it is over."
   },
   {
-   "id": "d33",
+   "id": "d40",
    "slug": "vedic-vs-western-astrology",
    "title": "Vedic vs. Western Astrology: Which One is Right for You?",
    "date": "2026-05-10",
@@ -905,7 +1250,7 @@
    "body": "Vedic and Western astrology share ancient roots but diverge in one crucial way: the zodiac they use. Western astrology follows the Tropical zodiac, tied to the seasons and the equinoxes. Vedic astrology (Jyotish) follows the Sidereal zodiac, anchored to the actual positions of the constellations. Because of a slow shift called precession, the two are currently about 24 degrees apart — which is why your sign can differ between systems.\n\nThe emphasis differs too. Western astrology leans psychological — personality, motivation and self-understanding. Vedic astrology leans predictive, using planetary periods called dashas to time events around marriage, career and health, alongside remedies such as mantras and gemstones.\n\nNeither is “more correct”; they answer different questions. If you want to understand your inner patterns, Western astrology is a wonderful mirror. If you want timing, life-event guidance and practical remedies rooted in classical tradition, Vedic astrology is built for exactly that. Many people, in the end, enjoy both."
   },
   {
-   "id": "d34",
+   "id": "d41",
    "slug": "saturn-return-explained",
    "title": "Saturn Return: What It Is, When It Happens, and How to Navigate It",
    "date": "2026-04-28",
@@ -917,7 +1262,7 @@
    "body": "Roughly every 29 and a half years, Saturn completes a full orbit and returns to the exact place it occupied at your birth. This is the Saturn return, and it tends to arrive around ages 28–30, again near 58–60, and for some a third time in old age. The first is usually the most memorable.\n\nSaturn is the planet of structure, responsibility and maturity, so its return often coincides with major thresholds: career pivots, marriages, moves, or the ending of things that no longer fit. It can feel heavy, as if life is testing whether your foundations are real. That pressure is the point — Saturn removes what is hollow so what remains can hold weight.\n\nTo navigate it, stop resisting change and start building deliberately. Commit to the work, the relationship or the path that genuinely matters, and release what you have outgrown. Handled with honesty, the Saturn return is less a crisis than a graduation — into a more grounded, authentic adult life."
   },
   {
-   "id": "d35",
+   "id": "d42",
    "slug": "12-astrological-houses-explained",
    "title": "The 12 Astrological Houses Explained: Where Life Happens",
    "date": "2026-04-15",
@@ -929,7 +1274,7 @@
    "body": "If planets are the actors and signs are their costumes, the twelve houses are the stages on which the drama plays out. Each house governs a specific arena of life, and the planets falling within it colour that arena.\n\nThe first six houses are personal. The 1st is the self, body and appearance; the 2nd, money and values; the 3rd, communication and siblings; the 4th, home and roots; the 5th, creativity, romance and children; the 6th, daily work, routine and health. The upper six reach outward. The 7th rules partnership and marriage; the 8th, transformation, shared resources and the hidden; the 9th, higher learning, travel and philosophy; the 10th, career and public standing; the 11th, friendships, networks and gains; the 12th, solitude, spirituality and release.\n\nWhen you read a chart, notice which houses are crowded with planets — those are the life areas where the most energy and story concentrate. An empty house is not a problem; it simply means that theme runs quietly in the background of your life."
   },
   {
-   "id": "d36",
+   "id": "d43",
    "slug": "best-gemstones-zodiac-sign",
    "title": "Best Gemstones for Each Zodiac Sign to Attract Wealth and Love",
    "date": "2026-04-02",
@@ -941,7 +1286,7 @@
    "body": "In Vedic astrology, gemstones are worn to strengthen a beneficial planet and steady its influence in your life. Each stone carries the energy of a specific planet, and traditional associations link them to the signs through their ruling planets.\n\nAs a general guide: Aries and Scorpio (ruled by Mars) favour red coral; Taurus and Libra (Venus) favour diamond or white sapphire; Gemini and Virgo (Mercury) favour emerald; Cancer (Moon) favours pearl; Leo (Sun) favours ruby; Sagittarius and Pisces (Jupiter) favour yellow sapphire; Capricorn and Aquarius (Saturn) favour blue sapphire. Worn correctly, these stones are said to support wealth, harmony and emotional balance.\n\nOne important caution: gemstones are powerful, and the wrong one can do more harm than good. A stone that helps one chart may aggravate another, depending on which planets are strong or afflicted for you. Always have your birth chart checked before choosing a gemstone — along with the correct weight, metal, finger and energising ritual."
   },
   {
-   "id": "d37",
+   "id": "d44",
    "slug": "mangal-dosha-myths-facts-remedies",
    "title": "Mangal Dosha (Kuja Dosha): Myths, Facts, and Remedies",
    "date": "2026-03-20",
@@ -953,7 +1298,7 @@
    "body": "Few astrological terms cause as much panic as Mangal Dosha, also known as Kuja Dosha or being “Manglik.” It occurs when Mars sits in certain houses — the 1st, 4th, 7th, 8th or 12th — of the birth chart, and it is most often discussed around marriage. When a chart is called Manglik, families often worry.\n\nThe myths run wild: that a Manglik person brings misfortune, or that such a marriage is doomed. The facts are far gentler. Mangal Dosha is just one factor among many in marriage matching, and it is frequently cancelled or reduced by other placements in the chart. An experienced Vedic astrologer weighs the whole picture, not a single label. In many cases the so-called dosha is mild, or already neutralised.\n\nWhere a genuine, strong dosha exists, classical remedies are well established: specific Mars mantras, charitable acts, fasting on Tuesdays, and in some traditions matching with another Manglik chart so the effect is balanced. The goal is never fear — it is a steady, well-suited marriage. If Mangal Dosha is worrying you, a proper Kundli Milan will tell you far more than the word “Manglik” ever could."
   },
   {
-   "id": "d38",
+   "id": "d45",
    "slug": "full-moon-new-moon-vedic-astrology",
    "title": "Full Moon and New Moon as per Vedic Astrology",
    "date": "2026-03-08",
@@ -965,7 +1310,7 @@
    "body": "In Vedic astrology the Moon is the mind, and its monthly cycle sets a powerful rhythm for emotion and spiritual practice. Two points anchor that cycle: the full moon (Purnima) and the new moon (Amavasya).\n\nPurnima, the full moon, is when the Moon is fully illuminated and at its most expansive. It is considered highly auspicious — a time of completion, gratitude, charity and celebration. Many festivals fall on Purnima, and it is regarded as ideal for meditation, mantra and devotion, when the mind is bright and full. Amavasya, the new moon, is dark and inward. It is a time for rest, reflection, honouring ancestors and releasing what no longer serves you — rather than starting bold new ventures.\n\nLiving with this cycle is simple and grounding. Use the waxing phase to begin and grow projects, the full moon to give thanks and complete, and the dark new moon to pause and reset. Aligning your intentions with the Moon’s natural breath brings calm, steady momentum to daily life and spiritual practice alike."
   },
   {
-   "id": "d39",
+   "id": "d46",
    "slug": "career-astrology-midheaven",
    "title": "Career Astrology: Finding Your True Calling Based on Your Midheaven",
    "date": "2026-02-22",
@@ -977,7 +1322,7 @@
    "body": "When people ask astrology one practical question, it is often about work: what am I truly meant to do? The chart offers a clear starting point in the Midheaven, or MC — the highest point of your chart, marking your public role, reputation and career direction.\n\nThe sign on your Midheaven describes the flavour of your vocation. An earthy MC may thrive in business, structure or craft; an airy one in communication, ideas or media; a fiery one in leadership or performance; a watery one in care, healing or the creative arts. The planet that rules your MC sign — and where it sits — adds detail about how that calling unfolds.\n\nThe Midheaven is not the whole story. The 10th house of career, the 6th house of daily work, the 2nd house of earnings, and strong planets like Saturn (discipline) and the Sun (purpose) all contribute. Read together, they reveal not just a job title but the kind of environment, contribution and recognition that will genuinely fulfil you — the foundation of any good career reading."
   },
   {
-   "id": "d40",
+   "id": "d47",
    "slug": "north-and-south-nodes-karmic-path",
    "title": "What Are the North and South Nodes? Unlocking Your Karmic Path",
    "date": "2026-02-10",
@@ -989,7 +1334,7 @@
    "body": "The North and South Nodes — known in Vedic astrology as Rahu and Ketu — are not planets but two points where the Moon’s path crosses the Sun’s. Despite being invisible, they carry some of the deepest meaning in a chart, describing your karmic axis: where you have been, and where you are growing toward.\n\nThe South Node (Ketu) represents the past — talents, habits and comfort zones carried from earlier experience. It comes easily, sometimes too easily, and can become a place you hide. The North Node (Rahu) points to the future — unfamiliar, uncomfortable, and exactly where your growth lies. Following it feels like a stretch precisely because it is new soul territory.\n\nThe nodes always sit opposite each other, forming an axis across two signs and houses. Understanding that axis is like reading a compass for this lifetime: lean away from over-relying on the South Node’s old comforts, and consciously move toward the North Node’s lessons. That gentle, deliberate stretch is the heart of walking your karmic path."
   },
   {
-   "id": "d41",
+   "id": "d48",
    "slug": "auspicious-dates-marriage-business",
    "title": "Most Auspicious Dates for Marriage and Business",
    "date": "2026-01-28",
@@ -1001,7 +1346,7 @@
    "body": "In Vedic astrology, when you begin something matters as much as what you begin. The practice of choosing an auspicious time is called Muhurat — electing a moment when planetary energies support success, harmony and longevity.\n\nFor a marriage, an astrologer studies the lunar day (tithi), the star or nakshatra, the weekday, and the positions of Jupiter and Venus, while avoiding inauspicious windows such as eclipse periods and the months when key planets are combust or retrograde. The aim is a date that supports a stable, happy union — ideally one harmonised with both partners’ birth charts. For a business launch, a signing or a move into a new home, similar principles apply, with attention to strong houses of wealth and a favourable rising sign.\n\nWhile general almanac (Panchang) dates give a useful shortlist, the most powerful Muhurat is personalised — chosen to fit your own chart, not just the calendar. If you have an important beginning ahead, an electional reading can pinpoint a window that gives it the best possible start."
   },
   {
-   "id": "d42",
+   "id": "d49",
    "slug": "solar-return-charts",
    "title": "Solar Return Charts: Predicting Your Birthday Year Ahead",
    "date": "2026-01-15",
@@ -1013,7 +1358,7 @@
    "body": "Every year, around your birthday, the Sun returns to the exact position it held when you were born. That precise moment creates a brand-new chart called the solar return — a forecast map for the twelve months ahead.\n\nThe solar return is read alongside your natal chart. The rising sign of the return, the house the Sun falls into, and the placement of the other planets all hint at the themes of your coming year. A solar return Sun in the career house may signal a year of professional focus; in the relationship house, a year where partnership takes centre stage. Aspects within the return chart show where ease and challenge are likely to appear.\n\nWhat makes the solar return so useful is its timing. Rather than vague yearly horoscopes, it offers a chart tailored to you and valid only until your next birthday. Read with the longer planetary periods and current transits, it becomes a practical planning tool — a way to enter your new year knowing where to invest your energy and what to prepare for."
   },
   {
-   "id": "d43",
+   "id": "d50",
    "slug": "medical-astrology-body",
    "title": "Medical Astrology: How the Zodiac Signs Relate to the Physical Body",
    "date": "2026-01-05",

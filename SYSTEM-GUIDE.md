@@ -190,6 +190,21 @@ Three rules learned the hard way:
   only on the two pages that list the catalogue, because a reference resolving to nothing is
   worse than no reference for anything reading a single page on its own.
 
+### Geo hubs (`/locations/…`)
+Seven pages, one per place people actually search from: Surrey, the Lower Mainland, British
+Columbia, Canada, the United States, the United Kingdom and India. Each opens with the
+question someone types there and answers it in 40–60 words, then states the consultation
+format, session length, time zones, languages and fee as a labelled list, and names the
+cities it covers. Only the Surrey hub carries the street address and the map, because it is
+the only one with a place to visit.
+
+They live in `locations` in the site data, so they are ordinary content: an owner can edit
+any of them, and `deletedLocations` keeps a deleted one deleted through later upgrades.
+Each hub emits a `Service` node whose `areaServed` is that hub's own places, plus a
+`FAQPage` holding its one visible question — so the geography is machine-readable, not just
+prose. Every hub links to the seven consultations and to the other six hubs, and the footer
+links to all seven from every page, so nothing is more than two clicks from the home page.
+
 ### Sitemap and robots
 Both generated live from your admin settings, with static copies in the web root as a
 fallback. The sitemap contains only canonical, indexable pages — anything redirected,
