@@ -55,9 +55,12 @@ if (realpath((string)($_SERVER['SCRIPT_FILENAME'] ?? '')) === __FILE__) { http_r
 //   from api/content/locations/<slug>.md: the direct-answer box, the question headings, the
 //   comparison table and the FAQ. Also their Google titles and descriptions, and the short labels
 //   used in the footer. A hub whose text the owner has edited keeps it.
+// Version 12:
+//   The last two geo hubs \u2014 Vancouver and the Lower Mainland, and British Columbia \u2014 get their
+//   written pages, Google titles and descriptions, like the other five did in version 11.
 // Only text that is still exactly as first shipped is replaced. Text you have edited is kept. Nothing is deleted.
 
-const AOK_CONTENT_VERSION = 11;
+const AOK_CONTENT_VERSION = 12;
 
 // fingerprints (md5 of the normalised text) of the originally shipped FAQ answers, by question
 const AOK_OLD_FAQ = [
@@ -653,40 +656,99 @@ function aok_upgrade_v11(array $d, array $def): array {
             if ($cur === null || $cur === '' || $cur === []) { $d['locations'][$i][$f] = $o[$f]; continue; }
             // a value still equal to what version 10 shipped takes the new one. Lists are compared
             // as JSON, because areas is a list of lists and would not implode.
-            $was = AOK_V10_LOCATIONS[$slug][$f] ?? null;
+            $was = AOK_PAST_LOCATIONS[$slug][$f] ?? null;
             if ($was === null) continue;
-            $same = is_array($cur) ? json_encode($cur) === json_encode($was) : aok_norm($cur) === aok_norm((string)$was);
-            if ($same) $d['locations'][$i][$f] = $o[$f];
+            foreach ((array)$was as $v) {
+                $same = is_array($cur) ? json_encode($cur) === json_encode($v) : aok_norm($cur) === aok_norm((string)$v);
+                if ($same) { $d['locations'][$i][$f] = $o[$f]; break; }
+            }
         }
     }
     return $d;
 }
 
-// The hub headings and answers as version 10 shipped them, so version 11 can tell an untouched one
-// from an owner's rewrite. Only the two fields that version 11 actually rewrites are listed.
-const AOK_V10_LOCATIONS = [
+// Every value these hub fields have had in an earlier release, so version 12 can tell a page the
+// owner has never touched from one they have rewritten. A field is replaced only when what is
+// stored still equals one of these. Lists are compared as JSON, because areas is a list of lists.
+const AOK_PAST_LOCATIONS = [
     'vedic-astrologer-surrey-bc' => [
-        'areas' => [['City', 'Surrey, BC, Canada']],
-        'title' => 'Vedic Astrologer in Surrey, BC',
-        'answer' => 'Independent Vedic Astrologer Jag Mallah provides 60-minute 1-on-1 Kundli readings, marriage matching (Kundli Milan), Dosha analysis, and Vedic meditation guidance in Surrey, BC from 15450 92a Ave (Fleetwood) and online via Zoom or WhatsApp. Consultations are offered in English, Hindi, and Punjabi for $100 CAD/hr, with payment after satisfaction.',
+        'title' => [
+            'Vedic Astrologer in Surrey, BC',
+        ],
+        'answer' => [
+            'Independent Vedic Astrologer Jag Mallah provides 60-minute 1-on-1 Kundli readings, marriage matching (Kundli Milan), Dosha analysis, and Vedic meditation guidance in Surrey, BC from 15450 92a Ave (Fleetwood) and online via Zoom or WhatsApp. Consultations are offered in English, Hindi, and Punjabi for $100 CAD/hr, with payment after satisfaction.',
+        ],
+        'areas' => [
+            [['City', 'Surrey, BC, Canada']],
+        ],
+    ],
+    'vedic-astrologer-vancouver-lower-mainland' => [
+        'title' => [
+            'Vedic Astrologer for Vancouver & the Lower Mainland',
+        ],
+        'answer' => [
+            'Clients across Metro Vancouver and the Fraser Valley—including Vancouver, Burnaby, Richmond, Delta, Langley, Abbotsford, and Chilliwack—can book live 60-minute Zoom or WhatsApp screen-share consultations or schedule an appointment at our Surrey office. Every session ($100 CAD/hr, pay after satisfaction) examines your Sidereal Lagna, Navamsha, and Vimshottari Dasha.',
+        ],
+        'cities' => [
+            ['Vancouver', 'Burnaby', 'Richmond', 'Delta', 'North Delta', 'Ladner', 'Tsawwassen', 'New Westminster', 'Coquitlam', 'Langley', 'Abbotsford', 'Chilliwack', 'Maple Ridge'],
+        ],
+        'cityLabel' => [
+            'Cities served',
+        ],
+    ],
+    'vedic-astrologer-british-columbia' => [
+        'title' => [
+            'Vedic Astrologer for British Columbia',
+        ],
+        'answer' => [
+            'Yes. Analysis of Karma serves clients throughout British Columbia—including Victoria, Nanaimo, Kelowna, Kamloops, and Prince George—through live 60-minute Zoom, WhatsApp, and phone sessions on Pacific Time. Jag Mallah delivers classical Parashari birth chart readings, career timing, and unbiased gemstone guidance ($100 CAD/hr) with zero travel required.',
+        ],
+        'areas' => [
+            [['AdministrativeArea', 'British Columbia, Canada'], ['City', 'Victoria, BC, Canada'], ['City', 'Nanaimo, BC, Canada'], ['City', 'Kelowna, BC, Canada'], ['City', 'Kamloops, BC, Canada'], ['City', 'Prince George, BC, Canada']],
+        ],
+        'cities' => [
+            ['Victoria', 'Saanich', 'Nanaimo', 'Kelowna', 'Vernon', 'Penticton', 'Kamloops', 'Prince George', 'Vancouver Island', 'the Okanagan', 'the BC Interior', 'the BC coast'],
+        ],
     ],
     'online-vedic-astrologer-canada' => [
-        'cities' => ['Brampton', 'Mississauga', 'Toronto', 'Markham', 'Ottawa', 'Hamilton', 'Kitchener–Waterloo', 'Calgary', 'Edmonton', 'Red Deer', 'Winnipeg', 'Saskatoon', 'Regina', 'Montreal', 'Halifax'],
-        'title' => 'Online Vedic Astrologer for Canada',
-        'answer' => "Clients across Canada\u{2014}including Brampton, Toronto, Mississauga, Calgary, Edmonton, Winnipeg, Ottawa, and Montreal\u{2014}connect live with Surrey-based Vedic Astrologer Jag Mallah via Zoom or WhatsApp. Sessions last 60 minutes (\$100 CAD/hr via Interac e-Transfer after you are satisfied) and accommodate Mountain, Central, Eastern, and Atlantic time zones.",
+        'title' => [
+            'Online Vedic Astrologer for Canada',
+        ],
+        'answer' => [
+            'Clients across Canada—including Brampton, Toronto, Mississauga, Calgary, Edmonton, Winnipeg, Ottawa, and Montreal—connect live with Surrey-based Vedic Astrologer Jag Mallah via Zoom or WhatsApp. Sessions last 60 minutes ($100 CAD/hr via Interac e-Transfer after you are satisfied) and accommodate Mountain, Central, Eastern, and Atlantic time zones.',
+        ],
+        'cities' => [
+            ['Brampton', 'Mississauga', 'Toronto', 'Markham', 'Ottawa', 'Hamilton', 'Kitchener–Waterloo', 'Calgary', 'Edmonton', 'Red Deer', 'Winnipeg', 'Saskatoon', 'Regina', 'Montreal', 'Halifax'],
+        ],
     ],
     'online-vedic-astrologer-usa' => [
-        'cities' => ['Seattle', 'Bellevue', 'Bellingham', 'Tacoma', 'Kent', 'San Francisco Bay Area', 'San Jose', 'Fremont', 'Sacramento', 'Fresno', 'Los Angeles', 'San Diego', 'New York', 'New Jersey (Edison, Jersey City)', 'Dallas', 'Houston', 'Austin', 'Chicago', 'Atlanta', 'Virginia', 'Michigan'],
-        'title' => 'Online Vedic Astrologer for the United States',
-        'answer' => "Yes. Clients across the United States\u{2014}from Seattle and California to New York, New Jersey, Texas, and Chicago\u{2014}book live 60-minute 1-on-1 consultations via Zoom or WhatsApp. Operating on Pacific Time, Jag Mallah provides convenient daytime and evening slots for US time zones (\$100 CAD/hr, paid only after satisfaction).",
+        'title' => [
+            'Online Vedic Astrologer for the United States',
+        ],
+        'answer' => [
+            'Yes. Clients across the United States—from Seattle and California to New York, New Jersey, Texas, and Chicago—book live 60-minute 1-on-1 consultations via Zoom or WhatsApp. Operating on Pacific Time, Jag Mallah provides convenient daytime and evening slots for US time zones ($100 CAD/hr, paid only after satisfaction).',
+        ],
+        'cities' => [
+            ['Seattle', 'Bellevue', 'Bellingham', 'Tacoma', 'Kent', 'San Francisco Bay Area', 'San Jose', 'Fremont', 'Sacramento', 'Fresno', 'Los Angeles', 'San Diego', 'New York', 'New Jersey (Edison, Jersey City)', 'Dallas', 'Houston', 'Austin', 'Chicago', 'Atlanta', 'Virginia', 'Michigan'],
+        ],
     ],
     'online-vedic-astrologer-uk' => [
-        'cities' => ['London', 'Southall', 'Wembley', 'Hounslow', 'Harrow', 'Ilford', 'Croydon', 'Birmingham', 'Wolverhampton', 'Coventry', 'Leicester', 'Manchester', 'Leeds', 'Bradford', 'Glasgow', 'Edinburgh'],
-        'title' => 'Online Vedic Astrologer for the United Kingdom',
-        'answer' => "Clients throughout the United Kingdom\u{2014}including London, Southall, Wembley, Birmingham, Leicester, Manchester, and Glasgow\u{2014}consult live with Jag Mallah via WhatsApp or Zoom. Morning appointments in British Columbia align seamlessly with UK late-afternoon and evening hours (5:00 PM to 11:00 PM GMT/BST), conducted in English, Hindi, or Punjabi.",
+        'title' => [
+            'Online Vedic Astrologer for the United Kingdom',
+        ],
+        'answer' => [
+            'Clients throughout the United Kingdom—including London, Southall, Wembley, Birmingham, Leicester, Manchester, and Glasgow—consult live with Jag Mallah via WhatsApp or Zoom. Morning appointments in British Columbia align seamlessly with UK late-afternoon and evening hours (5:00 PM to 11:00 PM GMT/BST), conducted in English, Hindi, or Punjabi.',
+        ],
+        'cities' => [
+            ['London', 'Southall', 'Wembley', 'Hounslow', 'Harrow', 'Ilford', 'Croydon', 'Birmingham', 'Wolverhampton', 'Coventry', 'Leicester', 'Manchester', 'Leeds', 'Bradford', 'Glasgow', 'Edinburgh'],
+        ],
     ],
     'online-vedic-astrologer-india' => [
-        'title' => 'Online Vedic Astrologer for India',
-        'answer' => "Clients across India\u{2014}including Chandigarh, Ludhiana, Amritsar, Jalandhar, Delhi NCR, Haryana, and Mumbai\u{2014}can book 1-on-1 WhatsApp or Zoom consultations directly in Punjabi, Hindi, or English. Early-morning and evening IST time slots allow seamless live Kundli readings, NRI marriage matching, and career consultations with Jag Mallah.",
+        'title' => [
+            'Online Vedic Astrologer for India',
+        ],
+        'answer' => [
+            'Clients across India—including Chandigarh, Ludhiana, Amritsar, Jalandhar, Delhi NCR, Haryana, and Mumbai—can book 1-on-1 WhatsApp or Zoom consultations directly in Punjabi, Hindi, or English. Early-morning and evening IST time slots allow seamless live Kundli readings, NRI marriage matching, and career consultations with Jag Mallah.',
+        ],
     ],
 ];

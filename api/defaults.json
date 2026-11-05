@@ -592,26 +592,31 @@
   {
    "id": "d14",
    "slug": "vedic-astrologer-vancouver-lower-mainland",
-   "title": "Vedic Astrologer for Vancouver & the Lower Mainland",
+   "title": "Vedic Astrologer for Vancouver, Burnaby, Langley, Abbotsford & the Lower Mainland",
    "navLabel": "Vancouver, Burnaby, Langley & Lower Mainland",
    "question": "How Do Clients in Vancouver, Burnaby, Langley, and Abbotsford Consult With Jag Mallah?",
-   "answer": "Clients across Metro Vancouver and the Fraser Valley—including Vancouver, Burnaby, Richmond, Delta, Langley, Abbotsford, and Chilliwack—can book live 60-minute Zoom or WhatsApp screen-share consultations or schedule an appointment at our Surrey office. Every session ($100 CAD/hr, pay after satisfaction) examines your Sidereal Lagna, Navamsha, and Vimshottari Dasha.",
+   "answer": "Clients throughout Metro Vancouver and the Fraser Valley — including Vancouver, Burnaby, Richmond, Delta, Coquitlam, Langley, Abbotsford, and Chilliwack — consult with Independent Vedic Astrologer Jag Mallah via live 60-minute Zoom or WhatsApp sessions, or by appointment at our Surrey office (15450 92a Ave). Consultations cost $100 CAD/hr, paid only after satisfaction.",
    "scope": "Metro Vancouver & the Fraser Valley",
-   "cityLabel": "Cities served",
+   "cityLabel": "Cities and communities served",
    "cities": [
     "Vancouver",
     "Burnaby",
+    "New Westminster",
     "Richmond",
-    "Delta",
     "North Delta",
     "Ladner",
     "Tsawwassen",
-    "New Westminster",
-    "Coquitlam",
+    "White Rock",
     "Langley",
+    "Coquitlam",
+    "Port Coquitlam",
+    "Port Moody",
+    "Maple Ridge",
+    "Pitt Meadows",
     "Abbotsford",
+    "Mission",
     "Chilliwack",
-    "Maple Ridge"
+    "Aldergrove"
    ],
    "format": "Live 1-on-1 on Zoom, WhatsApp or the phone, or in person at the Surrey office by appointment",
    "timezones": "Pacific Time (PST / PDT)",
@@ -657,30 +662,41 @@
      "Maple Ridge, BC, Canada"
     ]
    ],
+   "seoTitle": "Vedic Astrologer in Vancouver, Burnaby, Langley & Abbotsford | Jag Mallah",
+   "seoDescription": "Book a 1-on-1 Kundli birth chart reading, marriage matching (Kundli Milan), or career consultation across Vancouver, Burnaby, Richmond, Delta, Langley & Abbotsford. $100 CAD/hr.",
    "detail": ""
   },
   {
    "id": "d15",
    "slug": "vedic-astrologer-british-columbia",
-   "title": "Vedic Astrologer for British Columbia",
+   "title": "Online Vedic Astrologer in British Columbia — Victoria, Kelowna, Kamloops & BC-Wide",
    "navLabel": "British Columbia Online Consultations (Victoria, Kelowna, Kamloops)",
    "question": "Are Live 1-on-1 Vedic Astrology Consultations Available Throughout British Columbia?",
-   "answer": "Yes. Analysis of Karma serves clients throughout British Columbia—including Victoria, Nanaimo, Kelowna, Kamloops, and Prince George—through live 60-minute Zoom, WhatsApp, and phone sessions on Pacific Time. Jag Mallah delivers classical Parashari birth chart readings, career timing, and unbiased gemstone guidance ($100 CAD/hr) with zero travel required.",
+   "answer": "Analysis of Karma provides live 1-on-1 Vedic astrology (Jyotish) and meditation consultations throughout British Columbia — serving clients in Victoria, Nanaimo, Kelowna, Vernon, Penticton, Kamloops, and Prince George via Zoom, WhatsApp, and phone. Every 60-minute session costs $100 CAD/hr on Pacific Time, and new clients pay only after satisfaction.",
    "scope": "British Columbia",
    "cityLabel": "Communities served across the province",
    "cities": [
     "Victoria",
     "Saanich",
+    "Langford",
+    "Duncan",
     "Nanaimo",
+    "Courtenay",
+    "Campbell River",
     "Kelowna",
+    "West Kelowna",
     "Vernon",
     "Penticton",
+    "Osoyoos",
     "Kamloops",
+    "Merritt",
+    "Salmon Arm",
+    "Revelstoke",
     "Prince George",
-    "Vancouver Island",
-    "the Okanagan",
-    "the BC Interior",
-    "the BC coast"
+    "Dawson Creek",
+    "Fort St. John",
+    "Cranbrook",
+    "Nelson"
    ],
    "format": "Live 1-on-1 on Zoom, WhatsApp or the phone — no travel required",
    "timezones": "Pacific Time (PST / PDT), and Mountain Time in the Kootenays",
@@ -691,25 +707,32 @@
     ],
     [
      "City",
-     "Victoria, BC, Canada"
+     "Victoria, BC, Canada",
+     "British Columbia, Canada"
     ],
     [
      "City",
-     "Nanaimo, BC, Canada"
+     "Nanaimo, BC, Canada",
+     "British Columbia, Canada"
     ],
     [
      "City",
-     "Kelowna, BC, Canada"
+     "Kelowna, BC, Canada",
+     "British Columbia, Canada"
     ],
     [
      "City",
-     "Kamloops, BC, Canada"
+     "Kamloops, BC, Canada",
+     "British Columbia, Canada"
     ],
     [
      "City",
-     "Prince George, BC, Canada"
+     "Prince George, BC, Canada",
+     "British Columbia, Canada"
     ]
    ],
+   "seoTitle": "Online Vedic Astrologer in British Columbia | Victoria, Kelowna & Kamloops",
+   "seoDescription": "Live 1-on-1 online Vedic astrology and meditation consultations across British Columbia — including Victoria, Nanaimo, Kelowna, Kamloops & Prince George. $100 CAD/hr, pay after satisfaction.",
    "detail": ""
   },
   {

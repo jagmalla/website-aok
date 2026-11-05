@@ -94,6 +94,11 @@ function aok_llms_text(array $d, bool $full): string {
     if ($note = $T(aok_get($d, 'local.hoursNote', ''))) $o .= "- Availability: $note\n";
     $maps = trim((string)(aok_get($d, 'local.mapsCidUrl', '') ?: aok_get($d, 'contact.gmb', '')));
     if ($maps !== '') $o .= "- Google Business Profile: $maps\n";
+    if ($tp = trim((string)aok_get($d, 'contact.trustpilot', ''))) $o .= "- Trustpilot profile: $tp\n";
+    // every other place this same business is listed, so an assistant can confirm the entity
+    $other = [];
+    foreach (aok_same_as($d) as $u) if ($u !== $maps && $u !== ($tp ?? '')) $other[] = $u;
+    if ($other) $o .= '- Other profiles: ' . implode(', ', $other) . "\n";
     $o .= "- Book or ask a question: $base/contact\n\n";
     
     $o .= "## Practitioner credentials\n\n";
@@ -105,6 +110,19 @@ function aok_llms_text(array $d, bool $full): string {
     
     $o .= "## Services\n\n";
     $len = $T(aok_get($d, 'local.sessionLength', '60 minutes'));
+    // the whole catalogue as one table first: an assistant asked "which reading and how much" quotes
+    // a row rather than hunting through the prose underneath.
+    if ($full) {
+        $rows = '';
+        foreach ($services as $s) {
+            $f = $T($s['chartFactors'] ?? '');
+            if ($f === '') continue;
+            $u = "$base/services/" . $slugs[(string)($s['id'] ?? '')];
+            $rows .= '| ' . $T($s['title'] ?? '') . " | $u | $f | " . $T($s['duration'] ?? $len) . ' | '
+                . $T(($s['price'] ?? '') !== '' ? $s['price'] : aok_get($d, 'about.pricing.fee', '')) . " |\n";
+        }
+        if ($rows !== '') $o .= "| Service | URL | Chart factors analysed | Duration | Fee |\n|---|---|---|---|---|\n" . $rows . "\n";
+    }
     foreach ($services as $s) {
         $url = "$base/services/" . $slugs[(string)($s['id'] ?? '')];
         $price = $T(($s['price'] ?? '') !== '' ? $s['price'] : aok_get($d, 'about.pricing.fee', '$100 CAD')) . ' ' . $T(($s['priceUnit'] ?? '') !== '' ? $s['priceUnit'] : aok_get($d, 'about.pricing.unit', 'per hour'));

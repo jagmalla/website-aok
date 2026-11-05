@@ -1,7 +1,31 @@
 ANALYSIS OF KARMA — Update (SEO, local SEO, AI search & security)
 ===================================================================
 
-NEW IN THIS VERSION: FULL WRITTEN PAGES FOR FIVE OF THE SEVEN LOCATIONS
+NEW IN THIS VERSION: ALL SEVEN LOCATION PAGES ARE NOW WRITTEN
+  • Vancouver & the Lower Mainland, and British Columbia, now have full
+    pages like the other five: a highlighted direct answer, the question
+    people ask as the heading, a comparison table and the FAQs.
+  • The Lower Mainland table splits the region four ways (Metro Vancouver
+    core, South of the Fraser, Tri-Cities & the Ridge, Fraser Valley) and
+    now names White Rock, Port Coquitlam, Port Moody, Pitt Meadows, Mission
+    and Aldergrove as well.
+  • The British Columbia table covers Vancouver Island, the Okanagan, the
+    Thompson & Interior, and Northern BC & the Kootenays, naming Langford,
+    Duncan, Courtenay, Campbell River, West Kelowna, Osoyoos, Merritt,
+    Salmon Arm, Revelstoke, Dawson Creek, Fort St. John, Cranbrook and
+    Nelson.
+  • llms-full.txt — the file AI assistants read — now opens its services
+    section with a table of all seven consultations, their addresses, the
+    chart factors each one examines, duration and fee; and the entity block
+    now lists your Trustpilot profile and every other profile that links
+    back to you.
+  • PLEASE READ: Google titles and descriptions. Four of the seven location
+    titles are 66-74 characters and six of the descriptions are 171-190.
+    Google shows about 60-65 and 155-160 and cuts off the rest. Nothing is
+    broken and rankings are unaffected, but the ends will not be visible in
+    search results. Tell me and I will shorten them in one pass.
+
+EARLIER: FULL WRITTEN PAGES FOR FIVE OF THE SEVEN LOCATIONS
   • Surrey, Canada, the USA, the UK and India now have complete pages: a
     highlighted direct answer at the top, the question people ask as the
     heading, a comparison table, and two or three frequently asked questions

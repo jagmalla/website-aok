@@ -192,13 +192,14 @@ Three rules learned the hard way:
 
 ### Geo hubs (`/locations/…`)
 Seven pages, one per place people actually search from: Surrey, the Lower Mainland, British
-Columbia, Canada, the United States, the United Kingdom and India. Five of them (Surrey,
-Canada, the USA, the UK, India) carry full written pages, shipped as light Markdown in
-`api/content/locations/<slug>.md`: a direct-answer box, question headings, a comparison
-table and a three-question FAQ. The other two fall back to the question, its 40–60 word
-answer and a labelled list of format, session length, time zones, languages and fee. Only
-the Surrey hub carries the street address and the map, because it is the only one with a
-place to visit.
+Columbia, Canada, the United States, the United Kingdom and India. Each carries a full
+written page, shipped as light Markdown in `api/content/locations/<slug>.md`: a
+direct-answer box, question headings, a comparison table sized to that page, and two or
+three FAQs that become the page's `FAQPage` markup. Only the Surrey hub carries the street
+address and the map, because it is the only one with a place to visit.
+
+Each hub also has its own `seoTitle` and `seoDescription`, and a `navLabel` — the short name
+used in the footer and between hubs, where the full heading would be unreadable.
 
 They live in `locations` in the site data, so they are ordinary content: an owner can edit
 any of them, and `deletedLocations` keeps a deleted one deleted through later upgrades.
