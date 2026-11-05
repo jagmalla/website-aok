@@ -284,6 +284,7 @@ class Component extends DCLogic {
         mapsCidUrl:'https://maps.app.goo.gl/XrwSpDBGaVsFQ5dV8', reviewUrl:'https://maps.app.goo.gl/XrwSpDBGaVsFQ5dV8', priceRange:'$100 CAD per hour', currency:'CAD', languages:['English','Hindi','Punjabi'],
         sessionLength:'60 minutes', paymentMethods:['Interac e-Transfer','PayPal','Credit card','Debit card','International bank transfer'],
         paymentPolicy:'Pay after your reading: new clients pay only if they are completely satisfied with their consultation.',
+        ethicsPolicy:'100% confidential; zero sales of gemstones, talismans, or commercial rituals.',
         directories:[], locationInTitles:true },
       // Practitioner (E-E-A-T) — used in structured data and llms.txt
       person:{ name:'Jag Mallah', jobTitle:'Independent Vedic Astrologer', additionalRoles:['Meditation Guide'],
@@ -295,7 +296,7 @@ class Component extends DCLogic {
         knowsAbout:['Vedic astrology','Jyotish','Kundli (birth chart) reading','Kundli Milan (marriage matching)','Dasha and transit analysis','Mangal Dosha and other doshas','Muhurta (auspicious timing)','Tajika / Varshaphala (annual charts)','Prashna Shastra (horary astrology)','Jaimini astrology','Bhrigu Nandi Nadi','Swarodaya Shastra (breath science)','Pancha Mahabhuta (five elements)','Medical astrology','Gemstone recommendation','Meditation','Pranayama (breathwork)','Mantra practice'],
         sameAs:['https://www.youtube.com/channel/UCIHA2ZtOmAYP91GbK5RYkCQ','https://www.youtube.com/@analysisofkarma','https://www.instagram.com/analysisofkarma','https://www.linkedin.com/in/analysisofkarma/','https://x.com/analysisofkarma','https://www.pinterest.com/analysisofkarma','https://ca.trustpilot.com/review/analysisofkarma.com','https://maps.app.goo.gl/XrwSpDBGaVsFQ5dV8','https://share.google/r37d5nGpSJCeEXhvt'], image:'' },
       // AI & GEO control centre
-      ai:{ bots:{'GPTBot':true,'OAI-SearchBot':true,'ChatGPT-User':true,'ClaudeBot':true,'Claude-SearchBot':true,'Claude-User':true,'PerplexityBot':true,'Perplexity-User':true,'Google-Extended':true,'Applebot-Extended':true,'Amazonbot':true,'meta-externalagent':true,'CCBot':true,'Bytespider':true},
+      ai:{ bots:{'GPTBot':true,'OAI-SearchBot':true,'ChatGPT-User':true,'ClaudeBot':true,'Claude-SearchBot':true,'Claude-User':true,'Claude-Web':true,'PerplexityBot':true,'Perplexity-User':true,'Google-Extended':true,'Applebot-Extended':true,'Amazonbot':true,'meta-externalagent':true,'CCBot':true,'Bytespider':true},
         llmsOverride:'', llmsFullOverride:'', indexNowKey:'', indexNowAuto:true, googleVerification:'', bingVerification:'' },
       // admin-managed 301 redirects (used when merging duplicate services or posts): [{from:'/old', to:'/new'}]
       redirects:[],
@@ -1415,11 +1416,21 @@ class Component extends DCLogic {
   // "Where is <business> located in <city>?" above the map on the contact page. A question-shaped
   // heading with the answer right under it is what an AI assistant lifts when someone asks where
   // the business is, and it puts the full address on the page for Google to match against Maps.
+  // The address on one line, written exactly as Google Business Profile writes it:
+  // "15450 92a Ave, Surrey, BC V3R 9B1, Canada". Empty for a service-area business, which has no
+  // public street address. Mirrors aok_address_line() in api/seo-lib.php: the two must agree,
+  // because search engines match a business on that string being identical everywhere.
+  addressLine(){ const L=(this.state.data||{}).local||{};
+    if(L.serviceAreaBusiness) return '';
+    const street=String(L.streetAddress||'').trim(); if(!street) return '';
+    const city=String(L.locality||'Surrey').trim(), reg=String(L.regionCode||L.region||'BC').trim();
+    const pc=String(L.postalCode||'').trim(), country=(L.country||'CA')==='CA'?'Canada':String(L.country||'').trim();
+    return [street,city,(reg+' '+pc).trim(),country].filter(Boolean).join(', '); }
+
   locationBlock(){ const h=React.createElement,P=this.P,d=this.state.data,L=d.local||{},c=d.contact||{},pr=(d.about&&d.about.pricing)||{};
-    const street=(!L.serviceAreaBusiness&&L.streetAddress)?L.streetAddress:'';
     const city=L.locality||'Surrey', reg=L.regionCode||L.region||'BC';
-    const full=[street,[city,reg,(!L.serviceAreaBusiness&&L.postalCode)?L.postalCode:''].filter(Boolean).join(' '),(L.country||'CA')==='CA'?'Canada':L.country].filter(Boolean).join(', ');
-    if(!street) return null;
+    const full=this.addressLine();
+    if(!full) return null;
     const langs=(L.languages||[]).filter(Boolean);
     const id='where-is-'+this.slugify(this.brandName()+' '+city);
     return h('section',{'aria-labelledby':id,style:{marginBottom:18}},
@@ -2488,6 +2499,7 @@ class Component extends DCLogic {
           this.card(h('div',null, this.cardTitle('Pricing & languages'),
             h('div',{style:{display:'grid',gridTemplateColumns:'1.4fr .6fr',gap:12}}, this.inp('local.priceRange',{label:'Price range'}), this.inp('local.currency',{label:'Currency'})),
             this.inp('local.paymentPolicy',{label:'Payment policy',multiline:true,rows:3}),
+            this.inp('local.ethicsPolicy',{label:'Ethical policy',multiline:true,rows:2,hint:'One line on confidentiality and what you do not sell. It goes into llms.txt, where AI assistants read it.'}),
             this.inp('local.sessionLength',{label:'Standard session length',placeholder:'60 minutes'}),
             this.listInp('local.paymentMethods',{label:'Payment methods accepted',rows:4}),
             this.listInp('local.languages',{label:'Languages',rows:2,mb:0})))),
@@ -2544,6 +2556,7 @@ class Component extends DCLogic {
   // ----- AI & GEO control centre -----
   aiBotInfo(){ return {'GPTBot':['OpenAI','Trains ChatGPT models','train'],'OAI-SearchBot':['OpenAI','ChatGPT search results','search'],'ChatGPT-User':['OpenAI','Opens your pages when a ChatGPT user asks','user'],
     'ClaudeBot':['Anthropic','Trains Claude models','train'],'Claude-SearchBot':['Anthropic','Claude search results','search'],'Claude-User':['Anthropic','Opens your pages when a Claude user asks','user'],
+    'Claude-Web':['Anthropic','Older Claude crawler name, still used by some tools','search'],
     'PerplexityBot':['Perplexity','Perplexity answers & citations','search'],'Perplexity-User':['Perplexity','Opens your pages when a Perplexity user asks','user'],
     'Google-Extended':['Google','Gemini training & grounding (not Google Search)','train'],'Applebot-Extended':['Apple','Apple Intelligence training (not Siri / Spotlight search)','train'],
     'Amazonbot':['Amazon','Alexa answers','search'],'meta-externalagent':['Meta','Meta AI training','train'],'CCBot':['Common Crawl','Open dataset used by many AI models','train'],'Bytespider':['ByteDance','TikTok / Doubao AI training','train']}; }

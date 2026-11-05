@@ -56,6 +56,12 @@ Allow: /api/data.php
 Disallow: /api/
 Disallow: /admin
 
+User-agent: Claude-Web
+Allow: /
+Allow: /api/data.php
+Disallow: /api/
+Disallow: /admin
+
 User-agent: PerplexityBot
 Allow: /
 Allow: /api/data.php

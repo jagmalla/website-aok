@@ -158,6 +158,10 @@ matters because a lossy conversion would silently eat your words.
   in PHP — because you cannot assume a shared host applied your `.htaccess`.
   *Symptom when this is missing: Bing reports "too many pages with identical meta
   descriptions", listing the http and https versions of the same page.*
+  SEO Health proves it rather than assuming it: run on the live domain, it fetches
+  `http://example.com/about`, `https://example.com/about` and `http://www.example.com/about`
+  and insists each answers `301` to the one canonical address. Turning on "Force HTTPS" and
+  "Force WWW" in the hosting dashboard as well is belt and braces, and costs nothing.
 - **A self-referencing canonical tag** on every page.
 - **Unique title and description per address.** All 39 pages here have distinct ones.
 - **Exactly one visible `<h1>` per page**, both in the server HTML and after JavaScript runs.
@@ -221,14 +225,24 @@ Assistants lift *passages*, not pages. So every important page has:
 Two plain-text files at the root of the site, generated from the same data as the sitemap
 so they can never drift out of date.
 
-- **`llms.txt`** — a brief for assistants: who you are, what you do, prices, how to book,
-  where you work, languages, plus a linked list of every page with a one-line summary.
+- **`llms.txt`** — a brief for assistants. It opens with **Core Entity Facts**: the business
+  name exactly as Google Business Profile lists it, the street address, practitioner, fee,
+  session length, payment and ethical policy, languages, opening hours, phone, the Business
+  Profile link and where to book. Then the services, credentials, key pages and FAQs, each
+  with a link. Everything comes from Admin, so the file cannot drift out of date.
 - **`llms-full.txt`** — the complete text of every page in one file.
+
+The address in that block, on the contact page and in the structured data is one string
+built in one place (`aok_address_line` in PHP, `addressLine` in the browser). Keep those two
+in step if you ever change the format: search engines match a business on the address being
+character-for-character identical everywhere.
 
 ### Choosing which assistants may read you
 **Admin → AI & GEO** lists every known AI crawler with a switch: GPTBot, OAI-SearchBot,
-ChatGPT-User, ClaudeBot, Claude-SearchBot, Claude-User, PerplexityBot, Perplexity-User,
-Google-Extended, Applebot-Extended, Amazonbot, meta-externalagent, CCBot, Bytespider.
+ChatGPT-User, ClaudeBot, Claude-SearchBot, Claude-User, Claude-Web, PerplexityBot,
+Perplexity-User, Google-Extended, Applebot-Extended, Amazonbot, meta-externalagent, CCBot,
+Bytespider. Each one gets its own group in `robots.txt`, because a crawler that finds its own
+name ignores the `*` group entirely.
 
 Blocking the "-Extended" ones removes you from AI answers but does **not** affect your
 Google ranking. That is a business decision, so it is a switch rather than a default.

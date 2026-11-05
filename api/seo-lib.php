@@ -847,16 +847,28 @@ function aok_html_header(array $d): string {
 // "Where is <business> located in <city>?" with the full address underneath. A question-shaped
 // heading answered immediately is what an AI assistant quotes, and it puts the address on the
 // page in text for Google to match against the Business Profile. Mirrors locationBlock() in app.js.
-function aok_location_html(array $d): string {
+// The business's address on one line, written exactly as Google Business Profile writes it:
+// "15450 92a Ave, Surrey, BC V3R 9B1, Canada". Search engines match a business on that string being
+// identical everywhere, so the contact page, llms.txt and Admin -> Settings all take it from here.
+// Empty for a service-area business, which has no public street address. Mirrors addressLine() in app.js.
+function aok_address_line(array $d): string {
     $L = (array)aok_get($d, 'local', []);
-    if (aok_get($d, 'local.serviceAreaBusiness', true)) return '';
+    if (!empty($L['serviceAreaBusiness'])) return '';
     $street = trim((string)($L['streetAddress'] ?? ''));
     if ($street === '') return '';
-    $city = (string)($L['locality'] ?? 'Surrey');
-    $reg  = (string)($L['regionCode'] ?? ($L['region'] ?? 'BC'));
+    $city = trim((string)($L['locality'] ?? 'Surrey'));
+    $reg  = trim((string)($L['regionCode'] ?? ($L['region'] ?? 'BC')));
     $pc   = trim((string)($L['postalCode'] ?? ''));
-    $country = ((string)($L['country'] ?? 'CA')) === 'CA' ? 'Canada' : (string)($L['country'] ?? '');
-    $full = $street . ', ' . trim($city . ' ' . $reg . ' ' . $pc) . ', ' . $country;
+    $country = ((string)($L['country'] ?? 'CA')) === 'CA' ? 'Canada' : trim((string)($L['country'] ?? ''));
+    return implode(', ', array_filter([$street, $city, trim($reg . ' ' . $pc), $country]));
+}
+
+function aok_location_html(array $d): string {
+    $L = (array)aok_get($d, 'local', []);
+    $full = aok_address_line($d);
+    if ($full === '') return '';
+    $city = trim((string)($L['locality'] ?? 'Surrey'));
+    $reg  = trim((string)($L['regionCode'] ?? ($L['region'] ?? 'BC')));
     $listed = trim((string)($L['listingName'] ?? '')) ?: aok_brand($d);
     $langs = array_values(array_filter((array)($L['languages'] ?? [])));
     $fee = trim((string)aok_get($d, 'about.pricing.fee', ''));

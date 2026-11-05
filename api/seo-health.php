@@ -264,11 +264,20 @@ if (!$selfCheck) {
     $host = strtolower((string)parse_url(aok_base($d), PHP_URL_HOST));
     $reqHost = strtolower(preg_replace('/:\d+$/', '', (string)($_SERVER['HTTP_HOST'] ?? '')));
     if ($host !== '' && preg_replace('/^www\./', '', $reqHost) === preg_replace('/^www\./', '', $host)) {
+        // Three ways in, one address out. The https non-www case is the one that put two indexed copies
+        // of every page into Bing, so it is probed too rather than assumed from the http one.
         $bare = preg_replace('/^www\./', '', $host);
-        $r = $fetch('http://' . $bare . '/about');
-        $loc = ($r && preg_match('/^Location:\s*(\S+)/mi', $r['head'], $m)) ? $m[1] : '';
-        $ok = $r && $r['code'] === 301 && stripos($loc, 'https://' . $host . '/about') === 0;
-        $add($G, $ok ? 'ok' : 'warn', 'http:// and non-www addresses redirect to ' . 'https://' . $host, $ok ? '' : 'Got ' . ($r ? 'HTTP ' . $r['code'] . ($loc ? ' → ' . $loc : '') : 'no answer') . '. Check SSL is active for both www and non-www in cPanel → SSL/TLS Status.');
+        $want = 'https://' . $host . '/about';
+        $bad = [];
+        foreach (['http://' . $bare . '/about', 'https://' . $bare . '/about', 'http://' . $host . '/about'] as $from) {
+            $r = $fetch($from);
+            $loc = ($r && preg_match('/^Location:\s*(\S+)/mi', $r['head'], $m)) ? $m[1] : '';
+            if (!($r && $r['code'] === 301 && stripos($loc, $want) === 0))
+                $bad[] = $from . ' → ' . ($r ? 'HTTP ' . $r['code'] . ($loc ? ' ' . $loc : '') : 'no answer');
+        }
+        $add($G, $bad ? 'warn' : 'ok', 'Every address redirects once to ' . $want,
+            $bad ? implode('; ', $bad) . '. Turn on "Force HTTPS" and "Force WWW" in your hosting dashboard, and check SSL covers both www and non-www in cPanel → SSL/TLS Status.'
+                 : 'http, https, www and non-www all 301 here, so ranking is never split between two copies of a page.');
     } else {
         $add($G, 'info', 'https + www redirect is checked on the live domain only');
     }

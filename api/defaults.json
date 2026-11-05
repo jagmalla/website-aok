@@ -133,6 +133,7 @@
    "International bank transfer"
   ],
   "paymentPolicy": "Pay after your reading: new clients pay only if they are completely satisfied with their consultation.",
+  "ethicsPolicy": "100% confidential; zero sales of gemstones, talismans, or commercial rituals.",
   "directories": [],
   "locationInTitles": true
  },
@@ -204,6 +205,7 @@
    "ClaudeBot": true,
    "Claude-SearchBot": true,
    "Claude-User": true,
+   "Claude-Web": true,
    "PerplexityBot": true,
    "Perplexity-User": true,
    "Google-Extended": true,

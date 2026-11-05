@@ -39,9 +39,14 @@ if (realpath((string)($_SERVER['SCRIPT_FILENAME'] ?? '')) === __FILE__) { http_r
 //   2. The /services comparison table: every shipped consultation gains the chart factors, session
 //      format and duration the table needs. Services the owner added keep theirs empty and stay out
 //      of the table until they are filled in (Admin -> Services).
+// Version 8:
+//   1. Claude-Web joins the AI crawler list in Admin -> AI & GEO, so robots.txt names it. It is an
+//      older Anthropic crawler name that some tools still send; the newer ones were already there.
+//   2. The ethical policy line (confidentiality, and that nothing is sold) is added where it is
+//      empty, so llms.txt states it outright rather than leaving it to be inferred.
 // Only text that is still exactly as first shipped is replaced. Text you have edited is kept. Nothing is deleted.
 
-const AOK_CONTENT_VERSION = 7;
+const AOK_CONTENT_VERSION = 8;
 
 // fingerprints (md5 of the normalised text) of the originally shipped FAQ answers, by question
 const AOK_OLD_FAQ = [
@@ -124,6 +129,7 @@ function aok_upgrade_payload(array $d): array {
     $d = aok_upgrade_v5($d, $def);
     if ($v < 6) $d = aok_upgrade_v6($d);
     if ($v < 7) $d = aok_upgrade_v7($d, $def);
+    if ($v < 8) $d = aok_upgrade_v8($d, $def);
     $d['contentVersion'] = AOK_CONTENT_VERSION;
     return $d;
 }
@@ -516,5 +522,23 @@ function aok_upgrade_v7(array $d, array $def): array {
                 $d['services'][$i][$f] = $o[$f];
         }
     }
+    return $d;
+}
+
+// v8: the crawler list and the ethical policy. Both are additive -- a bot the owner has switched off
+// stays off, and a policy they have written stays theirs.
+function aok_upgrade_v8(array $d, array $def): array {
+    // Claude-Web: an older Anthropic crawler name. Added only when it has never been decided either
+    // way, so an owner who deliberately blocked it is not overruled.
+    if (!isset($d['ai']) || !is_array($d['ai'])) $d['ai'] = [];
+    if (!isset($d['ai']['bots']) || !is_array($d['ai']['bots'])) $d['ai']['bots'] = [];
+    foreach ((array)aok_get($def, 'ai.bots', []) as $name => $on) {
+        if (!array_key_exists($name, $d['ai']['bots'])) $d['ai']['bots'][$name] = $on;
+    }
+
+    if (!isset($d['local']) || !is_array($d['local'])) $d['local'] = [];
+    if (trim((string)($d['local']['ethicsPolicy'] ?? '')) === '')
+        $d['local']['ethicsPolicy'] = (string)aok_get($def, 'local.ethicsPolicy', '');
+
     return $d;
 }

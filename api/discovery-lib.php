@@ -55,18 +55,45 @@ function aok_llms_text(array $d, bool $full): string {
     $channels = implode(' & ', (array)aok_get($d, 'local.onlineChannels', ['Zoom', 'WhatsApp']));
     $person = aok_get($d, 'person.name', 'Jag Mallah');
     
-    $o  = "# $brand\n\n";
+    // The business's name exactly as Google Business Profile lists it, so an assistant reading this file
+    // and a crawler reading Maps see one and the same entity. The short brand name heads the website.
+    $listed = $T(aok_get($d, 'local.listingName', '')) ?: $brand;
+    $o  = "# $listed\n\n";
     $o .= '> ' . $T(aok_get($d, 'seo.home.metaDescription', aok_get($d, 'brand.tagline', ''))) . "\n\n";
     $o .= $T(aok_get($d, 'person.shortBio', '')) . "\n\n";
+
+    // A named block of the facts an assistant is asked for outright: who, where, how much, how to reach.
+    $o .= "## Core Entity Facts\n\n";
+    $o .= "- Official business name: $listed\n";
+    if ($listed !== $brand) $o .= "- Short name: $brand\n";
     $o .= "- Website: $base\n";
     $o .= '- Practitioner: ' . $person . ' — ' . aok_get($d, 'person.jobTitle', 'Vedic Astrologer') . "\n";
-    $o .= '- Location: ' . aok_get($d, 'local.locality', 'Surrey') . ', ' . aok_get($d, 'local.region', 'British Columbia') . ', Canada'
-        . (aok_get($d, 'local.serviceAreaBusiness', true) ? ' (service-area business; no walk-in office)' : '') . "\n";
+    $addr = aok_address_line($d);
+    if ($addr !== '') $o .= "- Address: $addr\n";
+    else $o .= '- Location: ' . aok_get($d, 'local.locality', 'Surrey') . ', ' . aok_get($d, 'local.region', 'British Columbia')
+        . ", Canada (service-area business; no walk-in office)\n";
     $o .= '- Areas served: ' . implode(', ', array_filter((array)aok_get($d, 'local.areasServed', []))) . (aok_get($d, 'local.onlineWorldwide', true) ? "; worldwide online via $channels" : '') . "\n";
     $o .= '- Languages: ' . implode(', ', (array)aok_get($d, 'local.languages', ['English', 'Hindi'])) . "\n";
     $o .= "- Consultation fee: $fee ($channels calls)\n";
+    $o .= '- Session length: ' . $T(aok_get($d, 'local.sessionLength', '60 minutes')) . "\n";
     if ($pol = $T(aok_get($d, 'local.paymentPolicy', ''))) $o .= "- Payment policy: $pol\n";
-    if ($ph = trim((string)aok_get($d, 'contact.phone', ''))) $o .= "- Phone: $ph\n";
+    if ($eth = $T(aok_get($d, 'local.ethicsPolicy', ''))) $o .= "- Ethical policy: $eth\n";
+    $ph = trim((string)aok_get($d, 'contact.phone', ''));
+    $wa = trim((string)aok_get($d, 'contact.whatsapp', ''));
+    if ($ph !== '') $o .= '- Phone' . ($wa !== '' && $wa === $ph ? ' & WhatsApp' : '') . ": $ph\n";
+    if ($wa !== '' && $wa !== $ph) $o .= "- WhatsApp: $wa\n";
+    if ($hrs = aok_hours_text($d)) {
+        // "Mon-Fri 10:00-17:00" reads better than five identical lines, and an assistant quoting it
+        // gets the whole week in one phrase. Days with different hours are listed separately.
+        $days = array_keys($hrs);
+        $same = count(array_unique(array_values($hrs))) === 1;
+        if ($same && count($days) > 1) $when = $days[0] . '–' . end($days) . ' ' . reset($hrs);
+        else { $parts = []; foreach ($hrs as $day => $t) $parts[] = "$day $t"; $when = implode(' · ', $parts); }
+        $o .= '- Opening hours: ' . $when . (aok_get($d, 'local.timezone', '') === 'America/Vancouver' ? ' (Pacific Time)' : '') . "\n";
+    }
+    if ($note = $T(aok_get($d, 'local.hoursNote', ''))) $o .= "- Availability: $note\n";
+    $maps = trim((string)(aok_get($d, 'local.mapsCidUrl', '') ?: aok_get($d, 'contact.gmb', '')));
+    if ($maps !== '') $o .= "- Google Business Profile: $maps\n";
     $o .= "- Book or ask a question: $base/contact\n\n";
     
     $o .= "## Practitioner credentials\n\n";

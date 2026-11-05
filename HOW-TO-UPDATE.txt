@@ -1,7 +1,30 @@
 ANALYSIS OF KARMA — Update (SEO, local SEO, AI search & security)
 ===================================================================
 
-NEW IN THIS VERSION: YOUR GOOGLE ADDRESS, AND BEING QUOTED BY AI
+NEW IN THIS VERSION: CRAWLER FILES AND ONE ADDRESS FOR THE SITE
+  • llms.txt — the summary AI assistants read — now opens with a "Core Entity
+    Facts" block: your business name exactly as Google Business Profile lists
+    it, the street address, fee, session length, payment and ethical policy,
+    languages, opening hours, phone and the Business Profile link.
+  • robots.txt now names Claude-Web as well, alongside GPTBot, OAI-SearchBot,
+    ChatGPT-User, ClaudeBot, Claude-SearchBot, Claude-User, PerplexityBot,
+    Perplexity-User, Google-Extended, Applebot-Extended and the rest. All are
+    switchable in Admin -> AI & GEO.
+  • New box in Admin -> Local & Business -> Pricing & languages: "Ethical
+    policy". It is pre-filled with "100% confidential; zero sales of gemstones,
+    talismans, or commercial rituals." Change it and llms.txt follows.
+  • The address now reads the same everywhere: "15450 92a Ave, Surrey, BC V3R
+    9B1, Canada". The contact page used to drop the comma after Surrey.
+  • Admin -> SEO Health now tests all three wrong ways into your site
+    (http, https without www, and http with www) and insists each one answers
+    with a single 301 to https://www.analysisofkarma.com. If any of them does
+    not, it says which, so split rankings cannot go unnoticed.
+  • ONE THING TO DO IN YOUR HOSTING DASHBOARD: turn on "Force HTTPS" and
+    "Force WWW" (cPanel -> Domains, and check SSL covers both www and non-www
+    under SSL/TLS Status). The site already redirects by itself, but doing it
+    at the host as well means it keeps working even if .htaccess is replaced.
+
+EARLIER: YOUR GOOGLE ADDRESS, AND BEING QUOTED BY AI
   • Footer, contact page and search-engine data now carry your full Google
     Business Profile address, 15450 92a Ave, Surrey, BC V3R 9B1, with the
     business name exactly as the Profile lists it. Google matches a business
